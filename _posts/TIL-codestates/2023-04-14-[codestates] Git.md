@@ -1,3 +1,8 @@
+---
+categories: "TIL-codestates"
+tag: [ "codestates", "git", "github", "gitcommand"]
+---
+
 # Git 이란
 
 Git이란 개발자의 코드를 효율적으로 관리하기 위해서 개발된 ‘분산형 버전 관리 시스템’ 입니다. 

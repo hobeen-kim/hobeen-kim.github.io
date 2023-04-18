@@ -262,6 +262,8 @@ RTR 정책이 동작하는 방식입니다.
 1. 이러한 방법은 JWT의 Stateless 방식에 어긋나는 행동입니다. Redis 에 refreshToken 을 저장함으로써 서버가 클라이언트의 상태를 보존하고 있기 때문입니다.
 2. Attacker 에게 accessToken, refreshToken 이 함께 탈취당했을 때 accessToken 이 만료되기 전까지 Attacker 는 사용자 정보에 접근할 수 있습니다. 이 점은 접속 IP 확인 등을 통해서 해결할 수도 있습니다.
 
+***<u>보안에서 모든 상황을 만족할 수 없습니다. 적절한 Trade-off 가 필요합니다.</u>***
+
 # 마치며
 
 Redis, RTR 의 개념적인 부분만 개략적으로 알아봤습니다. 다음 포스팅은 [socceranalyst] 카테고리에서 직접 적용하는 걸 해보겠습니다.

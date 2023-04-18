@@ -1,6 +1,6 @@
 ---
 categories: "TIL-spring"
-tag: ["validation", "spring", "springboot", "socceranalyst"]
+tag: ["validation", "spring", "springboot"]
 ---
 
 # Validation

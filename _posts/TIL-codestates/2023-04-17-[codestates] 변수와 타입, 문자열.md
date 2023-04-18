@@ -1,3 +1,8 @@
+---
+categories: "TIL-codestates"
+tag: [ "codestates", "variable", "type", "string"]
+---
+
 # 변수와 타입
 
 ## 변수

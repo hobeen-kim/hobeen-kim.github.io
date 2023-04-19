@@ -437,4 +437,9 @@ const refreshTokenHeader = {
 
 # 마치며
 
-RTR 기술을 간단하게 구현하는 건 생각보다 쉬웠습니다. 이제 
+RTR 기술을 간단하게 구현하는 건 생각보다 쉬웠습니다. 이제 같은 방법으로 Ec2 에 Redis 를 설치하고 사용하면 됩니다.
+
+[[AWS] Amazon Linux2 Redis 설치](https://small-stap.tistory.com/109?category=989595) (이거 하느라 2시간 걸렸습니다...)
+
+배포 및 테스트는 주말에 해보도록 하겠습니다... ㅎㅎ 감사합니다.
+

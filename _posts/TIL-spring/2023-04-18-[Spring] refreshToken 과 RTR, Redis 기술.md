@@ -273,6 +273,8 @@ Redis, RTR 의 개념적인 부분만 개략적으로 알아봤습니다. 다음
 3. Access Token 만료 시에만 새로운 Token을 발급 받을 수 있도록 구현. 그전에 발급받으려고 하면 Access, Refresh Token을 모두 폐기
    - Attacker 가 Refresh Token을 사용하여 일찍 Access Token을 발급받으려는 상황 방지
 
+*+추가 : [RTR 구현 코드 포스팅 링크입니다.](https://hobeen-kim.github.io/socceranalyst/socceranalyst-RTR-%EA%B8%B0%EC%88%A0-%EC%A0%81%EC%9A%A9/)*
+
 # Ref.
 
 [Springboot + Redis 연동하는 초간단 샘플 만들어보기](https://oingdaddy.tistory.com/239)

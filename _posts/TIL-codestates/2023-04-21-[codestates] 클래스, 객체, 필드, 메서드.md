@@ -293,20 +293,19 @@ array 와 같이 참조값이 다른 참조값을 가리키고 있는 경우 새
 ```java
 class Test {
 
-    public static final String[][] array = \{{"1", "2"}, {"3", "4"}};
-
+    public static final String[][] array = {{"1", "2"}, {"3", "4"}};
 }
-
 
 public class Main {
 
     public static void main(String[] args) {
 
         Test test = new Test();
-        test.array = new String[][]\{{"7", "8"}, {"9", "10"}}; // This would give a compilation error.
-        test.array[0] = new String[]\{"5", "6"}; // This is allowed because it changes the content, not the reference to the entire array.
+        test.array = new String[][]{{"7", "8"}, {"9", "10"}}; // This would give a compilation error.
+        test.array[0] = new String[]{"5", "6"}; // This is allowed because it changes the content, not the reference to the entire array.
 
     }
+}
 ```
 
 - main 메서드의 첫번째 test.array 와 같이 array 에 다른 배열을 넣는 것은 컴파일 에러가 납니다.

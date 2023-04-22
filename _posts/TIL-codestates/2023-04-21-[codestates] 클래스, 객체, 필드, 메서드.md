@@ -288,12 +288,12 @@ static final 은 생성자 주입으로 선언하지 못합니다.
 
 array 와 같이 참조값이 다른 참조값을 가리키고 있는 경우 새로운 array 로 변경하는 건 불가능하지만 array 내부 배열의 값은 변경가능합니다. 
 
-예시입니다.
+예시입니다. (리터럴이 계속 에러로 블로그에 안올려져서 주석처리했습니다. 주석 풀고 보시면 됩니다.)
 
 ```java
 class Test {
 
-    public static final String[][] array = {{"1", "2"}, {"3", "4"}};
+    public static final String[][] array = //{{"1", "2"}, {"3", "4"}};
 }
 
 public class Main {
@@ -301,15 +301,17 @@ public class Main {
     public static void main(String[] args) {
 
         Test test = new Test();
-        test.array = new String[][]{{"7", "8"}, {"9", "10"}}; // This would give a compilation error.
-        test.array[0] = new String[]{"5", "6"}; // This is allowed because it changes the content, not the reference to the entire array.
+         // This would give a compilation error.
+        test.array = new String[][]//{{"7", "8"}, {"9", "10"}};
+        // This is allowed because it changes the content, not the reference to the entire array.
+        test.array[0] = new String[]//{"5", "6"}; 
 
     }
 }
 ```
 
 - main 메서드의 첫번째 test.array 와 같이 array 에 다른 배열을 넣는 것은 컴파일 에러가 납니다.
-- 하지만 test.array 안의 배열 하나를 변경하는 건 정상적으로 작동합니다. 왜냐하면 array 의 참조값을 변경하는 게 아니라 array 내부 배열은 {"1", "2"} 의 참조값을 변경하는 것이기 때문입니다.
+- 하지만 test.array 안의 배열 하나를 변경하는 건 정상적으로 작동합니다. 왜냐하면 array 의 참조값을 변경하는 게 아니라 array 내부 배열은 `{"1", "2"}` 의 참조값을 변경하는 것이기 때문입니다.
 
 # 메서드
 

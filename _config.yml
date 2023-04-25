@@ -276,7 +276,7 @@ defaults:
       toc_label: "목차"
       author_profile: false
       sidebar: 
-          nav: ["docs", "counts"]
+          nav: "counts"
 
 
 date_format: "%Y-%m-%d"

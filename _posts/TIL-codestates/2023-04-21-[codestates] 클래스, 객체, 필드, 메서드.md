@@ -1,6 +1,6 @@
 ---
 categories: "TIL-codestates"
-tag: [ "codestates", "concept", "class", "object", "field", "method"]
+tag: [ "codestates", "concept", "class", "object", "field", "method", "access_modifier"]
 
 ---
 

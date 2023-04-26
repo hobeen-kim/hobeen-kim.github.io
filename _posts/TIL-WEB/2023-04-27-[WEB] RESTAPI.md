@@ -98,14 +98,16 @@ REST API 의 설계 방법은 다음과 같습니다.
 | movie 목록 조회 | GET        | /movies     |
 | 특정 movie 조희 | GET        | /movies/:id |
 | movie 생성      | POST       | /movies     |
-| movie 수정      | PUT        | /movies:id  |
-| movie 삭제      | DELETE     | /movies:id  |
+| movie 수정      | PUT        | /movies/:id |
+| movie 삭제      | DELETE     | /movies/:id |
 
 
 
-[MS_RESTAPI GUIDANCE](https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md)
+## MS RESTAPI GUIDANCE
 
-ms 에서 발표한 restAPI 가이드입니다. `7. Consistency fundamentals` 부터 보면 될 듯합니다.
+[MS_RESTAPI GUIDANCE](https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md) 
+
+MS 에서 발표한 restAPI 가이드입니다. `7. Consistency fundamentals` 부터 보면 될 듯합니다.
 
 아래와 같은 API 가 정석이라고 합니다.
 
@@ -160,7 +162,9 @@ Inflean Dowon Lee 님의 REST API 개발에서 공부한 내용이네요!
 
 추가적인 이론 내용입니다. 유튜브 영상을 보고 적었습니다. [Day1, 2-2. 그런 REST API로 괜찮은가](https://youtu.be/RP_f5dMoHFc) - naver d2
 
-사실 이 내용은 몰라도 되는 내용이긴 하지만 제가 REST API 을 공부하게 만든 동기부여 영상이기도 하고, 흥미롭기도 해서 조금만 정리해봤습니다.
+사실 이 내용은 몰라도 되는 내용이긴 하지만 제가 REST API 을 공부하게 만든 동기부여 영상이기도 하고, 흥미롭기도 해서 조금만 정리해봤습니다. 
+
+아래와 같은 재밌는 문구도 있습니다.
 
 > "REST API 를 위한 최고의 버저닝 전략은 버저닝을 안하는 것" - Roy T. Fielding
 
@@ -186,7 +190,7 @@ uniform interface (인터페이스 일관성) 중 다음 제약조건을 잘 만
 
 애플리케이션의 상태는 Hyperlink 를 이용해 전이되어야 한다는 조건입니다.
 
-애플리케이션 전이란 링크를 통해서 저장한 데이터를 읽기, 수정, 삭제 등을 하는 것입니다. html  은 문서 내에 a 태그를 통해서 전이 가능한 링크가 나오기 때문에 HATEOAS 를 만족한다고 볼 수 있습니다.
+애플리케이션 전이란 링크를 통해서 저장한 데이터를 읽기, 수정, 삭제 등을 하는 것입니다. 예를 들어 html  은 문서 내에 a 태그를 통해서 전이 가능한 링크가 나오기 때문에 HATEOAS 를 만족한다고 볼 수 있습니다. 하지만 json 은 대게 만족하지 못하죠.
 
 ```html
 <body>
@@ -194,7 +198,7 @@ uniform interface (인터페이스 일관성) 중 다음 제약조건을 잘 만
 </body>
 ```
 
-<center><i>a 태그를 통해서 링크가 나와있고 해당 상태로 전이가 가능하다</i></center>
+<center><i>a 태그를 통해서 링크가 나와있고 해당 상태로 전이가 가능하다<br/></i></center>
 
 JSON 으로는 다음과 같이 HATEOAS 를 만족시킬 수 있습니다.
 
@@ -208,7 +212,7 @@ JSON 으로는 다음과 같이 HATEOAS 를 만족시킬 수 있습니다.
 
 WEB 은 REST 를 잘 지키고 있습니다. 예를 들어 웹 브라우저를 업데이트한다고 해서 웹 어플리케이션을 업데이트할 필요는 없죠. 웹은 이렇게 상호운용성을 위해서 많은 노력을 했다고 합니다.
 
-HTML(WEB) 과 JSON 을 비교해보면 HTML 은 a 태그를 통해 **Hyperlink** 를 구현해서 다음 상태로 전이될 수 있고, HTML 명세로 **Self-desciptive** 를 정의하고 있습니다.(HTML 의 모든 태그 정리) 하지만 JSON 은 그렇지 않습니다.
+HTML(WEB) 과 JSON 을 비교해보면 HTML 은 a 태그를 통해 Hyperlink 를 구현해서 다음 상태로 전이될 수 있고(**HATEOAS**), HTML 명세로 **Self-desciptive** 를 정의하고 있습니다.(HTML 의 모든 태그 정리) 하지만 JSON 은 그렇지 않습니다.
 
 다음은 두 원칙이 독립적 진화에 어떻게 도움이 되는지 입니다.
 
@@ -225,22 +229,20 @@ HTML(WEB) 과 JSON 을 비교해보면 HTML 은 a 태그를 통해 **Hyperlink**
 
 ## 어떻게 원칙적인 REST API 를 만들까?
 
+**Self-dscriptive**
 
+1. Media-Type : 미디어 타입을 정의하여 미디어 타입 문서를 작성한 후 IANA 에 미디어 타입을 등록하고 문서를 미디어 타입의 명세로 등록합니다.
+2. Profile : json 의 의미를 정의한 명세를 Link 헤더에 profile relation 으로 해당 명세를 링크합니다.
 
-1. **Self-dscriptive**
+![image-20230427002047380](../../images/2023-04-17-[WEB] RESTAPI/image-20230427002047380.png)
 
-- Media-Type : 미디어 타입을 정의하여 미디어 타입 문서를 작성한 후 IANA 에 미디어 타입을 등록하고 문서를 미디어 타입의 명세로 등록합니다.
+**HATEOAS**
 
-- Profile : json 의 의미를 정의한 명세를 Link 헤더에 profile relation 으로 해당 명세를 링크합니다.
-
-  ![image-20230427002047380](../../images/2023-04-17-[WEB] RESTAPI/image-20230427002047380.png)
-
-2. **HATEOAS**
-   - JSON 본문에 `"link" : url` 을 넣습니다. 기존 API 를 많이 고쳐야 하는 단점이 있습니다.
+1. JSON 본문에 `"link" : url` 을 넣습니다. 기존 API 를 많이 고쳐야 하는 단점이 있습니다.
 
 ![image-20230427002237490](../../images/2023-04-17-[WEB] RESTAPI/image-20230427002237490.png)
 
-- Link, Location 등의 헤더로 링크를 표현할 수도 있습니다. (Location 은 위에 ms guidance 에도 있는 내용입니다.)
+2. Link, Location 등의 헤더로 링크를 표현할 수도 있습니다. (Location 은 위에 ms guidance 에도 있는 내용입니다.)
 
 ![image-20230427002252823](../../images/2023-04-17-[WEB] RESTAPI/image-20230427002252823.png)
 

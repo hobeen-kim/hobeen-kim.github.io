@@ -78,16 +78,19 @@ REST API 의 설계 방법은 다음과 같습니다.
 1. URI 에는 동사를 사용하지 않는다.
    - Bad : GET `/createmovie`
    - Good : GET `/movies`
-2. 마지막에 슬래시 (/)를 포함하지 않는다.
+2. 제공하는 데이터타입은 복수 형태로 사용한다.
+   - Bad : GET `/movie/1`
+   - Good : GET `/movies/1`
+3. 마지막에 슬래시 (/)를 포함하지 않는다.
    - Bad : GET `/movies/inception/`
    - Good : GET `/movies/inception`
-3. 언더바 대신 하이폰을 사용한다.
+4. 언더바 대신 하이폰을 사용한다.
    - Bad : GET `/movies/inception/test_customer`
    - Good : GET `/movies/inception/test-customer`
-4. 파일확장자는 URI에 포함하지 않는다.
+5. 파일확장자는 URI에 포함하지 않는다.
    - Bad : GET `/movies/inception/poster.jpg`
    - Good : GET `/movies/inception/poster`
-5. 행위를 포함하지 않는다.
+6. 행위를 포함하지 않는다.
    - Bad : DELETE `/movies/inception/delete-movie`
    - Good : DELETE `/movies/inception`
 
@@ -157,6 +160,26 @@ Inflean Dowon Lee 님의 REST API 개발에서 공부한 내용이네요!
 > ```
 
 
+
+# Richardson Maturity Model
+
+*\* inflean 강의 내용 중 일부입니다.*
+
+![image-20230427165445129](../../images/2023-04-27-[WEB] RESTAPI/image-20230427165445129.png)
+
+Richardson Maturity Model 은 REST 제약에 관련된 API 의 단계입니다.
+
+1. Level 0 : 기존의 resource 에 단순히 uri 만 매핑합니다.
+   - `/server/getPosts`
+   - `/server/deletePosts`
+   - `/server/doThis`
+2. Level 1 : 제공하고자 하는 resource 를 적절한 uri 로 표현합니다.
+   - `/server/accounts`
+   - `/server/accounts/10`
+   - 하지만 모든 요청을 GET, POST 로 처리하면서 http methods 를 적절하게 사용하지 못하는 단계입니다.
+3. Level 2 : Level 1 에 적절한 HTTP Methods 가 포함됩니다. 같은 uri 라도 다른 동작을 할 수 있습니다.
+4. Level 3 : Level 2 에 HATEOAS 를 포함합니다.
+   - client 측에서 server 가 제공하는 서비스를 일일히 찾지 않아도 됩니다.
 
 # 그런 REST API 로 괜찮은가
 

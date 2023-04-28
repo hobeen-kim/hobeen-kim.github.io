@@ -16,6 +16,8 @@ docs:
         url: /categories/#til-codestates
       - title: "TIL-spring"
         url: /categories/#til-spring
+      - title: "TIL-AWS"
+        url: /categories/#til-aws
       - title: "Learning"
         url: /categories/#learning
 

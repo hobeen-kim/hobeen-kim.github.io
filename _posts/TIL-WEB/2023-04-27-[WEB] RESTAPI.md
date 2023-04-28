@@ -263,11 +263,11 @@ HTML(WEB) 과 JSON 을 비교해보면 HTML 은 a 태그를 통해 Hyperlink 를
 
 1. JSON 본문에 `"link" : url` 을 넣습니다. 기존 API 를 많이 고쳐야 하는 단점이 있습니다.
 
-![image-20230427002237490](../../images/2023-04-17-[WEB] RESTAPI/image-20230427002237490.png)
+   ![image-20230427002237490](../../images/2023-04-17-[WEB] RESTAPI/image-20230427002237490.png)
 
 2. Link, Location 등의 헤더로 링크를 표현할 수도 있습니다. (Location 은 위에 ms guidance 에도 있는 내용입니다.)
 
-![image-20230427002252823](../../images/2023-04-17-[WEB] RESTAPI/image-20230427002252823.png)
+   ![image-20230427002252823](../../images/2023-04-17-[WEB] RESTAPI/image-20230427002252823.png)
 
 # 마치며
 

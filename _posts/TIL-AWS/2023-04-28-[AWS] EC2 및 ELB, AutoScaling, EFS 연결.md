@@ -536,6 +536,7 @@ EFS 는 EC2 , Lambda 같은 여러 컴퓨팅 인스턴스가 동시에 액세스
 - **EFS Standard** : 3개 이상의 AZ 에 보관 (가장 많이 사용)
 - EFS Standard-IA : 3개 이상의 AZ 에 보관, 조금 저렴한 대신 데이터를 가져올 떄 비용 발생
 - EFS One Zone : 하나의 AZ 에 보관 -> 저장된 가용영역의 상황에 영향을 받을 수 있음
+- EFS One Zone-IA : 한의 AZ 에 보관, 자주 액세스하지 않는 파일을 저장
 
 ## EFS 만들기
 

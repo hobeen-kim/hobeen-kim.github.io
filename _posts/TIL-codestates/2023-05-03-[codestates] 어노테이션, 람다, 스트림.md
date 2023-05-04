@@ -443,16 +443,7 @@ LUCKYGUY
 
  flatMap 은 중첩 구조를 제거하고 단일 컬렉션(`Stream<String>`)으로 만들어주는 역할을 합니다.
 
-```java
-String[][] namesArray = new String[][]{{"박해커", "이자바"}, {"김코딩", "나박사"}};
-
-Arrays.stream(namesArray).flatMap(Arrays::stream).forEach(System.out::println);
-
-//flatMap 이 없다면??
-Arrays.stream(namesArray)
-                .map(inner -> Arrays.stream(inner))
-                .forEach(names -> names.forEach(System.out::println));
-```
+![image-20230503221238001](../../images/2023-05-02-[codestates] 어노테이션, 람다, 스트림/image-20230503221238001.png)
 
 - 만약 flatMap 이 없다면 중첩 구조를 풀기 위해 아래처럼 번거롭게 반복해서 Stream 을 생성해야 합니다.
 

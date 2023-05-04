@@ -1,5 +1,5 @@
 ---
-categories: "learning"
+categories: "inflearn"
 tag: "inflearn"
 toc: true
 toc_sticky: true

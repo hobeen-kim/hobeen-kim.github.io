@@ -241,7 +241,7 @@ HTML(WEB) 과 JSON 을 비교해보면 HTML 은 a 태그를 통해 Hyperlink 를
 
 **Self-descriptive** : 확장 가능한 커뮤니케이션 
 
-- 서버나 클라이언트가 변경되더라도 오고가는 메시지는self-descriptive 하므로 언제나 해석이 가능합니다.
+- 서버나 클라이언트가 변경되더라도 오고가는 메시지는 self-descriptive 하므로 언제나 해석이 가능합니다.
 
 **HATEOAS** : 어플리케이션 상태 전이의 late binding
 

@@ -134,7 +134,7 @@ bootJar {
 
 ## 예제 설정
 
-예제는 Member 를 만드는 Member, MemberRepository, MemberService, MemberController, Dto 와 Post 를 만드는 Post, PostRepository, PostService, PostController, Dto 가 있습니다. 원래 다 올리려고 했는데 너무 길어질 것 같아 깃허브로 대체하겠습니다. 
+예제는 Member 를 만드는 Member, MemberRepository, MemberService, MemberController, Dto 와 Post 를 만드는 Post, PostRepository, PostService, PostController, Dto 가 있습니다. 원래 다 올리려고 했는데 너무 길어질 것 같아 깃허브로 대체하겠습니다. [깃허브 이동](https://github.com/hobeen-kim/RestDocsEx)
 
 src > main 디렉토리만 깃허브로 대체하겠습니다. 물론 restdocs 설정이나 gradle 도 있긴 합니다만 아래에서 설명하겠습니다.
 

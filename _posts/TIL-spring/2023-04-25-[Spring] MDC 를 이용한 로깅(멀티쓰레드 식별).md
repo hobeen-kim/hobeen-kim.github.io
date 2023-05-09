@@ -198,7 +198,7 @@ logfile 을 저장해주고, slack 알림까지 설정되어 있어서 알아보
 
 아래 Ref. 에는 **Nginx 에 request_id 설정**, **분산 환경 로그 추적(spring-cloud-sleuth)** 와 같은 내용도 포함되어있습니다.
 
-## Ref.
+# Ref.
 
  [[Spring] 멀티쓰레드 환경에서 MDC를 사용해 요청 별로 식별가능한 로그 남기기](https://mangkyu.tistory.com/266)
 

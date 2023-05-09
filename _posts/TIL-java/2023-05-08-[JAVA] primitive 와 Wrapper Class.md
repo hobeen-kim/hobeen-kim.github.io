@@ -20,7 +20,7 @@ primitive type 은 자바 언어에 속한 기본적인 데이터 타입입니�
 - `long` : from -9,223,372,036,854,775,808 to 9,223,372,036,854,775,807, 8byte.
 - `float`: 4byte 부동소수점 (부호 1bit, 지수부 8bit, 가수부 23bit) / **2^23 인 8388608 이 최대 수입니다.**
 - `double`: 8byte 부동소수점 (부호 1bit, 지수부 11bit, 가수부 52bit)
-- `char`: 16-bit Unicode character. / ascii code 뿐만 아니라 unicode 까지 표현가능합니다.
+- `char`: 16-bit Unicode character. / ascii code 뿐만 아니라 2바이트 unicode 까지 표현가능합니다.
 
 **Primitive 특징**
 
@@ -51,7 +51,7 @@ primitive type 은 자바 언어에 속한 기본적인 데이터 타입입니�
 
 -> 찾아본 결과 해당 이유도 맞구요. 다른 이유도 있는데요. Java 에서 class name 은 명사(noun) 가 되어야 하는데 Int, Char 라는 명사는 없다는 겁니다.
 
-물론 Short 와 Long 등과 같은 경우도 명사가 아니지만, primitive types 와 연관되고 알아보기 쉽게 하기 위해 그렇게 했다고 합니다. 뭐, 애초에 Int, Char 라는 단어도 없고, 있다고 하더라도 연관되지 않으니까요.(char : 숯)
+물론 Short 와 Long 등과 같은 경우도 명사가 아니지만, primitive types 와 연관되고 알아보기 쉽게 하기 위해 그렇게 했다고 합니다. 뭐, 일단 Short 와 Long 은 단어라도 되지만 애초에 Int, Char 라는 단어도 없고, 있다고 하더라도 연관되지 않으니까요.(char : 숯)
 
 # Wrapper Class
 

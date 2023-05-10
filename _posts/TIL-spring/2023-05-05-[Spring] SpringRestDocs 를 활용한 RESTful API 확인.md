@@ -54,9 +54,7 @@ plugins {
 	id 'org.asciidoctor.jvm.convert' version '3.3.2'
 }
 
-group = 'restapi'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '17'
+...
 
 configurations {
     //asciicodctorExt 를 configuration 으로 지정
@@ -89,7 +87,6 @@ ext {
 test {
 	outputs.dir snippetsDir
     useJUnitPlatform()
-
 }
 
 asciidoctor {
@@ -221,10 +218,14 @@ class PostControllerTest {
         );
 
         when(postService.findAll()).thenReturn(postResponses);
+        
+        ObjectMapper objectMapper = new ObjectMapper();
+        String expectedJson = objectMapper.writeValueAsString(postResponses);
 
         this.mockMvc.perform(get("/posts")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
+                .andExpect(content().json(expectedJson)) //api 호출 시 기대값을 설정합니다.
                 .andDo(document("post-get-all",
                         responseFields( //responseFields 를 만들어줍니다.
                                 fieldWithPath("[].id").description("Post Id"), //List 형식은 [].id 처럼 작성합니다.
@@ -476,3 +477,5 @@ operation::post-delete[snippets='http-request,http-response']
 [API 문서 자동화 - Spring REST Docs 팔아보겠습니다](https://tecoble.techcourse.co.kr/post/2020-08-18-spring-rest-docs/)
 
 [공식 문서](https://docs.spring.io/spring-restdocs/docs/2.0.4.RELEASE/reference/html5/#getting-started-documentation-snippets-invoking-the-service)
+
+\+ 추가 : [Spring REST Docs 적용 및 최적화 하기](https://backtony.github.io/spring/2021-10-15-spring-test-3/) <- 포스팅 시에는 참고하지 않았지만 이후에도 계속 rest docs 를 공부하면서 찾다보니 제일 도움되는 포스팅입니다.

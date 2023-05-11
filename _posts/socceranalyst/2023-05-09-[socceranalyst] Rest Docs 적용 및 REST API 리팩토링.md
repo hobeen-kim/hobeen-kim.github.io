@@ -101,6 +101,7 @@ class PlayerControllerTest {
         when(playerService.playerList()).thenReturn(playerResponseDtos);
 
         ObjectMapper objectMapper = new ObjectMapper();
+        //LocalDate 를 읽지 못해서 넣어줬습니다.
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
@@ -170,7 +171,66 @@ Test Case 작성도 힘드네요. 일단 이렇게 하고 src 에 docs 파일을
 include::player.adoc[]
 ```
 
-player.adoc
+**player.adoc**
+
+```
+== 플레이어
+
+=== 플레이어 생성
+operation::player-create[snippets='http-request,http-response,response-fields']
+
+```
+
+이렇게 했을 때 문제가 한가지 발생하는데요. 바로 JSON 이 정렬되지 않았다는 점입니다.
+
+![image-20230509195931687](../../images/2023-05-09-[socceranalyst] Rest Docs 적용 및 REST API 리팩토링/image-20230509195931687.png)
+
+따라서 정렬하기 위해 test 코드에 다음과 같이 추가합니다.
+
+```java
+@BeforeEach
+    public void setUp(WebApplicationContext webApplicationContext,
+                      RestDocumentationContextProvider restDocumentation) {
+
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
+                .apply(documentationConfiguration(restDocumentation)
+                        .operationPreprocessors()
+                        .withResponseDefaults(prettyPrint())) // Enable pretty printing for JSON responses
+                .build();
+    }
+```
+
+다음과 같이 예쁘게 정렬되었습니다.
+
+![image-20230509200042077](../../images/2023-05-09-[socceranalyst] Rest Docs 적용 및 REST API 리팩토링/image-20230509200042077.png)
+
+### 문서 custom 하기
+
+지금 Response Fields 가 이렇게 되어있는데요. optional() 필드까지 추가해보겠습니다.  src/test/resources/org/springframework/restdocs/templates 경로에 request-fields.snippet 파일을 추가하면 됩니다. 문법은 mustache 입니다.
+
+```java
+|===
+|Path|Type|Description|Optional
+
+{{#fields}}
+|{{#tableCellContent}}`+{{path}}+`{{/tableCellContent}}
+|{{#tableCellContent}}`+{{type}}+`{{/tableCellContent}}
+|{{#tableCellContent}}{{description}}{{/tableCellContent}}
+|{{#tableCellContent}}{{^optional}}No{{/optional}}{{#optional}}Yes{{/optional}}{{/tableCellContent}}
+
+{{/fields}}
+|===
+```
+
+참고로 intellij 에서는 빨간줄이 뜨는데요. 무시하면 됩니다. 이제 다음과 같이 optional 필드가 추가된 걸 볼 수 있습니다.
+
+![image-20230509201553805](../../images/2023-05-09-[socceranalyst] Rest Docs 적용 및 REST API 리팩토링/image-20230509201553805.png)
+
+
+
+
+
+
 
 
 

@@ -18,7 +18,7 @@ primitive type 은 자바 언어에 속한 기본적인 데이터 타입입니�
 - `int`:  from -2,147,483,648 to 2,147,483,647, 4byte. 
   - 코딩테스트 시 무심코 int 로 선언했다가 값이 넘어가서 overflow 가 되는 경우가 왕왕 있습니다...
 - `long` : from -9,223,372,036,854,775,808 to 9,223,372,036,854,775,807, 8byte.
-- `float`: 4byte 부동소수점 (부호 1bit, 지수부 8bit, 가수부 23bit) / **2^23 인 8388608 이 최대 수입니다.**
+- `float`: 4byte 부동소수점 (부호 1bit, 지수부 8bit, 가수부 23bit)
 - `double`: 8byte 부동소수점 (부호 1bit, 지수부 11bit, 가수부 52bit)
 - `char`: 16-bit Unicode character. / ascii code 뿐만 아니라 2바이트 unicode 까지 표현가능합니다.
 
@@ -234,6 +234,25 @@ System.out.println(end - start);
 ```
 
 
+
+## int 30 을 래핑한 Integer(30) 은 상수인가요?
+
+​	결론부터 말하자면 Integer(30) 은 상수입니다(상수객체). Integer 클래스의 value 를 보면 다음과 같이 되어 있습니다.
+
+```java
+private final int value;
+```
+
+하지만 다음과 같이 수행하면 값이 바뀜을 알 수 있습니다.
+
+```java
+Integer a = 30;
+System.out.println(a); //30
+a = 5;
+System.out.println(a); //5
+```
+
+ 왜냐하면 이렇게 새 값을 할당하면 Integer(5) 가 만들어지면서 레퍼런스가 바뀌기 때문입니다. Integer(30) 은 GC 에 의해 없어질 겁니다. 결론적으로 모든 Wrapper 클래스의 value 에는 final 이 선언되어 있어서 한번만 할당될 수 있고, 변경 시 계속 객체를 생성하게 됩니다.
 
 # 제네릭에는 왜 wrapper class 만 사용할까요?
 

@@ -1,6 +1,6 @@
 ---
 categories: "TIL-spring"
-tag: ["swagger", "openapi", "restapi", "socceranalyst"]
+tag: ["spring", "restDocs", "restapi"]
 ---
 
 저번에 RestAPI 를 간략하게 정리하면서 제 토이프로젝트에는 REST API 가 제대로 적용되지 않았다는 걸 깨달았습니다. 제대로 공부하기 전까진 그냥 GET, POST 만 써서 uri 로 연결하면 되는 줄 알았거든요... 
@@ -446,11 +446,164 @@ operation::post-delete[snippets='http-request,http-response']
 
 - 위 `member.adoc` 과 똑같습니다. 이렇게 만들어진 `.adoc` 파일이 `index.adoc` 에서 함께 보여집니다.
 
+## JSON prettyPrint
+
+
+
+
+
 ## 빌드
 
 이제 빌드를 해봅시다. `/gradlew build` 로 빌드를 하면 `main/resources/static` 에 index.html, member.html, post.html 문서가 생깁니다. 그 중 index.html 을 사용하면 됩니다.
 
 ![image-20230508192714898](../../images/2023-05-05-[Spring] SpringRestDocs 를 활용한 RESTful API 확인/image-20230508192714898.png)
+
+
+
+## 문서 커스텀 하기
+
+### prettyPrint
+
+지금 JSON 형식을 보시면 아래와 같이 한줄로 되어있습니다. 
+
+![image-20230513130449680](../../images/2023-05-05-[Spring] SpringRestDocs 를 활용한 RESTful API 확인/image-20230513130449680.png)
+
+Test 에서 @BeforeEach 에 `.withResponseDefaults(prettyPrint())` 설정을 추가하여 보기 쉽도록 하겠습니다.
+
+```java
+@BeforeEach
+public void setUp(WebApplicationContext webApplicationContext,
+                  RestDocumentationContextProvider restDocumentation) {
+    this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
+            .apply(documentationConfiguration(restDocumentation)
+                    .operationPreprocessors()
+                   	.withRequestDefaults(prettyPrint())
+                    .withResponseDefaults(prettyPrint()))
+            .build();
+}
+```
+
+설정을 추가하면 아래와 같이 됩니다.
+
+![image-20230513131622218](../../images/2023-05-05-[Spring] SpringRestDocs 를 활용한 RESTful API 확인/image-20230513131622218.png)
+
+### ResponseField 넣기, 커스텀
+
+각 요청 혹은 응답마다 필요한 field 의 이름, type, Desciption 이 있습니다. 이를 표로 만들어서 index 에 넣어주도록 하겠습니다. 다음과 같이 넣으면 오른쪽과 같이 보여집니다.
+
+![image-20230513132034403](../../images/2023-05-05-[Spring] SpringRestDocs 를 활용한 RESTful API 확인/image-20230513132034403.png)
+
+하지만 API 문서를 보면서 필요한 게 위 3가지만은 아니겠죠. Optional 여부, Constraints 같은 조건도 필요합니다. Optional 은 test 의 Field 에 `.optional` 로 설정되어있으므로 제약조건 설정해보겠습니다. 이를 위해 먼저 config 파일은 `RestDocsConfig.java` 파일을 test 폴더 내에 만들어 줍니다.
+
+```java
+package restapi.restdocs.config;
+
+import org.springframework.boot.test.context.TestConfiguration;
+import  org.springframework.restdocs.snippet.Attributes.Attribute;
+
+public class RestDocsConfig {
+
+    public static Attribute field(
+            final String key,
+            final String value){
+        return new Attribute(key,value);
+    }
+}
+```
+
+- 나중에 configuration 설정으로 쓰기 위해 이름을 `~Config` 라고 했습니다.
+
+이제 PostControllerTest 에서 `.attributes(field("constraints", "길이 100 이하"))` 를 붙이겠습니다.
+
+```java
+ @Test
+    void create() throws Exception {
+        // Change the postResponse object
+        final PostResponse postResponse = new PostResponse(1L, "title", "content");
+        when(postService.create(any())).thenReturn(postResponse);
+
+        this.mockMvc.perform(post("/posts")
+                        .content("{\"title\": \"title\", \n\"content\": \"content\"}")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated()) // Change the expected status code
+                .andDo(document("post-create",
+                        requestFields(
+                                fieldWithPath("title").description("Post 제목").attributes(field("constraints", "길이 100 이하")),
+                                fieldWithPath("content").description("Post 내용").optional()
+                        )
+                ));
+    }
+```
+
+이까지 했다고 .adoc 파일의 테이블에 optional 이나 contraints 가 추가되는 건 아닙니다. 추가되는 형식을 바꿔줘야 하는데요. `src/test/resources/org/springframework/restdocs/templates` 경로에 `request-fields.snippet` 와 `response-fields.snippet` 파일을 추가하면 됩니다. 문법은 mustache 입니다. 두 형식이 똑같기 때문에 하나만 적을게요.
+
+```
+|===
+|Path|Type|Description|Contraints|Optional
+
+{{#fields}}
+|{{#tableCellContent}}`+{{path}}+`{{/tableCellContent}}
+|{{#tableCellContent}}`+{{type}}+`{{/tableCellContent}}
+|{{#tableCellContent}}{{description}}{{/tableCellContent}}
+|{{#tableCellContent}}{{#constraints}}{{.}}{{/constraints}}{{/tableCellContent}}
+|{{#tableCellContent}}{{^optional}}No{{/optional}}{{#optional}}Yes{{/optional}}{{/tableCellContent}}
+
+{{/fields}}
+|===
+```
+
+이제 이런 식으로 나옵니다.
+
+![image-20230513140731556](../../images/2023-05-05-[Spring] SpringRestDocs 를 활용한 RESTful API 확인/image-20230513140731556.png)
+
+## Enum 코드 문서화
+
+지금까지 사용한 필드 중에 Enum 타입이 없었는데요. Member 에 Authority enum 타입을 만들어서 사용해보고, 문서화도 해보겠습니다.
+
+모든 Enum 타입에서 공통적으로 사용할 메서드를 먼저 선언해줍니다. EnumType 의 메서드는 문서화 작업시 사용됩니다.
+
+```java
+package restapi.restdocs.entity;
+
+public interface EnumType {
+    String getName();
+    String getDescription();
+}
+
+```
+
+Authority 도 만들어 줍니다.
+
+```java
+package restapi.restdocs.entity;
+
+import lombok.AllArgsConstructor;
+
+@AllArgsConstructor
+public enum Authority implements EnumType{
+
+    USER("ROLE_USER"),
+    ADMIN("ROLE_ADMIN");
+
+    private final String description;
+
+    @Override
+    public String getName() {
+        return this.description;
+    }
+
+    @Override
+    public String getDescription() {
+        return this.name();
+    }
+}
+```
+
+
+
+# Refactoring
+
+반복코드 줄이기 -> Contraints
 
 # 마치며
 

@@ -189,11 +189,7 @@ public ResponseEntity<TokenDto> login(@RequestBody MemberRequestDto requestDto) 
 
 # @ControllerAdvice  를 사용한 예외 처리
 
-우리의 영원한 친구 chatGPT 는 
-
-> 예외 처리를 위한 별도의 로직이 필요한 경우, `@ControllerAdvice` 어노테이션을 사용하여 전역 예외 처리기를 구현하는 것이 더 효과적일 수 있습니다. 이 방법을 사용하면, 예외 처리 로직을 별도의 클래스로 분리하여 코드의 가독성과 유지 보수성을 높일 수 있습니다.
-
-라고 저를 설득했기 때문에 해당 방법도 적용해보겠습니다.
+​	예외 처리를 위한 별도의 로직이 필요한 경우, `@ControllerAdvice` 어노테이션을 사용하여 전역 예외 처리기를 구현하는 것이 더 효과적일 수 있습니다. 이 방법을 사용하면, 예외 처리 로직을 별도의 클래스로 분리하여 코드의 가독성과 유지 보수성을 높일 수 있습니다.
 
 ## @ControllerAdvice  
 

@@ -189,3 +189,20 @@ public int count(int[] coins, int change) {
 
 ### 구현
 
+```java
+public int count(int[] coins, int change) {
+    //coins = {1, 4, 5, 6}
+    //change = 14
+    int[] dp = new int[change + 1];
+    dp[0] = 1;
+
+    for(int coin : coins){
+        for(int i = coin; i <= change; i++){
+            dp[i] += dp[i - coin];
+        }
+    }
+
+    return dp[change];
+}
+```
+

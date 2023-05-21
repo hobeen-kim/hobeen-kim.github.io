@@ -1,6 +1,6 @@
 ---
 categories: "TIL-codestates"
-tag: [ "brute-Force Algorithm", "Binary Search Algorithm"]
+tag: [ "brute-Force Algorithm", "Binary Search Algorithm", "closet-pair problem", "convex hull using divide and conquer"]
 ---
 
 # Brute Force Algorithm (BFA, 완전 탐색 알고리즘)
@@ -174,13 +174,31 @@ findHull(Solution, P, A, B):
         C ← Orthogonally farthest point from AB
         Solution.remove(AB)
         Solution.add(AC, CB)
-        Partition P – { C } in X0, X1 and X2
-        Discard X0 in side triangle
-
-        Call FindHull(X1, A, C)
-        Call FindHull(X2, C, B)
+        Point[] X0, X1, X2 <- points of each sides
+      
+        findHull(X1, A, C)
+        findHull(X2, C, B)
 ```
 
+- 결국 마지막에 findHull 메서드를 호출하며 재귀함수 형태로 진행됩니다.
 
+​	시간 복잡도를 분석해보겠습니다. 먼저 x 로 정렬하는 시간 복잡도는 O(nlogn) 입니다. 그리고 최좌측, 최우측 점을 찾는 시간 복잡도는 O(1) 입니다.  n/2 씩 나눠졌을 때 각 선분에서 가장 먼 점을 각각 찾아야 합니다. 해당 작업은 각각 (n-2)/2 번 수행되므로 총 n-2 번 수행됩니다. 이 때 나눠진 각각의 선분에 대해 다시 가장 먼 점을 찾아야 합니다. 그러면 4개의 선분에서 먼 4개의 점을 찾으므로 (n-4)/2 번 수행됩니다. 따라서 최악의 경우에는 O(n^2)번 수행되는데, 이 경우는 모든 점에 선분이 연결된 형태입니다. 하지만 theta 나 omega 는 이진트리와 같은 형태가 되어 O(nlogn) 입니다.
+
+> 그레이엄 스캔으로 푸는 방법은 정렬되어 있는 경우 O(n), 그렇지 않은 경우 O(nlogn) 의 시간복잡도를 가집니다. [볼록 껍질 그레이엄 스캔 (Convex Hull)](https://rebro.kr/14#recentEntries)
+
+아래는 프로그래머스 문제인데 해당 알고리즘과 비슷해보여서 들고 왔습니다. 아직 풀어보지는 않았습니다.
 
 [IU 와 콘의 보드게임](https://school.programmers.co.kr/learn/courses/30/lessons/1841)
+
+
+
+# 이진 탐색 알고리즘(BSA, Binary Search Algorithm)
+
+​	BSA 는 데이터가 정렬된 상태에서 절반씩 범위를 나눠 분할 정복기법으로 특정한 값을 찾아내는 알고리즘입니다. 먼저 중간값과 찾을 값을 비교한 뒤 찾을 값이 속한 집합에서 다시 분할정복을 실시합니다. 따라서 정렬되어 있다면 시간복잡도는 O(logn) 입니다. 시간복잡도는 작지만 데이터를 정렬하는 로직의 시간복잡도가 O(nlogn) 이므로 데이터의 양이 적다면 효율이 높지 않습니다.
+
+아래는 이진 탐색으로 34 를 찾는 과정입니다.
+
+![img](../../images/2023-05-18-[codestates] 완전탐색 알고리즘, 이진탐색 알고리즘/img.png)
+
+
+

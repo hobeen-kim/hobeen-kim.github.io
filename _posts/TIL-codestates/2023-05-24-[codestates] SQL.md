@@ -56,6 +56,7 @@ SELECT NAME FROM [TABLE 명] #TABLE 에서 NAME 필드를 가져옵니다.
 ```mysql
 SELECT * FROM [TABLE 명] WHERE NAME="KIM" #TABLE 에서 NAME 필드가 "KIM" 인 모든 레코드를 가져옵니다.
 SELECT * FROM [TABLE 명] WHERE NAME<>"KIM" #TABLE 에서 NAME 필드가 "KIM" 이 아닌 모든 레코드를 가져옵니다.
+SELECT * FROM [TABLE 명] WHERE NOT NAME = "KIM" #TABLE 에서 NAME 필드가 "KIM" 이 아닌 모든 레코드를 가져옵니다. 위와 같습니다.
 SELECT * FROM [TABLE 명] WHERE NAME LIKE "KIM%" #TABLE 에서 NAME 필드가 "KIM" 으로 시작하는 모든 레코드를 가져옵니다.
 SELECT * FROM [TABLE 명] WHERE ID IN (1, 10) #TABLE 에서 ID 필드가 1 ~ 10 인 모든 레코드를 가져옵니다.
 SELECT * FROM [TABLE 명] WHERE EMAIL IS NULL #TABLE 에서 EMAIL 필드가 NULL 값인 모든 레코드를 가져옵니다.
@@ -73,6 +74,7 @@ SELECT * FROM [TABLE 명] WHERE EMAIL IS NOT NULL #TABLE 에서 EMAIL 필드가 
 SELECT * FROM [TABLE 명] ORDER BY ID #TABLE 에서 모든 레코드를 ID 값의 오름차순으로 정렬하여 가져옵니다.
 SELECT * FROM [TABLE 명] ORDER BY NAME #TABLE 에서 모든 레코드를 NAME 값의 오름차순으로 정렬하여 가져옵니다.
 SELECT * FROM [TABLE 명] ORDER BY ID DESC #TABLE 에서 모든 레코드를 ID 값의 내림차순으로 정렬하여 가져옵니다.
+SELECT * FROM [TABLE 명] ORDER BY ID, NAME #TABLE 에서 모든 레코드를 ID 값의 오름차순으로 정렬하고 같으면 NAME 값의 오름차순으로 정렬하여 가져옵니다.
 ```
 
 

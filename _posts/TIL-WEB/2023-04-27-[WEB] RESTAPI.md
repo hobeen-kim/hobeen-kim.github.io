@@ -25,7 +25,7 @@ API 는 소프트웨어 간 지정된 형식으로 요청, 명령을 받을 수 
 
 
 
-## RESTful(REpresentational State Transfer0ful) API
+## RESTful(REpresentational State Transfer-ful) API
 
 REST API 는 이러한 API 를 어떻게 구성할지 정의된 아키텍처 스타일로( 프로토콜이나 표준이 아님), 웹상에서 사용되는 여러 리소스를 HTTP URI로 표현하고, 해당 리소스에 대한 행위를 HTTP Method(POST, GET, PUT, DELETE, PATCH) 로 정의하는 방식을 말합니다.
 

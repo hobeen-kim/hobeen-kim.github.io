@@ -171,6 +171,65 @@ SELECT U.ID, P.TITLE FROM USER AS U LEFT JOIN POST AS P ON U.ID = P.USER_ID
 | 3    | NULL    |
 
 
+### GROUP BY
+
+GROUP BY 는 데이터를 조회할 때 그룹으로 묶어서 조회합니다.
+
+| ID   | CUSTOMER_ID | TOTAL | STATE |
+| ---- | ----------- | ----- | ----- |
+| 1    | 1           | 100   | A     |
+| 2    | 1           | 150   | A     |
+| 3    | 1           | 150   | B     |
+| 4    | 2           | 200   | B     |
+| 5    | 2           | 300   | C     |
+
+위와 같은 테이블이 있다고 했을 때 STATE 별 GROUP BY 를 해보겠습니다.
+
+```MYSQL
+SELECT * FROM INVOICES GROUP BY STATE;
+```
+
+결과는 아래와 같이 나옵니다.
+
+| ID   | CUSTOMER_ID | TOTAL | STATE |
+| ---- | ----------- | ----- | ----- |
+| 1    | 1           | 100   | A     |
+| 3    | 1           | 150   | B     |
+| 5    | 2           | 300   | C     |
+
+그룹에 대한 특별한 작업이 없다면, 각 그룹의 첫번째 데이터만 표시됩니다. 따라서 그룹핑 어떠한 값으로 할지 정해야 합니다.
+
+```MYSQL
+SELECT CUSTOMER_ID, AVG(TOTAL) FROM INVOICES GROUP BY CUSTOMER_ID HAVING AVG(TOTAL) > 100.00
+```
+
+테이블에서 CUSTOMER_ID 로 그룹핑하는데, HAVING 을 사용해서 AVG(TOTAL) 가 100.00 이 넘는 레코드만 표시합니다.
+
+| CUSTOMER_ID | AVG(TOTAL) |
+| ----------- | ---------- |
+| 1           | 100        |
+| 2           | 150        |
+
+
+### COUNT(), SUM(), AVG(), MAX(), MIN()
+
+각 함수는 사용법이 비슷합니다. 아래 예시는 COUNT() 로, 레코드의 개수를 헤아릴 때 사용합니다. 
+
+```MYSQL
+SELECT STATE, COUNT(*) FROM INVOICES GROUP BY STATE
+```
+
+각 STATE 별 개수를 알 수 있습니다.
+
+## SELECT 실행 순서
+
+SELECT 실행 순서는 다음과 같습니다.
+
+FROM -> WHERE -> GROUP BY -> HAVING -> SELECT -> ORDER BY
+
+HAVING 까지 모든 과정이 끝난 후 각 레코드 값을 가져옵니다. 그리고 ORDER BY 로 정렬합니다.
+
+
 
 # 트랜잭션
 

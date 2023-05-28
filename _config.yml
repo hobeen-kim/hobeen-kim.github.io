@@ -107,7 +107,7 @@ analytics:
 author:
   name             : "Kim Hobeen"
   avatar           : # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
-  bio              : "안심하세요! 대부분 버그입니다."
+  bio              : "기술 & TIL 블로그입니다."
   location         : "South Korea"
   email            : "sksjsksh32@naver.com"
   links:

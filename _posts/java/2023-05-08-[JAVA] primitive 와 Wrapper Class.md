@@ -1,5 +1,5 @@
 ---
-categories: "TIL-java"
+categories: "java"
 tag: ["primitive", "wrapperclass"]
 ---
 

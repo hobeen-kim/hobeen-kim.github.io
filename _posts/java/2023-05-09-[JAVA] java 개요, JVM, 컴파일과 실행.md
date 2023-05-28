@@ -1,5 +1,5 @@
 ---
-categories: "TIL-java"
+categories: "java"
 tag: ["java", "jvm", "jre", "jdk", "compile"]
 ---
 

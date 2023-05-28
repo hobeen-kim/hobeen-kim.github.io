@@ -1,6 +1,6 @@
 ---
-categories: "TIL-spring"
-tag: ["validation", "spring", "springboot"]
+categories: "spring"
+tag: ["validation", "springboot"]
 header:
   teaser: /assets/images/spring.png
 ---

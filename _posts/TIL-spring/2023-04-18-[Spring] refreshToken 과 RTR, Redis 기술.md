@@ -1,5 +1,5 @@
 ---
-categories: "TIL-spring"
+categories: "spring"
 tag: ["token", "spring", "springboot", "redis", "RTR"]
 ---
 

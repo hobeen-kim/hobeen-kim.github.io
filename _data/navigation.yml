@@ -13,18 +13,20 @@ docs:
 
       - title: "TIL-codestates"
         url: /categories/#til-codestates
-      - title: "TIL-spring"
-        url: /categories/#til-spring
-      - title: "TIL-AWS"
-        url: /categories/#til-aws
-      - title: "TIL-WEB"
-        url: /categories/#til-web
-      - title: "TIL-react"
-        url: /categories/#til-react
-      - title: "TIL-git"
-        url: /categories/#til-git
-      - title: "TIL-java"
-        url: /categories/#til-java
+      - title: "spring"
+        url: /categories/#spring
+      - title: "AWS"
+        url: /categories/#aws
+      - title: "WEB"
+        url: /categories/#web
+      - title: "react"
+        url: /categories/#react
+      - title: "git"
+        url: /categories/#git
+      - title: "java"
+        url: /categories/#java
+      - title: "dataStructure"
+        url: /categories/#dataStructure  
       - title: "socceranalyst"
         url: /categories/#socceranalyst
       - title: "inflean"

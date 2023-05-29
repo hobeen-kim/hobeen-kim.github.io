@@ -1,5 +1,5 @@
 ---
-categories: "TIL-git"
+categories: "git"
 ---
 
 # 문제 직면

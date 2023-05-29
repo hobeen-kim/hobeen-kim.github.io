@@ -1,5 +1,5 @@
 ---
-categories: "TIL-AWS"
+categories: "AWS"
 tag: ["ec2", "elb", "alb", "autoscaling", "efs", "ami"]
 ---
 

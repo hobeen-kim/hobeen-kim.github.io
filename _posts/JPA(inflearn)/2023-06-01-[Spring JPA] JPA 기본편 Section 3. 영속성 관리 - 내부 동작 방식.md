@@ -10,9 +10,9 @@ tag: ["JPA", "JPQL", "EntityManager", "EntityManagerFactory"]
 
 # 영속성 컨텍스트
 
-​	영속성 컨텍스트는 Entity 를 영구 저장하는 환경을 의미하며, 논리적인 개념입니다. entityManager 를 통해 영속성 컨텍스트에 접근할 수 있습니다. 예를 들어 `EntityManager.persist(entity);` 는 Entity 를 db 에 저장하는게 아니라 영속성 컨텍스트에 저장하는 것입니다.
+​	영속성 컨텍스트(PersistenceContext) 는 Entity 를 영구 저장하는 환경을 의미하며, 논리적인 개념입니다. entityManager 를 통해 영속성 컨텍스트에 접근할 수 있습니다. 예를 들어 `EntityManager.persist(entity);` 는 Entity 를 db 에 저장하는게 아니라 영속성 컨텍스트에 저장하는 것입니다.
 
-​	entityManager 와 영속성 컨텍스트는 보통 아래와 같이 1:1 로 생성됩니다.
+​	entityManager 와 영속성 컨텍스트는 보통 아래와 같이 1:1 로 생성되며 EntityManager 안에 영속성 컨텍스트가 있다고 보면 편합니다.
 
 ![image-20230601002141143](../../images/2023-06-01-[Spring JPA] JPA 기본편 Section 3. 영속성 관리 - 내부 동작 방식/image-20230601002141143.png)
 
@@ -174,7 +174,7 @@ flush 가 되면 영속성 컨텍스트에서 memberA 의 스냅샷과 실제 me
 
 # 플러시(flush)
 
-​	**flush** 는 영속성 컨텍스트의 변경 내용을 감지해서 데이터 베이스에 반영하는 메서드입니다. flush 가 호출되면 수정된 엔티티 쓰기 지연 SQL 저장소에 등록된 쿼리문이 DB 에 반영됩니다. **다만, flush 가 발생한다고 db commit 이 발생되는 것은 아닙니다.**
+​	**flush** 는 영속성 컨텍스트의 변경 내용을 감지해서 데이터 베이스에 반영하는 메서드입니다. flush 가 호출되면 수정된 엔티티 쓰기 지연 SQL 저장소에 등록된 쿼리문이 DB 에 반영됩니다. **다만, flush 가 발생한다고 db commit 이 발생되는 것은 아닙니다.** 트랜잭션 작업 단위 안에서 커밋 직전에만 모든 SQL 문이 동기화되기만 하면 됩니다.
 
 **영속성 컨텍스트를 플러시하는 방법**
 
@@ -215,4 +215,33 @@ List<Member> members= query.getResultList();
 
 `FlushModeType.COMMIT` 은 중간에 JPQL 이 있지만 굳이 플러시 할 필요가 없을 때 사용합니다. 사실 그냥 기본값을 사용하면 됩니다.
 
-**플러시는!** • 영속성 컨텍스트를 비우지 않음 • 영속성 컨텍스트의 변경내용을 데이터베이스에 동기화 • 트랜잭션이라는 작업 단위가 중요 -> 커밋 직전에만 동기화 하면 됨
+# 준영속 상태
+
+​	준영속 상태는 영속에서 준영속 상태가 된 것입니다. em.persist(), em.find() 등으로 1차 캐시에 올라간 상태가 영속 상태이고, **영속 상태의 entity 가 영속성 컨텍스트에서 분리(detached) 된 게 준영속 상태**입니다. **준영속 상태가 되면 영속성 컨텍스트가 제공하는 기능을 사용하지 못합니다.**
+
+​	**준영속 상태로 만드는 방법**에는 아래와 같은 방법이 있습니다.
+
+- `em.detach(entity)` : 특정 엔티티만 준영속 상태로 전환
+- `em.clear()` : 영속성 컨텍스트를 완전히 초기화
+- em.close() : 영속성 컨텍스트를 종료
+
+```java
+try{
+    //select 쿼리 날림
+    Member member = em.find(Member.class, 101L);
+    member.setName("AAAAA");
+
+    //영속성 컨택스트에서 빠짐
+    em.detach(member);
+
+    //영속성 컨택스트를 초기화
+    em.clear();
+
+    //영속성 컨택스트를 종료
+    em.close();
+
+    //update 쿼리 없음
+    tx.commit();
+}
+```
+

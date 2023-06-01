@@ -198,3 +198,82 @@ public class CafeClient {
 `new AnnotationConfigApplicationContext(Config.class);` 를 통해서 Config 파일을 빈으로 등록합니다. 거기서 `context.getBean(MenuController.class);` 를 통해서 등록된 빈 중 MenuController 를 꺼냅니다.
 
 **이렇게 핵심 로직과 DI 를 분리하여 코드를 유연하게 구성할 수 있습니다.**
+
+## AOP
+
+​	AOP(Aspect Oriented Programming) 란 관심 지향 프로그래밍으로, 공통된 관심사를 처리하기 위한 프로그래밍입니다. 
+
+​	관심사항은 **공통 관심 사항(Cross-cutting concern)**과 **핵심 관심 사항(Core concern)**으로 나뉩니다. 어플리케이션의 핵심 로직이 바로 핵심 관심 사항에 해당되고, 공통적으로 적용되는 기능(트랜잭션, 예외처리 등) 은 공통 관심 사항이 됩니다. 아래 그림과 같이 생각하면 됩니다.
+
+![image-20230602012016085](../../images/2023-05-30-[codestates] Spring Framework 특징/image-20230602012016085.png)
+
+​	**AOP 의 주 목적은 핵심 관심 사항에서 공통 관심 사항을 분리하는 것**입니다. 둘을 나누면 코드가 간결해지고, 핵심 로직에 좀 더 집중할 수 있으며 유지보수도 편해지겠죠. 또한 객체 지향 설계 원칙에 맞는 코드 구현할 수 있습니다.
+
+## PSA
+
+​	PSA(Portable Service Abstraction) 란 클라이언트가 **추상화된 상위 클래스를 일관되게 바라보며 하위 클래스의 기능을 사용하는 것**입니다. 간단히 말해 OOP 의 추상화라고도 볼 수 있습니다. 
+
+PSA가 필요한 주된 이유는 **어떤 서비스를 이용하기 위한 접근 방식을 일관된 방식으로 유지함으로써 애플리케이션에서 사용하는 기술이 변경되더라도 최소한의 변경만으로 변경된 요구 사항을 반영하기 위함**입니다.
+
+아래 코드는 추상화를 위한 Child 추상 클래스입니다.
+
+```java
+public abstract class Child {
+    protected String childType;
+    protected double height;
+    protected double weight;
+    protected String bloodType;
+    protected int age;
+
+    protected abstract void sleep();
+
+    protected abstract void eat();
+}
+```
+
+그리고 이를 확장한 하위 클래스 Infant 와 Toddler 가 있습니다.
+
+```java
+public class Infant extends Child {
+    @Override
+    protected void sleep() {
+        System.out.println("영아부터는 밤에 잠을 자기 시작해요");
+    }
+
+    @Override
+    protected void eat() {
+        System.out.println("영아부터는 이유식을 시작해요");
+    }
+}
+
+public class Toddler extends Child {
+    @Override
+    protected void sleep() {
+        System.out.println("유아는 낮잠을 건너뛰고 밤잠만 자요");
+    }
+
+    @Override
+    protected void eat() {
+        System.out.println("유아는 딱딱한 걸 먹기 시작해요");
+    }
+}
+```
+
+해당 클래스들은 Child 에서 일반화시켜 놓은 아이의 동작을 구체화시켜 사용하고 있습니다. 이러한 추상화는 Spring DI 의 핵심으로 볼 수도 있습니다. 아래는 Jdbc 를 사용하기 위해 JdbcConnector 인터페이스로 커넥터들을 추상화한 예시입니다.
+
+![image-20230602013421076](../../images/2023-05-30-[codestates] Spring Framework 특징/image-20230602013421076.png) 
+
+DbClient 입장에서는 어떤 JdbcConnector 구현체를 사용하더라도 Connection을 얻는 방식은 getConnection() 메서드를 사용해야 하기 때문에 동일합니다. 즉 **느슨한 결합**이라고 볼 수 있습니다.
+
+
+
+# SpringBoot 를 사용해야 하는 이유
+
+​	SpringBoot 는 Spring 의 복잡한 설정으로 겪는 문제점을 해결하기 위해 생겨난 Spring Project 중 하나입니다. Spring Boot을 사용해야 하는 이유는 다음과 같습니다.
+
+- XML 기반의 복잡한 설계 방식 지양
+- 의존 라이브러리의 자동 관리
+- 애플리케이션 설정의 자동 구성
+- 프로덕션급 애플리케이션의 손쉬운 빌드
+- 내장된 WAS를 통한 손쉬운 배포
+

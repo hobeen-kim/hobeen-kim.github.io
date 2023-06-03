@@ -1,8 +1,6 @@
 ---
 categories: "JPA(inflearn)"
-tag: ["JPA", "JPQL", "EntityManager", "EntityManagerFactory"]
-
-
+tag: ["JPA", "JPQL", "Entity Mapping", "Entity", "primary key"]
 ---
 
 <div class="notice--danger">

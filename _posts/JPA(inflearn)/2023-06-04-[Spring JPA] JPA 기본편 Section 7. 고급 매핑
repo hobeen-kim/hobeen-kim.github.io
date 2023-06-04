@@ -25,7 +25,7 @@ tag: ["상속관계 매핑", "@Inheritance", "@MappedSuperclass"]
 ```java
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorColumn //DTYPE 을 넣어줍니다. 엔티티명이 들어갑니다. @Discriminat
+@DiscriminatorColumn //DTYPE 을 넣어줍니다. 엔티티명이 들어갑니다.
 public class Item {
 
     @Id

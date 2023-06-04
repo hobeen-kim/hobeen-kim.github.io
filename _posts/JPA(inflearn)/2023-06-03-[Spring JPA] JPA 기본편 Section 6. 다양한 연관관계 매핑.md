@@ -1,8 +1,6 @@
 ---
 categories: "JPA(inflearn)"
 tag: ["1:N", "N:1", "N:M", "1:1", "association"]
-
-
 ---
 
 <div class="notice--danger">

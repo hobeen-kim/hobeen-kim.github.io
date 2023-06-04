@@ -1,7 +1,6 @@
 ---
 categories: "JPA(inflearn)"
 tag: ["mapping","association"]
-
 ---
 
 <div class="notice--danger">

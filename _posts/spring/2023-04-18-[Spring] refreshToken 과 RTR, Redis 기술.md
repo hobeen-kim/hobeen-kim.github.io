@@ -11,7 +11,7 @@ tag: ["token", "spring", "springboot", "redis", "RTR"]
     </b>
 </div>
 
-# Redis 란?
+# Redis
 
 > Redis is an open source (BSD licensed), in-memory **data structure store** used as a database, cache, message broker, and streaming engine.
 >

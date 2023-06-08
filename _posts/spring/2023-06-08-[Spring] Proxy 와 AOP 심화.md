@@ -13,7 +13,7 @@ tag: ["proxy", "aop"]
 
 # 동적 프록시 기술
 
-​	지금부터 자바의 Aspect 가 어떻게 구현되는지 한번 알아보겠습니다.
+​	지금부터 Spring 의 Aspect 가 어떻게 구현되는지 한번 알아보겠습니다.
 
 ![image-20230606100617859](../../images/2023-06-08-[Spring] Proxy 와 AOP 심화/image-20230606100617859.png)
 
@@ -1237,3 +1237,98 @@ com.codestates.test.A$$EnhancerBySpringCGLIB$$345ecfed
 - @annotation : 메서드가 주어진 애노테이션을 가지고 있는 조인 포인트를 매칭 
 - @args : 전달된 실제 인수의 런타임 타입이 주어진 타입의 애노테이션을 갖는 조인 포인트 
 - bean : 스프링 전용 포인트컷 지시자, 빈의 이름으로 포인트컷을 지정합니다.
+
+기본적인 execution 의 문법은 다음과 같습니다. `?` 는 생략 가능하다는 뜻입니다.
+
+execution(modifiers-pattern? ret-type-pattern declaring-type-pattern?namepattern(param-pattern) throws-pattern?) 
+
+한글로 쓰면 아래와 같구요.
+
+execution(접근제어자? 반환타입 선언타입?메서드이름(파라미터) 예외?
+
+작성 방법은 [스프링 핵심원리 고급편 스프링 aop 포인트컷](https://hobeen-kim.github.io/inflearn/스프링-핵심원리-고급편-스프링-AOP-포인트컷/) 을 참고하는 게 나을 것 같습니다. 어차피 같은 내용 보면서 적고 있는거라서요... ㅎㅎ
+
+# JDK 동적 프록시와 CGLIB
+
+​	이제 다시 두 프록시를 비교해보겠습니다. 앞에서는 인터페이스를 사용하면 JDK 동적 프록시를 만든다고 했었는데요. 몇가지 제한사항 때문에 스프링 부트 2.0 부터는 CGLIB 를 기본적으로 사용하게 됩니다. 이제부터 그 제한사항을 알아보겠습니다.
+
+## JDK 동적 프록시의 한계
+
+​	테스트 코드로 진행해보겠습니다. 먼저 C 와 A 를 주입받아 클래스를 출력해보겠습니다. 스프링빈 C 를 구현하는 게 A 이기 때문에 A 로도 DI 를 받을 수 있습니다.
+
+```java
+@SpringBootTest
+@Import(Config.class)
+public class ProxyTest {
+
+    @Autowired C c;
+    @Autowired A a;
+
+    @Test
+    void test(){
+        System.out.println(c.getClass().getName());
+        System.out.println(a.getClass().getName());
+    }
+}
+/*
+com.codestates.test.A$$EnhancerBySpringCGLIB$$f20ab39a
+com.codestates.test.A$$EnhancerBySpringCGLIB$$f20ab39a
+*/
+```
+
+​	이상없이 잘 출력되는 걸 알 수 있습니다.
+
+​	위 코드에서 `@SpringBootTest(properties = {"spring.aop.proxy-target-class=false"})` 속성을 준다면 스프링은 인터페이스를 구현한 클래스에 대해 JDK 동적 프록시를 적용합니다.
+
+```java
+//@SpringBootTest
+@SpringBootTest(properties = {"spring.aop.proxy-target-class=false"}) //JDK 동적
+@Import(Config.class)
+public class ProxyTest {
+
+    @Autowired C c;
+    @Autowired A a; //여기서 오류발생
+
+    @Test
+    void test(){
+        System.out.println(c.getClass().getName());
+        System.out.println(a.getClass().getName());
+    }
+}
+/*
+Bean named 'c' is expected to be of type 'com.codestates.test.A' but was actually of type 'com.sun.proxy.$Proxy60'
+*/
+```
+
+​	타입관련 예외가 발생하게 되는데요. c 에 주입되길 기대하는 타입은  `com.codestates.test.A` 지만 실제로는 `com.sun.proxy.$Proxy60` 가 들어왔다는 얘기입니다. 이렇게 되는 이유는 **JDK 동적 프록시가 인터페이스 기반으로만 만들어질 뿐, A 라는 타입에 대한 정보는 전혀 알 수 없기 때문입니다.** 따라서 `@Autowired A a;` 에는 C 로 만든 JDK 동적 프록시가 들어올 수 없습니다.
+
+​	**즉 `JDK Proxy implement C` 이기 때문에 C 에는 의존관계를 주입할 수 있지만 A 는 주입할 수 없습니다.** 물론 보통 인터페이스를 기반으로 의존 관계를 주입받지만 테스트 또는 여러가지 이유로 AOP 프록시가 적용된 구체 클래스를 직접 의존관계 주입 받아야 하는 경우가 있을 수 있습니다. 이때는 CGLIB를 통해 구체 클래스 기반으로 AOP 프록시를 적용해야 합니다.
+
+​	반면 CGLIB 는 구체클래스를 상속받고 있기 때문에 당연히 구체 클래스를 의존 관계로 넣을 수 있습니다.
+
+## CGLIB 구체 클래스 기반 프록시의 한계
+
+1. **대상 클래스에 기본 생성자가 필수로 들어가야 합니다.** 
+   - 자바 문법에서 자식 클래스의 생성자로 호출할 때 부모 클래스의 생성자가 없으면 기본 생성자(`super()`) 를 호출 합니다. 따라서 구체 클래스에 무조건 기본 생성자가 있어야 합니다.
+2. **생성자가 2번 호출됩니다.**
+   - 실제 target 객체를 생성할 때 1번, 프록시 객체를 생성할 때 부모 클래스의 생성자를 호출하면서 1번으로 총 2번 호출됩니다.
+3. **final 키워드 클래스, 메서드를 사용할 수 없습니다.**
+   - final 키워드가 클래스에 있으면 상속이 불가능하고, 메서드에 있으면 오버라이딩이 불가능합니다. CGLIB는 상속을 기반으로 하기 때문에 두 경우 프록시가 생성되지 않거나 정상 동작하지 않습니다. 하지만 일반적인 웹 애플리케이션을 개발할 때 final 키워드를 잘 사용하지 않으므로 이 부분이 특별히 문제가 되지는 않습니다.
+
+## 해결 방법
+
+​	앞서 설명했듯이 기본적으로 스프링은 CGLIB 방식을 사용하고, JDK 프록시를 사용하려면 따로 설정해줘야 합니다. 그렇다면 CGLIB 의 문제를 그대로 안고 가는걸까요? 그건 아닙니다.
+
+​	스프링은 `objenesis` 라는 라이브러리로 기본 생성자 문제, 생성자 2번 호출 문제를 해결하였습니다. 따라서 기본 생성자 없이 프록시 객체 생성이 가능해지고, 생성자 또한 해당 라이브러리를 이용해서 1번만 호출되게 하였습니다. 앞서 프록시 팩토리의 어드바이스인  MethodInterceptor 클래스를 구현하는 부분에서, 잠깐 ObjenesisCglibAopProxy 를 봤었죠. CglibAopProxy 가 아닌 ObjenesisCglibAopProxy 인 이유도 해당 라이브러리를 이용한 프록시이기 때문입니다.
+
+​	결론적으로 스프링은 AOP 를 구현하는 프록시를 만들 때 CGLIB 를 사용합니다.
+
+
+
+# 마치며
+
+​	@Aspect 가 어떻게 적용되는지 알기 위해서 전체적인 흐름만 체크하려고 했는데 글이 많이 길어졌습니다. 해당 글의 맥락은 [스프링 핵심 원리 - 고급편](https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%95%B5%EC%8B%AC-%EC%9B%90%EB%A6%AC-%EA%B3%A0%EA%B8%89%ED%8E%B8/dashboard) 을 많이 참고했고 (사실 대부분입니다.) 복습도 되었습니다. 클래스 깊숙이 파고 드는 건 언제나 흥미로운 것 같습니다.
+
+​	토비의 스프링 3.1 도 참고하려고 봤는데 놀랍게도 구성 자체가 위 강의랑 비슷하고, 영한님도 중간중간에 토비님 언급하시는 거 보면 영한님도 해당 책을 참고 좀 하신 듯 합니다. 다만 저는 토비 책의 AOP 부분은 시간을 두고 진득하게 봐야할 것 같아서 개략적인 목차만 봤습니다.
+
+​	사실 로직의 구현과 사용은 다른 부분이라서 **클래스 깊숙이 파고드는 것보다는 AOP 의 개념이 뭔지, AOP 를 어떻게 사용하고 어떨 때 사용하는지가 더 중요하다고 생각합니다.**

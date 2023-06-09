@@ -31,8 +31,12 @@ docs:
         url: /categories/#socceranalyst
       - title: "inflean"
         url: /categories/#inflean
-      - title: "Learning"
-        url: /categories/#learning
+      - title: "JPA(inflean)"
+        url: /categories/#JPA(inflean)
+      - title: "network(inflean)"
+        url: /categories/#network(inflean)
+      - title: "review"
+        url: /categories/#review
 
 
   - title: "Tag"

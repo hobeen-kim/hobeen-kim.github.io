@@ -32,7 +32,7 @@ primitive type 은 자바 언어에 속한 기본적인 데이터 타입입니�
    - char (\u0000) -> null 이 아닙니다. `char c = null` 이라고 하면 오류가 납니다.
 2. 객체나 클래스가 아니기 때문에 메서드, 상속 등을 가지지 않습니다.
 
-**Primitive 와 대되는 Wrapper 클래스**
+**Primitive 와 대응되는 Wrapper 클래스**
 
 아래에 설명할 거지만, Wrapper 클래스는 primitive type 을 객체화한 것으로, 각각의 primitive type 은 대응되는 Wrapper 가 있습니다.
 

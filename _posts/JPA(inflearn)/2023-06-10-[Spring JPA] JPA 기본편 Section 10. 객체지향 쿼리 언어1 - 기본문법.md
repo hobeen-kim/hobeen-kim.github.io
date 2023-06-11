@@ -1,9 +1,6 @@
 ---
 categories: "JPA(inflearn)"
-tag: ["embedded", "collection", "ElementCollection"]
-
-
-
+tag: ["projection", "jpql", "query", "paging", "join", "subquery", "case"]
 ---
 
 <div class="notice--danger">

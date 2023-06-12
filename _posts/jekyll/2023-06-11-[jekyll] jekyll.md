@@ -196,7 +196,7 @@ home.html 을 만들어서 커스텀을 해봅시다.
 {% endfor %}
 ```
 
-{% for post in site.posts %} : site 에 있는 모든 posts 를 루프를 돌립니다.
+`{% for post in site.posts %}` : site 에 있는 모든 posts 를 루프를 돌립니다.
 
 post.url, post.title 등으로 값에 접근할 수 있습니다.
 

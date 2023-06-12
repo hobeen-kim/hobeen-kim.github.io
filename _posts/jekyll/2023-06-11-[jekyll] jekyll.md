@@ -288,13 +288,7 @@ defaults:
 
 이제 해당 값을 이용해서 if 문을 작성해보겠습니다.
 
-```
-{% for file in site.static_files %}
-    {% if file.image %}
-        <img src="{{file.path}}" alt="{file.name}">
-    {% endif %}
-{% endfor %}
-```
+![image-20230612153955131](../../images/2023-06-11-[jekyll] jekyll/image-20230612153955131.png)
 
 `file.image` 의 값은 assets/img 하위의 파일만 true 입니다. 따라서 imagetestoutside 는 출력되지 않고 imagetest 만 출력됩니다.
 

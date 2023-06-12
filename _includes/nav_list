@@ -25,7 +25,7 @@
         {% for category in site.categories %}
           {% if category[1].size == i %}
             <ul style="padding-top: 0px; padding-bottom: 0px;">
-              <a href="/categories/#{{ category[0] | slugify }}">
+              <a href="/{{ category[0] }}">
                 <strong style="font-size: 16px;">{{ category[0] }}</strong> <span class="taxonomy__count" style="font-size: 14px;">{{ i }}</span>
               </a>
             </ul>

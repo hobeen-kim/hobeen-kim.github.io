@@ -10,33 +10,34 @@ main:
 docs:
   - title: "Category"
     children:
-
-      - title: "TIL-codestates"
-        url: /categories/#til-codestates
+      - title: "codestates"
+        url: /categories/codestates
       - title: "spring"
-        url: /categories/#spring
+        url: /categories/spring
       - title: "AWS"
-        url: /categories/#aws
+        url: /categories/aws
       - title: "WEB"
-        url: /categories/#web
+        url: /categories/web
       - title: "react"
-        url: /categories/#react
+        url: /categories/react
       - title: "git"
-        url: /categories/#git
+        url: /categories/git
       - title: "java"
-        url: /categories/#java
+        url: /categories/java
       - title: "dataStructure"
-        url: /categories/#dataStructure  
+        url: /categories/dataStructure  
       - title: "socceranalyst"
-        url: /categories/#socceranalyst
+        url: /categories/socceranalyst
       - title: "inflean"
-        url: /categories/#inflean
+        url: /categories/inflean
       - title: "JPA(inflean)"
-        url: /categories/#JPA(inflean)
+        url: /categories/JPA(inflean)
       - title: "network(inflean)"
-        url: /categories/#network(inflean)
+        url: /categories/network(inflean)
       - title: "review"
-        url: /categories/#review
+        url: /categories/review
+      - title: "jekyll"
+        url: /categories/jekyll
 
 
   - title: "Tag"

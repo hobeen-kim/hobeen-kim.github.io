@@ -1,0 +1,22 @@
+---
+layout: archive
+---
+
+{{content}}
+
+{% assign entries_layout = page.entries_layout | default: 'list' %}
+
+{% for category in site.categories %}
+    {% assign category_name = category[0] | downcase %}
+    {% assign page_title = page.title | downcase %}
+    {% if category_name == page_title %}
+        <section id="{{ category[0] | slugify | downcase }}" class="taxonomy__section">
+            <div class="entries-{{ entries_layout }}">
+            {% for post in category.last %}
+                {% include archive-single.html type=entries_layout %}
+            {% endfor %}
+            </div>
+            <a href="#page-title" class="back-to-top">{{ site.data.ui-text[site.locale].back_to_top | default: 'Back to Top' }} &uarr;</a>
+        </section>
+    {% endif %}
+{% endfor %}

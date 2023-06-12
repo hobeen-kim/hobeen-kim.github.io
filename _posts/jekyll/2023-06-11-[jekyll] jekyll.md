@@ -288,7 +288,7 @@ defaults:
 
 이제 해당 값을 이용해서 if 문을 작성해보겠습니다.
 
-```java
+```
 {% for file in site.static_files %}
     {% if file.image %}
         <img src="{{file.path}}" alt="{file.name}">

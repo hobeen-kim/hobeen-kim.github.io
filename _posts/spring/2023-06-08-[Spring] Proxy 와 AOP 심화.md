@@ -1,7 +1,6 @@
 ---
 categories: "spring"
 tag: ["proxy", "aop"]
-
 ---
 
 <div class="notice--danger">

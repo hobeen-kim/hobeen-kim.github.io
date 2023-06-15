@@ -1,6 +1,6 @@
 ---
 categories: "jekyll"
-series: "Minimal Mistake Customizing"
+series: "Minimal Mistakes Customizing"
 ---
 
 # Home (index) 에 카테고리 추가

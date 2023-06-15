@@ -1,4 +1,17 @@
+---
+categories: "WEB"
+tag: ["tomcat", "servlet"]
+---
 
+# Web Server 와 WAS(Web Application Server)
+
+​	초기 웹 브라우저는 HTTP 프로토콜을 기반으로 해당 url path 에 맞게 정적인 파일:pencil:(HTML, CSS, JS, 이미지 등) 만 제공하는 목적이었습니다. 이를 **웹 서버**라고 합니다. Apache, Nginx 등이 웹 서버의 예시입니다.
+
+​	반면 **WAS** 는 웹 서버와는 달리 동적 콘텐츠를 생성하고 제공하는 역할을 합니다. 데이터베이스와의 상호작용, 비즈니스 로직의 실행 등을 할 수 있습니다. **WAS는 클라이언트의 요청에 따라 실시간으로 콘텐츠를 생성하고, 이를 웹 서버를 통해 클라이언트에게 전달**합니다. Java EE, ASP.NET, PHP 등의 플랫폼에서 동작하는 Tomcat, JBoss, WebLogic 등이 WAS의 예시입니다.
+
+​	물론 이 두 개념이 분리되어 운용되지 않습니다. 예를 들어 T**omcat 은 기본적으로 HTTP 서버 기능도 가지고 있어서, 웹 서버처럼 정적인 콘텐츠를 제공하는 역할도 수행할 수 있습니다**. 이는 Tomcat이 HTTP 요청을 받아서 처리하고 응답을 보낼 수 있기 때문입니다. 따라서 Tomcat은 웹 서버와 WAS의 기능을 모두 가지고 있다고 볼 수 있습니다.
+
+​	**그러나 실제 대규모 프로덕션 환경에서는, 웹 서버(Apache HTTP Server, Nginx 등)와 WAS(Tomcat 등)를 분리하여 운영하는 경우가 많습니다**. 이는 각각의 서버가 최적화된 작업을 수행하게 하여 전체 시스템의 성능을 향상시키기 위한 것입니다. 웹 서버는 정적 콘텐츠를 빠르게 제공하고, 동적 콘텐츠가 필요한 경우에만 WAS에 요청을 전달하는 방식으로 작동합니다. 이렇게 하면 WAS는 복잡한 애플리케이션 로직을 처리하는데 집중할 수 있습니다. 
 
 # 톰캣
 
@@ -12,19 +25,21 @@
 - **Catalina** : Tomcat의 Servlet 컨테이너 부분입니다. Catalina 는 Servlet과 JSP 페이지를 처리하며, 웹 애플리케이션의 생명주기를 관리합니다. 또한, 클라이언트의 요청을 적절한 웹 애플리케이션으로 라우팅하는 역할도 담당합니다. 이 과정에서는 Coyote 컴포넌트에서 전달받은 요청을 처리하고, 응답을 생성하여 다시 Coyote 컴포넌트로 보냅니다.
 - **Jasper** :  Tomcat의 JSP 엔진 부분으로, JSP 페이지를 Servlet으로 변환하는 역할을 합니다. 이렇게 변환된 Servlet은 그 후 Catalina 에 의해 처리됩니다. (현재 JSP 는 잘 사용되지 않습니다.)
 
+이러한 톰캣은 스프링부트에서 라이브러리로 내장되어 제공되고 있습니다. 
+
 # 서블릿
 
-![image-20230614232929700](../../images/2023-06-10-[WEB] 서블릿(Servlet)/image-20230614232929700.png)
+![image-20230615151310531](../../images/2023-06-10-[WEB] 서블릿(Servlet)/image-20230615151310531.png)
 
 ​	서블릿은 동적인 페이지를 생성하는 WAS 서버를 위한 기술입니다. 웹 브라우저에서 요청을 하면 해당 기능을 수행한 후 웹 브라우저에 결과를 전송합니다.
 
 1. 클라이언트가 HTTP 요청을 보냅니다. 이 요청은 먼저 톰캣의 Coyote 컴포넌트로 들어옵니다.
 2. Coyote 컴포넌트는 이 HTTP 요청을 파싱하여 `org.apache.coyote.Request` 객체와 `org.apache.coyote.Response` 객체를 생성합니다.
-3. 그 다음, 이 요청과 응답 객체는 서블릿 컨테이너인 Catalina 로 전달됩니다.
-4. Catalina는 이 `org.apache.coyote.Request` 객체와 `org.apache.coyote.Response` 객체를 `javax.servlet.http.HttpServletRequest` 객체와 `javax.servlet.http.HttpServletResponse` 객체로 변환합니다.
+3. 그 다음, `org.apache.coyote.Request` 객체와 `org.apache.coyote.Response` 객체는 서블릿 컨테이너인 Catalina 로 전달됩니다.
+4. Catalina는 `org.apache.coyote.Request` 객체와 `org.apache.coyote.Response` 객체를 `javax.servlet.http.HttpServletRequest` 객체와 `javax.servlet.http.HttpServletResponse` 객체로 변환합니다.
 5. 그 후, Catalina는 클라이언트의 요청을 처리할 적절한 서블릿을 찾아 이 `HttpServletRequest` 객체와 `HttpServletResponse` 객체를 해당 서블릿에 전달합니다.
 6. 이렇게 전달받은 `HttpServletRequest` 객체와 `HttpServletResponse` 객체는 서블릿에서 사용되어 클라이언트의 요청을 처리하고, 처리된 결과를 `HttpServletResponse` 객체에 담아서 클라이언트에게 반환합니다.
-7. 클라이언트에게 반환되기 전에 `HttpServletResponse` 객체는 다시 `org.apache.coyote.Response` 객체로 변환되어 Coyote에게 전달되고, Coyote는 이를 HTTP 응답 형식으로 변환하여 클라이언트에게 반환합니다.
+7. 클라이언트에게 반환되기 전에 `HttpServletResponse` 객체는 다시 `org.apache.coyote.Response` 객체로 변환되어 Coyote 에게 전달되고, Coyote 는 이를 HTTP 응답 형식으로 변환하여 클라이언트에게 반환합니다.
 
 ## 서블릿 구조
 
@@ -187,6 +202,10 @@ xml 형식의 파일이 없고, `@WebServlet(urlPatterns = "/my")` 을 통해 �
 ​	간단하게 표현하면 위 그림처럼 표현할 수 있습니다.
 
 ​	또한 DispatcherServlet 을 사용하면 **스프링의 IoC(Inversion of Control) 컨테이너와 통합되어, 의존성 주입, 트랜잭션 관리, 보안 등 스프링의 핵심 기능을 사용할 수 있게 됩니다.**
+
+![image-20230309173306041](../../images/2023-06-10-[WEB] 서블릿(Servlet)/image-20230309173306041.png)
+
+​	위 흐름은 DispatcherServlet 이후 핸들러를 호출하고 로직을 처리해서 View 를 응답해는 SpringMVC 구조입니다. 여기서는 서블릿까지만 알아봤습니다.
 
 # Ref.
 

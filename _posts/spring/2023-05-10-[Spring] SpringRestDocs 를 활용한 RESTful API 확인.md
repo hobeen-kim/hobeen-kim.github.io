@@ -1,6 +1,7 @@
 ---
 categories: "spring"
 tag: ["spring", "restDocs", "restapi"]
+series: "Spring REST Docs"
 ---
 
 저번에 RestAPI 를 간략하게 정리하면서 제 토이프로젝트에는 REST API 가 제대로 적용되지 않았다는 걸 깨달았습니다. 제대로 공부하기 전까진 그냥 GET, POST 만 써서 uri 로 연결하면 되는 줄 알았거든요... 

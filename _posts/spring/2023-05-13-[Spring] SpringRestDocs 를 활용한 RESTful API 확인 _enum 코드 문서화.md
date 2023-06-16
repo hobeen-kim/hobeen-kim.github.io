@@ -1,6 +1,7 @@
 ---
 categories: "spring"
 tag: ["spring", "restDocs", "restapi"]
+series: "Spring REST Docs"
 ---
 
 [[spring\] springrestdocs 를 활용한 restful api 확인](https://hobeen-kim.github.io/til-spring/Spring-SpringRestDocs-를-활용한-RESTful-API-확인/)

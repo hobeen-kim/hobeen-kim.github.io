@@ -4,10 +4,6 @@ tag: ["spring", "restDocs", "restapi"]
 series: "Spring REST Docs"
 ---
 
-[[spring\] springrestdocs 를 활용한 restful api 확인](https://hobeen-kim.github.io/til-spring/Spring-SpringRestDocs-를-활용한-RESTful-API-확인/)
-
-내용이 길어져서 포스팅을 나눴습니다.
-
 # Enum 코드 문서화
 
 지금까지 사용한 필드 중에 Enum 타입이 없었는데요. Member 에 Authority enum 타입을 만들어서 사용해보고, 문서화도 해보겠습니다.

@@ -4,10 +4,6 @@ tag: ["spring", "restDocs", "restapi"]
 series: "Spring REST Docs"
 ---
 
-[[spring\] springrestdocs 를 활용한 restful api 확인](https://hobeen-kim.github.io/til-spring/Spring-SpringRestDocs-를-활용한-RESTful-API-확인/)
-
-[[spring\] springrestdocs 를 활용한 restful api 확인 enum 코드 문서화](https://hobeen-kim.github.io/til-spring/Spring-SpringRestDocs-를-활용한-RESTful-API-확인-enum-코드-문서화/)
-
 # Refactoring - @BeforeEach
 
 ​	모든 Test 에 공통적으로 적용되는 게 있습니다. 바로 아래의 @BeforeEach 코드입니다.

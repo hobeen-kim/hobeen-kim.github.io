@@ -1,6 +1,7 @@
 ---
 categories: "jekyll"
 series: "Minimal Mistakes Customizing"
+tag: ["jekyll", "liquid", "minimal mistakes"]
 ---
 
 # Home (index) 에 카테고리 추가

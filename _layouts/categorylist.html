@@ -3,10 +3,13 @@ layout: archive
 ---
 
 {{content}}
-
-<h3 class="archive__subtitle">{{ site.data.ui-text[site.locale].recent_posts | default: "Recent Posts" }}</h3>
+<div class="button-container">
+<span class="button-posts selected">{{ site.data.ui-text[site.locale].recent_posts | default: "Recent Posts" }}</span>
+<span class="button-series">시리즈</span>
+</div>
+<hr/>
+<div class="categorylist-posts">
 {% assign entries_layout = page.entries_layout | default: 'list' %}
-
 {% for category in site.categories %}
     {% assign category_name = category[0] | downcase %}
     {% assign page_title = page.title | downcase %}
@@ -21,3 +24,41 @@ layout: archive
         </section>
     {% endif %}
 {% endfor %}
+</div>
+<div class="categorylist-series categorylist-hide">
+    {% assign entries_layout = page.entries_layout | default: 'list' %}
+    {% for category in site.categories %}
+        {% assign category_name = category[0] | downcase %}
+        {% assign reversedPosts = category.last | reverse %}
+        {% assign page_title = page.title | downcase %}
+        {% assign currentSeries = "" %}
+        {% if category_name == page_title %}
+            <section id="{{ category[0] | slugify | downcase }}" class="taxonomy__section">
+                <div class="entries-{{ entries_layout }}">
+                {% for post in category.last %}
+                    {% if post.series %}
+                        {% if currentSeries != post.series %}
+                            {% if currentSeries != "" %}
+                                {% assign currentSeries = post.series %}         
+                            {% else %}
+                                {% include archive-series.html type=entries_layout %}
+                            {% endif %}
+                        {% endif %}
+                        {% assign currentSeries = post.series %}
+                    {% endif %}
+                {% endfor %}
+                {% if currentSeries != "" %}
+                    {% assign break = true %}
+                    {% for post in reversedPosts %}
+                        {% if currentSeries == post.series and break %}
+                            {% include archive-series.html type=entries_layout %}
+                            {% assign break = false %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                </div>
+                <a href="#page-title" class="back-to-top">{{ site.data.ui-text[site.locale].back_to_top | default: 'Back to Top' }} &uarr;</a>
+            </section>
+        {% endif %}
+{% endfor %}
+</div>

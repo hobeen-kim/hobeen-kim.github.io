@@ -1,6 +1,7 @@
 ---
 categories: "jekyll"
 series: "Minimal Mistakes Customizing"
+tag: ["jekyll", "liquid", "minimal mistakes"]
 ---
 
 # Minimal Mistakes 시리즈 만들기

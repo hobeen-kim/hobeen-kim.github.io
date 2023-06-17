@@ -38,6 +38,8 @@ docs:
         url: /categories/review
       - title: "jekyll"
         url: /categories/jekyll
+      - title: "DB"
+        url: /categories/db
 
 
   - title: "Tag"

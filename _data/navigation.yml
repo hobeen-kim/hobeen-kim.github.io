@@ -25,13 +25,13 @@ docs:
       - title: "java"
         url: /categories/java
       - title: "dataStructure"
-        url: /categories/dataStructure  
+        url: /categories/datastructure  
       - title: "socceranalyst"
         url: /categories/socceranalyst
       - title: "inflean"
         url: /categories/inflean
       - title: "JPA(inflean)"
-        url: /categories/JPA(inflean)
+        url: /categories/jpa(inflean)
       - title: "network(inflean)"
         url: /categories/network(inflean)
       - title: "review"

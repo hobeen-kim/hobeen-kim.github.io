@@ -57,10 +57,16 @@ layout: archive
                 {% for post in category.last %}
                     {% if post.series %}
                         {% if currentSeries != post.series %}
-                            {% if currentSeries != "" %}
+                            {% if currentSeries == "" %}
                                 {% assign currentSeries = post.series %}         
                             {% else %}
-                                {% include archive-series.html type=entries_layout %}
+                                {% assign break = true %}
+                                {% for post in reversedPosts %}
+                                    {% if currentSeries == post.series and break %}
+                                        {% include archive-series.html type=entries_layout %}
+                                        {% assign break = false %}
+                                    {% endif %}
+                                {% endfor %}
                             {% endif %}
                         {% endif %}
                         {% assign currentSeries = post.series %}
@@ -74,6 +80,8 @@ layout: archive
                             {% assign break = false %}
                         {% endif %}
                     {% endfor %}
+                {% else %}
+                    시리즈가 없습니다.
                 {% endif %}
                 </div>
                 <a href="#page-title" class="back-to-top">{{ site.data.ui-text[site.locale].back_to_top | default: 'Back to Top' }} &uarr;</a>
@@ -81,6 +89,8 @@ layout: archive
         {% endif %}
 {% endfor %}
 </div>
+<script src="../../assets/js/custom_categorylist.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 ```
 
 하나하나 보겠습니다.
@@ -108,6 +118,19 @@ layout: archive
 ```
 
 ​	크게 보면 위와 같습니다. 버튼을 누르면 js 를 통해 `categorylist-hide` 클래스를 추가하거나 없앱니다. 해당 클래스가 있으면 `display: none` css 가 적용됩니다.
+
+**div `categorylist-series` 태그 안**
+
+​	기본적으로 모든 `post` 를 순회하면서 `sries` 가 있으면 해당 `sries` 중 첫번째 시리즈를 `{% include archive-series.html type=entries_layout %}` 로 출력하는 형태입니다. 변수 할당이 힘들어서 자바 쓰고 싶네요.
+
+**js 사용**
+
+```html
+<script src="../../assets/js/custom_categorylist.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+```
+
+최상위 문서인 `default.html` 에 사용하고 싶은데 그러면 충돌이 나서 포스트의 `toc` 가 현재 위치를 잡아주지 못하는 문제가 있었습니다. 그래서 따로 여기에서만 다시 jquery 를 넣어주겠습니다.
 
 ## _sass/minimal-mistakes/\_custom_categorylist.scss
 
@@ -167,18 +190,6 @@ $('.button-series').click(function(){
 
 ​	jQuery 입니다. 버튼을 누르면 class 를 추가하고 삭제하는 간단한 기능입니다.
 
-## _layout/default.html
-
-```html
-...
-</body>
-  <script src="../../assets/js/custom_categorylist.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-</html>
-```
-
-이번에는 가장 상위 레이아웃인 `default.html` 에 `js` 를 추가해줬습니다.
-
 ## _include/archive_series.html
 
 ```html
@@ -215,9 +226,5 @@ $('.button-series').click(function(){
 ```
 
 ​	`_layout/categorylist.html` 을 보면 포스트는 `archive_single.html` 을 사용하는데, 해당 파일은 포스트의 제목을 나타냅니다. 시리즈는 시리즈 제목으로 출력될 수 있도록 `archive_series.html` 를 만들어서 적용합니다. (이미 `categorylist.html` 에 적용되어있습니다.)
-
-
-
-
 
 {% endraw %}

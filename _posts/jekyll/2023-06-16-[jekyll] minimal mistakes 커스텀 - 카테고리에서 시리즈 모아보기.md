@@ -89,7 +89,6 @@ layout: archive
         {% endif %}
 {% endfor %}
 </div>
-<script src="../../assets/js/custom_categorylist.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 ```
 
@@ -126,11 +125,23 @@ layout: archive
 **js 사용**
 
 ```html
-<script src="../../assets/js/custom_categorylist.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 ```
 
 최상위 문서인 `default.html` 에 사용하고 싶은데 그러면 충돌이 나서 포스트의 `toc` 가 현재 위치를 잡아주지 못하는 문제가 있었습니다. 그래서 따로 여기에서만 다시 jquery 를 넣어주겠습니다.
+
+### _layout/default.html
+
+```html
+...
+	</body>
+<script src="../../assets/js/custom_categorylist.js"></script>
+</html>
+```
+
+그런데 `custom_categorylist.js` 파일은 `default.html` 에 적용해야 적용되더군요. 저는 프론트엔드가 싫습니다.
+
+
 
 ## _sass/minimal-mistakes/\_custom_categorylist.scss
 

@@ -38,10 +38,16 @@ layout: archive
                 {% for post in category.last %}
                     {% if post.series %}
                         {% if currentSeries != post.series %}
-                            {% if currentSeries != "" %}
+                            {% if currentSeries == "" %}
                                 {% assign currentSeries = post.series %}         
                             {% else %}
-                                {% include archive-series.html type=entries_layout %}
+                                {% assign break = true %}
+                                {% for post in reversedPosts %}
+                                    {% if currentSeries == post.series and break %}
+                                        {% include archive-series.html type=entries_layout %}
+                                        {% assign break = false %}
+                                    {% endif %}
+                                {% endfor %}
                             {% endif %}
                         {% endif %}
                         {% assign currentSeries = post.series %}
@@ -55,6 +61,8 @@ layout: archive
                             {% assign break = false %}
                         {% endif %}
                     {% endfor %}
+                {% else %}
+                    시리즈가 없습니다.
                 {% endif %}
                 </div>
                 <a href="#page-title" class="back-to-top">{{ site.data.ui-text[site.locale].back_to_top | default: 'Back to Top' }} &uarr;</a>

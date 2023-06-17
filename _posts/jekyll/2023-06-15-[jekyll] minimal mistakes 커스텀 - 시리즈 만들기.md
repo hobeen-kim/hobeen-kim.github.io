@@ -42,8 +42,7 @@ tag: ["jekyll", "liquid", "minimal mistakes"]
 <span class="collapsible">목록보기</span>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.7.0.js" integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM=" crossorigin="anonymous"></script>
-<script src="../../assets/js/custom.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 ```
 
 위에서부터 한번 살펴보겠습니다.
@@ -191,6 +190,17 @@ a:visited{
 ![image-20230616005313483](../../images/2023-06-15-[jekyll] minimal mistakes 커스텀 - 시리즈 만들기/image-20230616005313483.png)
 
 `_sass\minimal-mistakes.scss` 에서 아까 만든 custom 을 넣어줘야 합니다. `@import "minimal-mistakes/custom";` 라고 넣어줍니다.
+
+## _layout/default.html 에 js 파일 추가
+
+```html
+...
+  </body>
+<script src="../../assets/js/custom_categorylist.js"></script>
+</html>
+```
+
+`series.html` 에 추가하면 `js` 가 정상작동하지 않아서 `default.html` 에 넣어주겠습니다. jquery 와 연결하는 스크립트를 여기에 넣으면 충돌이 있어서 그거는 `series.html` 에 넣었습니다.
 
 # 사용 방법
 

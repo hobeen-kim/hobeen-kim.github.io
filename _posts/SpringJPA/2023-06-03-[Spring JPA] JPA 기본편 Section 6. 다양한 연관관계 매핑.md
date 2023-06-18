@@ -1,6 +1,7 @@
 ---
-categories: "JPA(inflearn)"
+categories: "springJPA"
 tag: ["1:N", "N:1", "N:M", "1:1", "association"]
+series: "자바 ORM 표준 JPA 프로그래밍 - 기본편"
 ---
 
 <div class="notice--danger">

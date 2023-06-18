@@ -30,8 +30,8 @@ docs:
         url: /categories/socceranalyst
       - title: "inflean"
         url: /categories/inflean
-      - title: "JPA(inflean)"
-        url: /categories/jpa(inflean)
+      - title: "springJPA"
+        url: /categories/springjpa
       - title: "network(inflean)"
         url: /categories/network(inflean)
       - title: "review"

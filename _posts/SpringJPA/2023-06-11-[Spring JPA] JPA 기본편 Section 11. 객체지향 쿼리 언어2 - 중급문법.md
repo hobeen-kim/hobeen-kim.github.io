@@ -1,7 +1,7 @@
 ---
-categories: "JPA(inflearn)"
+categories: "springJPA"
 tag: ["n+1", "jpql", "query", "paging", "join", "subquery", "case"]
-
+series: "자바 ORM 표준 JPA 프로그래밍 - 기본편"
 ---
 
 <div class="notice--danger">

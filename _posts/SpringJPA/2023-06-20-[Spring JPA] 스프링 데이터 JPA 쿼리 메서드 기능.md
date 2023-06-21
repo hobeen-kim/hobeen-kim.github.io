@@ -1,6 +1,6 @@
 ---
 categories: "springJPA"
-tag: ["queryMethod"]
+tag: ["queryMethod", "NamedQuery", "@Query", "Paging", "Page", "Slice", "Bulk", "@EntityGraph", "Hint"]
 ---
 
 # 메소드 이름으로 쿼리 생성

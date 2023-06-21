@@ -151,7 +151,7 @@ try{
 
 ![image-20230601010305010](../../images/2023-06-01-[Spring JPA] JPA 기본편 Section 3. 영속성 관리 - 내부 동작 방식/image-20230601010305010.png)
 
-**`em.persist(member)`를 호출하면 영속성 컨텍스트에 SQL 문이 생성되어 쓰기 지연 SQL 저장소에 저장됩니다.** 그리고 commit 하는 순간 flush 로 sql 문이 날라가고 commit 됩니다.최적화를 위해 최대한 한번에 모아서 보내는 겁니다.
+**`em.persist(member)`를 호출하면 영속성 컨텍스트에 SQL 문이 생성되어 쓰기 지연 SQL 저장소에 저장됩니다.** 그리고 commit 하는 순간 flush 로 sql 문이 날라가고 commit 됩니다. 최적화를 위해 최대한 한번에 모아서 보내는 겁니다.
 
 **변경 감지(Dirty Checking)**
 

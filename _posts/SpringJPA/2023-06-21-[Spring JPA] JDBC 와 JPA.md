@@ -248,6 +248,93 @@ public class JpaBasicConfig {
 
 결론적으로, 동일한 `EntityManager` 가 아니기 때문에 `System.out.println("member1 == member2 : " + (member1 == member2));` 은 `false` 를 출력합니다.
 
+비슷한 예시인데 아래 코드를 보겠습니다.
+
+```java
+@Configuration
+public class JpaBasicConfig {
+    private EntityManager em;
+    private EntityTransaction tx;
+
+    @Bean
+    public CommandLineRunner testJpaBasicRunner(EntityManagerFactory emf) {
+        this.em = emf.createEntityManager();
+        this.tx = em.getTransaction();
+
+        return args -> {
+            save();
+        };
+    }
+
+    private void save() {
+        tx.begin(); //트랜잭션 시작
+        
+        Member member = new Member("hgd@gmail.com");
+        em.persist(member); //저장
+        tx.commit(); //커밋
+        
+        tx.begin(); //트랜잭션 다시 시작
+        Member findMember = em.find(Member.class, 1L); //조회
+        System.out.println("findMember.getEmail() = " + findMember.getEmail()); //hgd@gmail.com
+
+        System.out.println("member == findMember : " + (member == findMember)); //?
+        
+        tx.commit(); //커밋
+    }
+}
+```
+
+위 코드는 트랜잭션을 커밋하고 다시 시작하는 코드입니다. 하지만 `member == findMember` 는 `true` 인데요. 그 이유는 영속성 컨텍스트가 닫히지 않았기 때문입니다.
+
+그렇다면 아래처럼 `em.clear()` 를 호출하면 어떻게 될까요?
+
+```java
+...
+private void save() {
+    tx.begin(); //트랜잭션 시작
+
+    Member member = new Member("hgd@gmail.com");
+    em.persist(member); //저장
+    tx.commit(); //커밋
+
+	em.clear();
+
+    tx.begin(); //트랜잭션 다시 시작
+    Member findMember = em.find(Member.class, 1L); //조회
+    System.out.println("findMember.getEmail() = " + findMember.getEmail()); //hgd@gmail.com
+
+    System.out.println("member == findMember : " + (member == findMember)); //?
+
+    tx.commit(); //커밋
+}
+```
+
+영속성 컨텍스트는 영속 상태의 엔티티만 관리하고 동일성을 보장합니다. 따라서 `em.clear();` 시점에 `member` 의 영속성이 끝났으므로 `member == findMember` 는 false 가 나옵니다.
+
+그렇다면 em.clear()  이후에도 동일성을 보장하기 위해서는 어떻게 해야 할까요?
+
+```java
+private void save(){
+    tx.begin();
+    Member member = new Member("test1@test.com", "member1", "010-1111-1234");
+    em.persist(member);
+    tx.commit();
+
+    em.clear();
+
+    tx.begin();
+    Member merge = em.merge(member); //merge 를 통해 준영속 상태를 영속 상태로 전환
+    Member findMember = em.find(Member.class, 1L);
+    System.out.println("member == findMember? " + (merge == findMember));
+
+    tx.commit();
+}
+```
+
+위에서 보는 것처럼 `merge()` 로 준영속상태의 `member` 를 다시 영속상태로 전환합니다. `merge == findMember2` 는 `true` 입니다. 주의해야 할 건 `member == findMember` 가 아니라는 점입니다.
+
+`em.merge()` 를 호출하면 `select m from Member m where m.id = ?` 쿼리문이 나갑니다. `member` 의 `id` 는 설정을 한 적이 없는데 어디서 설정된걸까요? **바로 `em.persist(member);` 에서 `member` 를 받아서 해당 객체에 `id` 를 주입합니다.**
+
 ## JPA 를 이용한 회원 수정 및 삭제
 
 ```java

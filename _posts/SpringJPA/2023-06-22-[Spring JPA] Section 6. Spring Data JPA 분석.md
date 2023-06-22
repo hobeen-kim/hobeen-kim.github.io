@@ -1,6 +1,6 @@
 ---
 categories: "springJPA"
-tag: ["custom repository", "auditing", "domain class converter", "web paging and sorting"]
+tag: ["SimpleJpaRepository", "save", "merge"]
 ---
 
 # 스프링 데이터 JPA 분석

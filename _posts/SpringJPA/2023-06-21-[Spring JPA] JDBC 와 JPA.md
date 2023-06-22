@@ -127,7 +127,7 @@ public class MemberRepository {
 
 ![image-20230621150421337](../../images/2023-06-21-[Spring JPA] JDBC/image-20230621150421337.png)
 
-**트랙잭션 관리(PlatformTransactionManager)**
+### 트랙잭션 관리(PlatformTransactionManager)
 
 ​	`PlatformTransactionManager` 는 트랙잭션을 얻는 방법을 추상화한 기술입니다.
 

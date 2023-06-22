@@ -159,7 +159,7 @@ public class Member {
     initialValue = 1, allocationSize = 1) 
 public class Member {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "MEMBER_SEQ_GENERATOR")
     private String id;
 	private String name;
     
@@ -175,6 +175,8 @@ public class Member {
 ​	persist 를 하면 sequence 에서 **call next value for MEMBER_SEQ 쿼리가 넘어가고 해당 id 값을 DB 내 MEMBER_SEQ_GENERATOR 테이블에서 받아서 영속성 컨텍스트에 저장됩니다.** IDENTITY 와 다르게 아직 DB insert Query 는 날라가지 않습니다.
 
 ​	allocationSize 가 50 이면 미리 id 값을 50개를 영속성 컨텍스트에 저장하고 사용합니다. 해당 시점에 DB 의 MEMBER_SEQ 값 51 이 되어있습니다. 따라서 50개를 사용하기 전까지 call next value 쿼리를 보내지 않습니다.
+
+> H2 DB 에서 allocationSize 를 50 으로 두고 `persist()` 를 2번 이상하게 되면 (ex. 5개) `call next value for member_seq` 가 2번 호출되게 됩니다. H2 DB에서는 최초 call next value 호출에 1을 return 하고, 그 이후부터 50 씩 더하기 때문입니다. 만약 1개만 `persist()` 를 하면 `call next value for member_seq` 는 1번만 호출됩니다.
 
 **TABLE 전략**
 

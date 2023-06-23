@@ -211,7 +211,7 @@ public class JpaBasicConfig {
 
 `flush()` 는 커밋시점이 아니어도 호출할 수 있습니다. **`flush()` 를 중간에 호출하게 되면 쓰기 지연 SQL 저장소에 있는 모든 쿼리문이 DB 로 보내지게 됩니다. 이 때 1차 캐시는 그대로 남아있습니다.** 예를 들어서 **JPQL 쿼리를 실행되는 경우**, 해당 쿼리가 데이터베이스에서 실제로 실행되기 때문에 그전에 변경사항 동기화를 위해 자동적으로 쿼리문 이전에 `flush()` 가 실행됩니다.
 
-`System.out.println("member == findMember : " + (member == findMember));` 의 값은 `true` 입니다. **동일한 `EntityManager` 에서는 같은 ID 에 대해서 동일한 엔티티 인스턴스를반환합니다.** 이러한 동작 방식은 JPA의 **'Identity Scope'** 라는 개념을 구현한 것입니다. 이 개념은 같은 ID의 엔티티에 대해서는 같은 `EntityManager` 내에서 항상 같은 인스턴스를 반환하도록 보장합니다. 이로 인해 애플리케이션 로직을 간단하게 작성할 수 있으며, 불필요한 데이터베이스 접근을 줄여 성능을 향상시킬 수 있습니다.
+`System.out.println("member == findMember : " + (member == findMember));` 의 값은 `true` 입니다. **동일한 `EntityManager` 에서는 같은 ID 에 대해서 동일한 엔티티 인스턴스를 반환합니다.** 이러한 동작 방식은 JPA의 **'Identity Scope'** 라는 개념을 구현한 것입니다. 이 개념은 같은 ID의 엔티티에 대해서는 같은 `EntityManager` 내에서 항상 같은 인스턴스를 반환하도록 보장합니다. 이로 인해 애플리케이션 로직을 간단하게 작성할 수 있으며, 불필요한 데이터베이스 접근을 줄여 성능을 향상시킬 수 있습니다.
 
 그렇다면 아래 로직은 어떨까요?
 

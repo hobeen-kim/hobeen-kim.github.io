@@ -24,6 +24,8 @@
         <a href="{{ post.url | relative_url }}" rel="permalink">{{ title }}</a>
       {% endif %}
     </h2>
+    {{ post.description }}
     {% include page__meta.html type=include.type %}
+    {% include post__tags.html %}
   </article>
 </div>

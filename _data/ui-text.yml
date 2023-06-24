@@ -594,6 +594,7 @@ ne-NP:
 # Korean
 # ------
 ko: &DEFAULT_KO
+  category                   : "카테고리"
   skip_links                 :
   skip_primary_nav           :
   skip_content               :

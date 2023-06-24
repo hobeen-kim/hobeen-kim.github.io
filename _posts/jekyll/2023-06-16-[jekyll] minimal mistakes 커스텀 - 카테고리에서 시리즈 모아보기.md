@@ -23,11 +23,11 @@ layout: archive
 
 {{content}}
 <div class="button-container">
-<span class="button-posts selected">{{ site.data.ui-text[site.locale].recent_posts | default: "Recent Posts" }}</span>
-<span class="button-series">시리즈</span>
+<span class="button-first selected">{{ site.data.ui-text[site.locale].recent_posts | default: "Recent Posts" }}</span>
+<span class="button-second">시리즈</span>
 </div>
 <hr/>
-<div class="categorylist-posts">
+<div class="toggle-first">
 {% assign entries_layout = page.entries_layout | default: 'list' %}
 {% for category in site.categories %}
     {% assign category_name = category[0] | downcase %}
@@ -44,7 +44,7 @@ layout: archive
     {% endif %}
 {% endfor %}
 </div>
-<div class="categorylist-series categorylist-hide">
+<div class="toggle-second toggle-hide">
     {% assign entries_layout = page.entries_layout | default: 'list' %}
     {% for category in site.categories %}
         {% assign category_name = category[0] | downcase %}
@@ -98,8 +98,8 @@ layout: archive
 
 ```html
 <div class="button-container">
-<span class="button-posts selected">{{ site.data.ui-text[site.locale].recent_posts | default: "Recent Posts" }}</span>
-<span class="button-series">시리즈</span>
+<span class="button-first selected">{{ site.data.ui-text[site.locale].recent_posts | default: "Recent Posts" }}</span>
+<span class="button-second">시리즈</span>
 </div>
 ```
 
@@ -108,17 +108,17 @@ layout: archive
 **포스트 및 시리즈**
 
 ```html
-<div class="categorylist-posts">
+<div class="toggle-first">
 	<!--포스트-->
 </div>
-<div class="categorylist-series categorylist-hide">
+<div class="toggle-second toggle-hide">
     <!--시리즈-->
 </div>
 ```
 
-​	크게 보면 위와 같습니다. 버튼을 누르면 js 를 통해 `categorylist-hide` 클래스를 추가하거나 없앱니다. 해당 클래스가 있으면 `display: none` css 가 적용됩니다.
+​	크게 보면 위와 같습니다. 버튼을 누르면 js 를 통해 `toggle-hide` 클래스를 추가하거나 없앱니다. 해당 클래스가 있으면 `display: none` css 가 적용됩니다.
 
-**div `categorylist-series` 태그 안**
+**div `toggle-second` 태그 안**
 
 ​	기본적으로 모든 `post` 를 순회하면서 `sries` 가 있으면 해당 `sries` 중 첫번째 시리즈를 `{% include archive-series.html type=entries_layout %}` 로 출력하는 형태입니다. 변수 할당이 힘들어서 자바 쓰고 싶네요.
 
@@ -155,22 +155,22 @@ layout: archive
     margin-bottom : 0.5rem;
 }
 
-.button-posts{
+.button-first{
     margin-right : 1rem;
     cursor: pointer;
 }
 
-.button-series{
+.button-second{
     margin-right : 1rem;
     cursor: pointer;
 }
 
-.categorylist-hide {
+.toggle-hide {
     display: none;
 }
 ```
 
-​	버튼을 눌렀을 때 `.selected` 와 `.categorylist-hide` 가 설정되거나 제거됩니다. `$link-color` 는 `_sass/minimal-mistakes/skins` 에서 해당되는 스킨의 `scss` 파일에 있는 전역변수입니다. 제 스킨은 현재 dark 입니다. (근데 dark 가 아니라 곰팡이 핀 죽 색깔같습니다.)
+​	버튼을 눌렀을 때 `.selected` 와 `.toggle-hide` 가 설정되거나 제거됩니다. `$link-color` 는 `_sass/minimal-mistakes/skins` 에서 해당되는 스킨의 `scss` 파일에 있는 전역변수입니다. 제 스킨은 현재 dark 입니다. (근데 dark 가 아니라 곰팡이 핀 죽 색깔같습니다.)
 
 ​	`scss` 를 새로 작성했다면 `_sass\minimal-mistakes.scss` 에 추가해줘야 합니다.
 
@@ -184,18 +184,18 @@ layout: archive
 ## assets\js\custom_categorylist.js
 
 ```js
-$('.button-posts').click(function(){
+$('.button-first').click(function(){
     $(this).addClass('selected');
-    $('.button-series').removeClass('selected');
-    $('.categorylist-series').addClass('categorylist-hide');
-    $('.categorylist-posts').removeClass('categorylist-hide');
+    $('.button-second').removeClass('selected');
+    $('.toggle-second').addClass('toggle-hide');
+    $('.toggle-first').removeClass('toggle-hide');
 });
 
-$('.button-series').click(function(){
+$('.button-second').click(function(){
     $(this).addClass('selected');
-    $('.button-posts').removeClass('selected');
-    $('.categorylist-posts').addClass('categorylist-hide');
-    $('.categorylist-series').removeClass('categorylist-hide');
+    $('.button-first').removeClass('selected');
+    $('.toggle-first').addClass('toggle-hide');
+    $('.toggle-second').removeClass('toggle-hide');
 });
 ```
 

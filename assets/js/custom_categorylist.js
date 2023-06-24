@@ -1,13 +1,13 @@
-$('.button-posts').click(function(){
+$('.button-first').click(function(){
     $(this).addClass('selected');
-    $('.button-series').removeClass('selected');
-    $('.categorylist-series').addClass('categorylist-hide');
-    $('.categorylist-posts').removeClass('categorylist-hide');
+    $('.button-second').removeClass('selected');
+    $('.toggle-second').addClass('toggle-hide');
+    $('.toggle-first').removeClass('toggle-hide');
 });
 
-$('.button-series').click(function(){
+$('.button-second').click(function(){
     $(this).addClass('selected');
-    $('.button-posts').removeClass('selected');
-    $('.categorylist-posts').addClass('categorylist-hide');
-    $('.categorylist-series').removeClass('categorylist-hide');
+    $('.button-first').removeClass('selected');
+    $('.toggle-first').addClass('toggle-hide');
+    $('.toggle-second').removeClass('toggle-hide');
 });

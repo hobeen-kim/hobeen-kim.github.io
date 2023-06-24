@@ -4,11 +4,11 @@ layout: archive
 
 {{content}}
 <div class="button-container">
-<span class="button-posts selected">{{ site.data.ui-text[site.locale].recent_posts | default: "Recent Posts" }}</span>
-<span class="button-series">시리즈</span>
+<span class="button-first selected">{{ site.data.ui-text[site.locale].recent_posts | default: "Recent Posts" }}</span>
+<span class="button-second">시리즈</span>
 </div>
 <hr/>
-<div class="categorylist-posts">
+<div class="toggle-first">
 {% assign entries_layout = page.entries_layout | default: 'list' %}
 {% for category in site.categories %}
     {% assign category_name = category[0] | downcase %}
@@ -25,7 +25,7 @@ layout: archive
     {% endif %}
 {% endfor %}
 </div>
-<div class="categorylist-series categorylist-hide">
+<div class="toggle-second toggle-hide">
     {% assign entries_layout = page.entries_layout | default: 'list' %}
     {% for category in site.categories %}
         {% assign category_name = category[0] | downcase %}

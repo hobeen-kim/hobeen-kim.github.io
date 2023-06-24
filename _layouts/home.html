@@ -24,7 +24,7 @@ layout: archive
         {% if category[1].size == i %}
           <li>
             <a href="/{{ category[0] }}" class="custom-category-a">
-              <img src="../assets/images/{{ category[0] }}.jpg" alt="사진영역" class="custom-category-img"/>
+              <img src="../assets/images/{{ category[0] }}/{{ category[0] }}.jpg" alt="사진영역" class="custom-category-img"/>
             </a>
             <a href="/{{ category[0] }}"  class="custom-category-a-text">
               <strong>{{ category[0] }}</strong> 
@@ -48,7 +48,9 @@ layout: archive
   {% assign entries_layout = page.entries_layout | default: 'list' %}
   <div class="entries-{{ entries_layout }}">
     {% for post in posts %}
-      {% include archive-single.html type=entries_layout %}
+      {% if post.layout == "single" %}
+        {% include archive-single.html type="grid" %}
+      {% endif %}
     {% endfor %}
   </div>
 

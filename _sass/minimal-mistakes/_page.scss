@@ -88,12 +88,24 @@ body {
 }
 
 .page__content {
+
+  /* custom */
+  h1{
+    border-bottom: 1px solid $border-color;
+    padding-bottom: 0.5em;
+    margin-top: 3rem;
+  }
+  /* endcustom */
+
   h2 {
     padding-bottom: 0.5em;
     border-bottom: 1px solid $border-color;
   }
 
 	h1, h2, h3, h4, h5, h6 {
+    /* custom */
+    color: $link-color;
+    /* endcustom */
 		.header-link {
 			position: relative;
 			left: 0.5em;

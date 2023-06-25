@@ -51,7 +51,7 @@
 }
 
 .custom-category-img{
-    width: 100%;
+    width: 240px;
     height: 160px;
 }
 
@@ -71,6 +71,8 @@
     margin-right: 1rem;
     width: 240px;
     height: 160px;
+    min-width: 240px;
+    min-height: 160px;
 }
 
 

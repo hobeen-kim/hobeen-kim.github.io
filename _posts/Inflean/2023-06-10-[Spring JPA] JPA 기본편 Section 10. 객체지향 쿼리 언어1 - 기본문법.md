@@ -1,12 +1,10 @@
 ---
-categories: "springJPA"
+categories: "inflean"
 tag: ["projection", "jpql", "query", "paging", "join", "subquery", "case"]
 series: "자바 ORM 표준 JPA 프로그래밍 - 기본편"
+title: "[JPA 기본편] Section 10. 객체지향 쿼리 언어1 - 기본문법"
+discription: "Section 10. '객체지향 쿼리 언어1 - 기본문법' 강의 내용 요약입니다."
 ---
-
-<div class="notice--danger">
-    <b>인프런 강의 내용입니다.</b><br/><a href="https://www.inflearn.com/course/ORM-JPA-Basic/dashboard">자바 ORM 표준 JPA 프로그래밍 - 기본편</a>
-</div>
 
 # JPQL 소개
 

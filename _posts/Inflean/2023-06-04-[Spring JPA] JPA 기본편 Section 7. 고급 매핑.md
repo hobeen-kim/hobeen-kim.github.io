@@ -1,12 +1,11 @@
 ---
-categories: "springJPA"
+categories: "inflean"
 tag: ["상속관계 매핑", "@Inheritance", "@MappedSuperclass"]
 series: "자바 ORM 표준 JPA 프로그래밍 - 기본편"
+title: "[JPA 기본편] Section 7. 고급 매핑"
+discription: "Section 7. '고급 매핑' 강의 내용 요약입니다."
 ---
 
-<div class="notice--danger">
-    <b>인프런 강의 내용입니다.</b><br/><a href="https://www.inflearn.com/course/ORM-JPA-Basic/dashboard">자바 ORM 표준 JPA 프로그래밍 - 기본편</a>
-</div>
 # 상속관계 매핑
 
 ​	관계형 데이터베이스는 상속 관계가 없습니다. 하지만 슈퍼타입 서브타입 관계라는 모델링 기법이 객체 상속과 유사합니다. 상속관계 매핑은 객체의 상속과 구조와 DB의 슈퍼타입 서브타입 관계를 매핑하는 것입니다.

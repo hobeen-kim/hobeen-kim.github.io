@@ -1,12 +1,12 @@
 ---
-categories: "springJPA"
+categories: "inflean"
 tag: ["JPA"]
 series: "자바 ORM 표준 JPA 프로그래밍 - 기본편"
+series-discription: "제가 좋아하는 영한님의 '자바 ORM 표준 JPA 프로그래밍 - 기본편' 강의 내용입니다"
+title: "[JPA 기본편] Section 1. JPA 소개"
+discription: "Section 1. 'JPA 소개 강의' 내용 요약입니다."
 ---
 
-<div class="notice--danger">
-    <b>인프런 강의 내용입니다.</b><br/><a href="https://www.inflearn.com/course/ORM-JPA-Basic/dashboard">자바 ORM 표준 JPA 프로그래밍 - 기본편</a>
-</div>
 
 # JPA 소개
 

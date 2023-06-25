@@ -1,12 +1,11 @@
 ---
-categories: "springJPA"
+categories: "inflean"
 tag: ["embedded", "collection", "ElementCollection"]
 series: "자바 ORM 표준 JPA 프로그래밍 - 기본편"
+title: "[JPA 기본편] Section 9. 값 타입"
+discription: "Section 9. '값 타입' 강의 내용 요약입니다."
 ---
 
-<div class="notice--danger">
-    <b>인프런 강의 내용입니다.</b><br/><a href="https://www.inflearn.com/course/ORM-JPA-Basic/dashboard">자바 ORM 표준 JPA 프로그래밍 - 기본편</a>
-</div>
 
 # 기본 값 타입
 

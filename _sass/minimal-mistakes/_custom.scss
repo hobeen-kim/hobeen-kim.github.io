@@ -64,10 +64,22 @@
 .archive-single-item-custom {
     display: flex;
     flex-direction: row;
+    justify-content: space-between;
+}
+
+/* 첫 번째 하위 div. 원하는 크기를 'width' 속성으로 지정하십시오. */
+.archive-single-item-custom > div:first-child {
+    flex: 0 0 auto;  /* 'flex-grow'가 0이므로 추가 공간을 가져가지 않음 */
+    width: 240px;  /* 여기에 원하는 폭을 입력하세요 */
+}
+
+/* 두 번째 하위 div. 남는 공간을 다 가져감 */
+.archive-single-item-custom > div:nth-child(2) {
+    flex: 1 0;  /* 'flex-grow'가 1이므로 남는 공간을 가져감 */
 }
 
 .archive-single-teaser-custom{
-    margin-top: 2rem;
+    margin-top: 2.6rem;
     margin-right: 1rem;
     width: 240px;
     height: 160px;
@@ -79,5 +91,19 @@
 .archive-single-img-custom{
     width: 100%;
     height: 100%;
+}
+
+.archive-single-titleDate-custom{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.archive-single-date-custom{
+    margin-top: 2.6rem;
+}
+
+.post-tags-custom{
+    font-size: 0.8em;
 }
   

@@ -1,6 +1,9 @@
 ---
-categories: "springJPA"
+categories: "inflean"
 tag: ["custom repository", "auditing", "domain class converter", "web paging and sorting"]
+series: "실전! 스프링 데이터 JPA"
+title: "[Spring JPA] Section 5. 확장 기능"
+description: "Section 5. '확장 기능' 내용 요약입니다."
 ---
 
 # 사용자 정의 리포지토리 구현

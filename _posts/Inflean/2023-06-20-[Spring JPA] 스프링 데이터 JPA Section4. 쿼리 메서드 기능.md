@@ -1,7 +1,13 @@
 ---
-categories: "springJPA"
+categories: "inflean"
 tag: ["queryMethod", "NamedQuery", "@Query", "Paging", "Page", "Slice", "Bulk", "@EntityGraph", "Hint"]
+series-description: "인프런 영한님의 '실전! 스프링 데이터 JPA' 강의 내용입니다"
+series-link: "https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81-%EB%8D%B0%EC%9D%B4%ED%84%B0-JPA-%EC%8B%A4%EC%A0%84/dashboard"
+series: "실전! 스프링 데이터 JPA"
+title: "[Spring JPA] Section 4. 쿼리 메서드 기능"
+description: "Section 4. '쿼리 메서드 기능' 내용 요약입니다."
 ---
+*Section 4 이전 내용은 정리할 게 없어서 안적었습니다.*
 
 # 메소드 이름으로 쿼리 생성
 

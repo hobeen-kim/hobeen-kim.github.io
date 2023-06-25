@@ -36,9 +36,14 @@
           {% include page__meta.html type=include.type %}
         </div>
       </div>
-      
       <div>{{ post.series-discription }}</div>
-      <div class="archive-series-count-custom">{{ include.count }} post</div>
+      
+      <div class="archive-series-count-custom">
+        {% if post.series-link %}
+        <a href="{{ post.series-link }}">관련 링크 이동 </a>
+        {% endif %}
+        <span> · {{ include.count }} post</span>
+      </div>
     </div>
   </article>
 </div>

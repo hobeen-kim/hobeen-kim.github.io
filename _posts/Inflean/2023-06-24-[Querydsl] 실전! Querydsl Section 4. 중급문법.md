@@ -3,6 +3,8 @@ categories: "springJPA"
 tag: ["Querydsl", "projection", "@QueryProjection", "BooleanBuilder", "동적 쿼리", "bulk", "SQL function"]
 description: "실전! Querydsl 강의 Section 4 내용입니다."
 series: "실전! Querydsl"
+title: "[Querydsl] 실전! Querydsl Section 4. 중급문법"
+
 ---
 
 # 프로젝션과 결과 반환 

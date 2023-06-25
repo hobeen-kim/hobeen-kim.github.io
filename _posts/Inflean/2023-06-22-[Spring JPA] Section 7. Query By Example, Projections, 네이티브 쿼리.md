@@ -1,5 +1,5 @@
 ---
-categories: "inflean"
+categories: "inflearn"
 tag: ["Query By Example", "Projections", "Native Query"]
 series: "실전! 스프링 데이터 JPA"
 title: "[Spring JPA] Section 7. Query By Example, Projections, 네이티브 쿼리"

@@ -28,12 +28,12 @@ docs:
         url: /categories/datastructure  
       - title: "socceranalyst"
         url: /categories/socceranalyst
-      - title: "inflean"
-        url: /categories/inflean
+      - title: "inflearn"
+        url: /categories/inflearn
       - title: "springJPA"
         url: /categories/springjpa
-      - title: "network(inflean)"
-        url: /categories/network(inflean)
+      - title: "network"
+        url: /categories/network
       - title: "review"
         url: /categories/review
       - title: "jekyll"

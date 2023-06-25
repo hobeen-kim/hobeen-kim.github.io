@@ -1,11 +1,8 @@
 ---
 categories: "inflearn"
 tag: "inflearn"
-toc: true
-toc_sticky: true
-author_profile: false
-sidebar: 
-    nav: "docs"
+series: "스프링 MVC 1편 - 백엔드 웹 개발 핵심 기술"
+
 ---
 
 # 1. 로깅 간단히 알아보기

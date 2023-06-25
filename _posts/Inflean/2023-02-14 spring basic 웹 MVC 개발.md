@@ -1,11 +1,7 @@
 ---
 categories: "inflearn"
 tag: "inflearn"
-toc: true
-toc_sticky: true
-author_profile: false
-sidebar: 
-    nav: "docs"
+series: "스프링 입문 - 코드로 배우는 스프링 부트, 웹 MVC, DB 접근 기술"
 ---
 
 # 0. 홈화면 추가

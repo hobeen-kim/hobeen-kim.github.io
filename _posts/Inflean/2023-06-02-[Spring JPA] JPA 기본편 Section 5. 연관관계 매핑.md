@@ -1,5 +1,5 @@
 ---
-categories: "inflean"
+categories: "inflearn"
 tag: ["mapping","association"]
 series: "자바 ORM 표준 JPA 프로그래밍 - 기본편"
 title: "[JPA 기본편] Section 5. 연관관계 매핑"

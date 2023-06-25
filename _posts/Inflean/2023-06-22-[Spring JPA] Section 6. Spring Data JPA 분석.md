@@ -1,5 +1,5 @@
 ---
-categories: "inflean"
+categories: "inflearn"
 tag: ["SimpleJpaRepository", "save", "merge"]
 series: "실전! 스프링 데이터 JPA"
 title: "[Spring JPA] Section 6. Spring Data JPA 분석"

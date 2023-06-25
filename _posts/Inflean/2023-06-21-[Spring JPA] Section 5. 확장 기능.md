@@ -1,5 +1,5 @@
 ---
-categories: "inflean"
+categories: "inflearn"
 tag: ["custom repository", "auditing", "domain class converter", "web paging and sorting"]
 series: "실전! 스프링 데이터 JPA"
 title: "[Spring JPA] Section 5. 확장 기능"

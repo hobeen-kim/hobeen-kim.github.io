@@ -1,5 +1,5 @@
 ---
-categories: "inflean"
+categories: "inflearn"
 tag: ["JPA"]
 series: "자바 ORM 표준 JPA 프로그래밍 - 기본편"
 series-discription: "제가 좋아하는 영한님의 '자바 ORM 표준 JPA 프로그래밍 - 기본편' 강의 내용입니다"

@@ -1,5 +1,5 @@
 ---
-categories: "inflean"
+categories: "inflearn"
 tag: ["n+1", "jpql", "query", "paging", "join", "subquery", "case"]
 series: "자바 ORM 표준 JPA 프로그래밍 - 기본편"
 title: "[JPA 기본편] Section 11. 객체지향 쿼리 언어2 - 중급문법"

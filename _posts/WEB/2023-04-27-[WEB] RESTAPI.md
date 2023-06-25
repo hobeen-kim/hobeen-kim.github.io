@@ -139,7 +139,7 @@ https://api.contoso.com/v1.0/people/7011042402/inbox
 >
 > Where "server321" is the service-allocated server name.
 
-Inflean Dowon Lee 님의 REST API 개발에서 공부한 내용이네요!
+inflearn Dowon Lee 님의 REST API 개발에서 공부한 내용이네요!
 
 다음과 같은 내용 있습니다. (표준 형식)
 
@@ -163,7 +163,7 @@ Inflean Dowon Lee 님의 REST API 개발에서 공부한 내용이네요!
 
 # Richardson Maturity Model
 
-*\* inflean 강의 내용 중 일부입니다.*
+*\* inflearn 강의 내용 중 일부입니다.*
 
 ![image-20230427165445129](../../images/2023-04-27-[WEB] RESTAPI/image-20230427165445129.png)
 

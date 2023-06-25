@@ -1,11 +1,9 @@
 ---
 categories: "inflearn"
 tag: ["springboot", "spring", "restfulapi"]
+series: "Spring Boot를 이용한 RESTful Web Services 개발"
+series-link: "https://www.inflearn.com/course/spring-boot-restful-web-services/dashboard"
 ---
-
-
-
-
 
 이번 강의는 Dowon Lee 님의 "Spring Boot를 이용한 RESTful Web Services 개발" 입니다.
 
@@ -37,7 +35,7 @@ public ResponseEntity<User> createUser(@RequestBody User user){
 
 - 다음과 같이 URI location 을 만들어준 뒤, ResponseEntity.created() 의 파라미터로 넘겨주어서 201 Created 응답 header 에 넣어줍니다.
 
-  ![image-20230426150020802](../../images/2023-04-26-[Inflean] Spring Boot를 이용한 RESTful Web Services 개발/image-20230426150020802.png)
+  ![image-20230426150020802](../../images/2023-04-26-[inflearn] Spring Boot를 이용한 RESTful Web Services 개발/image-20230426150020802.png)
 
 # 2. custom Exceptoin 의 응답코드 설정
 
@@ -162,7 +160,7 @@ public class HelloWorldController {
 
 클라이언트측에서 locale 정보를 헤더로 변경했을 때 다음과 같이 반환받습니다.
 
-![image-20230426162604741](../../images/2023-04-26-[Inflean] Spring Boot를 이용한 RESTful Web Services 개발/image-20230426162604741.png)
+![image-20230426162604741](../../images/2023-04-26-[inflearn] Spring Boot를 이용한 RESTful Web Services 개발/image-20230426162604741.png)
 
 
 
@@ -220,7 +218,7 @@ public class User {
 
 **결과**
 
-![image-20230426164432451](../../images/2023-04-26-[Inflean] Spring Boot를 이용한 RESTful Web Services 개발/image-20230426164432451.png)
+![image-20230426164432451](../../images/2023-04-26-[inflearn] Spring Boot를 이용한 RESTful Web Services 개발/image-20230426164432451.png)
 
 - password, ssn 값이 안넘어오는 것을 볼 수 있습니다.
 
@@ -228,7 +226,7 @@ public class User {
 >
 > 1. 클라이언트 측으로 넘어가지는 않지만 해당 도메인(User)이 controller 나 dao 로 넘어갈 때(서버 내에서 사용될 때) 값은 여전히 넘어갑니다.
 >
->    ![image-20230426164627910](../../images/2023-04-26-[Inflean] Spring Boot를 이용한 RESTful Web Services 개발/image-20230426164627910.png)
+>    ![image-20230426164627910](../../images/2023-04-26-[inflearn] Spring Boot를 이용한 RESTful Web Services 개발/image-20230426164627910.png)
 >
 > 2. 따라서 Dto 를 사용하는 방법이 아직까지는 더 나아보입니다.
 
@@ -346,7 +344,7 @@ public class AdminUserController {
 
 카카오의 버전 관리 예시입니다.
 
-![image-20230426213351783](../../images/2023-04-26-[Inflean] Spring Boot를 이용한 RESTful Web Services 개발/image-20230426213351783.png)
+![image-20230426213351783](../../images/2023-04-26-[inflearn] Spring Boot를 이용한 RESTful Web Services 개발/image-20230426213351783.png)
 
 - url 을 잘 보면, `v2` 라고 되어있습니다. 이렇게 API 에 직접 버전을 표시해주어 버전관리가 가능합니다.
 
@@ -507,7 +505,7 @@ public class UserController {
 - `model.add(linkTo.withRel("all-users"));` user 정보가 담긴 model 에 link 를 추가합니다. 해당 링크의 이름은 `all-users` 입니다.
 - 결과는 아래와 같습니다.
 
-![image-20230427114537496](../../images/2023-04-26-[Inflean] Spring Boot를 이용한 RESTful Web Services 개발/image-20230427114537496.png)
+![image-20230427114537496](../../images/2023-04-26-[inflearn] Spring Boot를 이용한 RESTful Web Services 개발/image-20230427114537496.png)
 
 # 7. Swagger
 
@@ -569,13 +567,13 @@ public class SwaggerConfig {
 
 http://localhost:8088/v2/api-docs
 
-![image-20230427125906264](../../images/2023-04-26-[Inflean] Spring Boot를 이용한 RESTful Web Services 개발/image-20230427125906264.png)
+![image-20230427125906264](../../images/2023-04-26-[inflearn] Spring Boot를 이용한 RESTful Web Services 개발/image-20230427125906264.png)
 
 - swagger 로 나타내지는 정보, tag, 각 api 의 status code 별 응답 등을 볼 수 있습니다.
 
 http://localhost:8088/swagger-ui/index.html#/
 
-![image-20230427125954191](../../images/2023-04-26-[Inflean] Spring Boot를 이용한 RESTful Web Services 개발/image-20230427125954191.png)
+![image-20230427125954191](../../images/2023-04-26-[inflearn] Spring Boot를 이용한 RESTful Web Services 개발/image-20230427125954191.png)
 
 - swagger-ui 로 API Doucmentation 을 만들어서 보기 쉽도록 나타낼 수 있습니다.
 
@@ -635,7 +633,7 @@ public class SwaggerConfig {
 
 다음과 같이 info 가 변경된 것을 확인할 수 있습니다.
 
-![image-20230427133246664](../../images/2023-04-26-[Inflean] Spring Boot를 이용한 RESTful Web Services 개발/image-20230427133246664.png)
+![image-20230427133246664](../../images/2023-04-26-[inflearn] Spring Boot를 이용한 RESTful Web Services 개발/image-20230427133246664.png)
 
 **User**
 
@@ -678,4 +676,4 @@ public class User {
 }
 ```
 
-![image-20230427133347588](../../images/2023-04-26-[Inflean] Spring Boot를 이용한 RESTful Web Services 개발/image-20230427133347588.png)
+![image-20230427133347588](../../images/2023-04-26-[inflearn] Spring Boot를 이용한 RESTful Web Services 개발/image-20230427133347588.png)

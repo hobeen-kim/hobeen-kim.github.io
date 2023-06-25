@@ -1,11 +1,8 @@
 ---
 categories: "inflearn"
 tag: "inflearn"
-toc: true
-toc_sticky: true
-author_profile: false
-sidebar: 
-    nav: "docs"
+series: "스프링 핵심 원리 - 기본편"
+
 ---
 
 # 0. 다양한 의존관계 주입 방법

@@ -1,11 +1,8 @@
 ---
 categories: "inflearn"
 tag: "inflearn"
-toc: true
-toc_sticky: true
-author_profile: false
-sidebar: 
-    nav: "docs"
+series: "스프링 핵심 원리 - 기본편"
+
 ---
 
 # 1. 빈 생명주기 콜백 시작

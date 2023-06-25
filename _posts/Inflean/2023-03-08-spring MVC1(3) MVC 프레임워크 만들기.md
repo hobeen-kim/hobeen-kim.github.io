@@ -1,11 +1,8 @@
 ---
 categories: "inflearn"
 tag: "inflearn"
-toc: true
-toc_sticky: true
-author_profile: false
-sidebar: 
-    nav: "docs"
+series: "스프링 MVC 1편 - 백엔드 웹 개발 핵심 기술"
+
 ---
 
 # 0. 프론트 컨트롤러 패턴 소개

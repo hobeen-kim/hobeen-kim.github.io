@@ -1,11 +1,8 @@
 ---
 categories: "inflearn"
 tag: "inflearn"
-toc: true
-toc_sticky: true
-author_profile: false
-sidebar: 
-    nav: "docs"
+series: "스프링 DB 1편 - 데이터 접근 핵심 원리"
+series-link: "https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81-db-1"
 ---
 
 # 0. H2 데이터베이스 설정

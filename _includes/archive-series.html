@@ -1,29 +1,45 @@
-{% if post.header.teaser %}
-  {% capture teaser %}{{ post.header.teaser }}{% endcapture %}
+{% if post.id %}
+  {% assign series_title = post.series | markdownify | remove: "<p>" | remove: "</p>" %}
 {% else %}
-  {% assign teaser = site.teaser %}
+  {% assign series_title = post.series %}
 {% endif %}
 
 {% if post.id %}
-  {% assign title = post.series | markdownify | remove: "<p>" | remove: "</p>" %}
+  {% assign title = post.title | markdownify | remove: "<p>" | remove: "</p>" %}
 {% else %}
-  {% assign title = post.series %}
+  {% assign title = post.title %}
 {% endif %}
 
-<div class="{{ include.type | default: 'list' }}__item">
-  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+{% if post.teaser %}
+  {% assign teaser = post.teaser %}
+{% else %}
+  {% assign teaser = post.categories %}
+{% endif %}
+
+<div class="list__item">
+  <article class="archive__item archive-single-item-custom" itemscope itemtype="https://schema.org/CreativeWork">
     {% if include.type == "grid" and teaser %}
-      <div class="archive__item-teaser">
-        <img src="{{ teaser | relative_url }}" alt="">
+      <div class="archive__item-teaser archive-single-teaser-custom">
+        <img src="/assets/images/{{ post.categories }}/{{ teaser }}.jpg" alt="사진 영역" class="archive-single-img-custom">
       </div>
     {% endif %}
-    <h2 class="archive__item-title no_toc" itemprop="headline">
-      {% if post.link %}
-        <a href="{{ post.link }}">{{ title }}</a> <a href="{{ post.url | relative_url }}" rel="permalink"><i class="fas fa-link" aria-hidden="true" title="permalink"></i><span class="sr-only">Permalink</span></a>
-      {% else %}
-        <a href="{{ post.url | relative_url }}" rel="permalink">{{ title }}</a>
-      {% endif %}
-    </h2>
-    {% include page__meta.html type=include.type %}
+    <div class="archive-single-text-custom">
+      <div class="archive-single-titleDate-custom">
+        <h2 class="archive__item-title no_toc" itemprop="headline">
+          {% if post.link %}
+            <a href="{{ post.link }}">{{ series_title }}</a> <a href="{{ post.url | relative_url }}" rel="permalink"><i class="fas fa-link" aria-hidden="true" title="permalink"></i><span class="sr-only">Permalink</span></a>
+          {% else %}
+            <a href="{{ post.url | relative_url }}" rel="permalink">{{ series_title }}</a>
+          {% endif %}
+        </h2>
+        <div class="archive-single-date-custom">
+          {% include page__meta.html type=include.type %}
+        </div>
+      </div>
+      
+      <div>{{ post.series-discription }}</div>
+      <div class="archive-series-count-custom">{{ include.count }} post</div>
+    </div>
   </article>
 </div>
+

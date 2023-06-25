@@ -30,41 +30,43 @@ layout: archive
         {% assign reversedPosts = category.last | reverse %}
         {% assign page_title = page.title | downcase %}
         {% assign currentSeries = "" %}
+        {% assign count = 0 %}
         {% if category_name == page_title %}
-            <section id="{{ category[0] | slugify | downcase }}" class="taxonomy__section">
-                <div class="entries-{{ entries_layout }}">
-                {% for post in category.last %}
-                    {% if post.series %}
-                        {% if currentSeries != post.series %}
-                            {% if currentSeries == "" %}
-                                {% assign currentSeries = post.series %}         
-                            {% else %}
-                                {% assign break = true %}
-                                {% for post in reversedPosts %}
-                                    {% if currentSeries == post.series and break %}
-                                        {% include archive-series.html type=entries_layout %}
-                                        {% assign break = false %}
-                                    {% endif %}
-                                {% endfor %}
-                            {% endif %}
+            <div class="entries-{{ entries_layout }}">
+            {% for post in category.last %}
+                {% if post.series %}
+                    {% assign count = count | plus: 1 %}
+                    {% if currentSeries != post.series %}
+                        {% if currentSeries == "" %}
+                            {% assign currentSeries = post.series %}         
+                        {% else %}
+                            {% assign break = true %}
+                            {% for post in reversedPosts %}
+                                {% if currentSeries == post.series and break %}
+                                    {% assign count = count | minus: 1 %}
+                                    {% include archive-series.html type="grid" count=count %}
+                                    {% assign count = 1 %}
+                                    {% assign break = false %}
+                                {% endif %}
+                            {% endfor %}
                         {% endif %}
-                        {% assign currentSeries = post.series %}
+                    {% endif %}
+                    {% assign currentSeries = post.series %}
+                {% endif %}
+            {% endfor %}
+            {% if currentSeries != "" %}
+                {% assign break = true %}
+                {% for post in reversedPosts %}
+                    {% if currentSeries == post.series and break %}
+                        {% include archive-series.html type="grid" count=count %}
+                        {% assign break = false %}
                     {% endif %}
                 {% endfor %}
-                {% if currentSeries != "" %}
-                    {% assign break = true %}
-                    {% for post in reversedPosts %}
-                        {% if currentSeries == post.series and break %}
-                            {% include archive-series.html type=entries_layout %}
-                            {% assign break = false %}
-                        {% endif %}
-                    {% endfor %}
-                {% else %}
-                    시리즈가 없습니다.
-                {% endif %}
-                </div>
-                <a href="#page-title" class="back-to-top">{{ site.data.ui-text[site.locale].back_to_top | default: 'Back to Top' }} &uarr;</a>
-            </section>
+            {% else %}
+                시리즈가 없습니다.
+            {% endif %}
+            </div>
+            <a href="#page-title" class="back-to-top">{{ site.data.ui-text[site.locale].back_to_top | default: 'Back to Top' }} &uarr;</a>
         {% endif %}
 {% endfor %}
 </div>

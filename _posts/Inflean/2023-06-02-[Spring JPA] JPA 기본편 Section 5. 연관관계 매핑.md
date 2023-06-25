@@ -3,7 +3,7 @@ categories: "inflearn"
 tag: ["mapping","association"]
 series: "자바 ORM 표준 JPA 프로그래밍 - 기본편"
 title: "[JPA 기본편] Section 5. 연관관계 매핑"
-discription: "Section 5. '연관관계 매핑' 강의 내용 요약입니다."
+description: "Section 5. '연관관계 매핑' 강의 내용 요약입니다."
 ---
 
 # 단방향 연관관계

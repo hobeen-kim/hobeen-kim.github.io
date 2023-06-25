@@ -3,7 +3,7 @@ categories: "inflearn"
 tag: ["1:N", "N:1", "N:M", "1:1", "association"]
 series: "자바 ORM 표준 JPA 프로그래밍 - 기본편"
 title: "[JPA 기본편] Section 6. 다양한 연관관계 매핑"
-discription: "Section 6. '다양한 연관관계 매핑' 강의 내용 요약입니다."
+description: "Section 6. '다양한 연관관계 매핑' 강의 내용 요약입니다."
 ---
 
 # 연관관계 매핑시 고려사항 3가지

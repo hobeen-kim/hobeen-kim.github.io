@@ -3,7 +3,7 @@ categories: "inflearn"
 tag: ["proxy", "lazy", ""]
 series: "자바 ORM 표준 JPA 프로그래밍 - 기본편"
 title: "[JPA 기본편] Section 8. 프록시와 연관관계 관리"
-discription: "Section 8. '프록시와 연관관계 관리' 강의 내용 요약입니다."
+description: "Section 8. '프록시와 연관관계 관리' 강의 내용 요약입니다."
 ---
 
 # 프록시

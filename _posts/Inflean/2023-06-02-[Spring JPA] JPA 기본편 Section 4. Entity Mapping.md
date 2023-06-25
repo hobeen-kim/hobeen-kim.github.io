@@ -3,7 +3,7 @@ categories: "inflearn"
 tag: ["JPA", "JPQL", "Entity Mapping", "Entity", "primary key"]
 series: "자바 ORM 표준 JPA 프로그래밍 - 기본편"
 title: "[JPA 기본편] Section 4. Entity Mapping"
-discription: "Section 4. 'Entity Mapping' 강의 내용 요약입니다."
+description: "Section 4. 'Entity Mapping' 강의 내용 요약입니다."
 ---
 
 # 객체와 테이블 매핑

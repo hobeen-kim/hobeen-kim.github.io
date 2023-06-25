@@ -3,7 +3,7 @@ categories: "inflearn"
 tag: ["JPA", "JPQL", "EntityManager", "EntityManagerFactory"]
 series: "자바 ORM 표준 JPA 프로그래밍 - 기본편"
 title: "[JPA 기본편] Section 2. JPA 시작하기"
-discription: "Section 2. 'JPA 시작하기' 강의 내용 요약입니다."
+description: "Section 2. 'JPA 시작하기' 강의 내용 요약입니다."
 ---
 
 

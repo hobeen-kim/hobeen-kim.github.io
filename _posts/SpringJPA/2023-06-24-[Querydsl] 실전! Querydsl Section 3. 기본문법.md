@@ -1,6 +1,8 @@
 ---
 categories: "springJPA"
 tag: ["Querydsl", "QType", "검색조건", "sort", "paging", "집합", "join", "fetch", "subQuery", "case", "constant", "concat"]
+description: "실전! Querydsl 강의 Section 3 내용입니다."
+series: "실전! Querydsl"
 ---
 
 # JPQL vs Querydsl

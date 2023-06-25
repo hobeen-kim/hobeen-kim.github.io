@@ -1,6 +1,8 @@
 ---
 categories: "springJPA"
-tag: ["Querydsl", "QType", "검색조건", "sort", "paging", "집합", "join", "fetch", "subQuery", "case", "constant", "concat"]
+tag: ["Querydsl", "projection", "@QueryProjection", "BooleanBuilder", "동적 쿼리", "bulk", "SQL function"]
+description: "실전! Querydsl 강의 Section 4 내용입니다."
+series: "실전! Querydsl"
 ---
 
 # 프로젝션과 결과 반환 
@@ -369,3 +371,99 @@ public static BooleanBuilder nullSafeBuilder(Supplier<BooleanExpression> f){
 ```
 
 `nullSafeBuilder()` 메서드를 지정하고, `null` 값이면 그냥 `BooleanBuilder()` 처럼 빈 값을 출력하도록 했습니다. 그러면 모든 조건이 되니까 `BooleanBuilder` 를 계속 이어나갈 수 있습니다.
+
+# 수정, 삭제 벌크 연산
+
+​	벌크 연산은 대량의 데이터를 쿼리 한번으로 수정하는 연산입니다.
+
+```java
+/**
+* 나이가 28 미만인 사람의 이름을 "비회원"으로 변경
+*/
+@Test
+void bulkUpdate() {
+    long count = queryFactory
+            .update(member)
+            .set(member.username, "비회원")
+            .where(member.age.lt(28))
+            .execute();
+
+    em.flush();
+    em.clear();
+
+    List<Member> result = queryFactory
+            .selectFrom(member)
+            .fetch();
+
+    for (Member member1 : result) {
+        System.out.println("member1 = " + member1);
+    }
+}
+
+/**
+* 회원 나이를 + 1
+*/
+@Test
+public void bulkAdd(){
+    queryFactory
+            .update(member)
+            .set(member.age, member.age.add(1)) //.multiply(), .divide()
+            .execute();
+}
+
+/**
+* 18살 초과 회원 삭제
+*/
+@Test
+void bulkDelete() {
+    queryFactory
+            .delete(member)
+            .where(member.age.gt(18))
+            .execute();
+    }
+```
+
+# SQL function 호출
+
+SQL function 은 각 DB dialect 에 내장되어있는 함수를 사용하는 것입니다.
+
+```java
+@Test
+void sqlFunction() {
+    List<String> result = queryFactory
+            .select(Expressions.stringTemplate(
+                    "function('replace', {0}, {1}, {2})",
+                    member.username, "member", "M"))
+            .from(member)
+            .fetch();
+
+    for (String s : result) {
+        System.out.println("s = " + s);
+    }
+}
+
+@Test
+public void sqlFunction2(){
+    queryFactory
+            .select(member.username)
+            .from(member)
+            .where(member.username.eq(
+                    Expressions.stringTemplate("function('lower', {0})", member.username)))
+            .fetch();
+}
+
+@Test
+public void sqlFunction3(){
+
+    queryFactory //위 아래는 같은 쿼리
+            .select(member.username)
+            .from(member)
+            .where(member.username.eq(
+                    member.username.lower()))
+            .fetch();
+}
+
+```
+
+`Expressions.stringTemplate()` 메서드를 사용해 호출합니다. **ANSI 표준에 있는 함수는 `member.username.eq(
+member.username.lower())` 와 같이 Querydsl 에서 직접 호출할 수 있습니다.** 따라서 `sqlFunction2` 과 `sqlFunction3` 은 같은 쿼리문이 나갑니다.

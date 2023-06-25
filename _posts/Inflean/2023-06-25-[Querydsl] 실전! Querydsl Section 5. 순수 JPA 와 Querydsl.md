@@ -1,5 +1,5 @@
 ---
-categories: "springJPA"
+categories: "inflearn"
 tag: ["동적쿼리", "BooleanBuilder", "where 파라미터"]
 description: "실전! Querydsl 강의 Section 5 내용입니다."
 series: "실전! Querydsl"

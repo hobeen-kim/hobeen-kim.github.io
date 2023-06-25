@@ -1,5 +1,5 @@
 ---
-categories: "springJPA"
+categories: "inflearn"
 tag: ["Querydsl", "QType", "검색조건", "sort", "paging", "집합", "join", "fetch", "subQuery", "case", "constant", "concat"]
 series: "실전! Querydsl"
 series-description: "인프런 영한님의 '실전! Querydsl' 강의 내용입니다. 로드맵 완성!!"

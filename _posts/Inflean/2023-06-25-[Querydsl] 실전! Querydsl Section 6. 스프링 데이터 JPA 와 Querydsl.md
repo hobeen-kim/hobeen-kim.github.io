@@ -1,5 +1,5 @@
 ---
-categories: "springJPA"
+categories: "inflearn"
 tag: ["paging", "countQuery", "custom repository"]
 description: "실전! Querydsl 강의 Section 6 내용입니다."
 series: "실전! Querydsl"

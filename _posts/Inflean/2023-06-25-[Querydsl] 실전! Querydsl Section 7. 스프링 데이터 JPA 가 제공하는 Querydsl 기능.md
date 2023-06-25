@@ -1,5 +1,5 @@
 ---
-categories: "springJPA"
+categories: "inflearn"
 tag: ["QuerydslPredicateEexcutor", "Querydsl Web", "QuerydslRepostiroySupport"]
 description: "실전! Querydsl 강의 Section 7 내용입니다."
 series: "실전! Querydsl"

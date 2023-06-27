@@ -1,8 +1,8 @@
 ---
 categories: "springJPA"
 tag: ["프록시", "EntityManager", "Singleton", "SharedEntityManagerCreator", "EntityManagerFactoryUtils"]
-title: "[Spring JPA] 프록시 객체를 통한 EntityMager 동시성 문제 해결"
-description: "DI 로 주입받는 entityManager 가 어떻게 쓰레드별로 다른 영속성 컨텍스트를 가지는지 알아봅니다."
+title: "[Spring JPA] 프록시 객체를 통한 EntityManager 동시성 문제 해결"
+description: "DI 로 주입받는 싱글톤의 EntityManager 가 어떻게 쓰레드별로 다른 영속성 컨텍스트를 가지는지 알아봅니다."
 ---
 
 # 쓰레드별 EntityManager 는 같을까?

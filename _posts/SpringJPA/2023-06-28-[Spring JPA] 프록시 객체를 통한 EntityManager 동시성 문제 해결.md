@@ -7,17 +7,21 @@ description: "DI 로 주입받는 싱글톤의 EntityManager 가 어떻게 쓰�
 
 # 쓰레드별 EntityManager 는 같을까?
 
-​	스프링 빈은 모두 싱글톤으로 관리됩니다. 이는 저장소 역할인 `Repository` 도 같습니다. 이때 JPA 에서 Repository 는 `EntityManager` 를 주입받아서 사용하는데요. 이 `EntityManager` 도 스프링 빈 생성 시 DI 로 주입받게 됩니다. <u>그렇다면 모든 쓰레드가 필드 레벨의 같은 `EntityManager` 를 사용하게 되는 건데, **동시성 문제**가 아래와 같이 발생하지 않을까요?</u>
+​	스프링 빈은 모두 싱글톤으로 관리됩니다. 이는 저장소 역할인 `Repository` 도 같습니다. 이때 JPA 에서 Repository 는 `EntityManager` 를 주입받아서 사용하는데요. 이 `EntityManager` 도 스프링 빈 생성 시 DI 로 주입받게 됩니다. <u>그렇다면 모든 쓰레드가 필드 레벨의 같은 `EntityManager` 를 사용하게 되는 건데, 동시성 문제가 아래와 같이 발생하지 않을까요?</u>
 
 ![image-20230626164515924](../../images/2023-06-26-[Spring JPA] 프록시 객체를 통한 EntityMager 동시성 문제 해결/image-20230626164515924.png)
 
+​	모든 client 가 `Repository` 를 동시에 사용하게 되면, 필드 레벨인 `EntityManager` 는 같은 참조값을 모든 client 가 사용하게 됩니다. `EntityManager` 의 영속성 컨텍스트는 논리적인 개념인데요. 결국은 1차 캐시, SQL 쓰기 지연 저장소 등은 힙 메모리에 저장되게 되며, 같은 `EntityManager` 를 공유하게 된다면 영속성 컨텍스트까지 공유한다는 뜻입니다. 당연히 동시성 문제가 발생하겠죠.
+
 # 프록시 객체를 통한 해결
 
-​	스프링 프레임워크는 이러한 문제를 해결하기 위해, 여기에 실제 EntityManager 를 주입하는 것이 아니라, 사실은 **실제 EntityManager를 연결해주는 EntityManager 프록시 객체를 주입**해둡니다. 이 프록시 객체는 실제 EntityManager의 레퍼(wrapper)로 작동하며, 이 프록시는 ThreadLocal 기반의 현재 트랜잭션 컨텍스트에 대한 참조를 통해 실제 EntityManager 인스턴스에 접근합니다. 
+​	스프링 프레임워크는 이러한 문제를 해결하기 위해, 여기에 실제 EntityManager 를 주입하는 것이 아니라,  **실제 `EntityManager` 를 연결해주는 `EntityManager` 프록시 객체를 주입**해둡니다. 이 프록시 객체는 실제 `EntityManager`의 레퍼(`wrapper`) 로 작동하며, 이 프록시는 `ThreadLocal` 기반으로 현재 트랜잭션에 대한 참조를 통해 실제 `EntityManager` 인스턴스에 접근합니다. 
 
-​	그리고 **이 EntityManager를 호출하면, 현재 데이터베이스 트랜잭션과 관련된 실제 EntityManager 를 호출**해줍니다. 따라서 개발자는 동시성 이슈에 대한 걱정없이 EntityManger 를 사용할 수 있습니다.
+​	그리고 **이 `EntityManager` 를 호출하면, 현재 데이터베이스 트랜잭션과 관련된 실제 `EntityManager` 를 호출**해줍니다. 따라서 개발자는 동시성 이슈에 대한 걱정없이 `EntityManger` 를 사용할 수 있습니다.
 
 # EntityManager 생성 확인
+
+이제부터 코드 레벨에서 프록시 객체는 어떻게 생성되고, 실제 `EntityManager` 는 어떻게 호출되는지 알아보겠습니다.
 
 ## SharedEntityManagerCreator
 
@@ -43,42 +47,42 @@ public abstract class SharedEntityManagerCreator {
                 ifcs, new SharedEntityManagerInvocationHandler(emf, properties, synchronizedWithTransaction));
     }
     
-	@Override
-    @Nullable
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        
-        ... 
-        EntityManager target = EntityManagerFactoryUtils.doGetTransactionalEntityManager(
-                this.targetFactory, this.properties, this.synchronizedWithTransaction);
+@Override
+@Nullable
+public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
-        switch (method.getName()) {
-            case "getTargetEntityManager":
-                // Handle EntityManagerProxy interface.
-                if (target == null) {
-                    throw new IllegalStateException("No transactional EntityManager available");
-                }
-                return target;
-            case "unwrap":
-                Class<?> targetClass = (Class<?>) args[0];
-                if (targetClass == null) {
-                    return (target != null ? target : proxy);
-                }
-                // We need a transactional target now.
-                if (target == null) {
-                    throw new IllegalStateException("No transactional EntityManager available");
-                }
-                // Still perform unwrap call on target EntityManager.
-                break;
-        }
+    ... 
+    EntityManager target = EntityManagerFactoryUtils.doGetTransactionalEntityManager(
+            this.targetFactory, this.properties, this.synchronizedWithTransaction);
 
-        ...
+    switch (method.getName()) {
+        case "getTargetEntityManager":
+            // Handle EntityManagerProxy interface.
+            if (target == null) {
+                throw new IllegalStateException("No transactional EntityManager available");
+            }
+            return target;
+        case "unwrap":
+            Class<?> targetClass = (Class<?>) args[0];
+            if (targetClass == null) {
+                return (target != null ? target : proxy);
+            }
+            // We need a transactional target now.
+            if (target == null) {
+                throw new IllegalStateException("No transactional EntityManager available");
+            }
+            // Still perform unwrap call on target EntityManager.
+            break;
     }
+
+    ...
+}
 
     
 ```
 
 1. `createSharedEntityManager` 메서드는 `(EntityManager) Proxy.newProxyInstance(...)`  로 프록시 객체를 만들어서 리턴합니다. 최초 `EntityManager` 주입 시 해당 프록시 객체의 `EntityManager` 가 주입됩니다.
-2. `invoke` 메서드를 호출해서 `EntityManager target = EntityManagerFactoryUtils.doGetTransactionalEntityManager(...)` 를 통해 실제 `EntityManager` 를 만듭니다. 그리고 method 이름에 따라서 `switch (method.getName())` 를 통해 해당 `target` 을 리턴합니다.
+2. `invoke` 메서드를 호출하면 `EntityManager target = EntityManagerFactoryUtils.doGetTransactionalEntityManager(...)` 를 통해 실제 `EntityManager` 를 만듭니다. 그리고 method 이름에 따라서 `switch (method.getName())` 를 통해 해당 `target` 을 리턴합니다.
 
 ## EntityManagerFactoryUtils
 
@@ -98,7 +102,7 @@ public abstract class EntityManagerFactoryUtils {
 		EntityManagerHolder emHolder =
 				(EntityManagerHolder) TransactionSynchronizationManager.getResource(emf); //1
         
-        //emHolder 가 있으면...
+		//emHolder 가 있으면...
 		if (emHolder != null) {
             	...
 				//해당 emHolder 에서 EntityManger 를 꺼내서 반환합니다.
@@ -152,4 +156,6 @@ public abstract class EntityManagerFactoryUtils {
 
 ## EntityManager 주입 및 실행
 
-즉 최초 빈 등록 시 `SharedEntityManagerCreator.createSharedEntityManager(...)` 를 통해 프록시 객체가 만들어져서 주입되어 싱글톤 객체로 관리됩니다. 이후 해당 프록시 객체의 메서드를 호출하면 `SharedEntityManagerCreator.invoke()` 가 호출되어 새로운 `EntityManager` 를 만들어서 동작하게 됩니다.
+​	결론적으로 최초 빈 등록 시 `SharedEntityManagerCreator.createSharedEntityManager(...)` 를 통해 프록시 객체가 만들어져서 주입되어 싱글톤 객체로 관리됩니다. 
+
+​	이후 해당 프록시 객체의 메서드를 호출하면 `SharedEntityManagerCreator.invoke()` 가 호출되어 새로운 `EntityManager` 를 만들어서 동작하게 됩니다. `persist` 든 `find` 든 해당 `EntityManager` 의 영속성 컨텍스트를 통해 동작하게 되겠죠.

@@ -2,6 +2,7 @@
 categories: "spring"
 tag: ["proxy", "aop"]
 series: "Proxy 와 AOP"
+title: "[Spring] Proxy 와 AOP 심화"
 ---
 
 *지금부터 소개할 내용은 나름 "심화" 과정이라고 생각하는데요. 심화는 다른 말로 "**몰라도 되지만 알면 좋은 것"** 이죠. 내용 흐름 자체는 김영한님의 inflearn 스프링 고급편 강의를 중심이고, 나름 클래스를 연구하면서 필요한 건 추가하고 했습니다.*

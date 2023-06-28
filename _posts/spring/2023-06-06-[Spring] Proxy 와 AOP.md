@@ -2,6 +2,7 @@
 categories: "spring"
 tag: ["proxy", "aop"]
 series: "Proxy 와 AOP"
+title: "[Spring] Proxy 와 AOP"
 ---
 
 # Proxy

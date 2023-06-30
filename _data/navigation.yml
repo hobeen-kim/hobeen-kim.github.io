@@ -15,9 +15,9 @@ docs:
       - title: "spring"
         url: /categories/spring
       - title: "AWS"
-        url: /categories/aws
+        url: /categories/AWS
       - title: "WEB"
-        url: /categories/web
+        url: /categories/WEB
       - title: "react"
         url: /categories/react
       - title: "git"
@@ -25,13 +25,13 @@ docs:
       - title: "java"
         url: /categories/java
       - title: "dataStructure"
-        url: /categories/datastructure  
+        url: /categories/dataStructure  
       - title: "socceranalyst"
         url: /categories/socceranalyst
       - title: "inflearn"
         url: /categories/inflearn
       - title: "springJPA"
-        url: /categories/springjpa
+        url: /categories/springJPA
       - title: "network"
         url: /categories/network
       - title: "review"
@@ -40,6 +40,9 @@ docs:
         url: /categories/jekyll
       - title: "DB"
         url: /categories/db
+      - title: "Tip"
+        url: /categories/Tip
+        
 
 
   - title: "Tag"

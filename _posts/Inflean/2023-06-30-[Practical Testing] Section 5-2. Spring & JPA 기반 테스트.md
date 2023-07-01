@@ -168,3 +168,4 @@ CUD 와 R 의 비율은 도메인에 따라 다르지만 2:8 정도이며, CQRS 
 public class JpaAuditingConfig {
 }
 ```
+

@@ -280,6 +280,12 @@ include::{snippets}/product-create/response-fields.adoc[]
 - `:sectlinks:`: 이 설정은 섹션 제목을 클릭하면 해당 섹션으로 이동하는 링크가 생성되도록 합니다. 이를 통해 문서 내의 특정 섹션으로 쉽게 이동할 수 있게 됩니다.
 - `[[product-create]]`는 Asciidoc 문서 내에서 앵커를 정의하는 방법입니다. `[[product-create]]`라는 앵커를 선언함으로써, 이 위치로 직접 링크를 생성하거나 이동할 수 있게 됩니다. 예를 들어, 이 앵커가 선언된 위치로 바로 이동하려면 문서 내에서 `<<product-create>>`와 같은 형식으로 참조할 수 있습니다.
 
+> 추가적인 속성
+>
+> - `:sectnums:` : 목차에서 각 섹션에 넘버링합니다.
+> - `:toc-title:` : 목차의 제목을 지정할 수 있습니다.
+> - `:source-highlighter: prettify` : 문서에 표시되는 소스 코드 하일라이터 중 하나입니다.
+
 빌드를 하면 아래의 디렉토리에서 `index.html` 파일이 생깁니다. (`build.gradle` 에서 지정해뒀던 곳입니다.)
 
 ![image-20230703022113199](../../images/2023-07-02-[Practical Testing] Section 8. Spring REST Docs/image-20230703022113199.png)
@@ -520,3 +526,75 @@ bootJar { //jar 를 만드는 파일, 문서가 나오면 정적파일로 보기
 터미널에서 실행 후 localhost:8080/docs/index.html 로 접속
 
 ![image-20230703101640121](../../images/2023-07-02-[Practical Testing] Section 8. Spring REST Docs/image-20230703101640121.png)
+
+# 추가 내용
+
+국비 교육을 진행하면서 추가적으로 공부한 내용입니다.
+
+## ControllerTest 와 RestDocs 함께 작성
+
+Controller 를 테스트하면서 동시에 RestDocs 를 작성할 수도 있습니다. 
+
+```java
+@WebMvcTest(MemberController.class)
+@MockBean(JpaMetamodelMappingContext.class)   // (1)
+@AutoConfigureRestDocs    // (2)
+public class MemberControllerRestDocsTest {
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+	  // (3) 테스트 대상 Controller 클래스가 의존하는 객체를 Mock Bean 객체로 주입받기
+
+    @Test
+    public void postMemberTest() throws Exception {
+        // given
+        // stubbing
+
+        // when
+        ResultActions actions =
+                mockMvc.perform(
+                     // request 전송
+                );
+
+        // then
+        actions
+                .andExpect(// (response에 대한 기대 값 검증)
+                .andDo(document(
+                            // API 문서 스펙 정보 추가
+                 ));
+    }
+}
+```
+
+1. `@EnableJpaAuditing`을 xxxxxxApplication 클래스에 추가하게 되면 JPA와 관련된 Bean 을 필요로 하기 때문에 `@WebMvcTest` 애너테이션을 사용해서 테스트를 진행할 경우에는 `JpaMetamodelMappingContext` 를 Mock 객체로 주입해 주어야 합니다.
+2. Spring Rest Docs에 대한 자동 구성을 위해 `@AutoConfigureRestDocs`를 추가해 줍니다.
+3. Controller 클래스가 의존하는 객체(주로 서비스 클래스, Mapper)의 의존성을 제거하기 위해 `@MockBean` 어노테이션을 사용해서 Mock 객체를 주입받습니다.
+
+## adoc Index 박스 문단 사용 및 경고 문구
+
+`index.adoc` 에 다음과 같이 박스 문단과 경고 문구를 추가할 수 있습니다.
+
+```
+***
+API 문서 개요
+
+ 이 문서는 45기 백엔드 수강생들과 Spring MVC 기반의 REST API 기반 애플리케이션에 대해 직접 학습하며 만들어 가는 샘플 애플리케이션입니다.
+ 샘플 애플리케이션을 사용해보고자 하는 분들은 이 문서를 통해 API의 구체적인 사용법을 알 수 있습니다.
+
+CAUTION: 이 문서는 학습용으로 일부 기능에 제한이 있습니다. 기능 제한 사항에 대해 알고 싶다면 담당자에게 문의 하세요
+
+***
+```
+
+![image-20230703112319563](../../images/2023-07-02-[Practical Testing] Section 8. Spring REST Docs/image-20230703112319563.png)
+
+`CAUTION` 이외에도 `NOTE:` , `TIP:` , `IMPORTANT:` , `WARNING:` 등을 사용할 수 있습니다.
+
+## 이미지 추가
+
+`image::img url[image name, width, heigth]`  를 지정할 수 있습니다.
+
+예시 : `image::https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Spring_Framework_Logo_2018.svg/1280px-Spring_Framework_Logo_2018.svg.png[spring-logo, 200, 200]`
+
+![image-20230703112720228](../../images/2023-07-02-[Practical Testing] Section 8. Spring REST Docs/image-20230703112720228.png)

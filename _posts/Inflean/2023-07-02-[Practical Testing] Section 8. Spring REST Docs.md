@@ -538,7 +538,8 @@ Controller 를 테스트하면서 동시에 RestDocs 를 작성할 수도 있습
 ```java
 @WebMvcTest(MemberController.class)
 @MockBean(JpaMetamodelMappingContext.class)   // (1)
-@AutoConfigureRestDocs    // (2)
+//@AutoConfigureMockMvc //WebMvcTest 에 있기 때문에 필요없음
+@ExtendWith({RestDocumentationExtension.class})
 public class MemberControllerRestDocsTest {
     @Autowired
     private MockMvc mockMvc;
@@ -598,3 +599,43 @@ CAUTION: 이 문서는 학습용으로 일부 기능에 제한이 있습니다. 
 예시 : `image::https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Spring_Framework_Logo_2018.svg/1280px-Spring_Framework_Logo_2018.svg.png[spring-logo, 200, 200]`
 
 ![image-20230703112720228](../../images/2023-07-02-[Practical Testing] Section 8. Spring REST Docs/image-20230703112720228.png)
+
+## PathVariable, QueryParameter 추가
+
+각각 `pathParameters`, `queryParameters` 를 사용합니다.
+
+```java
+mockMvc.perform(
+    post("/post/{postId}/{subPath}", postId, "exampleSubPath")
+        .param("query1", "value1")
+        .param("query2", "value2")
+        .contentType(MediaType.APPLICATION_JSON))
+    .andExpect(status().isCreated())
+    .andDo(documentHandler.document(
+        pathParameters(
+            parameterWithName("postId").description("The ID of the post"),
+            parameterWithName("subPath").description("The subpath")
+        ),
+        queryParameters(
+            parameterWithName("query1").description("The first query parameter"),
+            parameterWithName("query2").description("The second query parameter")
+        )
+    ));
+```
+
+## Header 값 검증
+
+`andExpect` 를 이용해 header 값을 검증하는 방법입니다.
+
+```java
+ mockMvc.perform(
+                        patch("/posts/{postId}", post.getId())
+                                .contentType(APPLICATION_JSON)
+                                .accept(APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(requestDto))
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(header().string("Location", is(endsWith("/posts/" + post.getId()))));
+```
+

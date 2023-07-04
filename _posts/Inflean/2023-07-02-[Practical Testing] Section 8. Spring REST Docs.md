@@ -655,5 +655,103 @@ mockMvc.perform(
 
 ![image-20230705005659085](../../images/2023-07-02-[Practical Testing] Section 8. Spring REST Docs/image-20230705005659085.png)
 
+## ControllerTestHelper 추가
 
+`get`, `post`, `patch`, `delete` 등 자주 사용하는 형식을 메서드로 정의해놓을 수도 있습니다. 먼저 기본적인 `ControllerTestHelper` 입니다.
+
+```java
+public interface ControllerTestHelper<T> {
+    default RequestBuilder postRequestBuilder(URI uri,
+                                              String content) {
+        return MockMvcRequestBuilders
+                .post(uri)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content);
+    }
+
+    default RequestBuilder patchRequestBuilder(String uri,
+                                               String content) {
+        return MockMvcRequestBuilders
+                .patch(uri)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content);
+
+    }
+
+    default RequestBuilder getRequestBuilder(String uri) {
+        return MockMvcRequestBuilders
+                .get(uri)
+                .accept(MediaType.APPLICATION_JSON);
+    }
+
+    default RequestBuilder getRequestBuilder(URI uri, MultiValueMap<String, String> queryParams) {
+        return MockMvcRequestBuilders
+                .get(uri)
+                .params(
+                        queryParams
+                )
+                .accept(MediaType.APPLICATION_JSON);
+    }
+
+    default RequestBuilder deleteRequestBuilder(String uri) {
+        return MockMvcRequestBuilders.delete(uri);
+    }
+
+    default URI createURI(String url) {
+        return UriComponentsBuilder.newInstance().path(url).build().toUri();
+    }
+
+    default URI createURI(String url, long resourceId) {
+        return UriComponentsBuilder.newInstance().path(url).buildAndExpand(resourceId).toUri();
+    }
+
+    default String toJsonContent(T t) {
+        Gson gson = new Gson();
+        String content = gson.toJson(t);
+        return content;
+    }
+}
+```
+
+만약 RestDocs 를 사용하려면 `return` 에서 `MockMvcRequestBuilders` 대신 `RestDocumentationRequestBuilders` 를 사용하고, `MockHttpServletRequestBuilder ` 를 반환해야 합니다.
+
+예를 들어, 쿼리 파라미터를 받거나 `PathVariables` 를 받는 메서드는 아래와 같이 구현할 수 있습니다.
+
+```java
+default MockHttpServletRequestBuilder getRequestBuilder(String uri, Object... uriVariables) {
+    return RestDocumentationRequestBuilders
+            .get(uri, uriVariables)
+            .accept(MediaType.APPLICATION_JSON);
+}
+
+default MockHttpServletRequestBuilder getRequestBuilder(URI uri, MultiValueMap<String, String> queryParams) {
+    return RestDocumentationRequestBuilders
+            .get(uri)
+            .params(
+                    queryParams
+            )
+            .accept(MediaType.APPLICATION_JSON);
+}
+```
+
+`String uri` 와 `URI uri` 를 구분해주어야 사용할 때 구분되어집니다. `MultiValueMap<String, String>` 가 들어와도 `Object` 로 인식되어서, 두번째  `getRequestBuilder` 가 아닌  첫번째 `getRequestBuilder` 가 실행되기 때문입니다.
+
+이번엔 `MemberControllerTest` 에 특화된 `MemberControllerTestHelper ` 입니다.
+
+```java
+public interface MemberControllerTestHelper extends ControllerTestHelper {
+    String MEMBER_URL = "/v11/members";
+    default URI getURI() {
+        return createURI(MEMBER_URL);
+    }
+
+    default URI getURI(long memberId) {
+        return createURI(MEMBER_URL + "/{memberId}", memberId);
+    }
+}
+```
+
+`ControllerTestHelper` 를 상속받고 있습니다. 필요한 메서드를 채워넣으면 됩니다.
 

@@ -641,9 +641,19 @@ mockMvc.perform(
 
 ## Header 값 문서에 추가
 
-Create 를 할 때 반환되는 reponse 의 Header 값도 문서에 포함할 필요가 있습니다.
+`Create` 를 할 때 반환되는 `reponse` 의 `Header` 값도 문서에 포함할 필요가 있습니다.
 
-## Enum 링크 추가
+```java
+.andDo(documentHandler.document(
+    responseHeaders(
+    	headerWithName(HttpHeaders.LOCATION).description("Location header. 등록된 리소스의 URI")
+    )
+));
+```
+
+이런 식으로 등록할 수 있습니다. 아래와 같이 `response-headers.adoc` 파일이 생깁니다.
+
+![image-20230705005659085](../../images/2023-07-02-[Practical Testing] Section 8. Spring REST Docs/image-20230705005659085.png)
 
 
 

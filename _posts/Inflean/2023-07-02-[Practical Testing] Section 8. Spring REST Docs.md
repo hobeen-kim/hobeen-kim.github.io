@@ -639,3 +639,11 @@ mockMvc.perform(
                 .andExpect(header().string("Location", is(endsWith("/posts/" + post.getId()))));
 ```
 
+## Header 값 문서에 추가
+
+Create 를 할 때 반환되는 reponse 의 Header 값도 문서에 포함할 필요가 있습니다.
+
+## Enum 링크 추가
+
+
+

@@ -13,7 +13,7 @@ description: "Spring Security Section 1. 스프링 시큐리티의 기본 API �
 
 # 사용자 정의 보안 기능 구현
 
-![image-20230703222731008](../../images/2023-07-03-[Spring Security] /image-20230703222731008.png)
+![image-20230703222731008](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230703222731008.png)
 
 스프링 보안 설정은 `WebSecurityConfigurerAdapter` 를 통해 실행됩니다. 이를 변경하려면 해당 클래스에서 오버라이딩 후 수정해야 합니다.
 
@@ -48,7 +48,7 @@ spring.security.user.password=1111
 
 아래는 Form Login 인증 기능의 API 입니다.
 
-![image-20230703223323690](../../images/2023-07-03-[Spring Security] /image-20230703223323690.png)
+![image-20230703223323690](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230703223323690.png)
 
 전체적으로 구현하면 아래와 같이 만들 수 있습니다.
 
@@ -96,7 +96,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 Form Login 인증 요청이 들어오면 `UsernamePasswordAuthenticationFilter` 가 아래와 같이 동작합니다.
 
-![image-20230703225112816](../../images/2023-07-03-[Spring Security] /image-20230703225112816.png)
+![image-20230703225112816](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230703225112816.png)
 
 - `AntPathRequestMatcher()` 내의 값은 `SecurityConfig` 의 `http.loginPage("/loginPage")` 설정에 따라 변경가능합니다.
 - `AuthenticationManager` 가 필터로부터 `Authentication` 인증 정보를 전달받아서 인증 처리를 합니다. 내부적으로 `AuthenticationProvider` 가 있어서 해당 인증을 위임합니다. 
@@ -106,13 +106,13 @@ Form Login 인증 요청이 들어오면 `UsernamePasswordAuthenticationFilter` 
 
 `Authentication` 는 `UsernamePasswordAuthenticationToken` 가 사용됩니다. 그리고 어디서든 `SecurityContextHolder.getContext().getAuthentication()` 을 하면 `Authentication` 을 꺼내쓸 수 있습니다.
 
-![image-20230703232447783](../../images/2023-07-03-[Spring Security] /image-20230703232447783.png)
+![image-20230703232447783](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230703232447783.png)
 
 # Logout 처리, LogoutFilter
 
 아래는 Form Login 인증 기능의 로그아웃 API 입니다.
 
-![image-20230703232506599](../../images/2023-07-03-[Spring Security] /image-20230703232506599.png)
+![image-20230703232506599](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230703232506599.png)
 
 아래와 같이 구현할 수 있습니다.
 
@@ -157,9 +157,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 Form Logout 요청은 기본적으로 POST 입니다. 해당 요청이 들어오면 `LogoutFilter` 가 아래와 같이 동작합니다.
 
-![image-20230703233426373](../../images/2023-07-03-[Spring Security] /image-20230703233426373.png)
+![image-20230703233426373](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230703233426373.png)
 
-![image-20230703233735972](../../images/2023-07-03-[Spring Security] /image-20230703233735972.png)
+![image-20230703233735972](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230703233735972.png)
 
 - `LogoutFilter` 가 해당 요청이 `POST: /logout` 인지 확인하고 `SecurityContext` 에서 `Authentication` 을 꺼내옵니다. 그리고 가지고 있는 `LogoutHandler` 로 로그아웃 처리를 합니다. (세션 무효화, 쿠키 삭제, `SecurityContextHolder` 삭제)
 
@@ -167,7 +167,7 @@ Form Logout 요청은 기본적으로 POST 입니다. 해당 요청이 들어오
 
 Remember Me 란 1.**세션이 만료되고 웹 브라우저가 종료된 후에도 어플리케이션이 사용자를 기억하는 기능**입니다. RememberMe 쿠키에 대한 Http 요청을 확인한 후 토큰 기반 인증을 사용해 유효성을 검사하고 토큰이 검증되면 사용자는 로그인됩니다.
 
-![image-20230703234453577](../../images/2023-07-03-[Spring Security] /image-20230703234453577.png)
+![image-20230703234453577](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230703234453577.png)
 
 - `userDetailsService` 는 Remember Me 기능 중 시스템에 있는 사용자의 계정을 조회하는 과정에 필요합니다.
 
@@ -198,17 +198,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 먼저 로그인 시 Remember-Me 를 체크합니다.
 
-![image-20230703235850351](../../images/2023-07-03-[Spring Security] /image-20230703235850351.png)
+![image-20230703235850351](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230703235850351.png)
 
 쿠키를 확인해보면 JSESSIONID 외에도 remember-me 가 있습니다.
 
-![image-20230703235933941](../../images/2023-07-03-[Spring Security] /image-20230703235933941.png)
+![image-20230703235933941](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230703235933941.png)
 
 이제 JSESSIONID 가 없어져도 `RequestHeader` 에 remember-me 라는 쿠키가 있다면 해당 값을 디코딩해서 User 계정을 얻고 그 계정을 통해 다시 인증을 시도하고 인증에 성공하면 JSESSIONID 를 반환합니다.
 
 # Remember Me 인증 필터 : RememberMeAuthenticationFilter
 
-![image-20230704000204183](../../images/2023-07-03-[Spring Security] /image-20230704000204183.png)
+![image-20230704000204183](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704000204183.png)
 
 - `RememberMeAuthenticationFilter` 는 `Authentication` 객체가 `null` 일 때만 동작합니다. 세션 만료, 브라우저 종료에 따른 세션이 끊긴 경우 해당 필터가 동작합니다.
 - 토큰을 추출하고 확인하는 건 `RememberMeServices` 입니다. 해당 인터페이스는 인메모리에 저장하는 `TokenBasedRememberMeServices` 와 DB 에 저장하는 `PersistentTokenBasedRememberMeServices` 가 있습니다.
@@ -219,20 +219,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 먼저 로그인을 하면 `AbstractAuthenticationProcessingFilter` 의 `successfulAuthentication()` 메서드에서 `rememberMeService` 의 `loginSuccess()` 메서드를 호출합니다.
 
-![image-20230704003609034](../../images/2023-07-03-[Spring Security] /image-20230704003609034.png)
+![image-20230704003609034](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704003609034.png)
 
 해당 메서드가 `response` 에 쿠키값을 담아서 응답합니다.
 
 이번에 JSESSION 을 삭제하고 리로드하면 `RememberMeAuthenticationFilter` 의 `doFilter` 에서 rememberMe 쿠키값을 통해 사용자 정보를 얻습니다.
 
-![image-20230704004803269](../../images/2023-07-03-[Spring Security] /image-20230704004803269.png)
+![image-20230704004803269](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704004803269.png)
 
 - `rememberMeAuth` 는 쿠키로부터 얻은 `Authentication` 입니다.
 - 이후 `rememberMeAuth` 를 `SecurityContextHolder` 에 저장하고 `SuccessfulAuthentication()` 을 호출합니다.
 
 # 익명사용자 인증 필터 : AnonymousAuthenticationFilter
 
-![image-20230704010428259](../../images/2023-07-03-[Spring Security] /image-20230704010428259.png)
+![image-20230704010428259](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704010428259.png)
 
 익명사용자 인증 처리 필터는 익명사용자와 인증 사용자를 구분해서 처리하기 위한 용도로 사용됩니다. 화면에서 인증 여부를 구현할 때 `isAnonymous()` 와 `isAuthenticated()` 로 구분해서 사용하면 됩니다. **인증 객체를 생성은 하지만 세션에 저장하지는 않습니다. (일회용)**
 
@@ -263,11 +263,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 이제 `"/"` 으로 들어가보면 `AnonymousAuthenticationFilter` 에서 디버깅이 걸리게 됩니다.
 
-![image-20230704010747807](../../images/2023-07-03-[Spring Security] /image-20230704010747807.png)
+![image-20230704010747807](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704010747807.png)
 
 `SecurityContextHolder` 에 있는 `Authentication` 이 `null` 이면, `createAuthentication()` 으로 `Authentication` 객체를 만들어서 넣어줍니다.
 
-![image-20230704011010566](../../images/2023-07-03-[Spring Security] /image-20230704011010566.png)
+![image-20230704011010566](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704011010566.png)
 
 해당 객체는 `AnonymousAuthenticationToken` 입니다.
 
@@ -297,11 +297,11 @@ if(SecurityContextHolder.getContext().getAuthentication() == null){
 
 최대 세션 허용 개수를 초과할 때 다음 두가지 정책을 사용할 수 있습니다.
 
-![image-20230704094658983](../../images/2023-07-03-[Spring Security] /image-20230704094658983.png)
+![image-20230704094658983](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704094658983.png)
 
 다음은 세션 기능 API 입니다.
 
-![image-20230704095015828](../../images/2023-07-03-[Spring Security] /image-20230704095015828.png)
+![image-20230704095015828](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704095015828.png)
 
 ```java
 @Override
@@ -323,17 +323,17 @@ protected void configure(HttpSecurity http) throws Exception {
 
 현재는 동시 로그인을 허용하지 않고 있습니다. 한 브라우저에서 로그인 후 다음과 같이 다른 브라우저로 로그인을 시도할 때 오류메세지를 보여줍니다.
 
-![image-20230704095438231](../../images/2023-07-03-[Spring Security] /image-20230704095438231.png)
+![image-20230704095438231](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704095438231.png)
 
 ## 세션 고정 보호
 
 아래는 세션 고정 공격의 흐름입니다.
 
-![image-20230704095818064](../../images/2023-07-03-[Spring Security] /image-20230704095818064.png)
+![image-20230704095818064](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704095818064.png)
 
 스프링 시큐리티는 이를 방지하기 위해 인증을 시도할 때마다 새로운 세션을 생성하도록 합니다. 아래와 같이 설정합니다.
 
-![image-20230704100000545](../../images/2023-07-03-[Spring Security] /image-20230704100000545.png)
+![image-20230704100000545](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704100000545.png)
 
 - `changeSessionId` 는 서블릿 3.1 이상, `migrateSession` 은 서블릿 3.1 미만에서 기본값입니다. **해당 정책을 설정하지 않아도 스프링 시큐리티에서 자동으로 설정합니다.**
 - `newSession` 은 이전 세션의 속성값들을 사용하지 못하고 새롭게 설정해야 합니다.
@@ -358,7 +358,7 @@ protected void configure(HttpSecurity http) throws Exception {
 
 ## 세션 정책
 
-![image-20230704100838694](../../images/2023-07-03-[Spring Security] /image-20230704100838694.png)
+![image-20230704100838694](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704100838694.png)
 
 세션을 전혀 사용하지 않는 방법은 JWT 등을 사용할 때 설정합니다.
 
@@ -379,11 +379,11 @@ protected void configure(HttpSecurity http) throws Exception {
 
 ## 흐름
 
-![image-20230704101613768](../../images/2023-07-03-[Spring Security] /image-20230704101613768.png)
+![image-20230704101613768](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704101613768.png)
 
 현재 정책이 동시 세션 접속 시 이전 사용자 세션을 만료시키는 정책이라고 가정하겠습니다. 새로운 사용자가 로그인 시도를 하면 `SessionManagementFilter` 는 이전 사용자 세션을 만료시킵니다. 이후 이전 사용자가 로그인 시도를 하면 `ConcurrentSessionFilter` 가 세션 만료 여부를 확인하고 오류 페이지를 응답합니다. 해당 확인은 `SessionManagementFilter` 를 통해 확인합니다.
 
-![image-20230704103211257](../../images/2023-07-03-[Spring Security] /image-20230704103211257.png)
+![image-20230704103211257](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704103211257.png)
 
 ​	위 그림에서 보면, `user1` 이 로그인을 시도하면 `SessionManagementFilter` 에서 세션 개수를 확인 후 (`ConcurrentSessionControlAuthenticationStrategy`) 세션고정보호 정책에 따라 session 을 변경 (`ChangSessionIdAuthenticationStrategy`) 합니다. 그리고 세션 정보를 등록합니다. (`RegisterSessionAuthenticationStrategy`) 
 
@@ -393,37 +393,37 @@ protected void configure(HttpSecurity http) throws Exception {
 
 1. **`user1` 이 로그인을 시도**하면 먼저 `ConcurrentSessionControlAuthenticationStrategy` 에서 총 세션 개수와 허용되는 세션 개수를 비교해서 그에 따른 처리를 합니다.
 
-![image-20230704104322226](../../images/2023-07-03-[Spring Security] /image-20230704104322226.png)
+![image-20230704104322226](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704104322226.png)
 
 2. 이후 세션 변경 정책에 따라 세션을 변경합니다. (`AbstractSessionFixationProtextionStrategy` 클래스)
 
-![image-20230704105036867](../../images/2023-07-03-[Spring Security] /image-20230704105036867.png)
+![image-20230704105036867](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704105036867.png)
 
-![image-20230704105108869](../../images/2023-07-03-[Spring Security] /image-20230704105108869.png)
+![image-20230704105108869](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704105108869.png)
 
 3. 이후 `RegisterSessionAuthenticationStrategy` 에서 등록이 이루어집니다. 실질적인 등록은 `SessionRegistryImpl` 의 `registerNewSession()` 메서드에서 이루어집니다.
 
-![image-20230704105512243](../../images/2023-07-03-[Spring Security] /image-20230704105512243.png)
+![image-20230704105512243](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704105354344.png)
 
 4. 이제 `user2` 가 로그인을 시도하면 `ConcurrentSessionControlAuthenticationStrategy` 에서 개수 초과로 `allowableSessionsExceeded()` 메서드가 실행됩니다.
 
-![image-20230704105800234](../../images/2023-07-03-[Spring Security] /image-20230704105800234.png)
+![image-20230704105800234](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704105512243.png)
 
-![image-20230704105906092](../../images/2023-07-03-[Spring Security] /image-20230704105906092.png)
+![image-20230704105906092](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704105906092.png)
 
 여기서 `exceptionIfMaximumExceeded` 속성은 `SecurityConfig` 에서 준 `.maxSessionsPreventsLogin(true)` 입니다. 해당값이 `true` 이므로 예외를 던지게 됩니다. 그게 아니라면 아래 회색 음영 표시된 로직이 실행됩니다. 해당 로직은 원래 있던 세션을 만료시키는 정책입니다.
 
 5. 이번엔 `.maxSessionsPreventsLogin(false)` 로 설정하고 4번 과정을 다시보겠습니다. 같은 `allowableSessionsExceeded()` 메서드 내입니다.
 
-![image-20230704110413598](../../images/2023-07-03-[Spring Security] /image-20230704110413598.png)
+![image-20230704110413598](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704110413598.png)
 
 ​	세션을 하나씩 순회하면서 제일 오래된 세션을 `.expireNow()` 로 만료시킵니다. 그리고 `user2` 는 2, 3번 과정을 거쳐 세션에 등록됩니다.
 
 6. 이제 `user1` 이 페이지를 방문하면 `ConcurrentSessionFilter` 에서 걸리게 됩니다. 세션이 만료되었으면 로그아웃처리 됩니다.
 
-![image-20230704110936208](../../images/2023-07-03-[Spring Security] /image-20230704110936208.png)
+![image-20230704110936208](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704110936208.png)
 
-![image-20230704110957680](../../images/2023-07-03-[Spring Security] /image-20230704110957680.png)
+![image-20230704110957680](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704110957680.png)
 
 브라우저에 오류 메세지가 나타납니다. 이렇게 되면 `user1` 은 다시 인증받아야 합니다.
 
@@ -453,7 +453,7 @@ protected void configure(HttpSecurity http) throws Exception {
 
 ## 권한 설정 방법
 
-![image-20230704111647224](../../images/2023-07-03-[Spring Security] /image-20230704111647224.png)
+![image-20230704111647224](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704111647224.png)
 
 - `/shop/**` : 인증된 사용자
 - `/shop/login`, `/shop/users/**` : 모든 사용자
@@ -465,7 +465,7 @@ protected void configure(HttpSecurity http) throws Exception {
 
 아래는 인가 API 표현식입니다.
 
-![image-20230704112400901](../../images/2023-07-03-[Spring Security] /image-20230704112400901.png)
+![image-20230704112400901](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704112400901.png)
 
 - `fullAuthenticated()` : `rememberMe` 인증을 통해 접근할 수 없습니다. 무조건 ID, PW 를 입력해야 합니다.
 - `anonymous()` : 익명 사용자만 접근가능합니다. `USER` 사용자는 익명 사용자가 아니기 때문에 모두 접근을 허용하려면 `permitAll()` 을 해야 합니다.
@@ -497,11 +497,11 @@ protected void configure(HttpSecurity http) throws Exception {
 
 해당 필터는 `AuthenticaitonException` (인증 예외 처리), `AccessDeniedException` (인가 예외 처리) 를 담당합니다. 
 
-![image-20230704125837658](../../images/2023-07-03-[Spring Security] /image-20230704125837658.png)
+![image-20230704125837658](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704125837658.png)
 
 다음은 인증/인가 예외 흐름입니다.
 
-![image-20230704130027719](../../images/2023-07-03-[Spring Security] /image-20230704130027719.png)
+![image-20230704130027719](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704130027719.png)
 
 - `FilterSecurityInterceptor` 가 인증, 인가 권한을 체크하고 `ExceptionTranslationFilter` 를 호출합니다.
 - 만약 인증 예외이면, `AuthenticationException` 을 호출합니다. 사용자의 요청 관련 정보를 저장한 후 실패 이후 처리를 합니다. 보통 로그인 페이지로 리다이렉트하는데, 로그인을 성공하면 저장된 요청 정보를 통해 접속하려는 페이지로 리다이렉트 해줍니다.
@@ -510,7 +510,7 @@ protected void configure(HttpSecurity http) throws Exception {
 
 ## ExceptionTranslationFilter 구현
 
-![image-20230704130836742](../../images/2023-07-03-[Spring Security] /image-20230704130836742.png)
+![image-20230704130836742](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704130836742.png)
 
 ```java
 @Override
@@ -561,33 +561,33 @@ protected void configure(HttpSecurity http) throws Exception {
 
 1. `ExceptionTranslationFilter` 의 `handlerSpringSecurtyExcetion()` 메서드입니다. `exception` 타입에 따라 분기됩니다.
 
-![image-20230704134802615](../../images/2023-07-03-[Spring Security] /image-20230704134802615.png)
+![image-20230704134802615](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704134802615.png)
 
 2. `AuthenticationException` 이면 `sendStartAuthentication()` 메서드를 실행합니다. `AccessDeniedException` 이면 `accessDeniedHandler` 의 `handle()` 메서드를 실행합니다. 이때 익명사용자면 다시 `sendStartAuthentication()` 메서드를 실행합니다.
 
-![image-20230704135056558](../../images/2023-07-03-[Spring Security] /image-20230704135056558.png)
+![image-20230704135056558](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704135056558.png)
 
 3. `sendStartAuthentication()` 에서는 `SecurityContext` 를 비우고 `requestCache` 와 `authenticationEntryPoint` 를 실행합니다. 앞서 `SecurityConfig` 에서 정의한 익명 메서드가 실행됩니다.
 
-![image-20230704135153615](../../images/2023-07-03-[Spring Security] /image-20230704135153615.png)
+![image-20230704135153615](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704135153615.png)
 
 ## RequestCacheAwareFilter 필터 확인
 
 해당 필터에서, requestCache 에 값이 있으면 해당 `request` 를 계속 이용하게 합니다.
 
-![image-20230704140912666](../../images/2023-07-03-[Spring Security] /image-20230704140912666.png)
+![image-20230704140912666](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704140912666.png)
 
 # 사이트 간 요청 위조 - CSRF, CsrfFilter
 
 ​	**CSRF (Cross-Site Request Forgery) 공격**은 사용자가 자신의 의지와는 무관하게 공격자가 준비한 행동을 수행하게 만드는 공격 방법입니다. 이 공격은 사용자가 이미 인증을 받은 상태에서 실행되며, 이를 통해 공격자는 사용자의 권한을 도용할 수 있습니다.
 
-![image-20230704215955421](../../images/2023-07-03-[Spring Security] /image-20230704215955421.png)
+![image-20230704215955421](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704215955421.png)
 
 ​	예를 들어, 사용자가 웹 서비스에 로그인한 상태에서 악성 웹 사이트를 방문하면, 이 사이트는 사용자가 모르는 사이에 공격을 위한 요청을 해당 웹 서비스(이미지 클릭)로 보낼 수 있습니다. 서버 입장에서는 이 요청이 사용자로부터 직접 온 것처럼 보이므로 해당 요청을 처리하게 되어, 사용자의 정보가 변경되거나 사용자를 대상으로 한 행동이 수행될 수 있습니다.
 
 ​	Spring Security 에서는 CSRF 공격을 방지하기 위해 토큰을 생성합니다.
 
-![image-20230704220450878](../../images/2023-07-03-[Spring Security] /image-20230704220450878.png)
+![image-20230704220450878](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704220450878.png)
 
 기본적으로 `http.csrf()` 가 활성화되어있습니다.
 
@@ -595,4 +595,4 @@ protected void configure(HttpSecurity http) throws Exception {
 
 `CsrfFilter` 의 `doFilterInternal()`  메서드입니다.
 
-![image-20230704221726170](../../images/2023-07-03-[Spring Security] /image-20230704221726170.png)
+![image-20230704221726170](../../images/2023-07-03-[Spring Security] Section 1. 스프링 시큐리티 기본 API 및 Filter/image-20230704221726170.png)

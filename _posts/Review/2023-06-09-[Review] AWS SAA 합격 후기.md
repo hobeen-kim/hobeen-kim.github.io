@@ -1,6 +1,7 @@
 ---
 categories: "Review"
 tag: ["AWS", "SAA", "Solution Architect Associated"]
+title: "[Review] AWS SAA 합격 후기"
 ---
 
 # SAA

@@ -1,6 +1,6 @@
 ---
 categories: "codestates"
-tag: [""]
+tag: ["Mock"]
 title: "[codestates] Mockito"
 description: "Mockito 사용에 대한 설명입니다."
 ---

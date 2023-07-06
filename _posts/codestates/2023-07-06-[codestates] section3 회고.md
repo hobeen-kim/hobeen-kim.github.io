@@ -1,7 +1,7 @@
 ---
 categories: "codestates"
-title: "[codestates] Mockito"
-description: "[codestates] Section 3. 회고"
+title: "[codestates] Section 3. 회고"
+description: "[codestates] Section 3. 회고 입니다"
 ---
 
 # 목표

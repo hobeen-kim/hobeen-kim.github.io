@@ -1,6 +1,6 @@
 ---
 categories: "inflearn"
-tag: ["FilterchainProxy", "Authentication, "Authorization", "SecurityContext"]
+tag: ["FilterchainProxy", "Authentication", "Authorization", "SecurityContext"]
 series: "Spring Boot 기반으로 개발하는 Spring Security"
 teaser: "Spring Security"
 title: "[Spring Security] Section 2. 주요 아키텍처 이해"

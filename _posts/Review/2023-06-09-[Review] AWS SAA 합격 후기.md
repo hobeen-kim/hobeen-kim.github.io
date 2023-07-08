@@ -9,7 +9,7 @@ teaser: "AWS SAA"
 
 ![image-20230609193307136](../../images/2023-06-09-[후기] AWS SAA 합격 후기/image-20230609193307136.png)
 
-​	SAA(Solution Architext Associate) 는 AWS 자격증 중 하나로, AWS 의 전반적인 이해를 목표로 하는 사람들이 많이 취득한다고 합니다.
+​	SAA(Solution Architext Associate) 는 AWS 자격증 중 하나로, AWS 의 전반적인 이해를 목표로 하는 사람들이 많이 취득한다고 합니다.s
 
 # 시험 응시 이유
 

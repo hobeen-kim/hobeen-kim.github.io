@@ -1,9 +1,9 @@
 ---
 categories: "inflearn"
-tag: []
+tag: ["FilterchainProxy", "Authentication, "Authorization", "SecurityContext"]
 series: "Spring Boot 기반으로 개발하는 Spring Security"
 teaser: "Spring Security"
-title: [Spring Security] Section 2. 주요 아키텍처 이해"
+title: "[Spring Security] Section 2. 주요 아키텍처 이해"
 description: "Spring Security Section 2. 주요 아키텍처 이해 내용입니다. 4시간짜리 섹션이라 내용이 깁니다."
 ---
 
@@ -363,7 +363,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 ![image-20230708112742336](../../images/2023-07-04-[Spring Security] Section 2. 주요 아키텍처 이해/image-20230708112742336.png)
 
-1. SecurityConfig 에서 정보를 읽어서 FIlterChainProxy 에 filters 가 생성됩니다.
+1. `SecurityConfig` 에서 정보를 읽어서 `FIlterChainProxy` 에 `filters` 가 생성됩니다.
 2. DelegatingFilterproxy 는 하나의 서블릿 필터로, 인증요청에 대해 springSecurityFilterChain 이라는 스프링 빈을 찾아 위임합니다.
-3. FilterChainProxy 는 요청을 받으면 필터 순서대로 요청을 처리합니다.
+3. `FilterChainProxy` 는 요청을 받으면 필터 순서대로 요청을 처리합니다.
 

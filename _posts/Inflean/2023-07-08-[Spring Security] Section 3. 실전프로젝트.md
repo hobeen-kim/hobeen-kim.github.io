@@ -3,7 +3,7 @@ categories: "inflearn"
 tag: ["WebIgnore", "PasswordEncoder", "UserDetailService", "CustomAuthenticationSuccessHandler", "CustomAuthenticationFailureHandler", "CustomAccessDeniedHandler"]
 series: "Spring Boot 기반으로 개발하는 Spring Security"
 teaser: "Spring Security"
-title: [Spring Security] Section 3. 인증 프로세스 Form 인증 구현"
+title: "[Spring Security] Section 3. 인증 프로세스 Form 인증 구현"
 description: "Spring Security Section 3. 실전 프로젝트 - Form 인증 구현 내용입니다. 필요한 내용만 넣었습니다."
 ---
 

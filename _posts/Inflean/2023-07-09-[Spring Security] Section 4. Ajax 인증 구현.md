@@ -1,6 +1,6 @@
 ---
 categories: "inflearn"
-tag: [" AjaxAUthenticationFilter", "Ajax Custom DSLs"]
+tag: ["AjaxAUthenticationFilter", "Ajax Custom DSLs"]
 series: "Spring Boot 기반으로 개발하는 Spring Security"
 teaser: "Spring Security"
 title: "[Spring Security] Section 4. Ajax 인증 구현"

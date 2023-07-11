@@ -106,3 +106,44 @@ title: "[Spring Security] AuthenticationFilter 흐름 확인하기"
 
 1. 먼저 `Authentication` 에서 비밀번호를 추출합니다. 여기서 유의해야 할 건 `Authentication` 은 요청으로부터 얻은 정보로 생성된 객체입니다.
 2. 그리고 `userDetails` 에 있는 비밀번호와 비교합니다. `userDetails` 는 DB 에서 얻은 정보입니다. 만약 다르다면 `BadCredentialsException` 이 발생합니다.
+
+# Authentication
+
+사용자의 인증 정보를 저장하는 토큰 개념으로. 인증 시 `id` 와 `password` 를 담고 인증 검증을 위해 전달되어 사용됩니다. 인증 후에는 최종 인증 결과 (user 객체, 권한정보) 를 담고 `SecurityContext` 에 저장되어 전역적으로 참조가 가능합니다.
+
+아래와 같은 필드 값을 가집니다.
+
+![image-20230712024110463](../../images/2023-07-11-[Spring Security] AuthenticationFilter 흐름 확인하기/image-20230712024110463.png)
+
+UsernamePasswordAuthenticationToken 은 AbstractAuthenticationToken 을 확장합니다. 필드값의 의미는 다음과 같습니다.
+
+1. **principal** : 사용자 아이디 혹은 User 객체를 저장
+2. **credentials** : 사용자 비밀번호
+3. **authorities** : 인증된 사용자의 권한 목록
+4. **details** : 인증 부가 정보
+5. **Authenticated :** 인증 여부
+
+## ThreadLocal 에 담긴 Authentication 객체 꺼내기
+
+![image-20230712022943115](../../images/2023-07-11-[Spring Security] AuthenticationFilter 흐름 확인하기/image-20230712022943115.png)
+
+기본적으로 모든 위치에서 `SecurityContexHolder.getContext().getAuthentication()` 로 `Authentication` 을 얻을 수 있습니다. 그 이유는 `ThreadLocal` 에 저장되어 있기 때문입니다.
+
+인증 성공 이후에 인증 필터인 `AbstractAuthenticationProcessingFilter` 의 `successfulAuthentication()` 메서드에서 `SecurityContext` 에 해당 `Authentication` 객체를 저장하고, 또한 세션에도 저장을 했습니다. 이제 해당 `Authentication` 을 꺼내보겠습니다. **`SecurityContextHolder` 에서 꺼내는 방법**과 **세션에서 꺼내는 방법** 두 가지가 있습니다.
+
+![image-20230712022126656](../../images/2023-07-11-[Spring Security] AuthenticationFilter 흐름 확인하기/image-20230712022126656.png)
+
+위 코드는 `"/"` 으로 매핑했을 때입니다. 두 방법으로 `Authentication` 을 받아도 둘 다 같은 인스턴스를 반환합니다.
+
+# Authentication Flow
+
+인증처리를 시작하는 시작 단계부터 각각의 인증 단계를 거쳐서 인증이 완료되는 흐름을 전체적으로 정리해보겠습니다.
+
+![image-20230712022359549](../../images/2023-07-11-[Spring Security] AuthenticationFilter 흐름 확인하기/image-20230712022359549.png)
+
+1. `UsernamePasswordAuthenticationFilter` 가 `Authentication` 객체를 생성해서 `AuthenticationManager` 에게 인증을 위임합니다. (**`attemptAuthentication()` 내의 `authenticate()`**)
+2. `AuthenticationManager` 은 인증의 전반적인 관리를 하지만 실제 인증역할은 하지 않습니다. 대신 내부적으로 가지고 있는 `List` 안의 `AuthenticationProvider` 중, 현재 인증에 사용되는 `AuthenticationProvider` 를 찾아서 (**`support()` 사용**) 인증을 위임합니다. (**`authenticate()`**)
+3. `AuthenticationProvider` 는 전달받은 `Authentication` 을 통해 `UserDetailsService` 로 유저 객체를 요청합니다. (**`loadUserByUsername()`**)
+4. `UserDetailsService` 는 DB 에서 유저 객체를 조회합니다. 이때 예외가 발생하면 인증에 실패하게 되고, 그 예외는 `UsernamePasswordAuthenticationFilter` 가 받아서 처리하게 됩니다. **인증에 성공하면 `UserDetails` 타입으로 반환**합니다.
+5. `AuthenticationProvider` 는 ID 가 검증된 `UserDetails` 에서 PW 를 검증합니다. (**`additionalAuthenticationChecks()`**) PW 가 일치하지 않으면 `BadCredentialException` 이 발생합니다. 검증이 완료되면 `Authentication` 에 `UserDetails` 와 `authorities` 를 담은 객체를 생성하여 반환합니다.
+6. 최종적으로 `UsernamePasswordAuthenticationFilter` 는 `SecurityContext` 에 인증 객체를 저장합니다. (**`successfulAuthentication()`**)

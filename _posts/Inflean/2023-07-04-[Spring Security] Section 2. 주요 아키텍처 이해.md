@@ -98,7 +98,7 @@ class SecurityConfig2 extends WebSecurityConfigurerAdapter {
 - 사용자의 인증 정보를 저장하는 토큰 개념입니다.
 - **인증 시** `id` 와 `password` 를 담고 인증 검증을 위해 전달되어 사용됩니다.
 - **인증 후** 최종 인증 결과 (user 객체, 권한정보) 를 담고 `SecurityContext` 에 저장되어 전역적으로 참조가 가능합니다.
-  - `Authentication authentication **=** SecurityContexHolder.getContext().getAuthentication()`
+  - `Authentication authentication = SecurityContexHolder.getContext().getAuthentication()`
 
 **구조**
 
@@ -268,7 +268,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 ![image-20230707223721481](../../images/2023-07-04-[Spring Security] Section 2. 주요 아키텍처 이해/image-20230707223721481.png)
 
-인증 필터인 `AuthenticationFilter` 가 `Authentication` 객체를 생성해서 `ProviderManger` 에게 넘기면, `ProviderManger ` 는 자기가 가지고 있는 `Provider` 리스트를 순회하면서 해당 인증을 처리할 수 있는지 확인합니다. `Form` 인증은 `DaoAuthenticationProvider` 를, `RememberMe` 인증은 `RememberMeAuthenticationProvider` 를 사용합니다. 하지만 해당 `ProviderManager` 가 처리하지 못한다면 `parent` 를 호출해서 처리합니다.
+인증 필터인 `AuthenticationFilter` 가 `Authentication` 객체를 생성해서 `ProviderManger` 에게 넘기면, `ProviderManger` 는 자기가 가지고 있는 `Provider` 리스트를 순회하면서 해당 인증을 처리할 수 있는지 확인합니다. `Form` 인증은 `DaoAuthenticationProvider` 를, `RememberMe` 인증은 `RememberMeAuthenticationProvider` 를 사용합니다. 하지만 해당 `ProviderManager` 가 처리하지 못한다면 `parent` 를 호출해서 처리합니다.
 
 ![image-20230707225612062](../../images/2023-07-04-[Spring Security] Section 2. 주요 아키텍처 이해/image-20230707225612062.png)
 

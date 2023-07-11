@@ -102,11 +102,11 @@ class SecurityConfig2 extends WebSecurityConfigurerAdapter {
 
 **구조**
 
-	1. **principal** : 사용자 아이디 혹은 User 객체를 저장
-	1. **credentials** : 사용자 비밀번호
-	1. **authorities** : 인증된 사용자의 권한 목록
-	1. **details** : 인증 부가 정보
-	1. **Authenticated :** 인증 여부
+1. **principal** : 사용자 아이디 혹은 User 객체를 저장
+1. **credentials** : 사용자 비밀번호
+1. **authorities** : 인증된 사용자의 권한 목록
+1. **details** : 인증 부가 정보
+1. **Authenticated :** 인증 여부
 
 ## 인증 흐름
 

@@ -1,7 +1,7 @@
 ---
 categories: "codestates"
-tag: [""]
-title: "[codestates] Spring Security"
+tag: ["JWT"]
+title: "[codestates] JWT"
 ---
 
 # JWT 구조

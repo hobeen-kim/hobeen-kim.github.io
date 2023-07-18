@@ -1,6 +1,6 @@
 ---
 categories: "codestates"
-tag: [""]
+tag: ["Spring Security", "Custom UserDetailsService"]
 title: "[codestates] Spring Security"
 ---
 

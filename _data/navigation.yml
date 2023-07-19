@@ -20,6 +20,8 @@ docs:
         url: /categories/WEB
       - title: "react"
         url: /categories/react
+      - title: "devOps"
+        url: /categories/devOps
       - title: "git"
         url: /categories/git
       - title: "java"

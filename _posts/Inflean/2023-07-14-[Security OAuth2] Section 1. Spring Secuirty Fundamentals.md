@@ -548,7 +548,7 @@ CORS 를 해결하기 위해서는 서버에서 Access-Control-Allow-\* 을 세�
 ## CorsConfigurer
 
 - Spring Security 필터 체인에 `CorsFilter` 를 추가합니다. 
-- `corsFilter` 라는 이름의 Bean 이 제공되면 해당 `CorsFilter` 가 사용된다
+- `corsFilter` 라는 이름의 Bean 이 제공되면 해당 `CorsFilter` 가 사용됩니다.
 - `corsFilter` 라는 이름의 Bean 이 없고 `CorsConfigurationSource` 빈이 정의된 경우 해당 `CorsConfiguration` 이 사용됩니다.
 - `CorsConfigurationSource` 빈이 정의되어 있지 않은 경우 Spring MVC가 클래스 경로에 있으면 `HandlerMappingIntrospector` 가 사용됩니다.
 

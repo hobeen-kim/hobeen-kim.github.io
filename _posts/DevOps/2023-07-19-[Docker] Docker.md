@@ -282,7 +282,8 @@ docker ps -a
 // 컨테이너 제거
 docker rm 컨테이너이름
 
-//** 이미지 제거
+//** 이미지 제거 (위 아래는 같은 명령어)
+docker rmi 도커Hub이름/도커Repository이름:tag
 docker image rm 도커Hub이름/도커Repository이름:tag
 ```
 

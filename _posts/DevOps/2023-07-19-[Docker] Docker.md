@@ -3,7 +3,7 @@ categories: "devOps"
 tag: ["Docker", "Image", "Container", "DockerHub"]
 teaser: "docker"
 title: "[Docker] Docker"
-description: "데이터베이스 개론과 실습 Ch8. 트랜잭션 내용 입니다."
+description: "도커에 관한 일반적인 내용 입니다."
 ---
 
 # Docker
@@ -30,7 +30,7 @@ description: "데이터베이스 개론과 실습 Ch8. 트랜잭션 내용 입�
 
 ​	컨터이너(container) 는 이미지를 실행한 상태로, 응용프로그램 종속성과 함께 응용프로그램 자체를 패키징하여 격리된 공간에서 프로세스를 동작시키는 기술입니다.
 
-1. 컨터에니ㅓ는 이미지 Layer 에 읽기/쓰기 Layer 를 추가하는 것으로 생성/실행됩니다. 따라서 여러 개의 컨테이너를 생성해도 최소한의 용량만 사용되며, 바뀐 부분을 읽기/쓰기 Layer 에 적습니다.
+1. 컨터이너에는 이미지 Layer 에 읽기/쓰기 Layer 를 추가하는 것으로 생성/실행됩니다. 따라서 여러 개의 컨테이너를 생성해도 최소한의 용량만 사용되며, 바뀐 부분을 읽기/쓰기 Layer 에 적습니다.
 2. 한 서버 내에서 컨테이너는 각각 독립적으로 실행됩니다.
 3. 컨테이너는 커널 공간과 호스트 OS 자원(시스템콜) 을 공유합니다.
 4. 컨테이너를 삭제하면 컨테이너에서 생성한 파일을 모두 사라집니다.
@@ -299,6 +299,45 @@ docker run -p 8080:8080 --name mycontainer sksjsksh32/my_first_docker:0.0.2
 이제 8080 포트를 실행하면 잘 동작하는 걸 볼 수 있습니다.
 
 ![image-20230719155130305](../../images/2023-07-19-[Docker] Docker/image-20230719155130305.png)
+
+# 기타 명령어
+
+## 도커 컨테이너 내 파일 접근
+
+`docker exec -it {컨테이너_이름} bash` 로 컨테이너 파일로 접근할 수 있습니다. 그러면 root:/usr/local/apache2 로 접근하게 됩니다.
+
+## docker-compose CLI
+
+ 두 개 이상의 컨테이너를 Docker Compose를 이용해 한 번에 실행할 수 있습니다. 
+
+먼저 **docker-compose.yaml** 파일을 만듭니다.
+
+```java
+version: '3.8'
+
+services:
+  nginx:
+    image: sebcontents/client
+    restart: 'always'
+    ports:
+      - "8080:80"
+    container_name: client
+
+  spring:
+    image: 0xnsky/server-spring
+    restart: 'always'
+    ports:
+      - "4999:3000"
+    container_name: server-spring
+```
+
+각각 image 와 container_name 을 지정합니다. 여기서는 `nginx` 와 `spring` 을 실행합니다. `docker-compose up -d` 으로 실행할 수 있습니다. `-d` 옵션은 백그라운드 실행입니다.
+
+종료는 `docker-compose down` 로 하며 `docker-compose up {특정 이미지}` 를 통해 특정 이미지를 실행할 수 있습니다.
+
+![image-20230720155534631](../../images/2023-07-19-[Docker] Docker/image-20230720155534631.png)
+
+위와 같이 2개가 한번에 실행됩니다.
 
 # Ref.
 

@@ -93,24 +93,3 @@ scope 에 openid 를 포함하면 바로 응답값으로 id_token 을 얻을 수
 ![image-20230721112403254](../../images/2023-07-21-[Security OAuth2] Section 4. OAuth 2.0 Open ID Connect/image-20230721112403254.png)
 
 이렇게 하면 한번에 AccessToken, id_token, code 를 얻을 수 있습니다.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

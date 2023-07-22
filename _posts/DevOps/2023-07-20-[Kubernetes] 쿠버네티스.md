@@ -147,6 +147,112 @@ spec:
 
 혹은 `kubectl delete deployment hello-minikube` 명령어를 통해 deployment 를 삭제할 수도 있습니다.
 
+# 파드 (Pods)
 
+파드(Pod)는 쿠버네티스의 배포 가능한 가장 작은 컴퓨팅 유닛입니다. 파드는 그 자체로 하나의 논리적인 호스트입니다. 파드는 다음을 포함할 수 있습니다. 마치 도커 컨테이너처럼 파드 내에서 다음 요소들은 격리됩니다.
 
- 
+- 하나 이상의 애플리케이션 컨테이너
+- IP 주소
+- 볼륨과 같은 공유 스토리지
+
+![image-20230721113608415](../../images/2023-07-20-[Kubernetes] 쿠버네티스/image-20230721113608415.png)
+
+쿠버네티스에서는 “워크로드 리소스”를 만들기 위해 YAML 파일과 같은 리소스 정의 파일을 사용할 수 있습니다. 워크로드란 <u>어떤 애플리케이션을 실행할 때 필요한 IT 리소스의 집합이라는 의미</u>로 통용되며 쿠버네티스에서는 <u>쿠버네티스상에서 작동되는 애플리케이션</u>을 의미합니다.
+
+파드를 생성하기 위해 파드를 정의할 때 다음과 같은 형태의 YAML 파일을 사용할 수 있습니다.
+
+```yml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.14.2
+    ports:
+    - containerPort: 80
+```
+
+위 파드 정의 파일을 실제로 만들기 위해서는, 다음 명령을 사용합니다.
+
+`kubectl apply -f simple-pod.yaml`
+
+만들고 난 이후 `kubectl get pods` 를 통해 상태를 확인할 수 있습니다.
+
+![image-20230721115605437](../../images/2023-07-20-[Kubernetes] 쿠버네티스/image-20230721115605437.png)
+
+또한 kubectl describe pod [파드이름] 명령어로 pod 의 정보를 확인할 수 있습니다.
+
+## 파드 관리
+
+​	쿠버네티스에서는 사실 직접 사용자가 개별 파드를 만들 일이 그리 많지 않습니다. 왜냐하면 **파드는 일시적이고, 언제나 삭제될 수 있음을 감안하고** 만들기 때문입니다. 쿠버네티스의 핵심은 **컨테이너를 오케스트레이션**하는 것으로, 파드 장애시 자동 복구하거나, 복제하거나 하는 등의 일을 자동으로 처리하는 데에 있습니다. 결론적으로, 파드는 **디플로이먼트, 스테이트풀셋, 데몬셋**을 이용해 관리하는 것이 바람직합니다. 해당 워크로드 리소스는 파드 템플릿을 항상 포함하고 있습니다.
+
+아래는 디플로이먼트의 예시입니다.
+
+```yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    # 여기서부터 파드 템플릿입니다.
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.14.2
+        ports:
+        - containerPort: 80
+    # 여기까지 파드 템플릿입니다.
+```
+
+## 디플로이먼트
+
+​	디플로이먼트는 파드를 업데이트하기 위한 선언적 명세입니다. 디플로이먼트 리소스를 통해 다음을 할 수 있습니다.
+
+- (레플리카셋, 즉 복제본 구성을 이용하여) 파드를 원하는 개수만큼 실행시킬 수 있습니다.
+- (제어판 *Control Plane*을 이용하여) 파드를 업데이트할 수 있습니다.
+- 마찬가지로, 파드를 롤백하는 것도 가능합니다.
+
+## 서비스
+
+​	클러스터 안에 파드는 각각 고유의 IP를 가지고 있지만, 직접 우리가 내부망에 접속할 수 있는 것은 아닙니다. 대신 서비스 리소스로 접근할 수 있습니다.
+
+> 서비스 리소스를 사용하면 파드에서 실행 중인 애플리케이션을 클러스터 외부에서 접근할 수 있습니다. 또한 서비스를 사용하여 클러스터 내부에서 사용할 수 있는 서비스만 게시할 수 있습니다. 쿠버네티스에서 서비스는 파드의 집합에 접근할 수 있는 정책을 정의하는 추상적 개념입니다. 서비스 리소스가 정의된 YAML 파일에 selector라는 것을 이용해 서비스할 대상 타겟을 설정할 수 있습니다.
+
+다음은 서비스 리소스 예제입니다.
+
+```yml
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  namespace: default
+spec:
+  selector:
+    app: nginx # 배포하려는 파드를 지정합니다. 당연히 파드가 이미 실행 중이어야 합니다.
+  type: LoadBalancer
+  ports:
+  - name: nginx
+    protocol: TCP
+    port: 80
+    targetPort: 80
+```
+
+LoadBalancer로 서비스를 만들고, 백엔드에 cozserver라는 이름을 가진 파드 집합에 연결되도록 지정했습니다. 
+
+![image-20230721131716509](../../images/2023-07-20-[Kubernetes] 쿠버네티스/image-20230721131716509.png)
+
+ minikube에서는 EXTERNAL-IP가 pending 상태로 진전이 되지 않습니다.
+
+`minikube tunnel` 명령을 이용하면, EXTERNAL-IP가 `127.0.0.1`로 설정되며, 그때부터 [http://localhost](http://localhost/) 로 접속이 가능해집니다. 접속이 원활하지 않을 경우, tunnel을 중지하고 해당 명령을 다시 시도하면 됩니다.

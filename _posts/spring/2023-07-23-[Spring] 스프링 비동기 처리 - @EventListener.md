@@ -1,7 +1,7 @@
 ---
 series: "스프링 비동기 처리 : @Async 와 @EventListener"
 categories: "spring"
-tag: ["@Async, @EventListener"]
+tag: ["@EventListener"]
 title: "[Spring] 비동기 처리 - @EventListener"
 ---
 
@@ -78,7 +78,7 @@ public class EventListenerController {
 
 `username` 을 받아서 member 로 저장하고 해당 member 를 리턴하는 로직입니다.
 
-### 실행
+## 실행
 
 포스트맨으로 실행해보겠습니다.
 
@@ -94,9 +94,7 @@ public class EventListenerController {
 
 ​	이제 요구사항을 간단하게 정의해보겠습니다.
 
-:white_check_mark: 회원가입 이후 Email 전송
-
-:white_check_mark: 회원가입 이후 Push 알림 발행
+:white_check_mark: 회원가입 이후 Email 전송, Push 알림 발행
 
 :white_check_mark: Email 과 Push 알림은 시간이 오래 걸리니 회원가입 처리가 되면 비동기로 실행
 
@@ -250,7 +248,9 @@ public class EventListenerController {
 
 ```java
 public String saveException(String username){
+    
 	applicationEventPublisher.publishEvent(new MemberEventDto(username));
+    
     log.info("member saving... : {}", username);
     exception(username);
 
@@ -277,6 +277,11 @@ public String saveException(String username){
 
     return username;
 }
+
+public void exception(String username){
+    log.info("member save Exception!! : {}", username);
+    throw new RuntimeException("member save Exception!! : " + username);
+}
 ```
 
 위 코드에서는 `publishEvent()` 메서드를 마지막에 넣어서, 저장 로직이 실패하면 예외가 반환되어 `publishEvent()` 메서드가 실행되지 않게 했습니다.
@@ -285,7 +290,7 @@ public String saveException(String username){
 
 ​	하지만 모든 상황이 위 예시처럼 간단하지만은 않겠죠. 여기서 member 저장에 실패했다는 뜻은 트랜잭션에서 Rollback 이 발생했다는 뜻입니다. 즉 **COMMIT 이 될 때만 Event 를 발행하고 싶습니다.**
 
-​	이 경우에는 `@TransactionalEventListener` 를 사용하면 됩니다.
+​	이 경우에는 `@TransactionalEventListener` 를 사용하면 됩니다. `MemberEventHandler` 의 `@EventListener` 어노테이션을 `@TransactionalEventListener` 로 변경하겠습니다.
 
 ```java
 @Component
@@ -348,7 +353,9 @@ public class MemberService {
 }
 ```
 
-`saveException()` 메서드는 unchecked 예외가 발생하기 때문에 트랜잭션이 롤백됩니다. 따라서 `publishEvent()` 메서드를 먼저 실행시킨다고 하더라도 이벤트가 발행되지 않습니다. 더 자세한 내용은 Ref. 2번 블로그를 참고하면 좋을 듯합니다.
+`saveException()` 메서드는 `unchecked` 예외가 발생하기 때문에 트랜잭션이 롤백됩니다. 따라서 `publishEvent()` 메서드를 먼저 실행시킨다고 하더라도 이벤트가 발행되지 않습니다. 더 자세한 내용은 Ref. 2번 블로그를 참고하면 좋을 듯합니다.
+
+> 참고로 checked 예외는 기본적으로 롤백되지 않고 커밋됩니다.
 
 # Ref.
 

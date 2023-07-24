@@ -57,7 +57,7 @@ EC2 는 AWS 에서 제공하는 가상 컴퓨팅 서비스로, 인스턴스를 �
 
    ![image-20230428114614713](../../images/2023-04-27-[AWS] EC2 및 ELB, AutoScaling, EFS 연결/image-20230428114614713.png)
 
-   - 'sudo -s` : root 권한 받아오기` 
+   - `sudo -s` : `root` 권한 받아오기
    - `yum install httpd -y` : httpd 패키지 설치
    - `service httpd start` : httpd 시작
 
@@ -644,3 +644,62 @@ EFS 는 EC2 , Lambda 같은 여러 컴퓨팅 인스턴스가 동시에 액세스
 <u>**확인이 완료되었으면 EFS 와 EC2 를 모두 종료해줍시다.**</u>
 
 \* EC2 종료 확인 후 EFS 를 종료해야합니다.
+
+# EC2 와 github SSH 로 연결하기
+
+​	일반적으로 SSH 키를 생성하는 위치는 사용자의 홈 디렉토리 아래에 있는 `.ssh` 디렉토리입니다.
+
+```
+cd ~
+mkdir .ssh
+chmod 700 .ssh
+cd .ssh
+ssh-keygen
+```
+
+​	이렇게 생성한 키는 `~/.ssh/id_rsa` (private key)와 `~/.ssh/id_rsa.pub` (public key) 두 파일로 저장됩니다.  GitHub 계정 설정의 SSH and GPG keys 섹션에 가서 새로운 SSH 키를 추가합니다. 여기에 `~/.ssh/id_rsa.pub`의 내용을 복사해서 붙여넣습니다.
+
+이제 깃허브 repository 의 SSH 연결로 clone 합니다.
+
+```
+git clone git@github.com:hobeen-kim/hobeen-kim.github.io.git
+```
+
+# shell script 로 실행 방법
+
+​	셀 스크립트는 셀이나 명령 중 인터프리터에서 돌아가도록 작성된 스크립트입니다. 운영체제를 위한 스크립트라고 생각하면 됩니다. 셸 스크립트는 실행 명령을 미리 작성해 둔 것이어서 ".sh"라는 파일 형태로 만들어 사용합니다.
+
+```
+$ nano restart.sh // 에디터로 파일을 생성한 후 아래 내용을 붙여넣기 해주세요.
+================================================================================
+#!/bin/bash
+
+# DeployServer-0.0.1-SNAPSHOT.jar가 실행 중이라면 프로세스를 종료합니다.
+ps -ef | grep "DeployServer-0.0.1-SNAPSHOT.jar" | grep -v grep | awk '{print $2}' | xargs kill -9 2> /dev/null
+
+# 종료 이력을 파악하여 적절한 문구를 출력합니다.
+if [ $? -eq 0 ];then
+    echo "my-application Stop Success"
+else
+    echo "my-application Not Running"
+fi
+
+# DeployServer-0.0.1-SNAPSHOT.jar를 다시 실행하기 위한 과정을 진행합니다.
+echo "my-application Restart!"
+echo $1
+
+# nohup 명령어를 통해 백그라운드에서 DeployServer-0.0.1-SNAPSHOT.jar를 실행합니다.
+nohup java -jar build/libs/DeployServer-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev > /dev/null 2>&1 &
+```
+
+눅스에 위와 같이 파일을 저장하고 아래 명령어를 통해 실행 권한을 부여합니다.
+
+```
+ chmod 755 restart.sh
+```
+
+위와 같이 명령어를 수행하였으면 아래 명령어를 통해 실행이 가능합니다.
+
+```
+ ./restart.sh
+```

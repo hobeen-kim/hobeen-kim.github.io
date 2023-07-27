@@ -340,6 +340,14 @@ services:
 
 위와 같이 2개가 한번에 실행됩니다.
 
+# EC2 에 Docker 설치하기
+
+Ubuntu 플랫폼을 사용 중인 EC2 인스턴스의 경우 아래 링크를 참고하여 도커를 설치할 수 있습니다.
+
+- [Ubuntu Docker Engine 설치 안내](https://docs.docker.com/engine/install/ubuntu/)
+
+docker 가 정상적으로 설치되었다면 `docker -v` 로 확인할 수 있습니다. EC2 에서 docker 를 사용하기 위해서 사용자 계정이면 `sudo` 를 사용해야 합니다.
+
 # Ref.
 
 [도커 컨테이너(Container) 와 이미지(Image) 란?](https://hoon93.tistory.com/48)

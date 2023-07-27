@@ -692,7 +692,7 @@ echo $1
 nohup java -jar build/libs/DeployServer-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev > /dev/null 2>&1 &
 ```
 
-눅스에 위와 같이 파일을 저장하고 아래 명령어를 통해 실행 권한을 부여합니다.
+리눅스에 위와 같이 파일을 저장하고 아래 명령어를 통해 실행 권한을 부여합니다.
 
 ```
  chmod 755 restart.sh

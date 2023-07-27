@@ -56,7 +56,7 @@ ENTRYPOINT ["java","-jar","/app.jar"]
 
 ![image-20230727104453348](../../images/2023-07-27-[CI] git Action 을 활용한 CI/image-20230727104453348.png)
 
-```java
+```yml
 name: Java CI with Gradle
 
 on:

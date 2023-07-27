@@ -1,6 +1,6 @@
 ---
 categories: "devOps"
-tag: [""]
+tag: ["kubernetes", "pod"]
 teaser: "kubernetes"
 title: "[Kubernetes] 쿠버네티스"
 description: "쿠버네티스에 관한 일반적인 내용 입니다."

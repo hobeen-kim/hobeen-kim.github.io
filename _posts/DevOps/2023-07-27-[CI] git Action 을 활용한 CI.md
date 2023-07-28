@@ -1,8 +1,8 @@
 ---
 categories: "devOps"
-tag: []
+series: "CI/CD 기초"
+tag: ["git actions"]
 title: "[CI] git Action 을 활용한 CI"
-description: ""
 ---
 
 # git action 을 활용한 CI

@@ -283,6 +283,14 @@ public class InitMember {
 
 `@PostConstruct` 를 통해 스프링 실행 시점에 데이터를 추가합니다. `@PostConstruct` 와 `@Transactional` 은 라이프 사이클 상 함꼐 사용할 수가 없어서 분리했습니다.
 
+> `@PostConstruct`와 `@Transactional`이 동일한 메서드에 적용되면 예상치 않은 동작이 발생할 수 있습니다. 이유는 두 어노테이션의 동작 방식과 라이프사이클에 있습니다.
+>
+> `@PostConstruct` 어노테이션이 붙은 메서드는 객체가 생성된 후, 의존성 주입이 끝나면 자동으로 호출되는 초기화 메서드입니다. 이 메서드는 Spring Bean이 완전히 생성되고 나서 한 번만 호출되며, Spring의 라이프사이클에서 매우 초기 단계에 해당합니다.
+>
+> 반면에 `@Transactional`은 Spring의 AOP(Aspect Oriented Programming)를 활용하여 동작합니다. `@Transactional` 어노테이션이 붙은 메서드가 호출되면, Spring은 먼저 프록시 객체를 생성하고, 이 프록시를 통해 원래의 메서드를 호출합니다. 이 프록시를 통해 트랜잭션 관리, commit, rollback 등의 트랜잭션 관련 작업을 수행할 수 있습니다. 이는 Spring 라이프사이클에서 비교적 뒷단계에 해당합니다.
+>
+> 그런데 `@PostConstruct`가 호출되는 시점에는 AOP 프록시가 아직 적용되지 않았기 때문에, `@Transactional` 어노테이션은 무시될 수 있습니다. 따라서 `@Transactional`이 정상적으로 동작하지 않고, 예상한 대로 트랜잭션 관리가 되지 않는 문제가 발생할 수 있습니다.
+
 조회 컨트롤러는 아래와 같이 만듭니다.
 
 ```java

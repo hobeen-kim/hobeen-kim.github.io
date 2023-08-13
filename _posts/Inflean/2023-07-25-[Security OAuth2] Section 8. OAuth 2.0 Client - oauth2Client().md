@@ -525,7 +525,7 @@ public class LoginController {
         if(authorizedClient != null){
             OAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService = new DefaultOAuth2UserService();
             ClientRegistration clientRegistration = authorizedClient.getClientRegistration();
-            OAuth2AccessToken accessToken = authorizedClient.getAccessToken();
+            OAuth2AccessToken accessToken = authorize dClient.getAccessToken();
             OAuth2UserRequest oAuth2UserRequest = new OAuth2UserRequest(clientRegistration, accessToken); //4
             OAuth2User oAuth2User = oAuth2UserService.loadUser(oAuth2UserRequest); //5
 

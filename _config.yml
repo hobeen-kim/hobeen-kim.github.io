@@ -118,10 +118,6 @@ author:
       icon: "fab fa-fw fa-github"
       url: "https://github.com/hobeen-kim"
 
-    - label: "soccerAnalyst"
-      icon: "fas fa-fw fa-link"
-      url: "https://socceranalyst.net"
-
 # Site Footer
 footer:
   links:

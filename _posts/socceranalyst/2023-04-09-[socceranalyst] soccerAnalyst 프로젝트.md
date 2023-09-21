@@ -7,6 +7,8 @@ tag: "toyproject"
 
 [socceranalyst 링크입니다.](https://socceranalyst.net)
 
+- 9.20 자로 사용하지 않아서 서버 비용 문제로 닫았습니다.
+
 [git 코드보기](https://github.com/hobeen-kim/socceranalyst.git)
 
 저는 축구를 보는 것도 좋아하지 않고 하는 건 완전 싫어하지만 우연찮게도 첫 배포까지 완료한 프로젝트는 축구 관련이었습니다.

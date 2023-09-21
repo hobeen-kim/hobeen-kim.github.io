@@ -468,30 +468,30 @@ select
 ### 서브 쿼리문 없이 2번에 나눠서 보내기
 
 ```java
-    public List<Reward> findByOrderIdTwice(Long memberId, String orderId) {
+public List<Reward> findByOrderIdTwice(Long memberId, String orderId) {
 
-        List<Long> videoIds = queryFactory.select(orderVideo.video.videoId)
-                .from(orderVideo)
-                .where(orderVideo.order.orderId.eq(orderId)
-                        .and(orderVideo.orderStatus.eq(OrderStatus.COMPLETED)))
-                .fetch();
+    List<Long> videoIds = queryFactory.select(orderVideo.video.videoId)
+            .from(orderVideo)
+            .where(orderVideo.order.orderId.eq(orderId)
+                    .and(orderVideo.orderStatus.eq(OrderStatus.COMPLETED)))
+            .fetch();
 
-        List<Reward> rewards = queryFactory
-                .selectFrom(reward)
-                .leftJoin(videoReward).on(reward.rewardId.eq(videoReward.rewardId))
-                .leftJoin(replyReward).on(reward.rewardId.eq(replyReward.rewardId))
-                .leftJoin(questionReward).on(reward.rewardId.eq(questionReward.rewardId))
-                .leftJoin(questionReward.question, question)
-                .where(reward.member.memberId.eq(memberId)
-                        .and(
-                                videoReward.video.videoId.in(videoIds)
-                                        .or(question.video.videoId.in(videoIds))
-                                        .or(replyReward.video.videoId.in(videoIds))
-                        )
-                ).fetch();
+    List<Reward> rewards = queryFactory
+            .selectFrom(reward)
+            .leftJoin(videoReward).on(reward.rewardId.eq(videoReward.rewardId))
+            .leftJoin(replyReward).on(reward.rewardId.eq(replyReward.rewardId))
+            .leftJoin(questionReward).on(reward.rewardId.eq(questionReward.rewardId))
+            .leftJoin(questionReward.question, question)
+            .where(reward.member.memberId.eq(memberId)
+                    .and(
+                            videoReward.video.videoId.in(videoIds)
+                                    .or(question.video.videoId.in(videoIds))
+                                    .or(replyReward.video.videoId.in(videoIds))
+                    )
+            ).fetch();
 
-        return rewards;
-    }
+    return rewards;
+}
 ```
 
 여기서는 `videoIds` 만 조회하고 나머지는 모두 `left join` 하여 하나의 테이블을 만든 뒤 그 `videoIds` 로 조회합니다.
@@ -609,3 +609,23 @@ JPQL 로 변경하는 건 쉬우니까 나중에 한번 해보겠습니다. 현�
 
 사실 이렇게 보면 다른 전략도 결국 다 비슷비슷하겠구나 느꼈습니다. 하지만 저는 어디엔가 있을 완벽한 설계를 찾고 싶은 갈망이 있습니다. 언젠가 이 테이블의 더 나은 설계를 찾을 수는 있겠죠.
 
+## + 추가
+
+처음에 쿼리문을 설계했을 때 `where r.member_id = ?` 조건을 넣는 걸 깜빡해서 결과값이 비디오에 연관된 모든 Reward 가 출력되었는데요. 약 1800개 정도 조회되었고 1번 쿼리는 시간이 비슷했지만 2, 3번 쿼리는 2000ms 라는 엄청난 시간이 걸렸었습니다. 그래서 확인해보니 `where r.member_id = ?` 가 빠져있었고 넣으니까 정상적인 시간이 걸렸습니다. 
+
+그런데 지금와서 생각해보니 데이터 조회 수가 많아지면 2, 3번 쿼리의 수행능력이 떨어질까 라는 생각이 들었습니다. 그래서 한번에 조회되는 최대 리워드 개수를 생각해보고 그 수만큼 조회해보기로 했습니다.
+
+현재 리워드 조회의 key 는 order 입니다. order 를 통해 그 주문에 해당하는 모든 리워드를 찾고 있습니다. 그리고 order 는 장바구니에서 가능하고, 장바구니의 최대개수는 20개입니다. 따라서 최대 리워드 개수는 20 x (비디오 질문 리워드 + 리플 리워드 + 구매 리워드) 입니다. 20 x (5 + 1 + 1) 로 140개네요. 이제 하나의 주문에 video 20개를 넣고 해보겠습니다.
+
+아래는 Reward 최대 개수 (140개) 를 orderId 로 조회 시 입니다.
+
+|            | 여러 번 짧은 쿼리 (1번) | 두방 쿼리 (2번) | 한방 쿼리 (3번) |
+| ---------- | ----------------------- | --------------- | --------------- |
+| 35개일 때  | 75.8 ms                 | 48 ms           | 35.2 ms         |
+| 140개일 때 | **82 ms**               | **62 ms**       | **45 ms**       |
+
+여전히 한방 쿼리가 괜찮긴 하지만 쿼리문 변경으로 10 ms 가 늘어난 건 상당히 늘었다고 볼 수 있습니다. 왜냐하면 DB 에서 실행한 쿼리문 자체의 실행 시간이 2배가 된거였거든요. 오히려 개수가 많아지면 1번이 더 안정적이지 않나 싶습니다.
+
+어쨋든 현재는 3번 쿼리로 만들어서 보내고 있고, 현재 비즈니스 로직 상 140개를 넘길 일이 거의 없구요. 또 주문 취소가 상당히 까다롭거든요. 주문한 비디오 중 하나라도 시청하면 전체 취소가 안되게 해놔서, Reward 개수가 많아지면 오히려 취소가 불가능하긴 합니다. 그리고 reply 를 달거나 question 을 풀기 위해선 비디오 시청 페이지를 거쳐야 하는 부분도 있구요.
+
+또 API 레이턴시 로그 기록도 꾸준히 수집해서 감시하고 있으니 큰 문제가 없지 않은 이상 1 ~ 3번 어느걸 사용해도 무방하다고 봅니다.

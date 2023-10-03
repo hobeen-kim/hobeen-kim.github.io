@@ -49,11 +49,13 @@ figure.highlight {
 
   pre {
     margin: 0;
+    background-color: $code-background-color;
   }
 }
 
 .highlight pre {
   width: 100%;
+  background-color: $code-background-color;
 }
 
 .highlight .hll {

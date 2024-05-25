@@ -2,7 +2,7 @@
 categories: "spring"
 tag: ["coroutine", "spring", "virtual thread"]
 series: "SpringCamp2024"
-title: "2024-05-25-[Spring Camp] 동시성의 미래 - 코루틴의 버츄얼 스레드"
+title: "[Spring Camp] 동시성의 미래 - 코루틴의 버츄얼 스레드"
 description: "스프링 캠프 - 코루틴의 버츄얼 스레드 섹션 내용입니다."
 ---
 

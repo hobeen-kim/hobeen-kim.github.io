@@ -12,6 +12,8 @@ docs:
     children:
       - title: "codestates"
         url: /categories/codestates
+      - title: "AI"
+        url: /categories/AI
       - title: "spring"
         url: /categories/spring
       - title: "AWS"

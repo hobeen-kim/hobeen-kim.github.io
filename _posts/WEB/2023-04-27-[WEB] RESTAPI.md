@@ -42,7 +42,7 @@ REST API 는 이러한 API 를 어떻게 구성할지 정의된 아키텍처 스
 1. **Server-Client(서버-클라이언트 구조)**
    - 자원이 있는 쪽이 Server, 자원을 요청하는 쪽이 Client가 됩니다.
      - REST Server: API를 제공하고 비즈니스 로직 처리 및 저장을 책임집니다.
-     - Client: 사용자 인증이나 context(세션, 로그인 정보) 등을 직접 관리하고 책임집니다..
+     - Client: 사용자 인증이나 context(세션, 로그인 정보) 등을 직접 관리하고 책임집니다.
    - 따라서 서로 간 의존성이 줄어듭니다.
 2. **Stateless(무상태)**
    - HTTP 프로토콜은 Stateless Protocol이므로 REST 역시 무상태성을 갖습니다.
@@ -53,7 +53,7 @@ REST API 는 이러한 API 를 어떻게 구성할지 정의된 아키텍처 스
      - 물론 이전 요청이 DB를 수정하여 DB에 의해 바뀌는 것은 허용됩니다.
      - Server의 처리 방식에 일관성을 부여하고 부담이 줄어들며, 서비스의 자유도가 높아집니다.
 3. **Cacheable(캐시 처리 가능)**
-   - 웹 표준 HTTP 프로토콜을 그대로 사용하므로 웹에서 사용하는 기존의 인프라를 그대로 활용할 수 있습니다. 즉, HTTP가 가진 가장 강력한 특징 중 하나인 캐싱 기능을 적용할 수 있다.
+   - 웹 표준 HTTP 프로토콜을 그대로 사용하므로 웹에서 사용하는 기존의 인프라를 그대로 활용할 수 있습니다. 즉, HTTP가 가진 가장 강력한 특징 중 하나인 캐싱 기능을 적용할 수 있습니다.
    - HTTP 프로토콜 표준에서 사용하는 Last-Modified 태그나 E-Tag를 이용하면 캐싱 구현이 가능합니다.
    - 대량의 요청을 효율적으로 처리하기 위해 캐시가 요구됩니다. 캐시 사용을 통해 응답시간이 빨라지고 REST Server 트랜잭션이 발생하지 않기 때문에 전체 응답시간, 성능, 서버의 자원 이용률을 향상시킬 수 있습니다.
 4. **Layered System(계층화)**
@@ -139,7 +139,7 @@ https://api.contoso.com/v1.0/people/7011042402/inbox
 >
 > Where "server321" is the service-allocated server name.
 
-inflearn Dowon Lee 님의 REST API 개발에서 공부한 내용이네요!
+inflearn Dowon Lee 님의 REST API 개발에서 공부한 내용이네요.
 
 다음과 같은 내용 있습니다. (표준 형식)
 

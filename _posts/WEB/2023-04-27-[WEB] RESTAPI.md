@@ -17,7 +17,7 @@ REST API 를 정리해봐야겠다고 생각이 든 건 우연히 "그런 REST A
 
 # REST API 란
 
-## API( Application Programming Interface)
+## API(Application Programming Interface)
 
 API 는 소프트웨어 간 지정된 형식으로 요청, 명령을 받을 수 있는 수단입니다.
 

@@ -50,5 +50,9 @@ echo "inter.broker.listener.name=LOCAL" >> ~/kafka/kafka_2.13-3.9.0/config/serve
   - Kafka 브로커들 간의 내부 통신에 사용할 리스너를 지정하는 설정입니다.
   - LOCAL 이므로 localhost:9092 를 사용한다는 뜻입니다.
 
+# Ref.
+
+https://stackoverflow.com/questions/62213671/how-to-solve-kafka-errors-kafkatimeouterror-kafkatimeouterror-failed-to-update
+
 
 

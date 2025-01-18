@@ -57,7 +57,7 @@ echo "inter.broker.listener.name=LOCAL" >> ~/kafka/kafka_2.13-3.9.0/config/serve
 
 # Ref.
 
-https://stackoverflow.com/questions/62213671/how-to-solve-kafka-errors-kafkatimeouterror-kafkatimeouterror-failed-to-update
+[https://stackoverflow.com/questions/62213671/how-to-solve-kafka-errors-kafkatimeouterror-kafkatimeouterror-failed-to-update](https://stackoverflow.com/questions/62213671/how-to-solve-kafka-errors-kafkatimeouterror-kafkatimeouterror-failed-to-update)
 
 
 

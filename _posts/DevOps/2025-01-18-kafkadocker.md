@@ -3,6 +3,7 @@ categories: "devOps"
 tag: ["kafka", "docker"]
 title: "[Kafka] 도커에서 카프카 접근하기"
 description: "도커에서 카프카 연결하는 방법"
+teaser: "kafka"
 ---
 
 # 0. 문제 상황

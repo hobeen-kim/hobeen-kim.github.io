@@ -2,7 +2,7 @@
 categories: "devOps"
 tag: ["eks", "kubernetes"]
 title: "[EKS] EKS 에서 DNS resolve 에러"
-description: "EKS 에서 dns resolve 에러가 발생한 상황에 대한 해결입니ㅏㄷ."
+description: "EKS 에서 dns resolve 에러가 발생한 상황에 대한 해결입니다."
 teaser: "eks"
 ---
 

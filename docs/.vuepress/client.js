@@ -5,7 +5,7 @@ import LogList from "./components/LogList.vue";
 import BookList from "./components/BookList.vue";
 import Footer from "./theme/Footer.vue";
 import Header from "./theme/Header.vue";
-import Home from "./components/Home.vue";
+import Home from "./components/home/Home.vue";
 
 export default defineClientConfig({
     enhance({ app, router, siteData }) {

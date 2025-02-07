@@ -1,5 +1,4 @@
 <template>
-  <div>간략한 소개</div>
   <div class="recent-container">
     <div class="post-container">
       <div class="post-header">
@@ -19,19 +18,24 @@
       <BookCard :book="recentBook"/>
     </div>
   </div>
-  <div>
-    이력서
-  </div>
 
+  <div class="home-description-container">
+    <MyDescription/>
+  </div>
+  <div class="resume-container">
+    <Resume/>
+  </div>
 </template>
 
 <script>
-import PostCard from "./PostCard.vue";
-import BookCard from "./BookCard.vue";
+import PostCard from "../PostCard.vue";
+import BookCard from "../BookCard.vue";
+import Resume from "./Resume.vue";
+import MyDescription from "./MyDescription.vue";
 
 export default {
   name: 'Home',
-  components: {BookCard, PostCard},
+  components: {MyDescription, Resume, BookCard, PostCard},
   data() {
     return {
       posts: __POSTS__ || [],
@@ -58,6 +62,21 @@ export default {
 </script>
 
 <style scoped>
+
+.home-description-container {
+  border-top : 1px solid var(--vp-c-control-hover);
+  padding-top: 1rem;
+  padding-left: 2rem;
+  margin-left: 2rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  position: relative;
+
+  strong {
+    font-weight: 700;
+    text-decoration: underline;
+  }
+}
 
 .recent-container {
   width: 1000px;
@@ -116,6 +135,12 @@ export default {
 .book-router-link{
   font-size: 0.9rem;
   margin-left: 0.4rem;
+}
+
+.resume-container {
+  margin-top: 1rem;
+  margin-left: 2rem;
+  padding-left: 2rem;
 }
 
 </style>

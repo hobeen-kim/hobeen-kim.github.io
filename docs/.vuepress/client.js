@@ -7,13 +7,6 @@ import Footer from "./theme/Footer.vue";
 import Header from "./theme/Header.vue";
 import Home from "./components/Home.vue";
 
-const style = document.createElement('style')
-style.textContent = `
-  
-`
-
-document.head.appendChild(style)
-
 export default defineClientConfig({
     enhance({ app, router, siteData }) {
         app.component('Home', Home)

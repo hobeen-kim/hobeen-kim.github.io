@@ -1,8 +1,6 @@
 <template>
   <router-link :to="book.path" class="book-item">
-    <div class="book-image-wrapper">
-      <img class="book-image" :src="book.frontmatter.thumbnail" alt="이미지가 없습니다." />
-    </div>
+    <img class="book-image" :src="book.frontmatter.thumbnail" alt="이미지가 없습니다." />
     <div class="book-content">
       <div class="book-header">
         <div class="book-title">
@@ -74,25 +72,15 @@ export default {
   }
 }
 
-.book-image-wrapper {
+.book-image {
   width: 220px;
   height: 330px;
-  overflow: hidden;
-  border-radius: 5px;
   margin-right: 1rem;
-  user-select: none;
-  -webkit-user-drag: none;
-  cursor: pointer;
-}
-
-.book-image {
-  width: 100%;
-  height: 100%;
   object-fit: cover;
+  border-radius: 5px;
   user-select: none;
   -webkit-user-drag: none;
   cursor: pointer;
-  z-index: -1;
 }
 
 .book-content {

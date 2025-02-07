@@ -66,7 +66,6 @@ name: "Resume"
   font-weight: 700;
   font-size: 1.1rem;
   margin-right: 0.5rem;
-  margin-left: 0.5rem;
   width: 8rem;
 }
 

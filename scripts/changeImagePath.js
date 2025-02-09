@@ -11,7 +11,7 @@ async function imagePathChange(directory) {
 
             if (stat.isDirectory()) {
                 //post, books, logs 디렉토리만 처리
-                if(!file.includes('_posts') && !file.includes('_books') && !file.includes('_logs')) {
+                if(!fullPath.includes('_posts') && !fullPath.includes('_books') && !fullPath.includes('_logs')) {
                     continue;
                 }
                 // 재귀적으로 하위 디렉토리 처리
@@ -22,7 +22,7 @@ async function imagePathChange(directory) {
             ) {
                 let content = await fs.readFile(fullPath, 'utf8');
 
-                content = content.replace('../../.vuepress/public', '');
+                content = content.replaceAll('../../.vuepress/public', '');
 
                 await fs.writeFile(fullPath, content, 'utf8');
 

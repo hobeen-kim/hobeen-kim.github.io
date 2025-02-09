@@ -18,6 +18,10 @@
         <span class="work-name">아이겐 코리아</span>
         <span class="work-desc">백엔드 엔지니어 | 초개인화 추천서비스를 위한 유저 행동 로그 수집 및 데이터 파이프라인 구성 | 2023.11 ~ 2025.02</span>
       </div>
+      <div class="work-list">
+        <span class="work-name"></span>
+        <span class="work-desc"></span>
+      </div>
     </div>
   </div>
 </template>

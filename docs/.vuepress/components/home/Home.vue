@@ -25,6 +25,7 @@
   <div class="resume-container">
     <Resume/>
   </div>
+  <HomeFooter/>
 </template>
 
 <script>
@@ -32,10 +33,11 @@ import PostCard from "../PostCard.vue";
 import BookCard from "../BookCard.vue";
 import Resume from "./Resume.vue";
 import MyDescription from "./MyDescription.vue";
+import HomeFooter from "./HomeFooter.vue";
 
 export default {
   name: 'Home',
-  components: {MyDescription, Resume, BookCard, PostCard},
+  components: {HomeFooter, MyDescription, Resume, BookCard, PostCard},
   data() {
     return {
       posts: __POSTS__ || [],

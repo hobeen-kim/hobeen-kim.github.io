@@ -9,25 +9,25 @@
         <li><strong>목표를 설정하고 추진</strong>하는 데 강합니다.</li>
       </ul>
     </div>
-    <div class="contact-container">
-      <span class="contact-text">연락처</span>
-      <div class="resume-body">
-        <div>
-          <ul style="list-style-type: none; margin-top: 0.2rem">
-            <li>📧</li>
-            <li>📞</li>
-            <li><img src="/images/github-mark.png" alt="github" class="home-description-icon"></li>
-          </ul>
-        </div>
-        <div>
-          <ul style="list-style-type: none; margin-top: 0.2rem">
-            <li>sksjsksh32@gmail.com</li>
-            <li>010-7174-4174</li>
-            <li><a href="https://github.com/hobeen-kim">https://github.com/hobeen-kim</a></li>
-          </ul>
-        </div>
-      </div>
-    </div>
+<!--    <div class="contact-container">-->
+<!--      <span class="contact-text">연락처</span>-->
+<!--      <div class="resume-body">-->
+<!--        <div>-->
+<!--          <ul style="list-style-type: none; margin-top: 0.2rem">-->
+<!--            <li>📧</li>-->
+<!--            <li>📞</li>-->
+<!--            <li><img src="/images/github-mark.png" alt="github" class="home-description-icon"></li>-->
+<!--          </ul>-->
+<!--        </div>-->
+<!--        <div>-->
+<!--          <ul style="list-style-type: none; margin-top: 0.2rem">-->
+<!--            <li>sksjsksh32@gmail.com</li>-->
+<!--            <li>010-7174-4174</li>-->
+<!--            <li><a href="https://github.com/hobeen-kim">https://github.com/hobeen-kim</a></li>-->
+<!--          </ul>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
   </div>
 </template>
 

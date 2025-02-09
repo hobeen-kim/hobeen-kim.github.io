@@ -9,9 +9,10 @@
   },
   "repository": "blog",
   "scripts": {
-    "pretoc": "node scripts/addToc.js",
+    "preadd": "node scripts/add.js",
+    "changeImagePath": "node scripts/changeImagePath.js",
     "docs:dev": "npm run pretoc && vuepress dev docs",
-    "docs:build": "npm run pretoc && vuepress build docs"
+    "docs:build": "npm run pretoc && npm run changeImagePath && vuepress build docs"
   },
   "license": "MIT",
   "devDependencies": {

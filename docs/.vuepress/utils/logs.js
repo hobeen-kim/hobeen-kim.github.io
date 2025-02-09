@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const relativePath = '../'
-const dir = '../_logs'
+const dir = '../_logs/all'
 
 export const getLogs = () => {
     const logsDirectory = path.join(__dirname, relativePath, dir)

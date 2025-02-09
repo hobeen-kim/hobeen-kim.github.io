@@ -11,7 +11,7 @@ async function addTocToFiles(directory) {
 
             if (stat.isDirectory()) {
                 //post 디렉토리만 처리
-                if(file !== '_posts') {
+                if(!file.includes('_posts')) {
                     continue;
                 }
                 // 재귀적으로 하위 디렉토리 처리

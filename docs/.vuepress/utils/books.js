@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const relativePath = '../'
-const dir = '../_books'
+const dir = '../_books/all'
 
 export const getBooks = () => {
     const booksDirectory = path.join(__dirname, relativePath, dir)
@@ -17,7 +17,7 @@ export const getBooks = () => {
         .map(file => {
             const fullPath = path.join(booksDirectory, file)
             const fileContents = fs.readFileSync(fullPath, 'utf8')
-            const { data, excerpt } = matter(fileContents, { excerpt: true, excerpt_separator: '<--! description -->' })
+            const { data, excerpt } = matter(fileContents, { excerpt: true, excerpt_separator: '<description />' })
 
             const slug = file.replace(/\.md$/, '');
 
@@ -39,7 +39,7 @@ export const getBooks = () => {
                 frontmatter: data,
                 content: data.content,
                 excerpt: refinedExcerpt,
-                path: `/books/${file.replace(/\.md$/, '.html')}`
+                path: `/books/all/${file.replace(/\.md$/, '.html')}`
             }
         }).sort((a, b) => (new Date(b.frontmatter.date) - new Date(a.frontmatter.date)))
 }

@@ -1,22 +1,19 @@
-[[toc]]
-
 ## 기본 포멧 (frontmatter)
 
 ### 1. 글
+
+- Header, Footer, toc 는 빌드 타임 시 붙임
+
 ```angular2html
 ---
-layout: CustomLayout
 title: title 입니다.
 date: 2025-02-03
 tags:
   - 태그1
   - 태그2
+description: description 입니다.
 ---
 
-[[toc]]
-
-description 입니다.
-<!-- more -->
 ```
 
 ### 2. 짧은 글
@@ -34,6 +31,32 @@ tags:
 내용입니다.
 1. 재밌다.
 2. 재미없다?
+
+```
+
+### 3. 책
+
+```angular2html
+---
+title: 그런 책을 읽었다.
+bookName: 그런 책 - 현재의 기억
+author: 나나나
+date: 2025-02-03
+tags:
+  - vue
+  - blog
+
+---
+
+<Header />
+
+이것은 요약입니다. 저런 책은 최고다!!!
+이것은 요약입니다. 저런 책은 최고다!!!
+이것은 요약입니다. 저런 책은 최고다!!!
+이것은 요약입니다. 저런 책은 최고다!!!
+이것은 요약입니다. 저런 책은 최고다!!!
+이것은 요약입니다. 저런 책은 최고다!!!
+<--! description -->
 
 ```
 

@@ -142,6 +142,7 @@ export default {
 
 .excerpt {
   margin: 0.5rem 0 0;
+  font-size: 0.9rem;
   color: var(--vp-c-text-mute);
 }
 </style>

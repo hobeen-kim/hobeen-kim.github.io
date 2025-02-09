@@ -116,7 +116,7 @@ async function addFooterToFiles(directory) {
 
             if (stat.isDirectory()) {
                 //post, book 디렉토리만 처리
-                if(fullPath.includes('_posts') || fullPath.includes('_books')) {
+                if(!fullPath.includes('_posts') && !fullPath.includes('_books')) {
                     continue;
                 }
                 // 재귀적으로 하위 디렉토리 처리

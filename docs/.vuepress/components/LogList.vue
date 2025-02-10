@@ -1,7 +1,7 @@
 <template>
   <div class="log-list">
     <span class="log-list-title">짧은 글</span>
-    <div class="log-list-description">생각과 감정, 다짐을 기록합니다.</div>
+    <div class="log-list-description">생각과 감정, 다짐을 공유합니다.</div>
     <div class="log" v-for="log in processedLogs" :key="log.frontmatter.title">
       <h3 class="log-title">{{ log.frontmatter.title }}</h3>
       <div class="log-date">{{ formatDate(log.frontmatter.date) }}</div>

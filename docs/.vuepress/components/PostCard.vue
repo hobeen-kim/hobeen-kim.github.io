@@ -135,6 +135,11 @@ export default {
 
 .tags {
   color: #3eaf7c;
+  width: 13rem;
+}
+
+.date {
+  width: 9rem;
 }
 
 .excerpt {

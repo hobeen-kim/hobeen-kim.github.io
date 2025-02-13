@@ -58,5 +58,18 @@ body.page-has-title header.vp-navbar {
     margin: 0.4rem 0;
     line-height: 1;
     text-decoration: none;
+
+    a {
+      text-decoration: none !important;
+      color: rgba(75,85,99,1);
+    }
+  }
+}
+
+[data-theme='dark'] .table-of-contents {
+  li {
+    a {
+      color: rgb(235 235 245 / 76%);
+    }
   }
 }

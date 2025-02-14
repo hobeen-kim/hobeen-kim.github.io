@@ -137,6 +137,7 @@ export default {
 
 img {
   object-fit: contain;
+  margin: 0 !important;
 }
 
 .arrow {

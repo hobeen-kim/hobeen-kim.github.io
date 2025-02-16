@@ -139,7 +139,7 @@ async function addFooterToFiles(directory) {
                 content = `${content}\n<Footer />`;
 
                 await fs.writeFile(fullPath, content, 'utf8');
-                console.log(`Added Header to ${fullPath}`);
+                console.log(`Added Footer to ${fullPath}`);
             }
         }
     } catch (error) {

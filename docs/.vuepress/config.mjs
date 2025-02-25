@@ -26,6 +26,10 @@ const theme = {
             text: '스프링',
             link: '/posts/spring/',
           },
+          {
+            text: '클라우드',
+            link: '/posts/cloud/',
+          },
         ],
       },
       {

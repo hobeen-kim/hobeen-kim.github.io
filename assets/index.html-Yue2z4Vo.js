@@ -1,0 +1,1 @@
+import{_ as t,c as o,a,r as n,o as s}from"./app-CcZm5Piw.js";const r={};function c(l,_){const e=n("LogList");return s(),o("div",null,[a(e)])}const m=t(r,[["render",c],["__file","index.html.vue"]]),d=JSON.parse('{"path":"/logs/","title":"","lang":"en-US","frontmatter":{"sidebar":false},"headers":[],"git":{},"filePathRelative":"_logs/README.md"}');export{m as comp,d as data};

@@ -278,3 +278,101 @@ output "moved_file_content" {
 }
 ```
 
+# 프로바이더
+
+## 프로바이더의 다중 정의
+
+동일한 프로바이더를 사용하지만 다른 조건을 갖는 경우 아래와 같이  alias 를 사용할 수 있다.
+
+```terraform
+provider "aws" {
+    region = "us-east-1"
+}
+
+provider "aws" {
+    alias = "seoul"
+    region = "ap-northeast-2"
+}
+
+resource "aws_instance" "example" {
+    provider = aws.seoul
+    ami = "ami-0c55b159cbfafe1f0"
+    instance_type = "t2.micro"
+}
+```
+
+# State
+
+## 워크스페이스
+
+state 를 관리하는 논리적인 가상 공간이다. 테라폼 구성 파일은 동일하지만 작업자는 서로 다른 state 를 갖는 실제 대상을 프로비저닝할 수 있다.
+
+![image-20250309222039484](../../.vuepress/public/images/2025-03-08-terraform/image-20250309222039484.png)
+
+terraform workspace list 로 워크스페이스의 목록을 볼 수 있다.
+
+```
+$ terraform workspace list
+* default
+```
+
+아래 리소스를 배포하면 default 워크스페이스에 배포된다.
+
+```terraform
+resource "aws_instance" "example" {
+    provider = aws.seoul
+    ami = "ami-08d0e13d30abef253"
+    instance_type = "t2.micro"
+}
+```
+
+그리고 terraform workspace new <워크스페이스이름> 명령으로 새로운 워크스페이스를 생성한다.
+
+```
+$ terraform workspace new myworkspace1
+```
+
+새로운 워크스페이스가 생성되면 루트 모듈 디렉토리에 terraform.tfstate.d 디렉토리가 생성되고 하위에 myworkspace1 이 생긴다. 현재 사용 중인 워크스페이스는 show 로 확인할 수 있다.
+
+```
+$ terraform workspace show
+myworkspace1
+```
+
+이 상태에서 plan, apply 는 새로운 리소스를 생성한다. 그리고 워크스페이스를 리소스 블록 내에서 읽을 수 있다. 아래는 workspace 가 default 일 때 5개, 아닐 때 1개만 배포하는 구성이다.
+
+```terraform
+resource "aws_instance" "example" {
+    count = "${terraform.workspace == "default" ? 5: 1}"
+    provider = aws.seoul
+    ami = "ami-08d0e13d30abef253"
+    instance_type = "t2.micro"
+}
+```
+
+다시 워크스페이스를 변경하려면 아래와 같이 바꾼다.
+
+```
+$ terraform workspace select default
+```
+
+apply, plan 시점에서 state 를 지정하려면 아래와 같이 state 파일을 지정한다.
+
+```
+terraform destroy -state=terraform.tfstate.d/myworkspace1/terraform.tfstate
+```
+
+워크스페이스를 사용하는 장단점은 다음과 같다.
+
+**장점**
+
+- 하나의 루트 모듈에서 다른 환경을 위한 리소스를 동일한 테라폼 구성으로 프로비저닝하고 관리
+- 기존 프로비저닝된 환경에 영향을 주지 않고 변경 사항 실험 가능
+- 깃으 브랜치 전략처럼 동일한 구성에서 서로 다른 리소스 결과 관리
+
+**단점**
+
+- satte 가 동일한 저장소(로컬 또는 백엔드)에 저장되어 state 접근 권한 관리가 불가능
+- 모든 환경이 동일한 리소스를 요구하지 않을 수 있으므로 테라폼 구성에 분기 처리가 다수 발생 가능
+- 프로비저닝 대상에 대한 인증 요소를 완벽히 분리하기 어려움
+

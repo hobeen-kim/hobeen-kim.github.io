@@ -376,3 +376,39 @@ terraform destroy -state=terraform.tfstate.d/myworkspace1/terraform.tfstate
 - 모든 환경이 동일한 리소스를 요구하지 않을 수 있으므로 테라폼 구성에 분기 처리가 다수 발생 가능
 - 프로비저닝 대상에 대한 인증 요소를 완벽히 분리하기 어려움
 
+# 모듈
+
+**모듈 구조 (예시)**
+
+![image-20250310233826614](../../.vuepress/public/images/2025-03-08-terraform/image-20250310233826614.png)
+
+**06-01-basic/main.tf**
+
+```terraform
+module "mypw1" {
+    source = "../modules/terraform-random-pwgen"
+}
+
+module "mypw2" {
+    source = "../modules/terraform-random-pwgen"
+    isDB = true
+}
+
+output "pw1" {
+    value = module.mypw1
+}
+
+output "pw2" {
+    value = module.mypw2
+}
+```
+
+## 모듈 사용 방식
+
+### 모듈과 프로바이더
+
+1. 자식 모듈에서 프로바이더 정의
+   1. **모듈에서 사용하는 프로바이더 버전과 구성 상세를 자식 모듈에 고정하는 방법.** 동일한 프로바이더가 루트와 자식 양쪽에 또는 서로 다른 자식 모듈에 버전 조건 합의가 안되면 오류가 발생하고 모듈에 반복문을 사용할 수 없는 단점
+   2. **루트 모듈에서 프로바이더 정의**. (권장)
+
+

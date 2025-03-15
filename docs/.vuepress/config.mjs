@@ -30,6 +30,10 @@ const theme = {
             text: '클라우드',
             link: '/posts/cloud/',
           },
+          {
+            text: '데이터베이스',
+            link: '/posts/database/',
+          },
         ],
       },
       {

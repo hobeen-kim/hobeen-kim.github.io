@@ -3,4 +3,5 @@ export default {
     "spring": "스프링",
     "cloud": "클라우드",
     "database": "데이터베이스",
+    "conference": "컨퍼런스",
 }

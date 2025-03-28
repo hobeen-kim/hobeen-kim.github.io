@@ -34,6 +34,10 @@ const theme = {
             text: '데이터베이스',
             link: '/posts/database/',
           },
+          {
+            text: '컨퍼런스',
+            link: '/posts/conference/',
+          },
         ],
       },
       {

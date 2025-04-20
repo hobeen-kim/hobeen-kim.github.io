@@ -205,11 +205,11 @@ LATERAL JOIN과 일반 조인의 주요 차이점은 **상관 관계(correlation
 
 일반 조인으로는 "각 학생별 상위 2개 과목"과 같은 요구사항을 직접적으로 표현하기 어렵습니다. 이런 경우 윈도우 함수를 사용한 추가적인 작업이 필요하지만, LATERAL JOIN을 사용하면 더 직관적으로 표현할 수 있습니다.
 
-## 5. EXPLAIN으로 성능 비교
+# 5. EXPLAIN으로 성능 비교
 
 LATERAL 조인과 대안 방식의 성능을 비교해봅시다. 대안으로는 윈도우 함수(ROW_NUMBER)를 사용한 방식을 살펴보겠습니다.
 
-### LATERAL 조인 사용 (원본 쿼리)
+## LATERAL 조인 사용 (원본 쿼리)
 
 ```sql
 EXPLAIN ANALYZE
@@ -226,7 +226,7 @@ FROM students s,
 ORDER BY s.name, x.score DESC;
 ```
 
-### 윈도우 함수 사용 (대안 방식)
+## 윈도우 함수 사용 (대안 방식)
 
 ```sql
 EXPLAIN ANALYZE

@@ -52,7 +52,7 @@ AWS Wavelength Zone은 특정 통신사의 **5G 네트워크 엣지**에 AWS 인
 - 게임 서버는 Wavelength Zone에 위치
 - 사용자 → SKT망 → Wavelength EC2 → 게임 서버 응답 (지연 시간 최소화)
 
-![image-20250604142128269](/Users/hobeen/Library/Application Support/typora-user-images/image-20250604142128269.png)
+**![image-20250604142128269](../../.vuepress/public/images/2025-05-04-awsregion/image-20250604142128269.png)**
 
 ------
 

@@ -19,6 +19,10 @@ const theme = {
             link: '/posts/',
           },
           {
+            text: '기술',
+            link: '/posts/tech/',
+          },
+          {
             text: '카프카',
             link: '/posts/kafka/',
           },

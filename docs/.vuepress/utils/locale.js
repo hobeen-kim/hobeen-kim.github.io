@@ -4,4 +4,5 @@ export default {
     "cloud": "클라우드",
     "database": "데이터베이스",
     "conference": "컨퍼런스",
+    "tech": "기술",
 }

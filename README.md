@@ -75,7 +75,7 @@ description: {설명}
 ```
 
 ### 2. 카테고리 한글명 추가
-- docs/utils/locale.js 파일에 category 한글명 추가
+- docs/.vuepress/utils/locale.js 파일에 category 한글명 추가
 
 ### 3. 설정 추가
 - docs/.vuepress/config.mjs 파일 navbar 추가

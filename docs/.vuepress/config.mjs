@@ -19,6 +19,10 @@ const theme = {
             link: '/posts/',
           },
           {
+            text: '개발 문화',
+            link: '/posts/culture/',
+          },
+          {
             text: '기술',
             link: '/posts/tech/',
           },

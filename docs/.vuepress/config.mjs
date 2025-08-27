@@ -76,8 +76,8 @@ const theme = {
 
 export default defineUserConfig({
   // 블로그 제목과 설명
-  title: '앤디  블로그 (블로그 공사중)🚧',
-  description: '안녕하세요! 데이터 엔지니어 앤디입니다.',
+  title: '앤디 블로그',
+  description: '안녕하세요! 소프트웨어 엔지니어 앤디입니다.',
   theme:theme,
   markdown: {
     headers: {

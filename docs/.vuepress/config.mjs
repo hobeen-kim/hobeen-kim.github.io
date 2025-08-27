@@ -35,8 +35,8 @@ const theme = {
             link: '/posts/spring/',
           },
           {
-            text: '클라우드',
-            link: '/posts/cloud/',
+            text: '인프라',
+            link: '/posts/infra/',
           },
           {
             text: '데이터베이스',

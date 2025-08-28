@@ -19,6 +19,10 @@ const theme = {
             link: '/posts/',
           },
           {
+            text: '개발 문화',
+            link: '/posts/culture/',
+          },
+          {
             text: '기술',
             link: '/posts/tech/',
           },
@@ -31,8 +35,8 @@ const theme = {
             link: '/posts/spring/',
           },
           {
-            text: '클라우드',
-            link: '/posts/cloud/',
+            text: '인프라',
+            link: '/posts/infra/',
           },
           {
             text: '데이터베이스',
@@ -72,8 +76,8 @@ const theme = {
 
 export default defineUserConfig({
   // 블로그 제목과 설명
-  title: '앤디  블로그 (블로그 공사중)🚧',
-  description: '안녕하세요! 데이터 엔지니어 앤디입니다.',
+  title: '앤디 블로그',
+  description: '안녕하세요! 소프트웨어 엔지니어 앤디입니다.',
   theme:theme,
   markdown: {
     headers: {

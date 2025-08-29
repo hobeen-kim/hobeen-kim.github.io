@@ -11,8 +11,8 @@
   "scripts": {
     "preadd": "node scripts/add.js",
     "changeImagePath": "node scripts/changeImagePath.js",
-    "docs:dev": "npm run preadd && vuepress dev docs",
-    "docs:build": "npm run preadd && npm run changeImagePath && vuepress build docs"
+    "docs:dev": "vuepress dev docs",
+    "docs:build": "npm run changeImagePath && vuepress build docs"
   },
   "license": "MIT",
   "devDependencies": {

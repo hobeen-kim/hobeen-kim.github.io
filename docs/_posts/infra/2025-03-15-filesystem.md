@@ -7,6 +7,11 @@ tags:
   - efs
 description: "EBS, EFS, S3 에서 블록, 파일, 객체 스토리지 차이점이 뭘까 궁금해하면서 찾아봤다. 주로 AWS docs 자료를 참고했다."
 ---
+<Header />
+
+
+[[toc]]
+
 
 <Header/>
 
@@ -149,3 +154,5 @@ smileshark 페이지에서 읽은 괜찮은 예시다
 5. [객체 스토리지란 무엇인가요?](https://aws.amazon.com/what-is/object-storage/)
 6. [[AWS] 📚 S3 / EBS / EFS 스토리지 서비스 비교](https://inpa.tistory.com/entry/AWS-%F0%9F%93%9A-S3-EBS-EFS-%EC%8A%A4%ED%86%A0%EB%A6%AC%EC%A7%80-%EC%84%9C%EB%B9%84%EC%8A%A4-%EB%B9%84%EA%B5%90)
 7. [아마존 S3 vs EFS vs EBS : 어떤 AWS 스토리지를 써야 하나요?](https://www.smileshark.kr/post/amazon-s3-efs-ebs-which-aws-storage-service-to-use)
+
+<Footer />

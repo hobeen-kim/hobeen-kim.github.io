@@ -6,6 +6,11 @@ tags:
   - enum
 description: "서버에서 응답으로 받는 enum 값과 실제 enum name 이 다를 때 해결"
 ---
+<Header />
+
+
+[[toc]]
+
 
 # 문제 상황
 
@@ -234,4 +239,5 @@ enum class DeviceType(
 
 # Ref.
 
-없음
+없음��
+<Footer />

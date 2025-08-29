@@ -56,6 +56,10 @@ const theme = {
         text: '짧은 글',  // 포스트 목록 페이지로 이동
         link: '/logs/',
       },
+      {
+        text: '이력서',  // 포스트 목록 페이지로 이동
+        link: '/resume/',
+      },
     ],
     // 테마 설정 추가
     colorMode: 'auto',

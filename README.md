@@ -174,7 +174,7 @@ tags:
 
 ### 3. 빌드 파일 생성
 
-- 빌드 시 모든 파일을 읽어서 목록을 만들기 위해 사용
+- 빌드 시 모든 파일을 읽어서 목록을 만들기 위해 사용 (docs/.vuepress/utils/techs.js)
 
 ```javascript
 import fs from 'fs'

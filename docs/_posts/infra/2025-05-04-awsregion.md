@@ -7,6 +7,11 @@ tags:
   - efs
 description: "숨겨진 region, Wavelength"
 ---
+<Header />
+
+
+[[toc]]
+
 
 <Header/>
 
@@ -90,3 +95,5 @@ AWS Wavelength Zone은 특정 통신사의 **5G 네트워크 엣지**에 AWS 인
 
   
 
+
+<Footer />

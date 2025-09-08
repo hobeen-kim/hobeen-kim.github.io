@@ -14,7 +14,7 @@ description: "Spring RestDocs 로 문서 남기기 - 3"
 
 # Refactoring - @BeforeEach
 
-​	모든 Test 에 공통적으로 적용되는 게 있습니다. 바로 아래의 @BeforeEach 코드입니다.
+	모든 Test 에 공통적으로 적용되는 게 있습니다. 바로 아래의 @BeforeEach 코드입니다.
 
 ```java
 private MockMvc mockMvc;
@@ -100,7 +100,7 @@ RestDocsTestSupport 에서 설정한 내용은 모두 상속받는다고 생각�
 
 # Refactoring - @Test
 
-​	이제 @Test 코드 안에 어떤 코드가 중복되는지 확인해보겠습니다.
+	이제 @Test 코드 안에 어떤 코드가 중복되는지 확인해보겠습니다.
 
 ```java
 @Test
@@ -127,7 +127,7 @@ void create() throws Exception {
 
 ## document 공통 제목 설정
 
-​	먼저 document 제목부터 설정하겠습니다. RestDocsTestSupport 의 @BeforeEach 설정에 아래와 같이 추가하고, 설정을 사용할 수 있도록 `RestDocumentationResultHandler` 을 주입해줍니다.
+	먼저 document 제목부터 설정하겠습니다. RestDocsTestSupport 의 @BeforeEach 설정에 아래와 같이 추가하고, 설정을 사용할 수 있도록 `RestDocumentationResultHandler` 을 주입해줍니다.
 
 ```java
 public class RestDocsTestSupport {
@@ -170,7 +170,7 @@ public class RestDocsTestSupport {
 - `RestDocumentationResultHandler` 로 document 이름을 `className / methodName` 으로 설정합니다. 이렇게 설정하면 className/methodName 디렉토리 구조가 형성됩니다.
 - `.alwaysDo(documentHandler)` 를 통해 만들어둔 `RestDocumentationResultHandler` 를 적용시킵니다.
 
-​	이제 test 코드안에서 불필요한 부분을 삭제하겠습니다.
+	이제 test 코드안에서 불필요한 부분을 삭제하겠습니다.
 
 ```java
 @Test
@@ -197,7 +197,7 @@ public class RestDocsTestSupport {
 
 ## 제약조건 설정
 
-​	이제 제약조건 코드를 줄여보겠습니다. 지금은 이렇게 되어있습니다.
+	이제 제약조건 코드를 줄여보겠습니다. 지금은 이렇게 되어있습니다.
 
 ```java
 @Test
@@ -220,7 +220,7 @@ void create() throws Exception {
 
 이 코드에서 `.attributes(new Attributes.Attribute("constraints","길이 100 이하"))` 부분은 Dto 의 제약조건으로, 해당 클래스에서 가져올 수 있습니다. (entity 에 제약조건을 설정해도 됩니다.)
 
-먼저 제약조건을 설정하는 ConstraintFields<T> 를 선언해줍니다.
+먼저 제약조건을 설정하는 ConstraintFields 를 선언해줍니다.
 
 ```java
 public class ConstraintFields<T> {
@@ -289,7 +289,7 @@ class PostControllerTest extends RestDocsTestSupport {
 
 # popup 링크 동적으로 만들기
 
-​	먼저 signUp 테스트 메서드를 보겠습니다.
+	먼저 signUp 테스트 메서드를 보겠습니다.
 
 ```java
 @Test
@@ -351,7 +351,7 @@ responseFields(
 
 **CommonDocController**
 
-​	HTTP Error Response, HTTP status codes, Host 환경 등을 문서화해보겠습니다. 에러 관련 문서화를 위해 테스트 컨트롤러에 다음과 같이 추가합니다.
+	HTTP Error Response, HTTP status codes, Host 환경 등을 문서화해보겠습니다. 에러 관련 문서화를 위해 테스트 컨트롤러에 다음과 같이 추가합니다.
 
 ```java
 @RestController
@@ -431,7 +431,7 @@ Exception 에는 제약 조건, optional 이 필요없으므로 `exception-respo
 
 **CustomResponseFieldsSnippet**
 
-​	해당 클래스의 생성자도 추가해주겠습니다. `subsectionExtractor` 파라미터는 api 를 호출했을 때의 결과값에서 필드를 뽑아내는건데, errorResponse 는 그럴 필요가 없기 때문입니다.
+	해당 클래스의 생성자도 추가해주겠습니다. `subsectionExtractor` 파라미터는 api 를 호출했을 때의 결과값에서 필드를 뽑아내는건데, errorResponse 는 그럴 필요가 없기 때문입니다.
 
 ```java
 public class CustomResponseFieldsSnippet extends AbstractFieldsSnippet {
@@ -519,7 +519,7 @@ class CommonDocControllerTest extends RestDocsTestSupport{
 
 # HTTP status code, host 환경 문서화
 
-​	마지막으로 제일 첫 페이지에 나올 host 환경, http satus code 설명을 넣어줍니다. src 디렉토리의 docs.asciidoc 에 overview.adoc 으로 만들어주면 됩니다.
+	마지막으로 제일 첫 페이지에 나올 host 환경, http satus code 설명을 넣어줍니다. src 디렉토리의 docs.asciidoc 에 overview.adoc 으로 만들어주면 됩니다.
 
 ```
 [[overview]]
@@ -626,3 +626,5 @@ include::post.adoc[]
 [공식 문서](https://docs.spring.io/spring-restdocs/docs/2.0.4.RELEASE/reference/html5/#getting-started-documentation-snippets-invoking-the-service)
 
 \+ 추가 : [Spring REST Docs 적용 및 최적화 하기](https://backtony.github.io/spring/2021-10-15-spring-test-3/) <- 포스팅 시에는 참고하지 않았지만 이후에도 계속 rest docs 를 공부하면서 찾다보니 제일 도움되는 포스팅입니다.
+
+<Footer/>

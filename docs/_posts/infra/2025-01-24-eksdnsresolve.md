@@ -1,10 +1,10 @@
 ---
-title: "도커에서 카프카 접근하기"
-date: 2025-01-18
+title: "EKS 의 DNS resolve 문제"
+date: 2025-01-24
 tags:
   - kafka
   - docker
-description: "도커에서 카프카 연결하는 방법"
+description: "EKS 에서 DNS resolve 문제와 해결"
 ---
 
 <Header/>

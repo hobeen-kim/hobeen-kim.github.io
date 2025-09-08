@@ -6,7 +6,6 @@ tags:
   - eviction
   - oom_killer
 description: "두 파드 간에 메모리 등 리소스가 경합할 때 어떤 파드가 어떻게 꺼지고 축출되는지 알아보자"
-
 ---
 
 <Header />

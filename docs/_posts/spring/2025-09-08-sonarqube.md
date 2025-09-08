@@ -119,3 +119,9 @@ SONARQUBE_TOKEN 은 깃 레포 secret 에 넣어주면 된다.
 ![image-20250908184210639](../../.vuepress/public/images/2025-09-08-sonarqube/image-20250908184210639.png)
 
 이제 결과를 보고 이슈를 해결해보자. 현재는 이슈가 많아서 한번에는 힘들고, 코드를 리팩토링하면서 조금씩 해봐야겠다.
+
+# Ref.
+
+1. [SnoarQube 8.9 연동가이드](https://snoop-study.tistory.com/138) : *jenkins 로 pr 메시지 만들기*
+
+<Footer/>

@@ -12,6 +12,25 @@ description: "두 파드 간에 메모리 등 리소스가 경합할 때 어떤 
 
 [[toc]]
 
+클러스터의 리소스를 효율적으로 운영할수록 자원이 부족할 때 어떻게 행동할지가 중요해진다. 쿠버네티스는 **kubelet의 Node-pressure eviction**으로 노드 안정성을 지키고, **스케줄러의 파드 우선순위/선점(Pod priority & preemption)**으로 리소스가 부족해도 중요한 워크로드를 밀어 넣을 수 있게 한다. 두 메커니즘은 서로 맞물려 동작하므로, 함께 이해해야 운영 품질이 올라갈 수 있다.
+
+# 노드-압박 축출(Node-pressure Eviction)
+
+노드의 메모리/디스크/PID 등이 임계치에 다다르면, kubelet이 파드를 능동적으로 종료해 자원을 회수하고 노드 정체(Starvation)를 막는다. 이때 축출된 파드의 phase는 Failed로 바뀌며, PDB 나 terminationGracePeriodSeconds 를 존중하지 않을 수 있다.
+
+## 의사결정의 입력값 - **축출 신호 & 임계값**
+
+- 대표 신호 :  `memory.available`, `nodefs.available / inodesFree`, `imagefs.available / inodesFree`, (분리 구성 시) `containerfs.available / inodesFree`, `pid.available`
+- **하드 임계값 기본값**(일부 OS별 상이) :  `memory.available<100Mi`(리눅스), `nodefs.available<10%`, `imagefs.available<15%`, `nodefs.inodesFree<5%`, `imagefs.inodesFree<5%`
+- **소프트 임계값**은 **grace period**와 함께 지정하며, `eviction-soft`, `eviction-soft-grace-period`, `eviction-max-pod-grace-period`로 제어
+- kubelet은 housekeeping-interval에 설정된 시간 간격(기본값: 10s)마다 축출 임계값을 확인한다. 노드 컨디션 토글 튐 방지는 `eviction-pressure-transition-period`(기본 `5m`)
+
+> **PDB**
+
+먼저 하는 일: 노드 레벨 회수 → 그래도 안 되면 파드 축출
+
+디스크 압박 시: 죽은 파드/컨테이너 GC → 사용하지 않는 이미지 삭제 순으로 정리(파일시스템 구성이 nodefs / imagefs / containerfs냐에 따라 순서가 달라짐)
+
 ### 축출 
 
 - Burstable 내에서는 요청(request)을 얼마나 초과해서 쓰는지가 큰 파드부터 우선 퇴출됩니다. (usage − request가 큰 순)
@@ -84,3 +103,5 @@ description: "두 파드 간에 메모리 등 리소스가 경합할 때 어떤 
 
 **정리:** 우선순위가 낮아도 “요청 이하”이면 *덜 위험*할 뿐, **상황이 심하면 축출될 수 있습니다.**
  진짜 보호가 필요하면 `requests≈피크 사용`으로 잡아 **Guaranteed QoS**에 가깝게 하고, 필요한 경우 **PriorityClass**와 전용 노드(taints/tolerations)까지 고려하세요.
+
+<Footer/>

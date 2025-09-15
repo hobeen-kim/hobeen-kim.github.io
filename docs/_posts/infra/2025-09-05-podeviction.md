@@ -118,3 +118,8 @@ description: "핵심 서비스용"
 Priority와 QoS는 직교(orthogonal) 합니다. 선점 시 스케줄러는 QoS를 고려하지 않고 Priority만 보고 희생자를 고르지만, 노드-압박 축출에서는 Priority가 순위에 영향을 주며 QoS는 **예상 지표**로 볼 수 있다.
 
 <Footer/>
+
+# Ref.
+
+- [노드-압박 축출](https://kubernetes.io/ko/docs/concepts/scheduling-eviction/node-pressure-eviction/)
+- [파드 우선순위(priority)와 선점(preemption)](https://kubernetes.io/ko/docs/concepts/scheduling-eviction/pod-priority-preemption/)

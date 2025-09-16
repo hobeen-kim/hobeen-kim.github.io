@@ -17,8 +17,6 @@ description: "오토스케일링을 위한 karpenter 설정"
 
 Karpenter는 대기(Pending) 파드를 감지해 요구사항에 꼭 맞는 노드를 수십 초–수분 내 신속히 띄우고, 유휴 노드는 합리적으로 줄여 비용과 가용성을 동시에 최적화하는 노드 오토스케일러이다. 기존 Cluster Autoscaler(CA)가 ASG(노드 그룹) 중심으로 스케일링하는 반면, Karpenter는 파드 요구사항을 직접 읽어 가장 알맞은 인스턴스(타입/크기/구역/구매옵션)를 고른 뒤 EC2 Fleet API로 곧장 노드를 띄운다. 이 구조 덕분에 더 빠른 확장과 세밀한 인스턴스 선택이 가능하게 된다.
 
-## 
-
 ## karpenter 동작원리
 
 ![image-20250915232215825](../../.vuepress/public/images/2025-09-15-autoscaling/image-20250915232215825.png)
@@ -57,7 +55,8 @@ HPA 란~
 
 # Ref.
 
-- **EKS User Guide**: Karpenter 개요 및 Auto Mode와의 관계. [AWS Documentation](https://docs.aws.amazon.com/eks/latest/userguide/autoscaling.html)
-- **Karpenter v1 문서**: NodePool/EC2NodeClass/Scheduling/Disruption/Upgrade 가이드. [karpenter.sh+4karpenter.sh+4karpenter.sh+4](https://karpenter.sh/docs/concepts/nodepools/)
-- **AWS 컨테이너 블로그**: Spot + Karpenter, PCO, 인터럽션 대응, 빈패킹과 Fleet. [Amazon Web Services, Inc.](https://aws.amazon.com/blogs/containers/using-amazon-ec2-spot-instances-with-karpenter/)
-- **사례/비용 최적화 글**: Consolidation 효과 및 실무 주의점. [Amazon Web Services, Inc.](https://aws.amazon.com/blogs/containers/optimizing-your-kubernetes-compute-costs-with-karpenter-consolidation/?utm_source=chatgpt.com)
+- [EKS User Guide](https://docs.aws.amazon.com/eks/latest/userguide/autoscaling.html)
+- [Karpenter v1 문서](https://karpenter.sh/docs/concepts/nodepools/)
+- [AWS 컨테이너 블로그](https://aws.amazon.com/blogs/containers/using-amazon-ec2-spot-instances-with-karpenter/)
+- [Consolidation 효과 및 실무 주의점](https://aws.amazon.com/blogs/containers/optimizing-your-kubernetes-compute-costs-with-karpenter-consolidation/?utm_source=chatgpt.com)
+- [EKS클러스터 Karpenter 적용기](https://devblog.kakaostyle.com/ko/2022-10-13-1-karpenter-on-eks/)

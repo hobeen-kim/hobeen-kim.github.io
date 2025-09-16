@@ -1,0 +1,1 @@
+import{_ as e,c as t,o as a}from"./app-DUIsGCIT.js";const r={};function n(c,o){return a(),t("div")}const _=e(r,[["render",n],["__file","java.html.vue"]]),s=JSON.parse('{"path":"/interview/java.html","title":"","lang":"en-US","frontmatter":{},"headers":[],"git":{},"filePathRelative":"_interview/java.md"}');export{_ as comp,s as data};

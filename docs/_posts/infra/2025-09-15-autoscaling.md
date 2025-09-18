@@ -92,7 +92,7 @@ spec:
 
 ```
 
-{{ .Values.backend.name }} 이름의 Deployment 에 대해 min, max 를 설정하고, target 을 넘게 되면 pod 에 대한 scale out 이 된다.
+`{{ .Values.backend.name }}` 이름의 Deployment 에 대해 min, max 를 설정하고, target 을 넘게 되면 pod 에 대한 scale out 이 된다.
 
 ## karpenter 설정 및 구성
 

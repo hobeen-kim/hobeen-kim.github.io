@@ -2,9 +2,9 @@
   <div class="skill">
     <span class="title">기술</span>
     <div class="resume-body">
-      <div class="skill-list"><strong>백엔드</strong> - Java, Kotlin, Spring, Spring Data JPA</div>
+      <div class="skill-list"><strong>백엔드</strong> - Java, Kotlin, Spring Boot, Spring Data JPA</div>
       <div class="skill-list"><strong>데이터베이스</strong> - Postgres, Redis, MongoDB</div>
-      <div class="skill-list"><strong>데브옵스</strong> - AWS, Kubenetes, Kafka</div>
+      <div class="skill-list"><strong>데브옵스</strong> - AWS, Kubenetes, Kafka, Grafana/Prometheus</div>
     </div>
   </div>
   <div class="work-ex">

@@ -6,7 +6,7 @@ import BookList from "./components/BookList.vue";
 import Footer from "./theme/Footer.vue";
 import Header from "./theme/Header.vue";
 import Home from "./components/home/Home.vue";
-import Resume from "./components/Resume.vue";
+import Resume from "./components/resume/Resume.vue";
 
 export default defineClientConfig({
     enhance({ app, router, siteData }) {

@@ -5,5 +5,6 @@ export default {
     "database": "데이터베이스",
     "conference": "컨퍼런스",
     "tech": "기술",
-    "culture": "개발 문화"
+    "culture": "개발 문화",
+    "java": "자바",
 }

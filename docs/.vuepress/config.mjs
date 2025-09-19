@@ -27,8 +27,8 @@ const theme = {
             link: '/posts/tech/',
           },
           {
-            text: '카프카',
-            link: '/posts/kafka/',
+            text: '자바',
+            link: '/posts/java/',
           },
           {
             text: '스프링',
@@ -37,6 +37,10 @@ const theme = {
           {
             text: '인프라',
             link: '/posts/infra/',
+          },
+          {
+            text: '카프카',
+            link: '/posts/kafka/',
           },
           {
             text: '데이터베이스',

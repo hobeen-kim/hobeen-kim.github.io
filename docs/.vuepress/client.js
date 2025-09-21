@@ -6,7 +6,7 @@ import BookList from "./components/BookList.vue";
 import Footer from "./theme/Footer.vue";
 import Header from "./theme/Header.vue";
 import Home from "./components/home/Home.vue";
-import Resume from "./components/resume/Resume.vue";
+import ResumeCover from "./components/resume/ResumeCover.vue";
 
 export default defineClientConfig({
     enhance({ app, router, siteData }) {
@@ -16,7 +16,7 @@ export default defineClientConfig({
         app.component('BookList', BookList)
         app.component('Footer', Footer)
         app.component('Header', Header)
-        app.component('Resume', Resume)
+        app.component('ResumeCover', ResumeCover)
     },
     layouts: {
         CustomLayout,

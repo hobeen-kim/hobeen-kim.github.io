@@ -2,4 +2,4 @@
 sidebar: false
 category: all
 ---
-<Resume/>
+<ResumeCover/>

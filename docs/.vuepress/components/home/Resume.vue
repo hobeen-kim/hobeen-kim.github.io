@@ -45,15 +45,6 @@ name: "Resume"
   margin-bottom: 2rem;
 }
 
-.skill-list {
-  margin-top: 0.5rem;
-  margin-left: 1rem;
-
-  strong {
-    font-weight: 700;
-  }
-}
-
 .work-list {
   margin-top: 0.4rem;
   padding-top: 0.6rem;

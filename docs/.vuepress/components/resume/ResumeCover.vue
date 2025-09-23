@@ -117,7 +117,7 @@ h1 {
 .header2 {
   margin-top: 0;
   padding-top: 0.5rem;
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: 600;
   color: var(--vp-c-brand);
   padding-bottom: 0;
@@ -166,6 +166,10 @@ ul {
 
 li {
   margin-bottom: 0.5rem;
+}
+
+.vp-page [vp-content] {
+  max-width: 860px !important;
 }
 
 @media (max-width: 768px) {

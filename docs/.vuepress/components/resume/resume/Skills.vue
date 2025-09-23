@@ -8,7 +8,7 @@
         <div class="skill-list"> Java, Kotlin, Spring Boot</div>
       </div>
       <div class="skill-category">
-        <div class="skill-category-title">인프라</div>
+        <div class="skill-category-title">데브옵스</div>
         <div class="skill-list"> AWS, Kubenetes, Kafka, Grafana/Prometheus, ArgoCD, Terraform</div>
       </div>
       <div class="skill-category">
@@ -34,7 +34,7 @@ export default {
 
 .skill-description {
   font-size: 0.8rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.7rem;
   color: var(--vp-c-text-2, #8e8e8e);
   font-style: italic;
 }
@@ -46,7 +46,7 @@ export default {
 .skill-category-title {
   margin-top: 0.3rem;
   margin-bottom: 0.3rem;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 800;
   min-width: 120px;
 }

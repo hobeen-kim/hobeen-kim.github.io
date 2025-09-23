@@ -9,7 +9,7 @@
     <Summary />
     <Skills />
     <Experience />
-    <Projects />
+    <Project />
     <Education />
   </div>
 </template>
@@ -18,8 +18,8 @@
 // 각 섹션 컴포넌트 가져오기
 import BasicInfo from './resume/BasicInfo.vue'
 import Summary from './resume/Summary.vue'
+import Project from './resume/Project.vue'
 import Experience from './resume/Experience.vue'
-import Projects from './resume/Projects.vue'
 import Skills from './resume/Skills.vue'
 import Education from './resume/Education.vue'
 
@@ -28,8 +28,8 @@ export default {
   components: {
     BasicInfo,
     Summary,
+    Project,
     Experience,
-    Projects,
     Skills,
     Education
   }

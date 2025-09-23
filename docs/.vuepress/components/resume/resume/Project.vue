@@ -148,7 +148,7 @@ export default {
 .responsibility-header {
   font-weight: 700;
   margin-right: 0.5rem;
-  min-width: 130px;
+  min-width: 140px;
   color: var(--vp-c-text-1);
 }
 

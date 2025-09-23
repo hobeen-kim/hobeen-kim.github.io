@@ -1,20 +1,28 @@
 <template>
   <div class="resume-tabs">
     <div class="tabs">
-      <button
-        v-for="tab in tabs"
-        :key="tab.key"
-        class="tab-btn"
-        :class="{ active: currentTab === tab.key }"
-        @click="selectTab(tab.key)"
-      >
-        {{ tab.label }}
-      </button>
+      <div class="tab-buttons">
+        <button
+          v-for="tab in tabs"
+          :key="tab.key"
+          class="tab-btn"
+          :class="{ active: currentTab === tab.key }"
+          @click="selectTab(tab.key)"
+        >
+          {{ tab.label }}
+        </button>
+      </div>
+      <div class="download-button">
+        <button class="download-btn" @click="downloadPDF">
+          <img src="/images/pdf.png" alt="download" class="download-icon"/>
+        </button>
+      </div>
     </div>
-
-    <div class="tab-panel">
+    <div class="tab-panel" ref="contentToDownload">
       <component :is="currentTabComponent" />
     </div>
+
+
   </div>
   
 </template>
@@ -22,6 +30,7 @@
 <script>
 import Portfolio from './Portfolio.vue'
 import Resume from './Resume.vue'
+import html2pdf from 'html2pdf.js'
 
 export default {
   name: 'ResumeCover',
@@ -44,6 +53,29 @@ export default {
   methods: {
     selectTab(key) {
       this.currentTab = key
+    },
+    downloadPDF() {
+      const element = this.$refs.contentToDownload;
+      const filename = this.currentTab === 'resume' ? '이력서.pdf' : '포트폴리오.pdf';
+      
+      const opt = {
+        margin: 10,
+        filename: filename,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+      
+      // PDF 생성 시작 알림
+      this.$nextTick(() => {
+        // PDF 생성 및 다운로드
+        html2pdf().set(opt).from(element).save().then(() => {
+          console.log('PDF 생성 완료');
+        }).catch(err => {
+          console.error('PDF 생성 중 오류 발생:', err);
+          alert('PDF 생성 중 오류가 발생했습니다.');
+        });
+      });
     }
   }
 }
@@ -58,12 +90,17 @@ export default {
   position: sticky;
   top: 3.5rem;
   display: flex;
-  gap: 0.5rem;
+  justify-content: space-between;
   align-items: center;
   background-color: var(--vp-c-bg);
   border-bottom: 1px solid var(--vp-c-border);
   padding-bottom: 0.5rem;
   margin-bottom: 1rem;
+}
+
+.tab-buttons {
+  display: flex;
+  gap: 0.5rem;
 }
 
 .tab-btn {
@@ -84,34 +121,32 @@ export default {
   color: var(--vp-c-accent);
 }
 
-.tab-panel {
+.download-button {
   margin-top: 0.5rem;
 }
 
-/* 공통 스타일 */
-.resume-container, .portfolio-container {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-family: 'Noto Sans KR', sans-serif;
-  color: var(--vp-c-text-1);
-  background-color: var(--vp-c-bg);
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+.download-btn {
+  border: 1px solid var(--vp-c-brand);
+  background: var(--vp-c-brand);
+  padding: 0.35rem 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
-.resume-header, .portfolio-header {
-  margin-bottom: 0.5rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid var(--vp-c-divider);
+.download-btn:hover {
+  background-color: var(--vp-c-brand-dark);
 }
 
-h1 {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--vp-c-brand);
-  margin-bottom: 1.5rem;
-  text-align: center;
+.download-icon {
+  margin-top: 0.3rem;
+  width: 1.5rem;
+  height: 1.7rem;
+}
+
+.tab-panel {
+  margin-top: 0.5rem;
 }
 
 .header2 {
@@ -122,20 +157,6 @@ h1 {
   color: var(--vp-c-brand);
   padding-bottom: 0;
   margin-bottom: 0;
-}
-
-h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--vp-c-text-1);
-  margin: 0.5rem 0;
-}
-
-h4 {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--vp-c-text-2);
-  margin: 0.5rem 0;
 }
 
 .section {

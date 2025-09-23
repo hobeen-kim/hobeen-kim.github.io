@@ -1,6 +1,32 @@
 <template>
   <div class="experience-section">
     <div class="header2">경력 사항</div>
+    <div class="experience-list">
+      <div class="experience-item">
+        <div class="experience-header">
+          <div class="experience-name">아그모</div>
+          <div class="position">TD팀 백엔드 엔지니어</div>
+          <div class="period">2025.02 ~ 현재</div>
+        </div>
+        <div>
+          <div class="experience-description"> • <span>SEAMOS</span> : ISOBUS 기반 농기계/건설기계 플랫폼의 마켓플레이스 API 개발</div>
+          <div class="experience-description"> • <span>AGMO Monitoring</span> : 농기계 자율주행에서 생성되는 로그를 수집하고 분석하는 파이프라인 구축 및 모니터링 API 개발 </div>
+          <div class="experience-skills"> • <span>사용 기술</span> : Java, Kotlin, Spring Boot, Kafka, PostgreSQL, MongoDB, Redis, AWS, Kubernetes, Grafana, Prometheus, Loki, ArgoCD, Terraform </div>
+        </div>
+      </div>
+      <div class="experience-item">
+        <div class="experience-header">
+          <div class="experience-name">테크랩스</div>
+          <div class="position">AI 사업부 백엔드 엔지니어</div>
+          <div class="period">2023.11 ~ 2025.02</div>
+        </div>
+        <div>
+          <div class="experience-description"> • <span>Interest detection</span> : 사용자가 선택한 상품을 통해 GPT 로 관심사 키워드를 추출하고 상품을 추천하는 서비스의 API 개발 </div>
+          <div class="experience-description"> • 하루 8000만 건의 쇼핑몰 사용자 로그를 수집하고 분석하는 ETL 파이프라인 관리 </div>
+          <div class="experience-skills"> • <span>사용 기술</span> : Java, Kotlin, Spring Boot, AWS, AWS Kinesis, PostgreSQL, Kubernetes, Datadog </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -15,6 +41,67 @@ export default {
 .experience-section {
   margin-bottom: 1rem;
   border-bottom: 1px solid var(--vp-c-gutter, #e2e2e3);
+}
+
+.experience-list {
+  padding: 1rem;
+}
+
+.experience-item {
+  background-color: var(--vp-c-bg-soft);
+  border-radius: 4px;
+  display: flex;
+  margin-bottom: 1.2rem;
+  margin-top: 0.5rem;
+}
+
+.experience-header {
+  font-size: 1.1rem;
+  font-weight: 700;
+  min-width: 150px;
+  color: var(--vp-c-text-1);
+}
+
+.period {
+  margin-top: 0.2rem;
+  font-weight: 300;
+  font-size: 0.8rem;
+  color: var(--vp-c-text-2, #6c757d);
+}
+
+.position {
+  font-size: 0.8rem;
+  color: var(--vp-c-text-2);
+  margin-top: 0.2rem;
+  margin-bottom: 0.2rem;
+  font-weight: 500;
+}
+
+.experience-description {
+  font-size: 0.9rem;
+  color: var(--vp-c-text-2);
+  margin-bottom: 0.3rem;
+  line-height: 1.5;
+  padding-left: 1rem;
+  text-indent: -1rem;
+}
+
+.experience-description span {
+  font-weight: 600;
+}
+
+.experience-skills {
+  font-size: 0.9rem;
+  color: var(--vp-c-text-2);
+  margin-bottom: 0.3rem;
+  line-height: 1.5;
+  padding-left: 1rem;
+  text-indent: -1rem;
+
+}
+
+.experience-skills span {
+  font-weight: 600;
 }
 
 </style>

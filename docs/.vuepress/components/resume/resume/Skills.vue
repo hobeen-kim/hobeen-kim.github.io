@@ -46,9 +46,9 @@ export default {
 .skill-category-title {
   margin-top: 0.3rem;
   margin-bottom: 0.3rem;
-  font-size: 0.9rem;
-  font-weight: 800;
-  min-width: 120px;
+  font-size: 1rem;
+  font-weight: 700;
+  min-width: 130px;
 }
 
 .skill-list {

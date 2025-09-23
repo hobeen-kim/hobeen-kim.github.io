@@ -16,9 +16,9 @@
         <div class="scale-selector">
           <select v-model="contentScale" style="max-width: 100px">
             <option value="1">100%</option>
-            <option value="0.9">90%)</option>
-            <option value="0.8">80%)</option>
-            <option value="0.7">70%)</option>
+            <option value="0.9">90%</option>
+            <option value="0.8">80%</option>
+            <option value="0.7">70%</option>
           </select>
         </div>
         <button class="download-btn" @click="downloadPDF">

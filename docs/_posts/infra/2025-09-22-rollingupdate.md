@@ -25,7 +25,7 @@ spec:
       maxSurge: "1" # 롤링 업데이트 중 원하는 레플리카 수보다 “추가로” 생성될 수 있는 파드의 최대치
 ```
 
-# 문제 상황
+# 1. 문제 상황
 
 쿠버네티스에서 Deployment를 RollingUpdate 방식으로 업데이트하면 다음 순서로 진행된다.
 
@@ -36,9 +36,9 @@ spec:
 
 > 헬스체크가 200 ok 인 이유는 ALB 가 10초 동안 2번의 health check 를 실패해야 파드를 대상에서 제외하기 때문이다. 10초, 2번은 커스텀한 설정이다.
 
-# 해결 전략
+# 2. 해결 전략
 
-## Deployment Pod 의 종료 절차 순서
+## 2.1 Deployment Pod 의 종료 절차 순서
 
 우선 Pod 의 종료 절차를 확인해보자.
 
@@ -67,7 +67,7 @@ spec:
 5. **시간 내 종료하지 않으면 SIGKILL**
    - `terminationGracePeriodSeconds` 안에 프로세스가 종료되지 않으면 kubelet이 `SIGKILL` 보내서 강제 종료
 
-## 해결 방법
+## 2.2 해결 방법
 
 따라서 Pod 종료 시점에 다음 단계를 밟도록 한다.
 
@@ -79,7 +79,7 @@ spec:
    - `terminationGracePeriodSeconds` 동안 기존 요청을 안전하게 끝낸다.
 4. **Pod 종료**  
 
-## Spring Boot 3.5: ReadinessState 활용
+## 2.3 Spring Boot 3.5: ReadinessState 활용
 
 Spring Boot 에서 `ReadinessState`, `LivenessState`를 기반으로 쿠버네티스와 잘 통합할 수 있다. 종료 이벤트 시 `ReadinessState.REFUSING_TRAFFIC` 으로 상태를 바꾸면 `/actuator/health/readiness`가 **DOWN** 을 반환한다.
 
@@ -122,7 +122,7 @@ management:
         enabled: true
 ```
 
-## 쿠버네티스 설정
+## 2.4 쿠버네티스 설정
 
 ### deployment.yaml 설정
 
@@ -181,7 +181,7 @@ spec:
 
 
 
-## 전체 흐름
+## 2.5 전체 흐름
 
 1. RollingUpdate 시작 → 기존 Pod에 SIGTERM 전달
 2. Spring Boot가 `ReadinessState`를 `REFUSING_TRAFFIC` 으로 변경
@@ -189,5 +189,12 @@ spec:
 4. readinessProbe 실패 → LB가 Pod를 트래픽 대상에서 제외
 5. 진행 중이던 요청 처리 완료
 6. Pod 종료
+
+# 3. 개선된 그래프
+
+아래 그래프에서 파란색은 success, 노란색은 error 개수이다. 배포 간 (rollingUpdate 간) `/health` 에 지속적으로 요청을 보내는 2번의 테스트를 5분 가량 진행했다. (그래프가 2개로 나눠진 걸 볼 수 있다.)
+첫번째 테스트는 무중단 배포 전략을 넣기 전이고 두번째 테스트는 모든 설정을 적용한 상태이다. 첫번째 테스트에서는 error (502) 의 개수가 중간에 생긴다. 이는 파드가 교체되면서 terminating 되는 파드로 인입되는 요청에 대한 에러이다. **반면에 두번째 테스트는 error 가 보이지 않는다.** 
+
+![KakaoTalk_Photo_2025-09-24-00-10-37](../../.vuepress/public/images/2025-09-22-rollingupdate/KakaoTalk_Photo_2025-09-24-00-10-37.png)
 
 <Footer/>

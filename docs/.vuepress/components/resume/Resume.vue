@@ -1,7 +1,7 @@
 <template>
   <div class="resume-container">
     <div class="resume-header">
-      <h1>몰입하는 개발자, 김호빈입니다. (작성중)</h1>
+      <h1>몰입하는 개발자, 김호빈입니다.</h1>
     </div>
     
     <!-- 각 섹션을 컴포넌트로 분리 -->

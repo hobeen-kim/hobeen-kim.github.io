@@ -9,7 +9,7 @@
       </div>
       <div class="skill-category">
         <div class="skill-category-title">데브옵스</div>
-        <div class="skill-list"> AWS, Kubenetes, Kafka, Grafana/Prometheus, ArgoCD, Terraform</div>
+        <div class="skill-list"> AWS, Kubenetes, Kafka, Grafana/Prometheus/Loki, ArgoCD, Terraform</div>
       </div>
       <div class="skill-category">
         <div class="skill-category-title">데이터베이스</div>

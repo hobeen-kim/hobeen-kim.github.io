@@ -9,7 +9,7 @@ description: "자바의 Pass by Value 에 대한 이해와 예시"
 
 <Header />
 
-아래 코드에 대한 출력값을 맞춰보자.
+아래 코드에 대한 출력값(1,2,3,4)을 맞춰보자.
 
 ```java
 class Tom {
@@ -114,11 +114,11 @@ public void test() {
 
 # Pass by Value 와 Pass by Reference
 
-Pass by Value (값에 의한 전달)과 Pass by Reference (참조에 의한 전달) 은 복사된 데이터를 전달하느냐 실제 값을 전달하느냐의 차이이다.
+Pass by Value (값에 의한 전달)과 Pass by Reference (참조에 의한 전달) 은 메서드의 파라미터로 복사된 데이터를 전달하느냐 실제 값을 전달하느냐의 차이이다.
 
 ## Pass by Value
 
-Pass By Value 는 값에 의한 전달 복사된 데이터를 전달하여 구성함으로써, 값을 수정하여도 원본의 데이터에는 영향을 주지 않도록 하는 방식이다. 맨 처음 나왔던 문제 중 배열만 보겠다.
+Pass By Value 는 복사된 데이터를 전달하여 구성함으로써, 값을 수정하여도 원본의 데이터에는 영향을 주지 않도록 하는 방식이다. 맨 처음 나왔던 문제 중 배열만 보겠다.
 
 ```java
 public class Main {
@@ -156,7 +156,7 @@ public class Main {
 
 자바는 모든 데이터를 Pass by Value 방식으로 전달한다. 그렇기 때문에 자바에서 어떤 객체가 파라미터로 전달되었을 때, 필드값에 접근하여 해당 값을 수정하는 것은 가능하지만 그 객체 자체는 변경 불가능하다.
 
-위 예시처럼 change()` 메서드가 종료되면 복제본 (0x002)은 소멸되고, arr 객체 자체에 변경사항이 있었다면 해당 부분은 반영되지 않는다.
+위 예시처럼 `change()` 메서드가 종료되면 복제본 (0x002)은 소멸되고, arr 객체 자체에 변경사항이 있었다면 해당 부분은 반영되지 않는다.
 
 ## Pass By Reference
 

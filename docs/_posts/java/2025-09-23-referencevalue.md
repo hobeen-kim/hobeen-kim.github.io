@@ -144,7 +144,7 @@ public class Main {
 
 ![image-20250923160933872](../../.vuepress/public/images/2025-09-23-referencevalue/image-20250923160933872.png)
 
-그리고 `arr = new int[] {3, 4};` 을 호출하게 되면 "**새로운** 객체를 생성한 후 arr 위치에 집어넣게 된다. 여전히 originArr 은 1, 2 이다. 만약 여기서 arr 을 수정한다고 해도 (`arr[0] = 5`와 같이) `0x002` 주소의 배열값만 바뀌는 것이지 `0x001` 배열 값은 아무런 영향을 받지 않는다.
+그리고 `arr = new int[] {3, 4};` 을 호출하게 되면 "**새로운 객체를 생성**"한 후 arr 위치에 집어넣게 된다. 여전히 originArr 은 1, 2 이다. 만약 여기서 arr 을 수정한다고 해도 (`arr[0] = 5`와 같이) `0x002` 주소의 배열값만 바뀌는 것이지 `0x001` 배열 값은 아무런 영향을 받지 않는다.
 
 ![image-20250923161031064](../../.vuepress/public/images/2025-09-23-referencevalue/image-20250923161031064.png)
 
@@ -196,8 +196,8 @@ int main() {
 
 # Ref.
 
-- https://medium.com/@samurai.stateless.coder/i-asked-50-java-developers-this-question-their-answers-will-shock-you-5964e9e5a2e3
-- https://mangkyu.tistory.com/106
+- [https://medium.com/@samurai.stateless.coder/i-asked-50-java-developers-this-question-their-answers-will-shock-you-5964e9e5a2e3](https://medium.com/@samurai.stateless.coder/i-asked-50-java-developers-this-question-their-answers-will-shock-you-5964e9e5a2e3)
+- [https://mangkyu.tistory.com/106](https://mangkyu.tistory.com/106)
 
 <Footer/>
 

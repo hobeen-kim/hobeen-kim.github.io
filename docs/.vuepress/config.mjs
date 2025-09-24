@@ -96,7 +96,13 @@ export default defineUserConfig({
     }
   },
   bundler: viteBundler({
-    viteOptions: {},
+    viteOptions: {
+      build: {
+        rollupOptions: {
+          external: ['html2pdf.js']
+        }
+      }
+    },
     vuePluginOptions: {},
   }),
   // 블로그 플러그인 설정

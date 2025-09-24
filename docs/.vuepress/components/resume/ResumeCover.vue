@@ -38,7 +38,8 @@
 <script>
 import Portfolio from './Portfolio.vue'
 import Resume from './Resume.vue'
-import html2pdf from 'html2pdf.js'
+// html2pdf는 SSR 환경에서 'self'를 참조하여 빌드 오류가 발생할 수 있으므로
+// 클라이언트 사이드에서만 동적 로딩합니다.
 
 export default {
   name: 'ResumeCover',
@@ -63,7 +64,13 @@ export default {
     selectTab(key) {
       this.currentTab = key
     },
-    downloadPDF() {
+    async downloadPDF() {
+      // SSR 환경 방지: 브라우저에서만 동작
+      if (typeof window === 'undefined') {
+        console.warn('PDF 다운로드는 브라우저에서만 가능합니다.');
+        return;
+      }
+
       const element = this.$refs.contentToDownload;
       const filename = this.currentTab === 'resume' ? '김호빈_백엔드_이력서.pdf' : '김호빈_백엔드_포트폴리오.pdf';
 
@@ -85,16 +92,16 @@ export default {
         }
       };
 
-      // PDF 생성 시작 알림
-      this.$nextTick(() => {
-        // PDF 생성 및 다운로드
-        html2pdf().set(opt).from(element).save().then(() => {
-          console.log('PDF 생성 완료');
-        }).catch(err => {
-          console.error('PDF 생성 중 오류 발생:', err);
-          alert('PDF 생성 중 오류가 발생했습니다.');
-        });
-      });
+      try {
+        // 클라이언트에서만 동적 임포트
+        const { default: html2pdf } = await import('html2pdf.js');
+        await this.$nextTick();
+        await html2pdf().set(opt).from(element).save();
+        console.log('PDF 생성 완료');
+      } catch (err) {
+        console.error('PDF 생성 중 오류 발생:', err);
+        alert('PDF 생성 중 오류가 발생했습니다.');
+      }
     }
   }
 }

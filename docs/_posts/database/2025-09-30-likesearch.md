@@ -66,7 +66,7 @@ create index idx_reviewtext on review (reviewtext);
 >
 > - 단어 단위 검색에 최적화.  `%good%` 같은 단순 부분검색이 아니라 `"good"`이라 는 단어를 찾을 때 훨씬 효율적임
 
-## 1. Trigram(tri-gram) 개념
+## 2.1 Trigram(tri-gram) 개념
 
 **Trigram** 은 문자열을 **3글자 단위**로 쪼갠 조각을 의미한다. 예를 들어 `"good"`이라는 문자열이 있다면,
 
@@ -75,7 +75,7 @@ create index idx_reviewtext on review (reviewtext);
 - 이렇게 쪼개진 trigrams 집합을 인덱스에 저장한다.
 
 
-## 2. PostgreSQL에서의 `pg_trgm` 확장
+## 2.2 PostgreSQL에서의 `pg_trgm` 확장
 
 PostgreSQL은 `pg_trgm` 확장을 통해 trigram 기반 검색을 지원한다. 아래와 같이 설치하고 인덱스를 생성한다.
 
@@ -90,7 +90,7 @@ CREATE INDEX idx_review_reviewtext_trgm ON review USING gin (lower(reviewtext) g
 > - "이 값이 들어 있냐?"를 빠르게 판별
 > - 예: 배열에 특정 값이 포함되어 있는지, 문자열에 특정 trigram이 있는지
 
-## 3. 동작 원리
+## 2.3 동작 원리
 
 ```sql
 SELECT * FROM review WHERE lower(reviewtext) LIKE '%good%';
@@ -105,7 +105,7 @@ SELECT * FROM review WHERE lower(reviewtext) LIKE '%good%';
 
 즉, **후보군을 빠르게 줄여주고 나머지 검증만 하기 때문에 성능이 크게 향상**된다.
 
-## 4. 특징
+## 2.4 특징
 
 **장점**
 
@@ -169,7 +169,7 @@ Bitmap Heap Scan on review  (cost=87.80..23038.73 rows=7861 width=585)
 
 # 4. 추가 개념: gin 인덱스
 
-## 1. 기본 개념
+## 4.1 기본 개념
 
 - **GIN (Generalized Inverted Index)** 는 말 그대로 **역색인(inverted index)** 이다.
 - RDBMS에서 보통 인덱스(B-tree)는 `값 → row 위치` 구조인데,
@@ -180,7 +180,7 @@ Bitmap Heap Scan on review  (cost=87.80..23038.73 rows=7861 width=585)
 - B-tree: `"홍길동"` → rowid=123
 - GIN: `"홍"`, `"길"`, `"동"` 각각 → [rowid=123, rowid=456, …]
 
-## 2. 인덱스 구조
+## 4.2 인덱스 구조
 
 GIN 인덱스는 크게 두 계층으로 나뉜다.
 
@@ -192,9 +192,7 @@ GIN 인덱스는 크게 두 계층으로 나뉜다.
   - row가 적으면 메모리에 바로 올릴 수 있는 **posting list** 형태
   - row가 많아지면 별도의 B-tree인 **posting tree**로 분리 저장
 
-------
-
-## 3. 쓰기(INSERT/UPDATE) 시 동작
+## 4.3 쓰기(INSERT/UPDATE) 시 동작
 
 1. 새 row 삽입하면 해당 컬럼 값이 토큰화된다.
    - 예: `"good"` → `"goo"`, `"ood"`
@@ -204,9 +202,7 @@ GIN 인덱스는 크게 두 계층으로 나뉜다.
 
 이 때문에 GIN은 **쓰기 비용이 크다** (토큰 분해 + 여러 곳에 rowid 삽입)
 
-------
-
-## 4. 읽기(SELECT) 시 동작
+## 4.4 읽기(SELECT) 시 동작
 
 1. 쿼리 조건을 토큰으로 분해
    - 예: `LIKE '%good%'` → `"goo"`, `"ood"`

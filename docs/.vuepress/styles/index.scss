@@ -17,6 +17,10 @@ body.page-has-title header.vp-navbar {
   margin-right: 0;
 }
 
+.vp-sidebar-item {
+  padding: 0.2rem 1.5rem 0.2rem 1.25rem !important;
+}
+
 @media (max-width: 1500px) {
   header.vp-navbar {
     margin-left: 0;
@@ -51,7 +55,7 @@ body.page-has-title header.vp-navbar {
 
   ul {
     list-style: none;
-    margin: 0;
+    margin-left: 0.7rem
   }
 
   li {
@@ -61,15 +65,7 @@ body.page-has-title header.vp-navbar {
 
     a {
       text-decoration: none !important;
-      color: rgba(75,85,99,1);
-    }
-  }
-}
-
-[data-theme='dark'] .table-of-contents {
-  li {
-    a {
-      color: rgb(235 235 245 / 76%);
+      color: var(--vp-c-text);
     }
   }
 }

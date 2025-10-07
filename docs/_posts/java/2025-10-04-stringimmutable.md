@@ -113,4 +113,4 @@ StringBuffer 는 StringBuilder 와 같은 메서드 (append 등)를 제공하는
 # Ref.
 
 - [my-interviewer-asked-so-is-string-immutable-in-java](https://medium.com/javarevisited/my-interviewer-asked-so-is-string-immutable-in-java-5e22579bc69f)
-[top-15-java-string-interview-questions-and-answers-for-experienced-professionals](https://medium.com/@sunil17bbmp/top-15-java-string-interview-questions-and-answers-for-experienced-professionals-e1f7ab430ae1)
+- [top-15-java-string-interview-questions-and-answers-for-experienced-professionals](https://medium.com/@sunil17bbmp/top-15-java-string-interview-questions-and-answers-for-experienced-professionals-e1f7ab430ae1)

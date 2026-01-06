@@ -1,0 +1,1 @@
+import{_ as o,c as t,a,r as n,o as s}from"./app-gLImAltm.js";const r={};function c(_,i){const e=n("BookList");return s(),t("div",null,[a(e)])}const m=o(r,[["render",c],["__file","index.html.vue"]]),d=JSON.parse('{"path":"/books/","title":"","lang":"en-US","frontmatter":{"sidebar":false},"headers":[],"git":{},"filePathRelative":"_books/README.md"}');export{m as comp,d as data};

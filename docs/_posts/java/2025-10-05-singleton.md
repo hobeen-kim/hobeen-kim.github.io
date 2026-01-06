@@ -84,7 +84,7 @@ class Singleton {
 
 즉, `INSTANCE` 객체는 **getInstance()가 처음 호출될 때 단 한 번 생성**된다.
 
-## ## 3.3 이 패턴의 장점
+## 3.3 이 패턴의 장점
 
 - **Lazy Initialization** : `Singleton` 인스턴스는 필요할 때까지 생성되지 않음 (처음부터 메모리를 차지하지 않음)
 - **Thread Safe** : JVM의 클래스 로더 초기화 과정은 thread-safe하므로 별도의 synchronized 처리가 필요 없음

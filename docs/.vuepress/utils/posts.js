@@ -45,7 +45,7 @@ const getPostsByCategory = (category) => {
             } else if(fs.existsSync(`${thumbnailPath}/thumbnail.jpg`)) {
                 data.thumbnail = `/images/${slug}/thumbnail.jpg`
             } else {
-                data.thumbnail = '/images/default-thumbnail.png'
+                data.thumbnail = `/images/${category}/default-thumbnail.png`
             }
 
             return {

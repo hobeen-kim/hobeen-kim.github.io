@@ -177,7 +177,7 @@ private final java.util.Date when;
 
 ## 3.3. 컬렉션 안의 요소가 가변일 때
 
-List<Person>에서 Person이 mutable이면, 리스트 자체는 못 바꿔도 요소는 바뀔 수 있다.
+List Person 에서 Person이 mutable이면, 리스트 자체는 못 바꿔도 요소는 바뀔 수 있다.
 
 - 얕은 불변(shallow immutability): 컬렉션 구조만 안 바뀜 (추가/삭제 불가)
 - 깊은 불변(deep immutability): 요소 객체까지 불변

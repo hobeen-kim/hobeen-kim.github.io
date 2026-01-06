@@ -109,12 +109,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://hobeen-kim.github.io/posts/java/2025-10-16-gc.html</loc>
-    <lastmod>2025-10-05</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://hobeen-kim.github.io/posts/java/2025-10-04-stringimmutable.html</loc>
     <lastmod>2025-10-04</lastmod>
     <changefreq>monthly</changefreq>
@@ -383,6 +377,12 @@
     <lastmod>2023-04-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://hobeen-kim.github.io/books/all/2026-01-05-c.html</loc>
+    <lastmod>2026-01-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url>
   <url>
     <loc>https://hobeen-kim.github.io/books/all/2025-08-31-unittest.html</loc>

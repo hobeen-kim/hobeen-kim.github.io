@@ -6,10 +6,10 @@
         <div class="experience-header">
           <div class="experience-name">아그모</div>
           <div class="position">TD팀 백엔드 엔지니어</div>
-          <div class="period">25.02 ~ 현재 / 8개월</div>
+          <div class="period">25.02 ~ 현재 / 1년 1개월</div>
         </div>
         <div>
-          <div class="experience-description"> • <span>SEAMOS</span> : ISOBUS 기반 농기계/건설기계 플랫폼의 마켓플레이스의 앱 업로드 및 다운로드, 결제 API 개발</div>
+          <div class="experience-description"> • <span>SEAMOS</span> : 농기계/건설기계 플랫폼의 앱 마켓플레이스 서비스. 앱 업로드 및 다운로드, 결제 API 개발</div>
           <div class="experience-description"> • <span>AGMO Monitoring</span> : 농기계 자율주행에서 생성되는 로그를 수집하고 분석하는 파이프라인 구축 및 모니터링 API 개발 </div>
           <div class="experience-skills"> • <span>사용 기술</span> : Java, Kotlin, Spring Boot, Kafka, PostgreSQL, MongoDB, Redis, AWS, Kubernetes, Grafana, Prometheus, Loki, ArgoCD, Terraform </div>
         </div>
@@ -21,7 +21,7 @@
           <div class="period">23.11 ~ 25.02 / 1년 4개월</div>
         </div>
         <div>
-          <div class="experience-description"> • <span>Interest detection</span> : 사용자가 선택한 상품을 통해 GPT 로 관심사 키워드를 추출하고 상품을 추천하는 서비스의 API 개발 </div>
+          <div class="experience-description"> • <span>Interest detection</span> : 사용자가 선택한 상품을 통해 GPT 로 관심사 키워드를 추출하고 상품을 추천하는 LLM 서비스 개발 </div>
           <div class="experience-description"> • 하루 8000만 건의 쇼핑몰 사용자 로그를 수집하고 분석하는 ETL 파이프라인 관리 </div>
           <div class="experience-skills"> • <span>사용 기술</span> : Java, Kotlin, Spring Boot, AWS, AWS Kinesis, PostgreSQL, Kubernetes, Datadog </div>
         </div>

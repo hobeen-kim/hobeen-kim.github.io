@@ -12,7 +12,7 @@
       <div class="responsibilities">
         <div class="responsibility-item">
           <div class="responsibility-header">
-            <div class="responsibility-title">마켓플레이스 개발</div>
+            <div class="responsibility-title">SEAMOS 마켓플레이스 개발</div>
             <div class="period">2025.04 ~ 현재</div>
           </div>
           <div class="responsibility-description">
@@ -59,6 +59,20 @@
             <div class="responsibility-detail"> • 수 초 이상 걸리는 gpt 요청으로 인한 지연을 비동기로 구조를 변경하여 200ms ~ 300ms 로 개선</div>
             <div class="responsibility-detail"> • EKS 와 Lambda, SNS 를 활용한 서버리스 이벤트 기반 아키텍처로 일 100만 건의 상품과 1만 건의 리뷰에서 키워드 및 추천문구 출력 처리</div>
             <div class="responsibility-skills"><span><strong>사용기술</strong>: Kotlin/Spring, Python, AWS EKS, MongoDB, ChatGPT</span></div>
+          </div>
+        </div>
+        <div class="responsibility-item">
+          <div class="responsibility-header">
+            <div class="responsibility-title">연합뉴스 뉴스 추천 시스템 파이프라인 설계</div>
+            <div class="period">2024.03 ~ 2024.10</div>
+          </div>
+          <div class="responsibility-description">
+            <div class="responsibility-detail-main"><span> • 연합뉴스 피드의 추천 시스템 개발</span></div>
+            <div class="responsibility-detail"> • 구독자의 이벤트를 수집하고 적재하는 ETL 파이프라인 개발</div>
+            <div class="responsibility-detail"> • 주기(일/시간)별 추천 로직을 추출하는 배치 프로세스 구축 및 관리</div>
+            <div class="responsibility-detail"> • 추천 결과 및 사용자 이벤트를 대시보드로 보여주는 API 개발</div>
+            <div class="responsibility-detail"> • 역정규화 및 파티셔닝으로 수 백만 row 의 DB 조회시간을 초 단위에서 500ms 이하로 단축</div>
+            <div class="responsibility-skills"><span><strong>사용기술</strong>: Kotlin/Spring, Postgres(AWS Aurora), Kinesis, Redshift</span></div>
           </div>
         </div>
         <div class="responsibility-item">
@@ -193,7 +207,6 @@ export default {
 }
 
 .responsibility-skills span {
-  background-color: #dadada;
   padding: 0.1rem 0.25rem;
   border-radius: 4px;
 }

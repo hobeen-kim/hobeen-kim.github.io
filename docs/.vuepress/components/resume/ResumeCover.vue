@@ -66,42 +66,42 @@ export default {
     },
     async downloadPDF() {
     //   // SSR 환경 방지: 브라우저에서만 동작
-    //   if (typeof window === 'undefined') {
-    //     console.warn('PDF 다운로드는 브라우저에서만 가능합니다.');
-    //     return;
-    //   }
-    //
-    //   const element = this.$refs.contentToDownload;
-    //   const filename = this.currentTab === 'resume' ? '김호빈_백엔드_이력서.pdf' : '김호빈_백엔드_포트폴리오.pdf';
-    //
-    //   const opt = {
-    //     margin: 10,                // PDF 문서의 여백을 10 단위로 설정 (기본 단위는 mm)
-    //     filename: filename,        // 다운로드될 PDF 파일의 이름 (이력서.pdf 또는 포트폴리오.pdf)
-    //     image: {
-    //       type: 'jpeg',           // PDF에 포함되는 이미지 형식을 JPEG로 설정
-    //       quality: 0.98           // 이미지 품질을 98%로 설정 (0~1 사이 값, 높을수록 고품질)
-    //     },
-    //     html2canvas: {
-    //       scale: 3,               // HTML을 캔버스로 변환할 때 배율을 2배로 설정 (더 선명한 결과물)
-    //       useCORS: true           // Cross-Origin 이미지 로딩 허용 (외부 이미지 포함 시 필요)
-    //     },
-    //     jsPDF: {
-    //       unit: 'mm',             // PDF 문서의 측정 단위를 밀리미터(mm)로 설정
-    //       format: 'a4',           // PDF 문서 크기를 A4 용지 크기로 설정
-    //       orientation: 'portrait' // PDF 문서 방향을 세로 방향으로 설정 (portrait: 세로, landscape: 가로)
-    //     }
-    //   };
-    //
-    //   try {
-    //     // 클라이언트에서만 동적 임포트
-    //     const { default: html2pdf } = await import('html2pdf.js');
-    //     await this.$nextTick();
-    //     await html2pdf().set(opt).from(element).save();
-    //     console.log('PDF 생성 완료');
-    //   } catch (err) {
-    //     console.error('PDF 생성 중 오류 발생:', err);
-    //     alert('PDF 생성 중 오류가 발생했습니다.');
-    //   }
+      if (typeof window === 'undefined') {
+        console.warn('PDF 다운로드는 브라우저에서만 가능합니다.');
+        return;
+      }
+
+      const element = this.$refs.contentToDownload;
+      const filename = this.currentTab === 'resume' ? '김호빈_백엔드_이력서.pdf' : '김호빈_백엔드_포트폴리오.pdf';
+
+      const opt = {
+        margin: 10,                // PDF 문서의 여백을 10 단위로 설정 (기본 단위는 mm)
+        filename: filename,        // 다운로드될 PDF 파일의 이름 (이력서.pdf 또는 포트폴리오.pdf)
+        image: {
+          type: 'jpeg',           // PDF에 포함되는 이미지 형식을 JPEG로 설정
+          quality: 0.98           // 이미지 품질을 98%로 설정 (0~1 사이 값, 높을수록 고품질)
+        },
+        html2canvas: {
+          scale: 3,               // HTML을 캔버스로 변환할 때 배율을 2배로 설정 (더 선명한 결과물)
+          useCORS: true           // Cross-Origin 이미지 로딩 허용 (외부 이미지 포함 시 필요)
+        },
+        jsPDF: {
+          unit: 'mm',             // PDF 문서의 측정 단위를 밀리미터(mm)로 설정
+          format: 'a4',           // PDF 문서 크기를 A4 용지 크기로 설정
+          orientation: 'portrait' // PDF 문서 방향을 세로 방향으로 설정 (portrait: 세로, landscape: 가로)
+        }
+      };
+
+      try {
+        // 클라이언트에서만 동적 임포트
+        const { default: html2pdf } = await import('html2pdf.js');
+        await this.$nextTick();
+        await html2pdf().set(opt).from(element).save();
+        console.log('PDF 생성 완료');
+      } catch (err) {
+        console.error('PDF 생성 중 오류 발생:', err);
+        alert('PDF 생성 중 오류가 발생했습니다.');
+      }
     }
   }
 }

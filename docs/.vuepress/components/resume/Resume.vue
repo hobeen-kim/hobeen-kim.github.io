@@ -1,7 +1,8 @@
 <template>
   <div class="resume-container">
     <div class="resume-header">
-      <h1>몰입하는 개발자, 김호빈입니다.</h1>
+      <h1>김호빈</h1>
+      <div class="resume-header-sub">백엔드 엔지니어</div>
     </div>
     
     <!-- 각 섹션을 컴포넌트로 분리 -->
@@ -42,5 +43,12 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.resume-header-sub {
+  margin-top: -10px;
+  margin-left: 2px;
+  margin-bottom: 10px;
+  color: var(--vp-c-text);
 }
 </style>

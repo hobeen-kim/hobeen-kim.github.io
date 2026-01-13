@@ -4,7 +4,6 @@
     <div class="project-item">
       <div class="project-header">
         <div class="company-name">아그모</div>
-        <span class="company-description">농기계 자율주행 시스템 및 ISOBUS 기반 마켓플레이스 서비스</span>
         <div class="position-period">
           <span class="position">백엔드 엔지니어</span><span class="period"> / 2025.02 ~ 현재</span>
         </div>
@@ -30,9 +29,9 @@
           </div>
           <div class="responsibility-description">
             <div class="responsibility-detail-main"><span> • 자율주행에서 생성되는 로그를 수집하고 분석하는 파이프라인 및 모니터링 앱 개발</span></div>
-            <div class="responsibility-detail"> • 실시간 로그 ETL 파이프라인 개발</div>
+            <div class="responsibility-detail"> • 실시간 자율주행 로그 ETL 파이프라인 개발</div>
             <div class="responsibility-detail"> • Kafka Streams 기반 실시간 로그 집계 및 통계 분석</div>
-            <div class="responsibility-detail"> • 하나의 배치 서버를 모듈 기반으로 구축</div>
+            <div class="responsibility-detail"> • 에러 처리를 위한 DLT 설계, 로그 전처리 프로세스 기획 및 개발</div>
             <div class="responsibility-skills"><span><strong>사용기술</strong>: Java/Spring, AWS ECS, Kafka, MongoDB</span></div>
           </div>
         </div>
@@ -41,7 +40,6 @@
     <div class="project-item">
       <div class="project-header">
         <div class="company-name">테크랩스</div>
-        <span class="company-description">고객 활동 이력을 바탕으로 한 초개인화 추천 서비스</span>
         <div class="position-period">
           <span class="position">AI 사업부 백엔드 엔지니어</span><span class="period"> / 2023.11 ~ 2025.02</span>
         </div>
@@ -71,7 +69,7 @@
             <div class="responsibility-detail"> • 구독자의 이벤트를 수집하고 적재하는 ETL 파이프라인 개발</div>
             <div class="responsibility-detail"> • 주기(일/시간)별 추천 로직을 추출하는 배치 프로세스 구축 및 관리</div>
             <div class="responsibility-detail"> • 추천 결과 및 사용자 이벤트를 대시보드로 보여주는 API 개발</div>
-            <div class="responsibility-detail"> • 역정규화 및 파티셔닝으로 수 백만 row 의 DB 조회시간을 초 단위에서 500ms 이하로 단축</div>
+            <div class="responsibility-detail"> • 반정규화 및 파티셔닝으로 수 백만 row 의 DB 조회시간을 초 단위에서 500ms 이하로 단축</div>
             <div class="responsibility-skills"><span><strong>사용기술</strong>: Kotlin/Spring, Postgres(AWS Aurora), Kinesis, Redshift</span></div>
           </div>
         </div>
@@ -122,12 +120,6 @@ export default {
   font-weight: 600;
   margin-right: 0.5rem;
   color: var(--vp-c-text-1);
-}
-
-.company-description {
-  font-size: 0.8rem;
-  color: var(--vp-c-text-2);
-  border-bottom: 1px solid var(--vp-c-border);
 }
 
 .position-period {

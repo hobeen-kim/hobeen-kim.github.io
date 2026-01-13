@@ -48,7 +48,7 @@ export default {
     return {
       tabs: [
         { key: 'resume', label: '이력서', component: 'Resume' },
-        { key: 'portfolio', label: '포트폴리오', component: 'Portfolio' },
+        { key: 'portfolio', label: '포트폴리오 (작성중)', component: 'Portfolio' },
       ],
       currentTab: 'resume',
       contentScale: 1

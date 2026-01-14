@@ -97,6 +97,9 @@ export default defineUserConfig({
   },
   bundler: viteBundler({
     viteOptions: {
+      optimizeDeps: {
+        include: ['html2pdf.js']
+      },
       build: {
         rollupOptions: {
         }

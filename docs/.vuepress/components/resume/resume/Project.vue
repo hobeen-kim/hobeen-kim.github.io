@@ -61,7 +61,7 @@
         </div>
         <div class="responsibility-item">
           <div class="responsibility-header">
-            <div class="responsibility-title">연합뉴스 뉴스 추천 시스템 파이프라인 설계</div>
+            <div class="responsibility-title">연합뉴스 추천 시스템 파이프라인 설계</div>
             <div class="period">2024.03 ~ 2024.10</div>
           </div>
           <div class="responsibility-description">

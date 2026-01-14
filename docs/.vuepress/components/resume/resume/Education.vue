@@ -7,7 +7,7 @@
         <div class="certification-list">
           <div class="certification-item">
             <div class="certification-name">SQLD</div>
-            <div class="certification-date">2025.12.11</div>
+            <div class="certification-date">2025.12.12</div>
           </div>
           <div class="certification-item">
             <div class="certification-name">AWS DevOps Engineer - Professional</div>

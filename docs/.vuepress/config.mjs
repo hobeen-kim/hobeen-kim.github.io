@@ -99,7 +99,6 @@ export default defineUserConfig({
     viteOptions: {
       build: {
         rollupOptions: {
-          external: ['html2pdf.js']
         }
       }
     },

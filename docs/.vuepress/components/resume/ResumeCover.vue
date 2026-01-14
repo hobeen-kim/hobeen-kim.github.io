@@ -83,7 +83,10 @@ export default {
         },
         html2canvas: {
           scale: 3,               // HTML을 캔버스로 변환할 때 배율을 2배로 설정 (더 선명한 결과물)
-          useCORS: true           // Cross-Origin 이미지 로딩 허용 (외부 이미지 포함 시 필요)
+          useCORS: true,           // Cross-Origin 이미지 로딩 허용 (외부 이미지 포함 시 필요)
+          onclone: (doc) => {
+            doc.documentElement.classList.remove('dark')
+          }
         },
         jsPDF: {
           unit: 'mm',             // PDF 문서의 측정 단위를 밀리미터(mm)로 설정

@@ -19,7 +19,17 @@
             <div class="responsibility-detail"> • 마켓 플레이스 기본 백엔드 API 기능 개발 (앱 설치, 다운로드, 검색, 디바이스/회원 관리) </div>
             <div class="responsibility-detail"> • Grafana, Prometheus, Loki, Pyroscope 를 활용한 모니터링 시스템 구축</div>
             <div class="responsibility-detail"> • AWS IoT 를 활용하여 디바이스와 MQTT 통신 시스템 개발</div>
-            <div class="responsibility-skills"><span><strong>사용기술</strong>: Kotlin/Spring, EKS, ArgoCD, AWS IoT, Postgres, Grafana, Prometheus</span></div>
+            <div class="responsibility-skills">
+              <div class="tech-stack">
+                <span class="tag">Kotlin/Spring</span>
+                <span class="tag">EKS</span>
+                <span class="tag">ArgoCD</span>
+                <span class="tag">AWS IoT</span>
+                <span class="tag">Postgres</span>
+                <span class="tag">Grafana</span>
+                <span class="tag">Prometheus</span>
+              </div>
+            </div>
           </div>
         </div>
         <div class="responsibility-item">
@@ -32,7 +42,13 @@
             <div class="responsibility-detail"> • 실시간 자율주행 로그 ETL 파이프라인 개발</div>
             <div class="responsibility-detail"> • Kafka Streams 기반 실시간 로그 집계 및 통계 분석</div>
             <div class="responsibility-detail"> • 에러 처리를 위한 DLT 설계, 로그 전처리 프로세스 기획 및 개발</div>
-            <div class="responsibility-skills"><span><strong>사용기술</strong>: Java/Spring, AWS ECS, Kafka, MongoDB</span></div>
+            <div class="responsibility-skills">
+                <div class="tech-stack">
+                  <span class="tag">AWS ECS</span>
+                  <span class="tag">Kafka</span>
+                  <span class="tag">MongoDB Boot</span>
+                </div>
+            </div>
           </div>
         </div>
       </div>
@@ -56,7 +72,15 @@
             <div class="responsibility-detail"> • 추천문구와 추천결과를 조합하는 Spring 서버와 langchain 을 활용하는 fast api 서버 개발</div>
             <div class="responsibility-detail"> • 수 초 이상 걸리는 gpt 요청으로 인한 지연을 비동기로 구조를 변경하여 200ms ~ 300ms 로 개선</div>
             <div class="responsibility-detail"> • EKS 와 Lambda, SNS 를 활용한 서버리스 이벤트 기반 아키텍처로 일 100만 건의 상품과 1만 건의 리뷰에서 키워드 및 추천문구 출력 처리</div>
-            <div class="responsibility-skills"><span><strong>사용기술</strong>: Kotlin/Spring, Python, AWS EKS, MongoDB, ChatGPT</span></div>
+            <div class="responsibility-skills">
+              <div class="tech-stack">
+                <span class="tag">Kotlin/Spring</span>
+                <span class="tag">Python</span>
+                <span class="tag">AWS EKS</span>
+                <span class="tag">MongoDB</span>
+                <span class="tag">OPENAI API</span>
+              </div>
+            </div>
           </div>
         </div>
         <div class="responsibility-item">
@@ -70,7 +94,14 @@
             <div class="responsibility-detail"> • 주기(일/시간)별 추천 로직을 추출하는 배치 프로세스 구축 및 관리</div>
             <div class="responsibility-detail"> • 추천 결과 및 사용자 이벤트를 대시보드로 보여주는 API 개발</div>
             <div class="responsibility-detail"> • 반정규화 및 파티셔닝으로 수 백만 row 의 DB 조회시간을 초 단위에서 500ms 이하로 단축</div>
-            <div class="responsibility-skills"><span><strong>사용기술</strong>: Kotlin/Spring, Postgres(AWS Aurora), Kinesis, Redshift</span></div>
+            <div class="responsibility-skills">
+              <div class="tech-stack">
+                <span class="tag">Kotlin/Spring</span>
+                <span class="tag">Postgres(AWS Aurora)</span>
+                <span class="tag">Kinesis</span>
+                <span class="tag">Redshift</span>
+              </div>
+            </div>
           </div>
         </div>
         <div class="responsibility-item">
@@ -82,7 +113,16 @@
             <div class="responsibility-detail-main"><span> • 하루 8000만 건 로그, API 호출 4000만 회의 Spring 기반 추천 API 및 배치 시스템 관리</span></div>
             <div class="responsibility-detail"> • 데이터독 PoC 및 도입 및 고도화로 실시간 모니터링 시스템 구축</div>
             <div class="responsibility-detail"> • 자사 6개 모든 서비스에 대한 기능/부하 테스트 진행 및 비용감소 프로젝트로 AWS 비용 월 56% 감축</div>
-            <div class="responsibility-skills"><span><strong>사용기술</strong>: Java/Spring, Kotlin, Postgres(AWS Aurora), Kinesis, Datadog, S3</span></div>
+            <div class="responsibility-skills">
+              <div class="tech-stack">
+                <span class="tag">Java/Spring</span>
+                <span class="tag">Kotlin</span>
+                <span class="tag">Postgres(AWS Aurora)</span>
+                <span class="tag">Kinesis</span>
+                <span class="tag">Datadog</span>
+                <span class="tag">S3</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -199,8 +239,6 @@ export default {
 }
 
 .responsibility-skills span {
-  padding: 0.1rem 0.25rem;
-  border-radius: 4px;
 }
 
 

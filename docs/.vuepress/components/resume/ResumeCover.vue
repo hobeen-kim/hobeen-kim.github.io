@@ -202,45 +202,23 @@ export default {
   margin-top: 0.5rem;
 }
 
-.header2 {
-  margin-top: 0;
-  padding-top: 0.5rem;
-  font-size: 1.4rem;
-  font-weight: 600;
-  color: var(--vp-c-brand);
-  padding-bottom: 0;
-  margin-bottom: 0;
-}
-
-.header3 {
-  margin-top: 0;
-  padding-top: 0.5rem;
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: var(--vp-c-brand);
-  padding-bottom: 0;
-  margin-bottom: 1rem;
-}
-
-.section {
-  margin-bottom: 2rem;
-}
-
-.tech-tags {
+.tech-stack {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
+  gap: 0.25rem;
 }
 
-.tech-tag {
-  display: inline-block;
-  padding: 0.25rem 0.5rem;
-  background-color: var(--vp-c-brand-dimm);
-  color: var(--vp-c-brand);
-  border-radius: 4px;
+.tag {
+  background-color: #eef1f5;
+  padding: 0.1rem 0.25rem;
+  border-radius: 15px;
   font-size: 0.85rem;
-  font-weight: 500;
+  color: #476582;
+}
+
+[data-theme='dark'] .tag {
+  background-color: rgb(87, 87, 87);
+  color: #82a9cf;
 }
 
 ul {

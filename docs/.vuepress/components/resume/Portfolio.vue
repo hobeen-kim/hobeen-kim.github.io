@@ -194,21 +194,6 @@ li {
   margin-bottom: 0.5rem;
 }
 
-.tech-stack {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.tag {
-  background-color: #eef1f5;
-  padding: 0.25rem 0.75rem;
-  border-radius: 15px;
-  font-size: 0.85rem;
-  color: #476582;
-}
-
 .troubleshooting {
   background-color: #fffbf0;
   border: 1px solid #ffe58f;

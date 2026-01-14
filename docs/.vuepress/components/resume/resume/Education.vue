@@ -6,7 +6,7 @@
         <div class="header3">자격증</div>
         <div class="certification-list">
           <div class="certification-item">
-            <div class="certification-name">SQLD</div>
+            <div class="certification-name">SQL Developer</div>
             <div class="certification-date">2025.12.12</div>
           </div>
           <div class="certification-item">
@@ -67,6 +67,11 @@ export default {
 
 .certifications-container {
   margin-bottom: 1.5rem;
+}
+
+.certification-list {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .certification-item {

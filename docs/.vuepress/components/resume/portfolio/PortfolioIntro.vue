@@ -1,7 +1,7 @@
 <template>
   <section class="intro-section">
-    <h1 class="name">김호빈 (Andy)</h1>
-    <p class="position">Backend Developer</p>
+    <div class="name">김호빈</div>
+    <p class="position">백엔드 엔지니어</p>
     <div class="contact-info">
       <p>Email: sksjsksh32@gmail.com</p>
       <p>Github: <a href="https://github.com/hobeen-kim" target="_blank">https://github.com/hobeen-kim</a></p>
@@ -32,14 +32,14 @@ export default {
 }
 
 .name {
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
   color: var(--vp-c-text-1);
 }
 
 .position {
-  font-size: 1.2rem;
+  font-size: 1rem;
   color: var(--vp-c-text-2);
   margin-bottom: 1.5rem;
 }

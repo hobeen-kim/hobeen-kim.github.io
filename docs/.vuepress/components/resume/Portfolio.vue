@@ -23,9 +23,7 @@ export default {
 
 <style scoped>
 .portfolio-container {
-  max-width: 900px;
   margin: 0 auto;
-  padding: 1rem;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   color: var(--vp-c-text-1);
 }

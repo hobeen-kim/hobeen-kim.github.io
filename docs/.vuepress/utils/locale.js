@@ -1,4 +1,5 @@
 export default {
+    "architecture": "아키텍처",
     "kafka": "카프카",
     "spring": "스프링",
     "infra": "인프라",

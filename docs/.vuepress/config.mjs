@@ -19,8 +19,8 @@ const theme = {
             link: '/posts/',
           },
           {
-            text: '개발 문화',
-            link: '/posts/culture/',
+            text: '아키텍처',
+            link: '/posts/architecture/',
           },
           {
             text: '기술',
@@ -49,6 +49,10 @@ const theme = {
           {
             text: '컨퍼런스',
             link: '/posts/conference/',
+          },
+          {
+            text: '개발 문화',
+            link: '/posts/culture/',
           },
         ],
       },

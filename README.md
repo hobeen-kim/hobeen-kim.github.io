@@ -100,6 +100,22 @@ children: [
 ],
 ```
 
+### 4. 카테고리의 한글명 추가
+- docs/.vuepress/utils/locale.js 에 추가
+```javascript{2}
+export default {
+    "{category}": "{한글명}"
+    "kafka": "카프카",
+    "spring": "스프링",
+    "infra": "인프라",
+    "database": "데이터베이스",
+    "conference": "컨퍼런스",
+    "tech": "기술",
+    "culture": "개발 문화",
+    "java": "자바",
+}
+```
+
 ## navbar 추가
 
 예시 : '기술' navbar 추가 (영어는 tech)

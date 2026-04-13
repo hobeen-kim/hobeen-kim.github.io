@@ -24,13 +24,13 @@ tags: [스마트농업, Agriculture4.0, 정밀농업]
 timeline
     title Agriculture 발전 단계
     section Agriculture 1.0
-        수작업 시대 : 인력과 축력 의존<br>경험 기반 의사결정<br>생산성 한계 명확
+        수작업 시대 : 인력과 축력 의존, 경험 기반 의사결정
     section Agriculture 2.0
-        기계화 시대 : 트랙터·콤바인 도입<br>화학비료·농약 사용<br>대량 생산 가능
+        기계화 시대 : 트랙터 도입, 화학비료와 농약 사용
     section Agriculture 3.0
-        자동화 시대 : 자동 관개·온실 제어<br>GPS 기반 작업<br>부분적 정밀화
+        자동화 시대 : GPS 기반 작업, 자동 관개와 온실 제어
     section Agriculture 4.0
-        데이터 기반 지능화 : IoT·AI·빅데이터 통합<br>실시간 의사결정<br>처방농업 실현
+        데이터 기반 지능화 : IoT와 AI 통합, 실시간 처방농업
 ```
 
 | 단계 | 시대 | 핵심 기술 | 특징 |

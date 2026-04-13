@@ -110,13 +110,13 @@ sequenceDiagram
 timeline
     title 스마트농업 기술 발전 타임라인
     section 현재(~2025)
-        ISOBUS 상호운용성 확산 : AEF 인증 보급<br>클라우드 FMIS 확산<br>agrirouter 데이터 허브
+        ISOBUS 상호운용성 확산 : AEF 인증 보급, 클라우드 FMIS, agrirouter
     section 근미래(2025~2030)
-        AI 기반 처방농업 : 위성·드론 데이터 AI 분석<br>디지털 트윈 도입<br>로봇 농기계 시범 운행
+        AI 기반 처방농업 : 위성·드론 AI 분석, 디지털 트윈 도입
     section 중기(2030~2035)
-        자율 농장 실현 : Level 4~5 자율주행 농기계<br>탄소 크레딧 자동 인증<br>데이터 기반 농업 보험 확산
+        자율 농장 실현 : Level 4~5 자율주행, 탄소 크레딧 자동 인증
     section 원미래(2035~)
-        완전 자율 농업 생태계 : 농장 디지털 트윈 완전 구현<br>AI 농장 매니저<br>분산 데이터 소유권(블록체인)
+        완전 자율 생태계 : 디지털 트윈 완성, AI 농장 매니저
 ```
 
 ### 디지털 트윈(Digital Twin)

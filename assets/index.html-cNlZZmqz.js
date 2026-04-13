@@ -1,1 +1,0 @@
-import{_ as t,c as a,a as n,r as s,o}from"./app-CJC3hE05.js";const r={};function c(_,d){const e=s("StudyList");return o(),a("div",null,[n(e)])}const l=t(r,[["render",c],["__file","index.html.vue"]]),m=JSON.parse('{"path":"/study/","title":"","lang":"en-US","frontmatter":{"sidebar":false},"headers":[],"git":{},"filePathRelative":"_study/README.md"}');export{l as comp,m as data};

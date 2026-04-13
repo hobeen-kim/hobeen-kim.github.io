@@ -317,6 +317,7 @@ SPN 176  Engine Turbo Temperature   : N/A
 SPN 1134 Intercooler Temp           : N/A
 ```
 
+::: details Python 파싱 예제
 ## Python 파싱 예제
 
 ```python
@@ -387,6 +388,7 @@ PGN      : 65262 (0x0FEEE)
   SPN 110 Engine Coolant Temp: 136 °C (raw=0xB0)
   SPN 174 Engine Fuel Temp 1 : 10 °C (raw=0x32)
 ```
+:::
 
 ::: tip 핵심 정리
 - 29비트 ID는 Priority(3) + EDP(1) + DP(1) + PF(8) + PS(8) + SA(8)로 구성된다.
@@ -398,4 +400,6 @@ PGN      : 65262 (0x0FEEE)
 
 ---
 
-[이전: SAE J1939 입문](/study/isobus/08-j1939-intro)
+## 다음 챕터
+
+[J1939 주소 체계](/study/isobus/10-j1939-address)으로 이어진다.

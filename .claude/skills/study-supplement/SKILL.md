@@ -51,6 +51,21 @@ triggers:
   - 코드 예제가 필요한 경우 포함
   - `<br/>` 사용 금지 — `<br>` 사용
   - `**bold**한글` 패턴 금지 — CommonMark에서 닫는 `**` 뒤에 한글이 바로 오면 bold가 적용되지 않음. `<strong>bold</strong>한글` 사용
+  - GitHub 스타일 callout(`> [!TIP]`, `> [!INFO]`) 사용 금지 — VuePress에서 렌더링되지 않음
+- VuePress 마크다운 컨테이너 활용:
+  - `:::tip 제목` — 핵심 정리, 팁
+  - `:::info 제목` — 참고 정보, 부연 설명
+  - `:::warning 제목` — 주의사항, 안전 관련 경고
+  - `:::details 제목` — 접기/펼치기 (긴 코드 예제, 심화 내용)
+  - `:::tabs` + `@tab` — 멀티 언어 코드 예제 (C/Python 등)
+- Mermaid 다이어그램 유형 활용:
+  - `flowchart`, `sequenceDiagram` — 흐름도, 통신 과정
+  - `packet-beta` — 프레임/패킷 필드 구조
+  - `stateDiagram-v2` — 상태 천이 (`\n` 대신 `<br>` 사용)
+  - `timeline` — 기술 발전사, 시간순 이벤트
+  - `xychart-beta` — 수치 비교 차트
+  - `pie` — 비율/분포
+  - `mindmap` — 개념 지도
 - 기존 내용을 삭제하거나 변경하지 않음 — 추가만
 
 ### 4단계: 빌드 및 배포

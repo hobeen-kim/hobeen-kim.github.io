@@ -508,4 +508,3 @@ Total as-applied records: 5
 
 ---
 
-이전: [ISOBUS 기타 기능](/study/isobus/21-isobus-misc) | 다음: [정리 및 요약](/study/isobus/23-summary)

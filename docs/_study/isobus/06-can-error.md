@@ -159,8 +159,9 @@ CAN 컨트롤러는 <strong>TEC(Transmit Error Counter)</strong>와 **REC(Receiv
 | 메시지 성공적으로 수신 | -1 |
 | REC가 127 초과 상태에서 성공 수신 | 119로 재설정 |
 
-> [!INFO]
-> 에러 카운터의 비대칭성에 주목하자. 오류 시 +8, 성공 시 -1로 설계된 이유는, <strong>오류 빈도가 낮아야 정상</strong>이라는 가정 때문이다. 간헐적 오류는 카운터가 자연히 회복되지만, 지속적 오류는 빠르게 누적된다.
+::: info 에러 카운터의 비대칭성
+에러 카운터의 비대칭성에 주목하자. 오류 시 +8, 성공 시 -1로 설계된 이유는, <strong>오류 빈도가 낮아야 정상</strong>이라는 가정 때문이다. 간헐적 오류는 카운터가 자연히 회복되지만, 지속적 오류는 빠르게 누적된다.
+:::
 
 그렇다면 카운터가 특정 임계값에 도달하면 어떤 일이 벌어질까? CAN은 카운터 값에 따라 노드의 동작 상태를 세 단계로 구분한다.
 
@@ -174,16 +175,16 @@ TEC와 REC 값에 따라 노드는 3가지 상태 중 하나에 있게 된다.
 stateDiagram-v2
     [*] --> ErrorActive: 초기 상태
 
-    ErrorActive: Error Active\n(정상 동작 상태)\nTEC < 128 AND REC < 128
+    ErrorActive: Error Active<br>(정상 동작 상태)<br>TEC < 128 AND REC < 128
 
-    ErrorPassive: Error Passive\n(제한 동작 상태)\nTEC >= 128 OR REC >= 128
+    ErrorPassive: Error Passive<br>(제한 동작 상태)<br>TEC >= 128 OR REC >= 128
 
-    BusOff: Bus Off\n(버스 분리 상태)\nTEC > 255
+    BusOff: Bus Off<br>(버스 분리 상태)<br>TEC > 255
 
     ErrorActive --> ErrorPassive: TEC >= 128 또는 REC >= 128
     ErrorPassive --> ErrorActive: TEC < 128 AND REC < 128
     ErrorPassive --> BusOff: TEC > 255
-    BusOff --> ErrorActive: 128 × 11-recessive-bit 시퀀스 감지\n(자동 복구)
+    BusOff --> ErrorActive: 128 × 11-recessive-bit 시퀀스 감지<br>(자동 복구)
 ```
 
 **Error Active (에러 활성)**
@@ -263,8 +264,9 @@ flowchart TD
     G -->|No| I[유지보수 요청\n또는 안전 모드 유지]
 ```
 
-> [!TIP]
-> **농기계(ISOBUS) 환경에서의 고려사항**: 전기 노이즈가 많은 트랙터 환경에서는 간헐적 오류로 인한 Bus Off가 발생할 수 있다. 자동 복구가 적절할 수 있지만, 조향/브레이크 관련 ECU는 수동 복구로 설계해 불확실한 상태에서의 자동 복귀를 방지하는 것이 안전하다.
+::: warning 농기계(ISOBUS) 환경에서의 고려사항
+전기 노이즈가 많은 트랙터 환경에서는 간헐적 오류로 인한 Bus Off가 발생할 수 있다. 자동 복구가 적절할 수 있지만, 조향/브레이크 관련 ECU는 수동 복구로 설계해 불확실한 상태에서의 자동 복귀를 방지하는 것이 안전하다.
+:::
 
 ::: tip 핵심 정리
 
@@ -280,4 +282,4 @@ flowchart TD
 
 ## 다음 챕터
 
-- **이전**: [05. CAN 중재와 우선순위](/study/isobus/05-can-arbitration)
+[CAN FD](/study/isobus/07-can-fd)으로 이어진다.

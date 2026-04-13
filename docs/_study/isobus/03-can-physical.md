@@ -259,6 +259,7 @@ graph LR
    CAN_H/CAN_L 단락: 0Ω
 ```
 
+::: details Python 예제: 종단 저항 측정값 해석
 ```python
 # 종단 저항 측정값 해석 예시 (진단 스크립트)
 def interpret_termination_resistance(ohm):
@@ -277,6 +278,7 @@ print(interpret_termination_resistance(60))   # OK
 print(interpret_termination_resistance(120))  # WARNING
 print(interpret_termination_resistance(9999)) # ERROR
 ```
+:::
 
 종단 저항이 올바르게 설치된 버스에서, 실제로 얼마나 빠르게, 얼마나 먼 거리까지 통신할 수 있을까요? 속도와 거리 사이에는 중요한 트레이드오프가 있다.
 
@@ -295,6 +297,14 @@ CAN에서 **속도와 거리는 반비례** 관계이다. 속도가 빠를수록
 | 50 kbps | 약 1000 m | 장거리 산업 네트워크 |
 
 ISOBUS는 250 kbps를 표준으로 사용한다. 트랙터 + 작업기의 연결 거리를 고려해도 충분한 속도와 거리를 제공한다.
+
+```mermaid
+xychart-beta
+    title "비트레이트와 최대 버스 길이"
+    x-axis ["1 Mbps", "500 kbps", "250 kbps", "125 kbps", "50 kbps"]
+    y-axis "최대 버스 길이 (m)" 0 --> 1100
+    bar [25, 100, 250, 500, 1000]
+```
 
 ```c
 /* CAN 비트 타이밍 설정 예시 (250 kbps, 16 MHz 클럭) */

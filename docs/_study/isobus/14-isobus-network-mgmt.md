@@ -202,4 +202,6 @@ gantt
 
 ---
 
-이전: [ISOBUS 네트워크 아키텍처](/study/isobus/13-isobus-architecture)
+## 다음 챕터
+
+[Virtual Terminal 기초](/study/isobus/15-vt-basics)으로 이어진다.

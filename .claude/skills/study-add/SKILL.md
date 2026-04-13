@@ -116,12 +116,21 @@ tags: [관련태그]
 #### 문체 규칙
 - **반말 평서체(해라체)** 사용 — `~이다`, `~한다`, `~있다`, `~된다` 등. `~입니다`, `~합니다`, `~있습니다` 등 경어체 금지
 
+#### 시각화 도구 활용
+- VuePress 마크다운 컨테이너:
+  - `:::tip 제목` — 핵심 정리, 팁
+  - `:::info 제목` — 참고 정보, 부연 설명
+  - `:::warning 제목` — 주의사항, 안전 관련 경고
+  - `:::details 제목` — 접기/펼치기 (긴 코드 예제, 심화 내용)
+  - `:::tabs` + `@tab` — 멀티 언어 코드 예제 (C/Python 등)
+- GitHub 스타일 callout(`> [!TIP]`, `> [!INFO]`) 사용 금지 — VuePress에서 렌더링되지 않음
+
 #### Mermaid 다이어그램 규칙
 - 각 챕터에 최소 2개 이상의 Mermaid 다이어그램 포함
+- 활용 가능한 유형: flowchart, sequenceDiagram, packet-beta, stateDiagram-v2, timeline, xychart-beta, pie, mindmap, gantt
+- `stateDiagram-v2`에서 줄바꿈은 `\n` 대신 `<br>` 사용
 - `<br/>` 사용 금지 — Vue 컴파일 에러 발생. `<br>` 사용
 - `**bold**한글` 패턴 금지 — CommonMark에서 닫는 `**` 뒤에 한글이 바로 오면 bold가 적용되지 않음. `<strong>bold</strong>한글` 사용
-- 다이어그램 유형: flowchart, sequenceDiagram, stateDiagram, packet-beta, mindmap, gantt 등
-- 코드 블록으로 감쌈: ` ```mermaid ... ``` `
 
 #### 콘텐츠 병렬 작성
 - 관련 챕터 2~3개씩 그룹으로 묶어 executor 에이전트에 위임

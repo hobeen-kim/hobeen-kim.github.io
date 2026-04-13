@@ -140,4 +140,6 @@ John Deere, AGCO, CNH Industrial(케이스·뉴홀랜드), CLAAS, Fendt, Kvernel
 
 ---
 
-이전: [J1939 Transport Protocol](/study/isobus/11-j1939-transport) | 다음: [ISOBUS 네트워크 아키텍처](/study/isobus/13-isobus-architecture)
+## 다음 챕터
+
+[ISOBUS 네트워크 아키텍처](/study/isobus/13-isobus-architecture)으로 이어진다.

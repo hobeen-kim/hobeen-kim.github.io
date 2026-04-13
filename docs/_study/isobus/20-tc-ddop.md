@@ -265,4 +265,6 @@ graph TD
 
 ---
 
-이전: [TC 프로세스 데이터](/study/isobus/19-tc-process-data) | 다음: [TC Task 관리](/study/isobus/21-tc-task)
+## 다음 챕터
+
+[ISOBUS 기타 기능](/study/isobus/21-isobus-misc)으로 이어진다.

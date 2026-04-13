@@ -203,4 +203,6 @@ sequenceDiagram
 
 ---
 
-이전: [Task Controller 기초](/study/isobus/18-tc-basics) | 다음: [TC 디바이스 디스크립션 (DDOP)](/study/isobus/20-tc-ddop)
+## 다음 챕터
+
+[TC DDOP](/study/isobus/20-tc-ddop)으로 이어진다.

@@ -25,6 +25,16 @@ next: /study/isobus/03-can-physical
 
 1991년 Mercedes-Benz S-Class에 처음 양산 적용되었고, 이후 <strong>ISO 11898</strong>로 국제 표준화되었다.
 
+```mermaid
+timeline
+    title CAN 기술 발전사
+    1986 : Bosch가 CAN 프로토콜 발표
+    1991 : Mercedes-Benz S-Class에 최초 양산 적용
+    1993 : ISO 11898로 국제 표준화
+    2003 : J1939 기반 ISOBUS(ISO 11783) 완성
+    2012 : Bosch가 CAN FD 규격 발표
+```
+
 **CAN 표준 체계:**
 
 | 표준 | 내용 |

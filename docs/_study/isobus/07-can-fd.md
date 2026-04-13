@@ -223,4 +223,6 @@ CAN FD 채택 동향
 
 ---
 
-[이전: CAN 에러 처리](/study/isobus/06-can-error) | [다음: SAE J1939 입문](/study/isobus/08-j1939-intro)
+## 다음 챕터
+
+[SAE J1939 입문](/study/isobus/08-j1939-intro)으로 이어진다.

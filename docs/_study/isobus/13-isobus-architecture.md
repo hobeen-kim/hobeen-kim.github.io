@@ -179,4 +179,6 @@ sequenceDiagram
 
 ---
 
-이전: [ISOBUS 개요](/study/isobus/12-isobus-overview) | 다음: [ISOBUS 네트워크 관리](/study/isobus/14-isobus-network-mgmt)
+## 다음 챕터
+
+[ISOBUS 네트워크 관리](/study/isobus/14-isobus-network-mgmt)으로 이어진다.

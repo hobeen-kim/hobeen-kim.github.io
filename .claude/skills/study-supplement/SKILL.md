@@ -62,7 +62,7 @@ triggers:
   - `flowchart`, `sequenceDiagram` — 흐름도, 통신 과정
   - `packet-beta` — 프레임/패킷 필드 구조
   - `stateDiagram-v2` — 상태 천이 (`\n` 대신 `<br>` 사용)
-  - `timeline` — 기술 발전사, 시간순 이벤트
+  - `timeline` — 기술 발전사, 시간순 이벤트 (`<br>` 미지원, 쉼표로 구분)
   - `xychart-beta` — 수치 비교 차트
   - `pie` — 비율/분포
   - `mindmap` — 개념 지도

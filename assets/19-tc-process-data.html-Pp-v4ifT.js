@@ -1,0 +1,84 @@
+import{_ as e,c as n,e as r,o as a}from"./app-DktBU1vW.js";const d={};function l(o,t){return a(),n("div",null,t[0]||(t[0]=[r(`<h1 id="tc-프로세스-데이터" tabindex="-1"><a class="header-anchor" href="#tc-프로세스-데이터"><span>TC 프로세스 데이터</span></a></h1><div class="hint-container info"><p class="hint-container-title">학습 목표</p><ul><li>DDI(Data Dictionary Identifier)의 의미와 주요 번호를 설명할 수 있다.</li><li>Device Element의 타입과 역할을 구분할 수 있다.</li><li>Value Command와 Process Data Value의 흐름을 시퀀스 다이어그램으로 그릴 수 있다.</li><li>Measurement와 Setpoint의 차이를 이해하고 제어 오차의 개념을 설명할 수 있다.</li><li>살포량 제어 시나리오를 통해 전체 프로세스 데이터 흐름을 추적할 수 있다.</li></ul></div><hr><h2 id="_1-ddi-data-dictionary-identifier" tabindex="-1"><a class="header-anchor" href="#_1-ddi-data-dictionary-identifier"><span>1. DDI (Data Dictionary Identifier)</span></a></h2><p><strong>DDI</strong>는 TC 프로세스 데이터 항목을 구분하는 표준화된 16비트 번호이다.</p><blockquote><p>DDI는 &quot;어떤 종류의 데이터인가&quot;를 나타낸다. 살포량인지, 속도인지, 면적인지를 숫자로 표현한다.</p></blockquote><p>모든 TC 메시지는 DDI를 포함하여 어떤 데이터를 주고받는지 명시한다. 주요 DDI는 다음과 같다.</p><table><thead><tr><th>DDI</th><th>이름</th><th>방향</th><th>설명</th></tr></thead><tbody><tr><td><strong>1</strong></td><td>Setpoint Volume Per Area</td><td>TC → 작업기</td><td>목표 살포량 (L/ha, ml/m²)</td></tr><tr><td><strong>2</strong></td><td>Actual Volume Per Area</td><td>작업기 → TC</td><td>실제 살포량 (센서 측정)</td></tr><tr><td><strong>7</strong></td><td>Setpoint Volume Per Time</td><td>TC → 작업기</td><td>시간당 목표 유량 (L/min)</td></tr><tr><td><strong>8</strong></td><td>Actual Volume Per Time</td><td>작업기 → TC</td><td>시간당 실제 유량</td></tr><tr><td><strong>73</strong></td><td>Setpoint Mass Per Area</td><td>TC → 작업기</td><td>목표 살포 질량 (kg/ha)</td></tr><tr><td><strong>74</strong></td><td>Actual Mass Per Area</td><td>작업기 → TC</td><td>실제 살포 질량</td></tr><tr><td><strong>141</strong></td><td>Section Control State</td><td>TC → 작업기</td><td>구획 ON/OFF 상태</td></tr></tbody></table><p>전체 DDI 목록은 <a href="https://www.isobus.net/isobus/dDI" target="_blank" rel="noopener noreferrer">isobus.net</a>에서 확인할 수 있다. 현재 약 600개 이상의 DDI가 정의되어 있다.</p><h3 id="ddi가-없으면-tc는-데이터를-해석할-수-없다" tabindex="-1"><a class="header-anchor" href="#ddi가-없으면-tc는-데이터를-해석할-수-없다"><span>DDI가 없으면 TC는 데이터를 해석할 수 없다</span></a></h3><p>TC가 수신하는 메시지에는 32비트 정수 값이 포함된다. 그 값이 어떤 의미인지—살포량인지, 유량인지, 속도인지—는 오직 DDI가 결정한다. DDI 없이 값만 전달되면 TC는 바이트 데이터의 의미를 전혀 해석할 수 없다. DDI는 데이터의 &quot;단위표&quot;이자 &quot;해석 키&quot;이다.</p><h3 id="resolution-분해능-과-단위" tabindex="-1"><a class="header-anchor" href="#resolution-분해능-과-단위"><span>Resolution(분해능)과 단위</span></a></h3><p>각 DDI에는 표준으로 정해진 분해능과 단위가 있다. TC-Client는 이 규칙에 따라 정수 값을 인코딩하여 전송하고, TC-Server는 동일한 규칙으로 디코딩한다.</p><table><thead><tr><th>DDI</th><th>단위</th><th>분해능</th><th>예시</th></tr></thead><tbody><tr><td>1 (Setpoint Volume Per Area)</td><td>ml/m²</td><td>0.01 L/ha</td><td>값 200000 → 200 L/ha (= 20 ml/m²)</td></tr><tr><td>2 (Actual Volume Per Area)</td><td>ml/m²</td><td>0.01 L/ha</td><td>값 198000 → 198 L/ha</td></tr><tr><td>7 (Setpoint Volume Per Time)</td><td>ml/min</td><td>0.001 L/min</td><td>값 15000 → 15 L/min</td></tr><tr><td>8 (Actual Volume Per Time)</td><td>ml/min</td><td>0.001 L/min</td><td>값 14800 → 14.8 L/min</td></tr></tbody></table><p>분해능이 다른 DDI끼리 값을 교환하면 단위 불일치가 발생한다. TC 구현 시 DDI별 스케일 팩터를 반드시 적용해야 한다.</p><h3 id="setpoint-ddi와-actual-ddi의-쌍-구조" tabindex="-1"><a class="header-anchor" href="#setpoint-ddi와-actual-ddi의-쌍-구조"><span>Setpoint DDI와 Actual DDI의 쌍 구조</span></a></h3><p>ISOBUS 표준은 같은 물리량에 대해 Setpoint DDI와 Actual DDI를 쌍으로 정의한다. TC-Server는 Setpoint DDI로 목표값을 명령하고, 작업기 ECU는 Actual DDI로 실제 측정값을 보고한다.</p><table><thead><tr><th>물리량</th><th><strong>Setpoint</strong> DDI (TC → 작업기)</th><th><strong>Actual</strong> DDI (작업기 → TC)</th></tr></thead><tbody><tr><td>면적당 살포량</td><td>DDI 1</td><td>DDI 2</td></tr><tr><td>시간당 유량</td><td>DDI 7</td><td>DDI 8</td></tr><tr><td>면적당 살포 질량</td><td>DDI 73</td><td>DDI 74</td></tr></tbody></table><p>이 쌍 구조 덕분에 TC는 목표값(DDI 1)과 실제값(DDI 2)을 같은 물리 단위로 비교하여 제어 오차를 계산할 수 있다.</p><hr><h2 id="_2-element" tabindex="-1"><a class="header-anchor" href="#_2-element"><span>2. Element</span></a></h2><p><strong>Device Element(DeviceElement)</strong>는 작업기의 논리적 구성 단위이다. 물리적 장치를 계층적으로 표현한다.</p><h3 id="element-type" tabindex="-1"><a class="header-anchor" href="#element-type"><span>Element Type</span></a></h3><table><thead><tr><th>타입</th><th>설명</th><th>예시</th></tr></thead><tbody><tr><td><strong>Device</strong></td><td>전체 장치 (최상위)</td><td>살포기 전체</td></tr><tr><td><strong>Function</strong></td><td>기능 단위</td><td>살포 펌프, 교반기</td></tr><tr><td><strong>Bin</strong></td><td>저장 용기</td><td>약액 탱크, 비료 빈</td></tr><tr><td><strong>Section</strong></td><td>분할 구획</td><td>붐 스프레이어의 좌/우 섹션</td></tr><tr><td><strong>Connector</strong></td><td>연결 포인트</td><td>히치 연결부</td></tr><tr><td><strong>Navigation Reference</strong></td><td>위치 기준점</td><td>GPS 안테나 기준 작업 위치 오프셋</td></tr></tbody></table><p>각 Element는 <strong>Element Number</strong>로 식별된다. 예를 들어, Section 1은 Element Number 1, Section 2는 Element Number 2로 구분된다.</p><pre class="mermaid">graph TD
+    DEV[&quot;Device&lt;br&gt;살포기 전체&lt;br&gt;(Element 0)&quot;]
+    FUNC[&quot;Function&lt;br&gt;살포 펌프&lt;br&gt;(Element 1)&quot;]
+    BIN[&quot;Bin&lt;br&gt;약액 탱크&lt;br&gt;(Element 2)&quot;]
+    SEC1[&quot;Section&lt;br&gt;좌측 구획&lt;br&gt;(Element 3)&quot;]
+    SEC2[&quot;Section&lt;br&gt;중앙 구획&lt;br&gt;(Element 4)&quot;]
+    SEC3[&quot;Section&lt;br&gt;우측 구획&lt;br&gt;(Element 5)&quot;]
+
+    DEV --&gt; FUNC
+    DEV --&gt; BIN
+    FUNC --&gt; SEC1
+    FUNC --&gt; SEC2
+    FUNC --&gt; SEC3
+</pre><h3 id="element-간-부모-자식-관계" tabindex="-1"><a class="header-anchor" href="#element-간-부모-자식-관계"><span>Element 간 부모-자식 관계</span></a></h3><p>Element는 계층 구조를 이룬다. <strong>Device</strong>가 최상위이며, 그 아래에 <strong>Function</strong>과 <strong>Bin</strong>이 중간 계층으로 위치한다. <strong>Section</strong>은 가장 말단에 해당한다. TC-Server가 특정 Element에 명령을 보낼 때는 해당 Element Number를 지정한다. 부모 Element에 명령을 보내면 그 아래 모든 자식 Element에 적용되는 것이 일반적이다.</p><p>TC가 특정 Section에만 명령을 보내려면 해당 Section의 Element Number를 명시적으로 지정해야 한다. 예를 들어, Section 3(Element 5)에만 DDI 141(Section Control State)로 OFF 명령을 보내면, 나머지 두 구획(Section 1, Section 2)은 살포를 계속하면서 우측 구획만 살포가 중단된다. 이 메커니즘이 붐 스프레이어의 구획별 살포 제어(Section Control)를 가능하게 한다.</p><hr><h2 id="_3-value-command-value-request" tabindex="-1"><a class="header-anchor" href="#_3-value-command-value-request"><span>3. Value Command / Value Request</span></a></h2><p>TC-Server와 TC-Client는 <strong>Process Data</strong> 메시지(PGN: 0x00CB00)를 통해 값을 주고받는다.</p><h3 id="메시지-방향" tabindex="-1"><a class="header-anchor" href="#메시지-방향"><span>메시지 방향</span></a></h3><table><thead><tr><th>메시지</th><th>방향</th><th>설명</th></tr></thead><tbody><tr><td><strong>Process Data Value Command</strong></td><td>TC-Server → TC-Client</td><td>설정값(Setpoint) 전달, 작업기에 목표값 명령</td></tr><tr><td><strong>Process Data Value</strong></td><td>TC-Client → TC-Server</td><td>측정값(Measurement) 보고</td></tr><tr><td><strong>Process Data Value Request</strong></td><td>TC-Server → TC-Client</td><td>특정 DDI의 현재값을 요청</td></tr></tbody></table><h3 id="시퀀스-다이어그램" tabindex="-1"><a class="header-anchor" href="#시퀀스-다이어그램"><span>시퀀스 다이어그램</span></a></h3><pre class="mermaid">sequenceDiagram
+    participant TC as TC-Server
+    participant CLIENT as TC-Client
+
+    Note over TC,CLIENT: 작업 시작 후 TC가 Setpoint 전달
+    TC -&gt;&gt; CLIENT: Process Data Value Command&lt;br&gt;[DDI=1, Element=3, Value=200]&lt;br&gt;(Section 3 목표 살포량 200 L/ha)
+
+    CLIENT --&gt;&gt; TC: Process Data Value&lt;br&gt;[DDI=2, Element=3, Value=198]&lt;br&gt;(Section 3 실제 살포량 198 L/ha)
+
+    Note over TC,CLIENT: TC가 특정 값을 명시적으로 요청
+    TC -&gt;&gt; CLIENT: Process Data Value Request&lt;br&gt;[DDI=8, Element=1]&lt;br&gt;(펌프 실제 유량 요청)
+
+    CLIENT --&gt;&gt; TC: Process Data Value&lt;br&gt;[DDI=8, Element=1, Value=15]&lt;br&gt;(펌프 실제 유량 15 L/min)
+</pre><h3 id="pgn-0x00cb00-메시지-구조" tabindex="-1"><a class="header-anchor" href="#pgn-0x00cb00-메시지-구조"><span>PGN 0x00CB00 메시지 구조</span></a></h3><p>Process Data 메시지의 데이터 필드는 다음과 같이 구성된다.</p><table><thead><tr><th>바이트</th><th>필드</th><th>설명</th></tr></thead><tbody><tr><td>0</td><td>Command/Response</td><td>명령(0xA) 또는 응답 구분</td></tr><tr><td>1–2</td><td>DDI</td><td>데이터 항목 번호 (16비트)</td></tr><tr><td>3–4</td><td>Element Number</td><td>대상 Element 번호</td></tr><tr><td>5–8</td><td>Value</td><td>32비트 정수 값</td></tr></tbody></table><h3 id="trigger-method" tabindex="-1"><a class="header-anchor" href="#trigger-method"><span>Trigger Method</span></a></h3><p>TC-Client가 Measurement 값을 TC-Server에 보고하는 조건을 <strong>Trigger Method</strong>라고 한다. TC-Server는 Request Value Command를 통해 TC-Client에 트리거 방법을 설정한다.</p><table><thead><tr><th>트리거 방법</th><th>설명</th><th>예시</th></tr></thead><tbody><tr><td><strong>Time Interval</strong></td><td>일정 시간마다 보고</td><td>100ms마다 현재 유량 전송</td></tr><tr><td><strong>Distance Interval</strong></td><td>일정 거리마다 보고</td><td>1m 이동할 때마다 살포량 전송</td></tr><tr><td><strong>On Change</strong></td><td>값이 변할 때만 보고</td><td>섹션 상태가 ON→OFF로 바뀔 때만 전송</td></tr><tr><td><strong>Total</strong></td><td>누적값 요청 시 보고</td><td>작업 종료 후 총 살포량 요청</td></tr></tbody></table><p>TC-Server가 트리거 방법을 설정하는 흐름은 다음과 같다.</p><pre class="mermaid">sequenceDiagram
+    participant TC as TC-Server
+    participant CLIENT as TC-Client
+
+    Note over TC,CLIENT: TC-Server가 100ms 주기 보고 요청
+    TC -&gt;&gt; CLIENT: Process Data Value Request&lt;br&gt;[DDI=8, Element=1, Trigger=Time Interval, Interval=100ms]
+
+    loop 100ms마다
+        CLIENT --&gt;&gt; TC: Process Data Value&lt;br&gt;[DDI=8, Element=1, Value=현재 유량]
+    end
+
+    Note over TC,CLIENT: TC-Server가 거리 기반 보고로 전환
+    TC -&gt;&gt; CLIENT: Process Data Value Request&lt;br&gt;[DDI=2, Element=3, Trigger=Distance Interval, Dist=1m]
+
+    loop 1m 이동마다
+        CLIENT --&gt;&gt; TC: Process Data Value&lt;br&gt;[DDI=2, Element=3, Value=실제 살포량]
+    end
+</pre><p>트리거 방법을 적절히 설정하면 CAN 버스 트래픽을 줄이면서도 필요한 시점에 정확한 데이터를 수집할 수 있다.</p><hr><h2 id="_4-measurement-setpoint" tabindex="-1"><a class="header-anchor" href="#_4-measurement-setpoint"><span>4. Measurement / Setpoint</span></a></h2><p>TC 프로세스 데이터는 크게 두 가지로 구분된다.</p><table><thead><tr><th>구분</th><th>생성 주체</th><th>방향</th><th>의미</th></tr></thead><tbody><tr><td><strong>Setpoint</strong></td><td>TC-Server</td><td>TC → 작업기</td><td>TC가 처방 맵에서 조회한 목표 값</td></tr><tr><td><strong>Measurement</strong></td><td>작업기 센서</td><td>작업기 → TC</td><td>작업기가 실제로 측정한 값</td></tr></tbody></table><pre class="mermaid">graph LR
+    MAP[&quot;처방 맵&quot;] --&gt;|&quot;목표값 조회&quot;| SP[&quot;Setpoint&lt;br&gt;DDI 1 = 200 L/ha&quot;]
+    SENSOR[&quot;유량 센서&quot;] --&gt;|&quot;실제값 측정&quot;| MS[&quot;Measurement&lt;br&gt;DDI 2 = 198 L/ha&quot;]
+
+    SP --&gt;|&quot;Value Command&quot;| ECU[&quot;작업기 ECU&quot;]
+    ECU --&gt;|&quot;Process Data Value&quot;| MS
+
+    SP --- ERR[&quot;제어 오차&lt;br&gt;200 - 198 = 2 L/ha&quot;]
+    MS --- ERR
+</pre><p><strong>제어 오차(Control Error)</strong> = Setpoint − Measurement</p><p>작업기의 제어 시스템은 이 오차를 최소화하도록 밸브 개도량, 펌프 속도 등을 조절한다. TC는 오차가 허용 범위를 벗어나면 알람을 발생시킬 수 있다.</p><p>오차가 허용 범위를 벗어나면 TC는 ISO 11783-12에 정의된 <strong>DM1(Diagnostic Message 1)</strong> 진단 코드를 생성할 수 있다. DM1 메시지는 SPN(Suspect Parameter Number)과 FMI(Failure Mode Indicator)를 포함하여 어떤 파라미터가 어떤 방식으로 이상 상태인지 기록한다. 예를 들어 실제 살포량이 목표값 대비 20% 이상 낮으면 &quot;유량 부족&quot; 진단 코드가 발생할 수 있다.</p><p>작업기 ECU 내부에서는 <strong>PID(Proportional-Integral-Derivative) 제어 루프</strong>가 오차를 줄이는 방향으로 밸브를 조절한다. P 항은 현재 오차에 즉각적으로 반응하고, I 항은 지속적인 정상 오차(Steady-State Error)를 제거하며, D 항은 오차 변화율에 반응하여 과도한 진동을 억제한다. TC-Server는 Setpoint를 명령할 뿐이며, PID 제어는 전적으로 작업기 ECU(TC-Client 측)가 수행한다.</p><hr><h2 id="_5-프로세스-데이터-흐름-실습" tabindex="-1"><a class="header-anchor" href="#_5-프로세스-데이터-흐름-실습"><span>5. 프로세스 데이터 흐름 실습</span></a></h2><h3 id="시나리오-gps-기반-살포량-제어" tabindex="-1"><a class="header-anchor" href="#시나리오-gps-기반-살포량-제어"><span>시나리오: GPS 기반 살포량 제어</span></a></h3><p>트랙터가 밭을 주행하면서 위치에 따라 비료 살포량을 자동으로 조절하는 시나리오이다.</p><p><strong>조건</strong></p><ul><li>처방 맵: 구역 A = 200 L/ha, 구역 B = 150 L/ha</li><li>살포기: 3구획, 각 3m 폭 (총 9m)</li><li>DDI 1: Setpoint Volume Per Area / DDI 2: Actual Volume Per Area</li></ul><pre class="mermaid">sequenceDiagram
+    participant GPS as GNSS 수신기
+    participant TC as TC-Server
+    participant MAP as 처방 맵
+    participant CLIENT as TC-Client&lt;br&gt;(살포기 ECU)
+    participant VALVE as 밸브/펌프
+
+    GPS -&gt;&gt; TC: PGN 65267&lt;br&gt;(위도: 37.123, 경도: 127.456)
+
+    TC -&gt;&gt; MAP: 현재 위치 조회
+    MAP --&gt;&gt; TC: 구역 A → 목표 200 L/ha
+
+    TC -&gt;&gt; CLIENT: Process Data Value Command&lt;br&gt;[DDI=1, Element=3, Value=200]
+
+    CLIENT -&gt;&gt; VALVE: 밸브 개도량 조절&lt;br&gt;(200 L/ha에 맞게)
+
+    VALVE --&gt;&gt; CLIENT: 유량 센서 피드백&lt;br&gt;(실제 198 L/ha)
+
+    CLIENT --&gt;&gt; TC: Process Data Value&lt;br&gt;[DDI=2, Element=3, Value=198]
+
+    Note over TC: 오차: 200 - 198 = 2 L/ha&lt;br&gt;허용 범위 내 → 정상
+
+    GPS -&gt;&gt; TC: PGN 65267&lt;br&gt;(위치 변경: 구역 B 진입)
+
+    TC -&gt;&gt; MAP: 현재 위치 조회
+    MAP --&gt;&gt; TC: 구역 B → 목표 150 L/ha
+
+    TC -&gt;&gt; CLIENT: Process Data Value Command&lt;br&gt;[DDI=1, Element=3, Value=150]
+
+    CLIENT -&gt;&gt; VALVE: 밸브 개도량 감소
+    CLIENT --&gt;&gt; TC: Process Data Value&lt;br&gt;[DDI=2, Element=3, Value=151]
+</pre><p>이 시퀀스는 TC 프로세스 데이터의 전체 흐름을 보여준다. GPS 위치 변화에 따라 처방 맵의 목표값이 바뀌고, TC는 그 값을 즉시 TC-Client에 전달한다.</p><hr><blockquote><p><strong>핵심 정리</strong></p><ul><li>DDI(Data Dictionary Identifier)는 TC 데이터 항목을 구분하는 16비트 표준 번호이다. DDI 1=Setpoint Volume Per Area, DDI 2=Actual Volume Per Area.</li><li>Device Element는 작업기의 논리적 구성 단위로, Device/Function/Bin/Section 등의 타입으로 분류된다.</li><li>TC-Server → TC-Client 방향의 Value Command로 Setpoint를 전달하고, TC-Client → TC-Server 방향의 Process Data Value로 Measurement를 보고한다.</li><li>Setpoint는 처방 맵 기반 목표값이고, Measurement는 센서 실측값이며, 그 차이가 제어 오차가 된다.</li><li>GPS 위치(PGN 65267) → 처방 맵 조회 → Value Command 전송 → 밸브 조절 → Measurement 보고 순으로 제어 루프가 완성된다.</li></ul></blockquote><hr><h2 id="다음-챕터" tabindex="-1"><a class="header-anchor" href="#다음-챕터"><span>다음 챕터</span></a></h2><ul><li>다음 : <a href="/study/isobus/20-tc-ddop">TC DDOP</a></li></ul>`,67)]))}const s=e(d,[["render",l],["__file","19-tc-process-data.html.vue"]]),g=JSON.parse('{"path":"/study/isobus/19-tc-process-data.html","title":"TC 프로세스 데이터","lang":"en-US","frontmatter":{"title":"TC 프로세스 데이터","description":"Task Controller의 핵심 데이터 단위인 DDI, Element, 그리고 Measurement/Setpoint의 교환 과정을 이해한다.","date":"2026-04-13T00:00:00.000Z","tags":["ISOBUS","ISO11783","TaskController","TC","DDI","ProcessData","Measurement","Setpoint"],"prev":"/study/isobus/18-tc-basics","next":"/study/isobus/20-tc-ddop"},"headers":[{"level":1,"title":"TC 프로세스 데이터","slug":"tc-프로세스-데이터","link":"#tc-프로세스-데이터","children":[{"level":2,"title":"1. DDI (Data Dictionary Identifier)","slug":"_1-ddi-data-dictionary-identifier","link":"#_1-ddi-data-dictionary-identifier","children":[{"level":3,"title":"DDI가 없으면 TC는 데이터를 해석할 수 없다","slug":"ddi가-없으면-tc는-데이터를-해석할-수-없다","link":"#ddi가-없으면-tc는-데이터를-해석할-수-없다","children":[]},{"level":3,"title":"Resolution(분해능)과 단위","slug":"resolution-분해능-과-단위","link":"#resolution-분해능-과-단위","children":[]},{"level":3,"title":"Setpoint DDI와 Actual DDI의 쌍 구조","slug":"setpoint-ddi와-actual-ddi의-쌍-구조","link":"#setpoint-ddi와-actual-ddi의-쌍-구조","children":[]}]},{"level":2,"title":"2. Element","slug":"_2-element","link":"#_2-element","children":[{"level":3,"title":"Element Type","slug":"element-type","link":"#element-type","children":[]},{"level":3,"title":"Element 간 부모-자식 관계","slug":"element-간-부모-자식-관계","link":"#element-간-부모-자식-관계","children":[]}]},{"level":2,"title":"3. Value Command / Value Request","slug":"_3-value-command-value-request","link":"#_3-value-command-value-request","children":[{"level":3,"title":"메시지 방향","slug":"메시지-방향","link":"#메시지-방향","children":[]},{"level":3,"title":"시퀀스 다이어그램","slug":"시퀀스-다이어그램","link":"#시퀀스-다이어그램","children":[]},{"level":3,"title":"PGN 0x00CB00 메시지 구조","slug":"pgn-0x00cb00-메시지-구조","link":"#pgn-0x00cb00-메시지-구조","children":[]},{"level":3,"title":"Trigger Method","slug":"trigger-method","link":"#trigger-method","children":[]}]},{"level":2,"title":"4. Measurement / Setpoint","slug":"_4-measurement-setpoint","link":"#_4-measurement-setpoint","children":[]},{"level":2,"title":"5. 프로세스 데이터 흐름 실습","slug":"_5-프로세스-데이터-흐름-실습","link":"#_5-프로세스-데이터-흐름-실습","children":[{"level":3,"title":"시나리오: GPS 기반 살포량 제어","slug":"시나리오-gps-기반-살포량-제어","link":"#시나리오-gps-기반-살포량-제어","children":[]}]},{"level":2,"title":"다음 챕터","slug":"다음-챕터","link":"#다음-챕터","children":[]}]}],"git":{},"filePathRelative":"_study/isobus/19-tc-process-data.md"}');export{s as comp,g as data};

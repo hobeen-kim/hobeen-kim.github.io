@@ -74,21 +74,23 @@ tags: [스마트농업, IoT, 센서, LoRa, 엣지컴퓨팅]
 
 ```mermaid
 quadrantChart
-    title IoT 통신 기술 비교 (전송 거리 vs 전력 소비)
-    x-axis 낮은 전력 소비 --> 높은 전력 소비
-    y-axis 짧은 전송 거리 --> 긴 전송 거리
-    quadrant-1 장거리·고전력
-    quadrant-2 장거리·저전력(농업 최적)
-    quadrant-3 단거리·저전력
-    quadrant-4 단거리·고전력
-    LoRa/LoRaWAN: [0.15, 0.80]
+    title IoT Communication Technologies
+    x-axis Low Power --> High Power
+    y-axis Short Range --> Long Range
+    quadrant-1 Long Range High Power
+    quadrant-2 Long Range Low Power
+    quadrant-3 Short Range Low Power
+    quadrant-4 Short Range High Power
+    LoRa: [0.15, 0.80]
     NB-IoT: [0.30, 0.70]
     Sigfox: [0.10, 0.85]
-    셀룰러 LTE: [0.85, 0.75]
+    LTE: [0.85, 0.75]
     Wi-Fi: [0.70, 0.20]
     Bluetooth: [0.35, 0.15]
     Zigbee: [0.30, 0.20]
 ```
+
+농업에서는 좌상단(Long Range Low Power) 영역이 핵심이다. LoRa, NB-IoT, Sigfox가 이 영역에 위치하며, 그중 LoRa가 비용과 커버리지 면에서 가장 널리 채택되고 있다.
 
 ## 센서 네트워크 아키텍처
 

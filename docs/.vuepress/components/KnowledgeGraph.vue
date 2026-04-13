@@ -46,7 +46,8 @@ function computeNodeColors(nodes, edges) {
   // 스마트농업 = green(140)
   // Future roots can get other hues (blue=220, purple=280, etc.)
   const branchHues = {
-    'smart-agriculture': 140,
+    'smart-agriculture': 140,  // 녹색 계열
+    'software': 220,           // 파랑 계열
   }
 
   const visited = new Set([root.id])

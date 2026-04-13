@@ -1,6 +1,6 @@
 ---
 title: "VT 오브젝트 풀 (Object Pool)"
-description: "VT 화면을 정의하는 오브젝트 풀의 구조, 타입, 계층 관계, 전송 과정을 이해하고 간단한 화면을 직접 구성해봅니다."
+description: "VT 화면을 정의하는 오브젝트 풀의 구조, 타입, 계층 관계, 전송 과정을 이해하고 간단한 화면을 직접 구성해본다."
 date: 2026-04-13
 tags: [ISOBUS, VT, Object Pool, IOP, ISO-11783-6]
 prev: /study/isobus/15-vt-basics
@@ -284,7 +284,7 @@ ECU → VT: Change Numeric Value
 
 ::: tip 핵심 정리
 - 오브젝트 풀은 VT 화면 전체를 정의하는 바이너리 구조이며, 각 오브젝트는 ID + 타입 + 속성으로 구성된다.
-- Working Set → Data Mask → Container/Output/Input → 속성 오브젝트 순의 계층 구조를 가집니다.
+- Working Set → Data Mask → Container/Output/Input → 속성 오브젝트 순의 계층 구조를 가진다.
 - 오브젝트 풀 전송 시 ETP(Extended Transport Protocol)를 사용하며, Store/Load Version으로 재전송 시간을 절약한다.
 - 화면 초기화 후 ECU는 Change Numeric Value 등의 명령어로 특정 오브젝트만 실시간 갱신한다.
 :::

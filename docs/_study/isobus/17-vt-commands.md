@@ -36,7 +36,7 @@ VT Server가 사용자 입력이나 화면 상태 변화를 작업기 ECU(VT Cli
 
 ### Activation Code 상세
 
-Button Activation과 Soft Key Activation의 `활성화 코드`는 다음 값을 가집니다.
+Button Activation과 Soft Key Activation의 `활성화 코드`는 다음 값을 가진다.
 
 | 코드 | 의미 |
 |------|------|

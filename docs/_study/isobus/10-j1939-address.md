@@ -20,7 +20,7 @@ next: /study/isobus/11-j1939-transport
 
 ## 1. 소스 주소 (SA)
 
-J1939 네트워크에서 모든 ECU는 <strong>소스 주소(Source Address, SA)</strong>를 가집니다. SA는 8비트 값으로, 29비트 CAN ID의 <strong>하위 8비트(비트 7~0)</strong>에 위치한다.
+J1939 네트워크에서 모든 ECU는 <strong>소스 주소(Source Address, SA)</strong>를 가진다. SA는 8비트 값으로, 29비트 CAN ID의 <strong>하위 8비트(비트 7~0)</strong>에 위치한다.
 
 ```
 ┌─────────────────────────────────────────────────┐

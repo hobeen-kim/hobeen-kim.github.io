@@ -24,7 +24,7 @@ ISOBUS의 주소 클레임은 J1939의 방식을 기반으로 하되, 농업 기
 
 ### CF (Control Function)
 
-ISOBUS에서는 네트워크에 참여하는 모든 장치를 <strong>CF(Control Function)</strong>라고 부릅니다. 하나의 물리적 ECU가 여러 CF를 포함할 수도 있다. 각 CF는 독립적인 주소를 가집니다.
+ISOBUS에서는 네트워크에 참여하는 모든 장치를 <strong>CF(Control Function)</strong>라고 부른다. 하나의 물리적 ECU가 여러 CF를 포함할 수도 있다. 각 CF는 독립적인 주소를 가진다.
 
 ### 주소 범위
 
@@ -93,7 +93,7 @@ graph TD
 
 WSM은 네트워크에 참여한 후 <strong>PGN 65070 (Working Set Master)</strong>를 브로드캐스트하여 자신이 마스터임을 선언한다. 이 메시지에는 Working Set에 속한 멤버 수가 포함된다.
 
-멤버 ECU들은 <strong>PGN 65075 (Working Set Member)</strong>를 전송하여 자신이 특정 마스터에 속함을 알립니다.
+멤버 ECU들은 <strong>PGN 65075 (Working Set Member)</strong>를 전송하여 자신이 특정 마스터에 속함을 알린다.
 
 VT와 TC는 이 메시지를 수신하여 작업기의 구조를 파악하고, WSM을 통해서만 작업기와 통신한다.
 
@@ -191,7 +191,7 @@ gantt
 | ~1,500 ms | Object Pool 전송 완료, 화면 표시 시작 |
 | ~2,000 ms | TC Device Descriptor 완료, 전체 통신 확립 |
 
-> **실제 현장에서의 차이**: Object Pool 크기, ECU 수, 버스 부하에 따라 타임라인은 달라집니다. 복잡한 작업기의 경우 Object Pool 전송만 수 초가 걸릴 수 있다.
+> **실제 현장에서의 차이**: Object Pool 크기, ECU 수, 버스 부하에 따라 타임라인은 달라진다. 복잡한 작업기의 경우 Object Pool 전송만 수 초가 걸릴 수 있다.
 
 ---
 

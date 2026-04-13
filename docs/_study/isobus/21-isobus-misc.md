@@ -205,7 +205,7 @@ sequenceDiagram
 
 ### 2.4 Python으로 File Server 메시지 파싱
 
-ISOBUS File Server 메시지는 ISO 11783-13이 정의한 바이트 구조를 따릅니다.
+ISOBUS File Server 메시지는 ISO 11783-13이 정의한 바이트 구조를 따른다.
 아래는 Open File Response를 파싱하는 Python 예시이다.
 
 ```python

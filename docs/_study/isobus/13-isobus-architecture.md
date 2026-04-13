@@ -167,8 +167,8 @@ sequenceDiagram
 2. **Working Set 구성**: 작업기를 대표하는 WSM이 자신과 멤버 ECU를 선언한다.
 3. **VT 연결**: WSM이 VT에 연결을 요청하고 상태를 수신한다.
 4. **Object Pool 전송**: 작업기 UI 화면 데이터를 VT에 업로드한다.
-5. **Device Descriptor 전송**: 작업기의 기능 구조를 TC에 알립니다.
-6. **정상 동작**: TECU 정보·TC 명령·VT 화면 업데이트가 주기적으로 이루어집니다.
+5. **Device Descriptor 전송**: 작업기의 기능 구조를 TC에 알린다.
+6. **정상 동작**: TECU 정보·TC 명령·VT 화면 업데이트가 주기적으로 이루어진다.
 
 ---
 

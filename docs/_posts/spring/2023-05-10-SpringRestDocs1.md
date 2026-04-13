@@ -371,7 +371,7 @@ class MemberControllerTest {
 
 `build` 를 하면 `build/generated-snippets` 에 다음과 같이 `.adoc` 파일이 생깁니다.
 
-![image-20230508191009728](../../.vuepress/public/images/2023-05-10-SpringRestDocs1/image-20230508191009728.png)
+![image-20230508191009728](/images/2023-05-10-SpringRestDocs1/image-20230508191009728.png)
 
 이제 이 파일들을 모아서 보여줄 수 있도록 문서화를 하겠습니다.
 
@@ -405,13 +405,13 @@ include::post.adoc[]
 
 - `include::member.adoc[]` : 같은 디렉토리에 있는 `member.adoc` 파일을 포함해서 문서화를 합니다.
 
-  ![image-20230508191911011](../../.vuepress/public/images/2023-05-10-SpringRestDocs1/image-20230508191911011.png)
+  ![image-20230508191911011](/images/2023-05-10-SpringRestDocs1/image-20230508191911011.png)
 
   - 이런 식으로 만들어질겁니다. (현재 단계에서는 아니며, 아래 단계를 따라 member.adoc, post.adoc 을 만들고 build 를 해야 합니다.)
 
 - AsciiDoc 플러그인을 사용하면 `.adoc` 에서 다음과 같이 보여집니다.
 
-  ![image-20230508192100190](../../.vuepress/public/images/2023-05-10-SpringRestDocs1/image-20230508192100190.png)
+  ![image-20230508192100190](/images/2023-05-10-SpringRestDocs1/image-20230508192100190.png)
 
 **member.adoc**
 
@@ -465,7 +465,7 @@ operation::post-delete[snippets='http-request,http-response']
 
 이제 빌드를 해봅시다. `/gradlew build` 로 빌드를 하면 `main/resources/static` 에 index.html, member.html, post.html 문서가 생깁니다. 그 중 index.html 을 사용하면 됩니다.
 
-![image-20230508192714898](../../.vuepress/public/images/2023-05-10-SpringRestDocs1/image-20230508192714898.png)
+![image-20230508192714898](/images/2023-05-10-SpringRestDocs1/image-20230508192714898.png)
 
 
 
@@ -475,7 +475,7 @@ operation::post-delete[snippets='http-request,http-response']
 
 지금 JSON 형식을 보시면 아래와 같이 한줄로 되어있습니다. 
 
-![image-20230513130449680](../../.vuepress/public/images/2023-05-10-SpringRestDocs1/image-20230513130449680.png)
+![image-20230513130449680](/images/2023-05-10-SpringRestDocs1/image-20230513130449680.png)
 
 Test 에서 @BeforeEach 에 `.withResponseDefaults(prettyPrint())` 설정을 추가하여 보기 쉽도록 하겠습니다.
 
@@ -494,13 +494,13 @@ public void setUp(WebApplicationContext webApplicationContext,
 
 설정을 추가하면 아래와 같이 됩니다.
 
-![image-20230513131622218](../../.vuepress/public/images/2023-05-10-SpringRestDocs1/image-20230513131622218.png)
+![image-20230513131622218](/images/2023-05-10-SpringRestDocs1/image-20230513131622218.png)
 
 ### ResponseField 넣기, 커스텀
 
 각 요청 혹은 응답마다 필요한 field 의 이름, type, Desciption 이 있습니다. 이를 표로 만들어서 index 에 넣어주도록 하겠습니다. 다음과 같이 넣으면 오른쪽과 같이 보여집니다.
 
-![image-20230513132034403](../../.vuepress/public/images/2023-05-10-SpringRestDocs1/image-20230513132034403.png)
+![image-20230513132034403](/images/2023-05-10-SpringRestDocs1/image-20230513132034403.png)
 
 하지만 API 문서를 보면서 필요한 게 위 3가지만은 아니겠죠. Optional 여부, Constraints 같은 조건도 필요합니다. Optional 은 test 의 Field 에 `.optional` 로 설정되어있으므로 제약조건 설정해보겠습니다. 이를 위해 먼저 config 파일은 `RestDocsConfig.java` 파일을 test 폴더 내에 만들어 줍니다.
 
@@ -563,6 +563,6 @@ public class RestDocsConfig {
 
 이제 이런 식으로 나옵니다.
 
-![image-20230513140731556](../../.vuepress/public/images/2023-05-10-SpringRestDocs1/image-20230513140731556.png)
+![image-20230513140731556](/images/2023-05-10-SpringRestDocs1/image-20230513140731556.png)
 
 <Footer/>

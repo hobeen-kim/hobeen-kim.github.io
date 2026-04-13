@@ -35,7 +35,7 @@ enum class DeviceType(
 
 이때 아래와 같이 다른 서버의 json 값이 해당 Enum 값인데 반환값에 "-"(hyphen) 을 사용하고 있다고 가정하자.
 
-![image-20250828142633576](../../.vuepress/public/images/2025-08-28-jsonproperty/image-20250828142633576.png)
+![image-20250828142633576](/images/2025-08-28-jsonproperty/image-20250828142633576.png)
 
 나는 아래와 같이 응답값을 받기 위해 DeviceInfo 를 만든 상황이다.
 

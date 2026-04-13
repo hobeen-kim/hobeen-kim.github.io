@@ -21,7 +21,7 @@ description: "비슷해보이는 @Valid 와 @Validated 의 차이"
 
 ## @Valid 를 사용하는 이유
 
-![image-20250909003118853](../../.vuepress/public/images/2023-04-12-validation/image-20250909003118853.png)
+![image-20250909003118853](/images/2023-04-12-validation/image-20250909003118853.png)
 
 @Valid 를 사용하는 이유는 간단히 말해 검증로직을 분리하여 통합관리하고 위함입니다.즉 SRP(단일책임원칙) 때문이라고 할 수도 있습니다. 
 
@@ -119,7 +119,7 @@ public class Car {
 
 ## 어디서 어떻게 검증하는가??
 
-![image-20250909003130309](../../.vuepress/public/images/2023-04-12-validation/image-20250909003130309.png)
+![image-20250909003130309](/images/2023-04-12-validation/image-20250909003130309.png)
 
 스프링 컨테이너의 구조에 대해 큰 그림을 그려봤습니다. 여기서 빨간색 동그라미를 친 ArgumentResolver 에서 @Valid 검증이 실행됩니다. 한번 자세히 보겠습니다. [스프링 mvc 구조이해](https://hobeen-kim.github.io/learning/spring-MVC1-%EC%8A%A4%ED%94%84%EB%A7%81-MVC-%EA%B5%AC%EC%A1%B0%EC%9D%B4%ED%95%B4/)
 
@@ -218,7 +218,7 @@ protected void validateIfApplicable(WebDataBinder binder, MethodParameter parame
 
 그림으로 그려봤습니다.
 
-![image-20250909003155620](../../.vuepress/public/images/2023-04-12-validation/image-20250909003155620.png)
+![image-20250909003155620](/images/2023-04-12-validation/image-20250909003155620.png)
 
 1. 핸들러 어댑터에서 resolveArgument 호출
 2. resolveArgument 내부에서 validateIfApplicable 호출

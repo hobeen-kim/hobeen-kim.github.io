@@ -29,7 +29,7 @@ AWS 자격증을 준비하면서 여러가지 저장 시스템을 배웠지만 E
 
 smileshark 페이지에서 읽은 괜찮은 예시다
 
-![클라우드 스토리지 서비스 비교](../../.vuepress/public/images/2025-03-15-filesystem/3aac70_19ccad8d2ac34a0990dc262460f7a866~mv2.png)
+![클라우드 스토리지 서비스 비교](/images/2025-03-15-filesystem/3aac70_19ccad8d2ac34a0990dc262460f7a866~mv2.png)
 
 > ...
 >

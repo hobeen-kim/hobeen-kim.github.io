@@ -13,7 +13,7 @@
     "changeImagePath": "node scripts/changeImagePath.js",
     "sitemap": "node scripts/generateSitemap.js",
     "docs:dev": "vuepress dev docs",
-    "docs:build": "npm run changeImagePath && npm run sitemap && vuepress build docs"
+    "docs:build": "npm run changeImagePath && npm run sitemap && NODE_OPTIONS='--require ./docs/.vuepress/ssr-polyfill.cjs' vuepress build docs"
   },
   "license": "MIT",
   "devDependencies": {

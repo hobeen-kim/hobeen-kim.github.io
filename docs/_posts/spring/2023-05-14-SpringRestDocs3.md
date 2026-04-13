@@ -283,7 +283,7 @@ class PostControllerTest extends RestDocsTestSupport {
 - `ConstraintFields<PostRequest> fields` 를 선언하고, 제약조건이 필요한 곳에 사용해줍니다. 따지기 귀찮으면 다 붙여줘도 됩니다.
 
 제약조건이 아래와 같이 변경되었습니다.
-![image-20230514161531214](../../.vuepress/public/images/2023-05-14-SpringRestDocs3/image-20230514161531214.png)
+![image-20230514161531214](/images/2023-05-14-SpringRestDocs3/image-20230514161531214.png)
 
 
 
@@ -597,13 +597,13 @@ include::post.adoc[]
 
 최종적으로 아래와 같이 잘 나왔습니다.
 
-![image-20230514202852146](../../.vuepress/public/images/2023-05-14-SpringRestDocs3/image-20230514202852146.png)
+![image-20230514202852146](/images/2023-05-14-SpringRestDocs3/image-20230514202852146.png)
 
 잘 따라오시면 어렵지 않게 간단한 restDocs 를 구현하실 수 있을 것 같습니다. 물론 저도 test 에서나 .adoc 에서 완벽하게 만들었다고 할 수 없지만요. 새로운 툴을 사용하는 건 두려우면서도 재밌습니다.
 
 다음에는 Swagger 를 포스팅해봐야겠습니다. 아무래도 사람들이 많이 사용하는 건 Swagger 인거같거든요. 
 
-![image-20230505015725081](../../.vuepress/public/images/2023-05-14-SpringRestDocs3/image-20230505015725081.png)
+![image-20230505015725081](/images/2023-05-14-SpringRestDocs3/image-20230505015725081.png)
 
 <center><i>swagger vs restDocs 사용량 비교</i></center>
 

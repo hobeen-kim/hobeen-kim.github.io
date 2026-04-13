@@ -92,7 +92,7 @@ public void test() {
 
 그러면 test 메서드가 호출될 때 해당 스레드의 스택 메모리에 다음과 같이 직접적으로 저장된다.
 
-![image-20250923155353003](../../.vuepress/public/images/2025-09-23-referencevalue/image-20250923155353003.png)
+![image-20250923155353003](/images/2025-09-23-referencevalue/image-20250923155353003.png)
 
 ## 객체 타입 (Object Type)
 
@@ -110,7 +110,7 @@ public void test() {
 
 그리고 그 주소값은 힙메모리의 실제 주소를 가리킨다.
 
-![image-20250923155638205](../../.vuepress/public/images/2025-09-23-referencevalue/image-20250923155638205.png)
+![image-20250923155638205](/images/2025-09-23-referencevalue/image-20250923155638205.png)
 
 # Pass by Value 와 Pass by Reference
 
@@ -138,19 +138,19 @@ public class Main {
 
 먼저 change 를 호출하기 전 originArr 은 다음과 같이 보인다.
 
-![image-20250923160643918](../../.vuepress/public/images/2025-09-23-referencevalue/image-20250923160643918.png)
+![image-20250923160643918](/images/2025-09-23-referencevalue/image-20250923160643918.png)
 
 그리고 `change()` 메서드가 호출되면 호출한 코드의 "돌아갈 위치"인 Return Address 가 쌓이게 되고 그 위에 매개변수 등의 값이 쌓인다.
 
-![image-20250923160933872](../../.vuepress/public/images/2025-09-23-referencevalue/image-20250923160933872.png)
+![image-20250923160933872](/images/2025-09-23-referencevalue/image-20250923160933872.png)
 
 그리고 `arr = new int[] {3, 4};` 을 호출하게 되면 "**새로운 객체를 생성**"한 후 arr 위치에 집어넣게 된다. 여전히 originArr 은 1, 2 이다. 만약 여기서 arr 을 수정한다고 해도 (`arr[0] = 5`와 같이) `0x002` 주소의 배열값만 바뀌는 것이지 `0x001` 배열 값은 아무런 영향을 받지 않는다.
 
-![image-20250923161031064](../../.vuepress/public/images/2025-09-23-referencevalue/image-20250923161031064.png)
+![image-20250923161031064](/images/2025-09-23-referencevalue/image-20250923161031064.png)
 
 그리고 `change()` 메서드가 끝나면 arr 지역 변수만 스택 메모리에서 pop 되어 사라지게 된다. (초록색 부분이 사라짐)
 
-![image-20250923161302509](../../.vuepress/public/images/2025-09-23-referencevalue/image-20250923161302509.png)
+![image-20250923161302509](/images/2025-09-23-referencevalue/image-20250923161302509.png)
 
 따라서 arr 을 재할당한다고 하더라도 orginArr 의 실제 값에는 **아무런 변화가 없다.**
 
@@ -192,7 +192,7 @@ int main() {
 
 따라서 `arr = new int[2]{3, 4}` 가 실행 될 때 다음과 같이 동작된다.
 
-![image-20250923162538945](../../.vuepress/public/images/2025-09-23-referencevalue/image-20250923162538945.png)
+![image-20250923162538945](/images/2025-09-23-referencevalue/image-20250923162538945.png)
 
 # Ref.
 

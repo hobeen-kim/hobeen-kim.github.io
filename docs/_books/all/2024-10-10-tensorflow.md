@@ -11,7 +11,7 @@ tags:
 
 <Header />
 
-![백견불여일타 딥러닝 입문 with 텐서플로우 2.x | 조휘용 - 교보문고](../../.vuepress/public/images/2024-10-10-tensorflow/thumbnail.jpg)
+![백견불여일타 딥러닝 입문 with 텐서플로우 2.x | 조휘용 - 교보문고](/images/2024-10-10-tensorflow/thumbnail.jpg)
 
 AI 가 어떻게 동작하는지 궁금해서 찾아본 책. 딥러닝에 대한 이론적 설명과 텐서플로우 코드를 설명한다.
 

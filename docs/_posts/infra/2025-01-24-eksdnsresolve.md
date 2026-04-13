@@ -13,7 +13,7 @@ description: "EKS 에서 DNS resolve 문제와 해결"
 
 # 0. 문제 상황
 
-![image-20250908001559407](../../.vuepress/public/images/2025-01-24-eksdnsresolve/thumbnail.png)
+![image-20250908001559407](/images/2025-01-24-eksdnsresolve/thumbnail.png)
 
 Prod 노드그룹에서는 외부서버와 DB 를 잘 호출하는데 Test 노드그룹의 파드에서는 아래와 같은 에러로 호출이 되지 않았다.
 
@@ -92,7 +92,7 @@ spec:
 
 CoreDNS 는 Deployment 로 2개의 파드가 배포된다.
 
-![image-20250908001547213](../../.vuepress/public/images/2025-01-24-eksdnsresolve/image-20250908001547213.png)
+![image-20250908001547213](/images/2025-01-24-eksdnsresolve/image-20250908001547213.png)
 
 위에서 Node3 이 Node1 또는 2에 접근이 안된다면 coreDNS 에 접근할 수 없다.
 

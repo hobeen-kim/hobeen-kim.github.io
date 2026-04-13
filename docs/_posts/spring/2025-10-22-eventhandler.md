@@ -16,7 +16,7 @@ description: "이벤트를 발행할 때 반드시 보장되어야할 행동과 
 
 다음과 같이 Post 를 생성하면 **<u>알림 서비스로 알림을 생성하는 코드</u>**가 있다.
 
-![image-20251022153303967](../../.vuepress/public/images/2025-10-22-eventhandler/image-20251022153303967.png)
+![image-20251022153303967](/images/2025-10-22-eventhandler/image-20251022153303967.png)
 
 그럼 다음과 같이 코드를 짤 수 있다.
 
@@ -82,7 +82,7 @@ class PostService(
 
 아래와 같이 **Spring Application Event** 를 활용해서 Post 와 Notification 을 구분해보자.
 
-![image-20251022183706517](../../.vuepress/public/images/2025-10-22-eventhandler/image-20251022183706517.png)
+![image-20251022183706517](/images/2025-10-22-eventhandler/image-20251022183706517.png)
 
 Post 에서는 아래 방법으로 **"post 가 생성되었다"**는 이벤트만 발행한다.
 
@@ -102,7 +102,7 @@ fun createPost(dto: PostCreateApiDto): String {
 
 하지만 이 경우에도 Notification 이 실패할 경우 Post 의 트랜잭션 또한 롤백될 수 있는데, 이는 @EventListener는 동기 실행이라, 리스너 예외가 퍼블리셔 트랜잭션을 롤백시키기 때문이다. 따라서 Post와 Notification 을 논리적으로 분리하더라도 물리(트랜잭션)적으로 결합된다. (~~논리적으로 분리되면서 물리적으로 묶이는 아이러니~~)
 
-![image-20251022191334335](../../.vuepress/public/images/2025-10-22-eventhandler/image-20251022191334335.png)
+![image-20251022191334335](/images/2025-10-22-eventhandler/image-20251022191334335.png)
 
 ## @TransactionalEventListener 사용
 
@@ -158,7 +158,7 @@ class NotificationService(
 
   최종적으로 아래와 같이 만들어진다.
 
-![image-20251022192641599](../../.vuepress/public/images/2025-10-22-eventhandler/image-20251022192641599.png)
+![image-20251022192641599](/images/2025-10-22-eventhandler/image-20251022192641599.png)
 
 - Post 가 이벤트를 발행하고 Notification 이 수신하여 처리한다.
 - **Post 트랜잭션(작성)과 Notification 트랜잭션(알림 저장)은 `AFTER_COMMIT + REQUIRES_NEW`로 분리**된다.

@@ -78,7 +78,7 @@ description: "깃 pr 시 소나큐브 정적 분석 적용"
 
 argocd 에서 본 구조다.
 
-![image-20250908182504581](../../.vuepress/public/images/2025-09-08-sonarqube/image-20250908182504581.png)
+![image-20250908182504581](/images/2025-09-08-sonarqube/image-20250908182504581.png)
 
 **필요 리소스**
 
@@ -116,7 +116,7 @@ SONARQUBE_TOKEN 은 깃 레포 secret 에 넣어주면 된다.
 
 # 결과
 
-![image-20250908184210639](../../.vuepress/public/images/2025-09-08-sonarqube/image-20250908184210639.png)
+![image-20250908184210639](/images/2025-09-08-sonarqube/image-20250908184210639.png)
 
 이제 결과를 보고 이슈를 해결해보자. 현재는 이슈가 많아서 한번에는 힘들고, 코드를 리팩토링하면서 조금씩 해봐야겠다.
 

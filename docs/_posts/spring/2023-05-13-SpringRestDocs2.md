@@ -20,7 +20,7 @@ description: "Spring RestDocs 로 문서 남기기 2"
 
 아래 이미지는 최종적인 모습입니다. Description 에 링크를 걸어 Enum 에 대한 설명을 볼 수 있습니다.
 
-![image-20230513170330210](../../.vuepress/public/images/2023-05-13-SpringRestDocs2/image-20230513170330210.png)
+![image-20230513170330210](/images/2023-05-13-SpringRestDocs2/image-20230513170330210.png)
 
 **Gradle**
 
@@ -306,7 +306,7 @@ class CommonDocControllerTest {
 ​	asciidoc 자체에서 팝업 기능을 제공하지는 않습니다. 대신 docinfo.html 을 이용해서 구현합니다. asccidoctor의 docinfo 라는 속성이 있는데 adoc 파일에 html 파일을 주입 할 수 있게 해주는 속성입니다.
 
 전체적인 directory 구조는 아래와 같습니다.
-![image-20230513200534716](../../.vuepress/public/images/2023-05-13-SpringRestDocs2/image-20230513200534716.png)
+![image-20230513200534716](/images/2023-05-13-SpringRestDocs2/image-20230513200534716.png)
 
 **docinfo.html**
 
@@ -410,7 +410,7 @@ include::{snippets}/authority/custom-response-fields-authority.adoc[]
 ​	Enum 이 있는 login() 메서드를 수정합니다. description 값으로 `"link:common/authority.html[Enum,role=\"popup\"]")`  를 줍니다. html 로 변환 시 `<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="common/authority.html" class="popup">Enum</a></p></td>` 으로 됩니다.
 
 이제 build 를 하면 main 의 resources 에 다음과 같이 생깁니다.
-![image-20230513201233004](../../.vuepress/public/images/2023-05-13-SpringRestDocs2/image-20230513201233004.png)
+![image-20230513201233004](/images/2023-05-13-SpringRestDocs2/image-20230513201233004.png)
 
 
 

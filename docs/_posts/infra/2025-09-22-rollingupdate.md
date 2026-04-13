@@ -195,6 +195,6 @@ spec:
 아래 그래프에서 파란색은 success, 노란색은 error 개수이다. 배포 간 (rollingUpdate 간) `/health` 에 지속적으로 요청을 보내는 2번의 테스트를 5분 가량 진행했다. (그래프가 2개로 나눠진 걸 볼 수 있다.)
 첫번째 테스트는 무중단 배포 전략을 넣기 전이고 두번째 테스트는 모든 설정을 적용한 상태이다. 첫번째 테스트에서는 error (502) 의 개수가 중간에 생긴다. 이는 파드가 교체되면서 terminating 되는 파드로 인입되는 요청에 대한 에러이다. **반면에 두번째 테스트는 error 가 보이지 않는다.** 
 
-![KakaoTalk_Photo_2025-09-24-00-10-37](../../.vuepress/public/images/2025-09-22-rollingupdate/KakaoTalk_Photo_2025-09-24-00-10-37.png)
+![KakaoTalk_Photo_2025-09-24-00-10-37](/images/2025-09-22-rollingupdate/KakaoTalk_Photo_2025-09-24-00-10-37.png)
 
 <Footer/>

@@ -307,7 +307,7 @@ resource "aws_instance" "example" {
 
 state 를 관리하는 논리적인 가상 공간이다. 테라폼 구성 파일은 동일하지만 작업자는 서로 다른 state 를 갖는 실제 대상을 프로비저닝할 수 있다.
 
-![image-20250309222039484](../../.vuepress/public/images/2025-03-08-terraform/image-20250309222039484.png)
+![image-20250309222039484](/images/2025-03-08-terraform/image-20250309222039484.png)
 
 terraform workspace list 로 워크스페이스의 목록을 볼 수 있다.
 
@@ -380,7 +380,7 @@ terraform destroy -state=terraform.tfstate.d/myworkspace1/terraform.tfstate
 
 **모듈 구조 (예시)**
 
-![image-20250310233826614](../../.vuepress/public/images/2025-03-08-terraform/image-20250310233826614.png)
+![image-20250310233826614](/images/2025-03-08-terraform/image-20250310233826614.png)
 
 **06-01-basic/main.tf**
 

@@ -6,6 +6,7 @@ import path from 'path'
 import {getCategories} from "./utils/categories.js";
 import {getLogs} from "./utils/logs.js";
 import {getBooks} from "./utils/books.js";
+import {getStudies} from "./utils/studies.js";
 
 const theme = {
   extends: defaultTheme({
@@ -57,15 +58,19 @@ const theme = {
         ],
       },
       {
-        text: '책',  // 포스트 목록 페이지로 이동
+        text: '책',
         link: '/books/',
       },
       {
-        text: '짧은 글',  // 포스트 목록 페이지로 이동
+        text: '짧은 글',
         link: '/logs/',
       },
       {
-        text: '이력서',  // 포스트 목록 페이지로 이동
+        text: '공부하기',
+        link: '/study/',
+      },
+      {
+        text: '이력서',
         link: '/resume/',
       },
     ],
@@ -77,6 +82,73 @@ const theme = {
       ['link', { rel: 'icon', href: '/images/favicon.ico' }]
     ],
     sidebarDepth: 0,
+    sidebar: {
+      '/study/isobus/': [
+        {
+          text: '통신과 CAN 기초',
+          children: [
+            '/study/isobus/',
+            '/study/isobus/01-communication-basics',
+            '/study/isobus/02-can-intro',
+            '/study/isobus/03-can-physical',
+            '/study/isobus/04-can-data-frame',
+            '/study/isobus/05-can-arbitration',
+            '/study/isobus/06-can-error',
+            '/study/isobus/07-can-fd',
+          ],
+        },
+        {
+          text: 'SAE J1939',
+          children: [
+            '/study/isobus/08-j1939-intro',
+            '/study/isobus/09-j1939-message',
+            '/study/isobus/10-j1939-address',
+            '/study/isobus/11-j1939-transport',
+          ],
+        },
+        {
+          text: 'ISOBUS (ISO 11783)',
+          children: [
+            '/study/isobus/12-isobus-overview',
+            '/study/isobus/13-isobus-architecture',
+            '/study/isobus/14-isobus-network-mgmt',
+          ],
+        },
+        {
+          text: 'Virtual Terminal (VT)',
+          children: [
+            '/study/isobus/15-vt-basics',
+            '/study/isobus/16-vt-object-pool',
+            '/study/isobus/17-vt-commands',
+          ],
+        },
+        {
+          text: 'Task Controller (TC)',
+          children: [
+            '/study/isobus/18-tc-basics',
+            '/study/isobus/19-tc-process-data',
+            '/study/isobus/20-tc-ddop',
+          ],
+        },
+        {
+          text: '심화 및 실습',
+          children: [
+            '/study/isobus/21-isobus-misc',
+            '/study/isobus/22-practice',
+          ],
+        },
+        {
+          text: '부록',
+          children: [
+            '/study/isobus/appendix-glossary',
+            '/study/isobus/appendix-pgn-spn',
+            '/study/isobus/appendix-ddi',
+            '/study/isobus/appendix-troubleshooting',
+            '/study/isobus/appendix-references',
+          ],
+        },
+      ],
+    },
     lastUpdated: false,
     contributors: false,
   }),
@@ -107,7 +179,10 @@ export default defineUserConfig({
       build: {
         rollupOptions: {
         }
-      }
+      },
+      ssr: {
+        noExternal: ['@vue/devtools-api', '@vue/devtools-kit'],
+      },
     },
     vuePluginOptions: {},
   }),
@@ -120,11 +195,22 @@ export default defineUserConfig({
       },
     ],
   ],
+  extendsMarkdown: (md) => {
+    const origFence = md.renderer.rules.fence
+    md.renderer.rules.fence = (tokens, idx, options, env, self) => {
+      const token = tokens[idx]
+      if (token.info.trim() === 'mermaid') {
+        return `<pre class="mermaid">${md.utils.escapeHtml(token.content)}</pre>`
+      }
+      return origFence(tokens, idx, options, env, self)
+    }
+  },
   // 전역 변수로 포스트 데이터 제공
   define: {
     __POSTS__: getPosts(),
     __CATEGORIES__: getCategories(),
     __LOGS__: getLogs(),
     __BOOKS__: getBooks(),
+    __STUDIES__: getStudies(),
   }
 })

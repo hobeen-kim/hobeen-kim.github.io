@@ -39,6 +39,35 @@ next: /study/isobus/20-tc-ddop
 
 전체 DDI 목록은 [isobus.net](https://www.isobus.net/isobus/dDI)에서 확인할 수 있다. 현재 약 600개 이상의 DDI가 정의되어 있다.
 
+### DDI가 없으면 TC는 데이터를 해석할 수 없다
+
+TC가 수신하는 메시지에는 32비트 정수 값이 포함된다. 그 값이 어떤 의미인지—살포량인지, 유량인지, 속도인지—는 오직 DDI가 결정한다. DDI 없이 값만 전달되면 TC는 바이트 데이터의 의미를 전혀 해석할 수 없다. DDI는 데이터의 "단위표"이자 "해석 키"이다.
+
+### Resolution(분해능)과 단위
+
+각 DDI에는 표준으로 정해진 분해능과 단위가 있다. TC-Client는 이 규칙에 따라 정수 값을 인코딩하여 전송하고, TC-Server는 동일한 규칙으로 디코딩한다.
+
+| DDI | 단위 | 분해능 | 예시 |
+|-----|------|--------|------|
+| 1 (Setpoint Volume Per Area) | ml/m² | 0.01 L/ha | 값 200000 → 200 L/ha (= 20 ml/m²) |
+| 2 (Actual Volume Per Area) | ml/m² | 0.01 L/ha | 값 198000 → 198 L/ha |
+| 7 (Setpoint Volume Per Time) | ml/min | 0.001 L/min | 값 15000 → 15 L/min |
+| 8 (Actual Volume Per Time) | ml/min | 0.001 L/min | 값 14800 → 14.8 L/min |
+
+분해능이 다른 DDI끼리 값을 교환하면 단위 불일치가 발생한다. TC 구현 시 DDI별 스케일 팩터를 반드시 적용해야 한다.
+
+### Setpoint DDI와 Actual DDI의 쌍 구조
+
+ISOBUS 표준은 같은 물리량에 대해 Setpoint DDI와 Actual DDI를 쌍으로 정의한다. TC-Server는 Setpoint DDI로 목표값을 명령하고, 작업기 ECU는 Actual DDI로 실제 측정값을 보고한다.
+
+| 물리량 | <strong>Setpoint</strong> DDI (TC → 작업기) | <strong>Actual</strong> DDI (작업기 → TC) |
+|--------|------|------|
+| 면적당 살포량 | DDI 1 | DDI 2 |
+| 시간당 유량 | DDI 7 | DDI 8 |
+| 면적당 살포 질량 | DDI 73 | DDI 74 |
+
+이 쌍 구조 덕분에 TC는 목표값(DDI 1)과 실제값(DDI 2)을 같은 물리 단위로 비교하여 제어 오차를 계산할 수 있다.
+
 ---
 
 ## 2. Element
@@ -74,11 +103,17 @@ graph TD
     FUNC --> SEC3
 ```
 
+### Element 간 부모-자식 관계
+
+Element는 계층 구조를 이룬다. <strong>Device</strong>가 최상위이며, 그 아래에 <strong>Function</strong>과 <strong>Bin</strong>이 중간 계층으로 위치한다. <strong>Section</strong>은 가장 말단에 해당한다. TC-Server가 특정 Element에 명령을 보낼 때는 해당 Element Number를 지정한다. 부모 Element에 명령을 보내면 그 아래 모든 자식 Element에 적용되는 것이 일반적이다.
+
+TC가 특정 Section에만 명령을 보내려면 해당 Section의 Element Number를 명시적으로 지정해야 한다. 예를 들어, Section 3(Element 5)에만 DDI 141(Section Control State)로 OFF 명령을 보내면, 나머지 두 구획(Section 1, Section 2)은 살포를 계속하면서 우측 구획만 살포가 중단된다. 이 메커니즘이 붐 스프레이어의 구획별 살포 제어(Section Control)를 가능하게 한다.
+
 ---
 
 ## 3. Value Command / Value Request
 
-TC-Server와 TC-Client는 **Process Data** 메시지(PGN: 0x00CB00)를 통해 값을 주고받다.
+TC-Server와 TC-Client는 **Process Data** 메시지(PGN: 0x00CB00)를 통해 값을 주고받는다.
 
 ### 메시지 방향
 
@@ -117,6 +152,41 @@ Process Data 메시지의 데이터 필드는 다음과 같이 구성된다.
 | 3–4 | Element Number | 대상 Element 번호 |
 | 5–8 | Value | 32비트 정수 값 |
 
+### Trigger Method
+
+TC-Client가 Measurement 값을 TC-Server에 보고하는 조건을 <strong>Trigger Method</strong>라고 한다. TC-Server는 Request Value Command를 통해 TC-Client에 트리거 방법을 설정한다.
+
+| 트리거 방법 | 설명 | 예시 |
+|-------------|------|------|
+| **Time Interval** | 일정 시간마다 보고 | 100ms마다 현재 유량 전송 |
+| **Distance Interval** | 일정 거리마다 보고 | 1m 이동할 때마다 살포량 전송 |
+| **On Change** | 값이 변할 때만 보고 | 섹션 상태가 ON→OFF로 바뀔 때만 전송 |
+| **Total** | 누적값 요청 시 보고 | 작업 종료 후 총 살포량 요청 |
+
+TC-Server가 트리거 방법을 설정하는 흐름은 다음과 같다.
+
+```mermaid
+sequenceDiagram
+    participant TC as TC-Server
+    participant CLIENT as TC-Client
+
+    Note over TC,CLIENT: TC-Server가 100ms 주기 보고 요청
+    TC ->> CLIENT: Process Data Value Request<br>[DDI=8, Element=1, Trigger=Time Interval, Interval=100ms]
+
+    loop 100ms마다
+        CLIENT -->> TC: Process Data Value<br>[DDI=8, Element=1, Value=현재 유량]
+    end
+
+    Note over TC,CLIENT: TC-Server가 거리 기반 보고로 전환
+    TC ->> CLIENT: Process Data Value Request<br>[DDI=2, Element=3, Trigger=Distance Interval, Dist=1m]
+
+    loop 1m 이동마다
+        CLIENT -->> TC: Process Data Value<br>[DDI=2, Element=3, Value=실제 살포량]
+    end
+```
+
+트리거 방법을 적절히 설정하면 CAN 버스 트래픽을 줄이면서도 필요한 시점에 정확한 데이터를 수집할 수 있다.
+
 ---
 
 ## 4. Measurement / Setpoint
@@ -143,6 +213,10 @@ graph LR
 **제어 오차(Control Error)** = Setpoint − Measurement
 
 작업기의 제어 시스템은 이 오차를 최소화하도록 밸브 개도량, 펌프 속도 등을 조절한다. TC는 오차가 허용 범위를 벗어나면 알람을 발생시킬 수 있다.
+
+오차가 허용 범위를 벗어나면 TC는 ISO 11783-12에 정의된 <strong>DM1(Diagnostic Message 1)</strong> 진단 코드를 생성할 수 있다. DM1 메시지는 SPN(Suspect Parameter Number)과 FMI(Failure Mode Indicator)를 포함하여 어떤 파라미터가 어떤 방식으로 이상 상태인지 기록한다. 예를 들어 실제 살포량이 목표값 대비 20% 이상 낮으면 "유량 부족" 진단 코드가 발생할 수 있다.
+
+작업기 ECU 내부에서는 <strong>PID(Proportional-Integral-Derivative) 제어 루프</strong>가 오차를 줄이는 방향으로 밸브를 조절한다. P 항은 현재 오차에 즉각적으로 반응하고, I 항은 지속적인 정상 오차(Steady-State Error)를 제거하며, D 항은 오차 변화율에 반응하여 과도한 진동을 억제한다. TC-Server는 Setpoint를 명령할 뿐이며, PID 제어는 전적으로 작업기 ECU(TC-Client 측)가 수행한다.
 
 ---
 

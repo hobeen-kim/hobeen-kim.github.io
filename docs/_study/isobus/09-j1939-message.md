@@ -30,12 +30,12 @@ tags:
 
 ```mermaid
 packet-beta
-  0-2: "Priority\n3 bit"
-  3-3: "EDP\n1 bit"
-  4-4: "DP\n1 bit"
-  5-12: "PF (PDU Format)\n8 bit"
-  13-20: "PS (PDU Specific)\n8 bit"
-  21-28: "SA (Source Address)\n8 bit"
+  0-2: "Priority<br>3 bit"
+  3-3: "EDP<br>1 bit"
+  4-4: "DP<br>1 bit"
+  5-12: "PF (PDU Format)<br>8 bit"
+  13-20: "PS (PDU Specific)<br>8 bit"
+  21-28: "SA (Source Address)<br>8 bit"
 ```
 
 | 필드 | 비트 위치 | 범위 | 설명 |
@@ -182,10 +182,10 @@ flowchart TD
     A["29비트 CAN ID 수신"]
     B["PF 값 확인"]
     C{"PF < 240?"}
-    D["PDU1\n(Peer-to-Peer)"]
-    E["PDU2\n(Broadcast)"]
-    F["PS = Destination Address\n특정 노드에게만 전송"]
-    G["PS = Group Extension\n모든 노드에게 전송"]
+    D["PDU1<br>(Peer-to-Peer)"]
+    E["PDU2<br>(Broadcast)"]
+    F["PS = Destination Address<br>특정 노드에게만 전송"]
+    G["PS = Group Extension<br>모든 노드에게 전송"]
 
     A --> B --> C
     C -- Yes --> D --> F
@@ -276,14 +276,14 @@ PGN = DP * 65536 + PF * 256 + PS
 
 ```mermaid
 packet-beta
-  0-7: "SPN 110\nbyte[0]=0xFF\n(N/A)"
-  8-15: "SPN 110\nbyte[1]=0xB0\n→ 136°C"
-  16-23: "SPN 174\nbyte[2]=0x32\n→ 10°C"
-  24-31: "SPN 175\nbyte[3]=0x04\n(low byte)"
-  32-39: "SPN 175\nbyte[4]=0xFF\n(N/A)"
-  40-47: "SPN 176\nbyte[5]=0xFF\n(N/A)"
-  48-55: "SPN 176\nbyte[6]=0xFF\n(N/A)"
-  56-63: "SPN 1134\nbyte[7]=0xFF\n(N/A)"
+  0-7: "SPN 110<br>byte[0]=0xFF<br>(N/A)"
+  8-15: "SPN 110<br>byte[1]=0xB0<br>→ 136°C"
+  16-23: "SPN 174<br>byte[2]=0x32<br>→ 10°C"
+  24-31: "SPN 175<br>byte[3]=0x04<br>(low byte)"
+  32-39: "SPN 175<br>byte[4]=0xFF<br>(N/A)"
+  40-47: "SPN 176<br>byte[5]=0xFF<br>(N/A)"
+  48-55: "SPN 176<br>byte[6]=0xFF<br>(N/A)"
+  56-63: "SPN 1134<br>byte[7]=0xFF<br>(N/A)"
 ```
 
 ### 5단계: SPN 110 값 추출

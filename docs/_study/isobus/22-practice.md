@@ -263,15 +263,15 @@ if __name__ == "__main__":
 graph TD
     subgraph Main["메인 화면 (Data Mask 0x0010)"]
         direction TB
-        SKM["Soft Key Mask (0x0040)\nSettings | Work ON | Work OFF"]
-        C_RPM["Container: RPM (0x0050)\n레이블: Engine RPM\n값: 1600 rpm"]
-        C_SPD["Container: Speed (0x0051)\n레이블: Speed (km/h)\n값: 8.5 km/h"]
-        WS["Work Status (0x0022)\nWORKING"]
+        SKM["Soft Key Mask (0x0040)<br>Settings | Work ON | Work OFF"]
+        C_RPM["Container: RPM (0x0050)<br>레이블: Engine RPM<br>값: 1600 rpm"]
+        C_SPD["Container: Speed (0x0051)<br>레이블: Speed (km/h)<br>값: 8.5 km/h"]
+        WS["Work Status (0x0022)<br>WORKING"]
     end
 
     subgraph Settings["설정 화면 (Data Mask 0x0011)"]
         direction TB
-        RATE["Number Input: Target Rate (0x0030)\n0~600 L/ha"]
+        RATE["Number Input: Target Rate (0x0030)<br>0~600 L/ha"]
         BACK["Soft Key: Back to Main"]
     end
 
@@ -322,19 +322,19 @@ graph TD
 
 ```mermaid
 sequenceDiagram
-    participant FMIS as FMIS\n(농장 관리 소프트웨어)
-    participant FS as File Server\n(ISO 11783-13)
-    participant TC as Task Controller\n(ISO 11783-10)
+    participant FMIS as FMIS<br>(농장 관리 소프트웨어)
+    participant FS as File Server<br>(ISO 11783-13)
+    participant TC as Task Controller<br>(ISO 11783-10)
     participant GPS as GPS 수신기
-    participant SC as Section Control\n(작업기 ECU)
+    participant SC as Section Control<br>(작업기 ECU)
     participant LOG as As-Applied 로그
 
     Note over FMIS,SC: [Phase 1] 작업 준비
-    FMIS->>FS: 처방 맵 파일 업로드\n(prescription_map.xml)
+    FMIS->>FS: 처방 맵 파일 업로드<br>(prescription_map.xml)
     FS-->>FMIS: 업로드 완료
     TC->>FS: 처방 맵 파일 다운로드 요청
     FS-->>TC: 처방 맵 파일 전달
-    TC->>TC: 처방 맵 파싱 및\n격자 셀별 목표값 로드
+    TC->>TC: 처방 맵 파싱 및<br>격자 셀별 목표값 로드
 
     Note over FMIS,SC: [Phase 2] 작업 시작
     FMIS->>TC: Task Start 명령
@@ -342,22 +342,22 @@ sequenceDiagram
 
     Note over FMIS,SC: [Phase 3] 실시간 살포
     loop 작업 중 (1초 간격)
-        GPS->>TC: NMEA GGA / ISOBUS TECU\n현재 위치 (lat, lon)
-        TC->>TC: 위치 → 처방 맵 격자 셀 조회\n목표 살포량 결정
-        TC->>SC: Section Control 명령\n(섹션 ON/OFF 비트맵)
-        TC->>SC: Rate Control 명령\n(목표 살포량 L/ha)
+        GPS->>TC: NMEA GGA / ISOBUS TECU<br>현재 위치 (lat, lon)
+        TC->>TC: 위치 → 처방 맵 격자 셀 조회<br>목표 살포량 결정
+        TC->>SC: Section Control 명령<br>(섹션 ON/OFF 비트맵)
+        TC->>SC: Rate Control 명령<br>(목표 살포량 L/ha)
         SC-->>TC: 실제 살포량 피드백
-        TC->>LOG: As-Applied 레코드 저장\n(위치, 목표값, 실제값, 시간)
+        TC->>LOG: As-Applied 레코드 저장<br>(위치, 목표값, 실제값, 시간)
     end
 
     Note over FMIS,SC: [Phase 4] 작업 종료 및 데이터 회수
     FMIS->>TC: Task Stop 명령
     TC-->>FMIS: Task Stop 확인
-    TC->>FS: As-Applied 로그 파일 업로드\n(task_log_20260413.xml)
+    TC->>FS: As-Applied 로그 파일 업로드<br>(task_log_20260413.xml)
     FS-->>TC: 업로드 완료
     FMIS->>FS: 로그 파일 다운로드
     FS-->>FMIS: 로그 파일 전달
-    FMIS->>FMIS: As-Applied Map 생성\n및 분석
+    FMIS->>FMIS: As-Applied Map 생성<br>및 분석
 ```
 
 ### 4.2 처방 맵 격자 조회 Python 시뮬레이션

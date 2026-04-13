@@ -34,14 +34,14 @@ VT 시스템은 두 주체로 구성된다.
 ```mermaid
 graph LR
     subgraph 트랙터
-        VTS[VT Server\nCANBUS 주소 0x26]
+        VTS[VT Server<br>CANBUS 주소 0x26]
         DISP[디스플레이 하드웨어]
         VTS --> DISP
     end
     subgraph 작업기
-        ECU[작업기 ECU\nVT Client]
+        ECU[작업기 ECU<br>VT Client]
     end
-    ECU -- "오브젝트 풀 전송\n사용자 입력 수신" --> VTS
+    ECU -- "오브젝트 풀 전송<br>사용자 입력 수신" --> VTS
     VTS -- "사용자 입력 이벤트" --> ECU
 ```
 
@@ -72,7 +72,7 @@ VT는 이 문제를 <strong>스마트폰 앱 스토어 모델</strong>로 해결
 
 ```mermaid
 graph TD
-    VT[VT 디스플레이\n하나의 통합 인터페이스]
+    VT[VT 디스플레이<br>하나의 통합 인터페이스]
     A[비료 살포기 ECU]
     B[파종기 ECU]
     C[스프레이어 ECU]

@@ -79,7 +79,7 @@ flowchart TD
     A["노드A가 비트 전송"] --> C{버스 읽기}
     B["노드B가 비트 전송"] --> C
     C -->|내가 보낸 값 = 버스 값| D[계속 전송]
-    C -->|내가 Recessive 보냈는데\n버스는 Dominant| E[중재 패배\n전송 중단 후 재시도]
+    C -->|내가 Recessive 보냈는데<br>버스는 Dominant| E[중재 패배<br>전송 중단 후 재시도]
 ```
 
 ### 물리적으로 이해하기
@@ -195,20 +195,20 @@ CAN은 **선형 버스(Linear Bus)** 구조를 사용한다. 하나의 주선(Ba
 
 ```mermaid
 graph LR
-    RT1["종단저항\n120Ω"] --- MAIN
+    RT1["종단저항<br>120Ω"] --- MAIN
 
     subgraph MAIN["주선 (Backbone)"]
         direction LR
         P1[ ] --- P2[ ] --- P3[ ] --- P4[ ] --- P5[ ]
     end
 
-    MAIN --- RT2["종단저항\n120Ω"]
+    MAIN --- RT2["종단저항<br>120Ω"]
 
-    P1 -- "스텁\n≤0.3m" --> N1["ECU A\n엔진"]
-    P2 -- "스텁\n≤0.3m" --> N2["ECU B\n변속기"]
-    P3 -- "스텁\n≤0.3m" --> N3["ECU C\n계기판"]
-    P4 -- "스텁\n≤0.3m" --> N4["ECU D\nABS"]
-    P5 -- "스텁\n≤0.3m" --> N5["ECU E\n작업기"]
+    P1 -- "스텁<br>≤0.3m" --> N1["ECU A<br>엔진"]
+    P2 -- "스텁<br>≤0.3m" --> N2["ECU B<br>변속기"]
+    P3 -- "스텁<br>≤0.3m" --> N3["ECU C<br>계기판"]
+    P4 -- "스텁<br>≤0.3m" --> N4["ECU D<br>ABS"]
+    P5 -- "스텁<br>≤0.3m" --> N5["ECU E<br>작업기"]
 
     style RT1 fill:#f9a,stroke:#c55
     style RT2 fill:#f9a,stroke:#c55
@@ -240,7 +240,7 @@ graph LR
     STUB1 ---     |CAN_H| RT2["120Ω"]
     STUB1 ---     |CAN_L| RT2
 
-    Note1["양 끝 120Ω 병렬\n= 합성 저항 60Ω"]
+    Note1["양 끝 120Ω 병렬<br>= 합성 저항 60Ω"]
 
     style RT1 fill:#f9a,stroke:#c55
     style RT2 fill:#f9a,stroke:#c55

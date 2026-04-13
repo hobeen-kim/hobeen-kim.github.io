@@ -34,16 +34,16 @@ next: /study/isobus/22-practice
 
 ```mermaid
 flowchart TD
-    A([작업 시작]) --> B[작업기 하강\nLower Implement]
-    B --> C[살포 시작\nSection ON / Rate Control]
-    C --> D{두둑 진입\n감지?}
-    D -- 아니오 --> E[직진 이동\n살포 계속]
+    A([작업 시작]) --> B[작업기 하강<br>Lower Implement]
+    B --> C[살포 시작<br>Section ON / Rate Control]
+    C --> D{두둑 진입<br>감지?}
+    D -- 아니오 --> E[직진 이동<br>살포 계속]
     E --> D
-    D -- 예 --> F[살포 중지\nSection OFF]
-    F --> G[작업기 상승\nRaise Implement]
-    G --> H[선회 이동\nHeadland Turn]
-    H --> I[작업기 하강\nLower Implement]
-    I --> J[살포 재개\nSection ON]
+    D -- 예 --> F[살포 중지<br>Section OFF]
+    F --> G[작업기 상승<br>Raise Implement]
+    G --> H[선회 이동<br>Headland Turn]
+    H --> I[작업기 하강<br>Lower Implement]
+    I --> J[살포 재개<br>Section ON]
     J --> K{작업 종료?}
     K -- 아니오 --> D
     K -- 예 --> L([작업 종료])
@@ -111,13 +111,13 @@ int sc_send_command(uint8_t step, uint8_t cmd, uint8_t trigger,
 flowchart LR
     subgraph Field["포전 (Field)"]
         direction TB
-        HL_TOP["두둑 상단\n(Headland Zone)"]
-        WORK["작업 구역\n(Working Area)"]
-        HL_BOT["두둑 하단\n(Headland Zone)"]
+        HL_TOP["두둑 상단<br>(Headland Zone)"]
+        WORK["작업 구역<br>(Working Area)"]
+        HL_BOT["두둑 하단<br>(Headland Zone)"]
         HL_TOP --- WORK --- HL_BOT
     end
 
-    GPS["GPS 수신기"] -- 위치 전달 --> SC["Sequence\nControl"]
+    GPS["GPS 수신기"] -- 위치 전달 --> SC["Sequence<br>Control"]
     TC["Task Controller"] -- 구역 경계 좌표 --> SC
     SC -- 명령 --> IMPL["작업기 ECU"]
 ```
@@ -164,9 +164,9 @@ Volume (최상위 저장소)
 
 ```mermaid
 graph TD
-    FS["File Server\n(ISO 11783-13)"]
-    FS --> V1["Volume 0\n(내부 저장소)"]
-    FS --> V2["Volume 1\n(외부 SD / CF)"]
+    FS["File Server<br>(ISO 11783-13)"]
+    FS --> V1["Volume 0<br>(내부 저장소)"]
+    FS --> V2["Volume 1<br>(외부 SD / CF)"]
     V1 --> D1["Directory: /prescriptions"]
     V1 --> D2["Directory: /logs"]
     D1 --> F1["prescription_map_2026.xml"]
@@ -187,17 +187,17 @@ sequenceDiagram
     participant FS as File Server
 
     C->>FS: Get File Server Properties Request
-    FS-->>C: File Server Properties Response\n(버전, 볼륨 수, 최대 파일 크기)
+    FS-->>C: File Server Properties Response<br>(버전, 볼륨 수, 최대 파일 크기)
 
-    C->>FS: Open File Request\n(경로, 읽기/쓰기 모드)
-    FS-->>C: Open File Response\n(파일 핸들 or 오류 코드)
+    C->>FS: Open File Request<br>(경로, 읽기/쓰기 모드)
+    FS-->>C: Open File Response<br>(파일 핸들 or 오류 코드)
 
     loop 데이터 전송
-        C->>FS: Read/Write File Request\n(파일 핸들, 오프셋, 길이)
-        FS-->>C: Read/Write File Response\n(데이터 or 확인)
+        C->>FS: Read/Write File Request<br>(파일 핸들, 오프셋, 길이)
+        FS-->>C: Read/Write File Response<br>(데이터 or 확인)
     end
 
-    C->>FS: Close File Request\n(파일 핸들)
+    C->>FS: Close File Request<br>(파일 핸들)
     FS-->>C: Close File Response
 ```
 

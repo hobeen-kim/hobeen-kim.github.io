@@ -42,22 +42,22 @@ ISOBUS 작업기 ECU는 대부분 **128~247** 범위의 Self-Configurable 주소
 
 ```mermaid
 sequenceDiagram
-    participant ECU_A as ECU A\n(NAME: 낮은 값)
-    participant ECU_B as ECU B\n(NAME: 높은 값)
+    participant ECU_A as ECU A<br>(NAME: 낮은 값)
+    participant ECU_B as ECU B<br>(NAME: 높은 값)
     participant BUS as ISOBUS
 
-    ECU_A->>BUS: Request for Address Claimed\n(주소 128 원함)
-    ECU_B->>BUS: Request for Address Claimed\n(주소 128 원함)
+    ECU_A->>BUS: Request for Address Claimed<br>(주소 128 원함)
+    ECU_B->>BUS: Request for Address Claimed<br>(주소 128 원함)
 
     Note over ECU_A,ECU_B: 충돌 발생 — 두 ECU가 같은 주소 요청
 
-    ECU_A->>BUS: Address Claimed (128)\nNAME = 낮은 값
-    ECU_B->>BUS: Address Claimed (128)\nNAME = 높은 값
+    ECU_A->>BUS: Address Claimed (128)<br>NAME = 낮은 값
+    ECU_B->>BUS: Address Claimed (128)<br>NAME = 높은 값
 
     Note over ECU_A,ECU_B: NAME 값 비교: 낮은 값이 우선권 획득
 
-    ECU_A->>BUS: Address Claimed (128) 유지\n주소 128 확정
-    ECU_B->>BUS: Cannot Claim Address (128)\n다른 주소(129)로 재시도
+    ECU_A->>BUS: Address Claimed (128) 유지<br>주소 128 확정
+    ECU_B->>BUS: Cannot Claim Address (128)<br>다른 주소(129)로 재시도
     ECU_B->>BUS: Address Claimed (129) 확정
 ```
 
@@ -72,21 +72,21 @@ sequenceDiagram
 ```mermaid
 graph TD
     subgraph Working_Set_파종기
-        WSM["Working Set Master\n파종기 메인 ECU\n주소: 132\n─────────────\nVT·TC와 직접 통신\n작업기 대표"]
+        WSM["Working Set Master<br>파종기 메인 ECU<br>주소: 132<br>─────────────<br>VT·TC와 직접 통신<br>작업기 대표"]
 
-        M1["Working Set Member 1\n섹션 밸브 ECU\n주소: 133\n─────────────\n좌/우 섹션 개폐 제어"]
+        M1["Working Set Member 1<br>섹션 밸브 ECU<br>주소: 133<br>─────────────<br>좌/우 섹션 개폐 제어"]
 
-        M2["Working Set Member 2\n속도 센서 ECU\n주소: 134\n─────────────\n지면 속도 측정 및 보고"]
+        M2["Working Set Member 2<br>속도 센서 ECU<br>주소: 134<br>─────────────<br>지면 속도 측정 및 보고"]
 
-        M3["Working Set Member 3\n비료 탱크 ECU\n주소: 135\n─────────────\n잔량 센서, 경보"]
+        M3["Working Set Member 3<br>비료 탱크 ECU<br>주소: 135<br>─────────────<br>잔량 센서, 경보"]
 
         WSM -- "내부 제어 명령" --> M1
         WSM -- "센서 값 수신" --> M2
         WSM -- "잔량 모니터링" --> M3
     end
 
-    VT["VT\n(트랙터 화면)"] -- "UI 데이터 요청" --> WSM
-    TC["TC\n(작업 컨트롤러)"] -- "섹션 명령" --> WSM
+    VT["VT<br>(트랙터 화면)"] -- "UI 데이터 요청" --> WSM
+    TC["TC<br>(작업 컨트롤러)"] -- "섹션 명령" --> WSM
 ```
 
 ### Working Set 선언 메시지 (PGN 65070)
@@ -121,10 +121,10 @@ ISOBUS는 ISO 11783-12를 통해 표준화된 진단 메시지를 정의한다. 
 ```mermaid
 graph LR
     subgraph 진단_메시지_흐름
-        FAULT[고장 발생\nSPN+FMI 감지] --> DM1[DM1 전송\n활성 고장 코드]
-        DM1 --> VT_WARN[VT 화면에\n경고 표시]
-        FAULT_CLEAR[고장 해소] --> DM2[DM2로 이동\n이전 고장 기록]
-        TECH[정비사 요청] --> DM3[DM3 전송\n고장 코드 초기화]
+        FAULT[고장 발생<br>SPN+FMI 감지] --> DM1[DM1 전송<br>활성 고장 코드]
+        DM1 --> VT_WARN[VT 화면에<br>경고 표시]
+        FAULT_CLEAR[고장 해소] --> DM2[DM2로 이동<br>이전 고장 기록]
+        TECH[정비사 요청] --> DM3[DM3 전송<br>고장 코드 초기화]
         DM3 --> DM2_CLEAR[DM2 기록 삭제]
     end
 ```

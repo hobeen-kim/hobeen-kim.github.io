@@ -60,12 +60,12 @@ next: /study/isobus/20-tc-ddop
 
 ```mermaid
 graph TD
-    DEV["Device\n살포기 전체\n(Element 0)"]
-    FUNC["Function\n살포 펌프\n(Element 1)"]
-    BIN["Bin\n약액 탱크\n(Element 2)"]
-    SEC1["Section\n좌측 구획\n(Element 3)"]
-    SEC2["Section\n중앙 구획\n(Element 4)"]
-    SEC3["Section\n우측 구획\n(Element 5)"]
+    DEV["Device<br>살포기 전체<br>(Element 0)"]
+    FUNC["Function<br>살포 펌프<br>(Element 1)"]
+    BIN["Bin<br>약액 탱크<br>(Element 2)"]
+    SEC1["Section<br>좌측 구획<br>(Element 3)"]
+    SEC2["Section<br>중앙 구획<br>(Element 4)"]
+    SEC3["Section<br>우측 구획<br>(Element 5)"]
 
     DEV --> FUNC
     DEV --> BIN
@@ -130,13 +130,13 @@ TC 프로세스 데이터는 크게 두 가지로 구분된다.
 
 ```mermaid
 graph LR
-    MAP["처방 맵"] -->|"목표값 조회"| SP["Setpoint\nDDI 1 = 200 L/ha"]
-    SENSOR["유량 센서"] -->|"실제값 측정"| MS["Measurement\nDDI 2 = 198 L/ha"]
+    MAP["처방 맵"] -->|"목표값 조회"| SP["Setpoint<br>DDI 1 = 200 L/ha"]
+    SENSOR["유량 센서"] -->|"실제값 측정"| MS["Measurement<br>DDI 2 = 198 L/ha"]
 
     SP -->|"Value Command"| ECU["작업기 ECU"]
     ECU -->|"Process Data Value"| MS
 
-    SP --- ERR["제어 오차\n200 - 198 = 2 L/ha"]
+    SP --- ERR["제어 오차<br>200 - 198 = 2 L/ha"]
     MS --- ERR
 ```
 

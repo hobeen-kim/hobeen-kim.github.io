@@ -51,19 +51,19 @@ DDOP는 5가지 타입의 오브젝트로 구성된다.
 
 ```mermaid
 graph TD
-    DVC["Device\n살포기 전체\n제조사/모델/S/N"]
+    DVC["Device<br>살포기 전체<br>제조사/모델/S/N"]
 
-    DE_ROOT["DeviceElement\nType=Device\n(전체 기능 루트)"]
-    DE_SEC1["DeviceElement\nType=Section\nSection 1 (3m)"]
-    DE_SEC2["DeviceElement\nType=Section\nSection 2 (3m)"]
-    DE_SEC3["DeviceElement\nType=Section\nSection 3 (3m)"]
+    DE_ROOT["DeviceElement<br>Type=Device<br>(전체 기능 루트)"]
+    DE_SEC1["DeviceElement<br>Type=Section<br>Section 1 (3m)"]
+    DE_SEC2["DeviceElement<br>Type=Section<br>Section 2 (3m)"]
+    DE_SEC3["DeviceElement<br>Type=Section<br>Section 3 (3m)"]
 
-    DPD_SP["DeviceProcessData\nDDI=1\nSetpoint Volume/Area"]
-    DPD_MS["DeviceProcessData\nDDI=2\nActual Volume/Area"]
+    DPD_SP["DeviceProcessData<br>DDI=1<br>Setpoint Volume/Area"]
+    DPD_MS["DeviceProcessData<br>DDI=2<br>Actual Volume/Area"]
 
-    DPROP["DeviceProperty\nDDI=작업폭\nValue=9m"]
+    DPROP["DeviceProperty<br>DDI=작업폭<br>Value=9m"]
 
-    DVP["DeviceValuePresentation\nUnit=L/ha\nScale=0.01"]
+    DVP["DeviceValuePresentation<br>Unit=L/ha<br>Scale=0.01"]
 
     DVC --> DE_ROOT
     DE_ROOT --> DE_SEC1
@@ -158,31 +158,31 @@ DDOP 데이터는 일반적으로 수백 바이트~수 킬로바이트에 달하
 
 ```mermaid
 graph TD
-    DVC["Device\n오브젝트 ID: 1\n3구획 붐 스프레이어"]
+    DVC["Device<br>오브젝트 ID: 1<br>3구획 붐 스프레이어"]
 
-    DE0["DeviceElement\nID: 2, Type: Device\nElement Number: 0\n전체 기능 루트"]
+    DE0["DeviceElement<br>ID: 2, Type: Device<br>Element Number: 0<br>전체 기능 루트"]
 
-    DE1["DeviceElement\nID: 3, Type: Section\nElement Number: 1\nSection 1 (좌, 3m)"]
+    DE1["DeviceElement<br>ID: 3, Type: Section<br>Element Number: 1<br>Section 1 (좌, 3m)"]
 
-    DE2["DeviceElement\nID: 4, Type: Section\nElement Number: 2\nSection 2 (중, 3m)"]
+    DE2["DeviceElement<br>ID: 4, Type: Section<br>Element Number: 2<br>Section 2 (중, 3m)"]
 
-    DE3["DeviceElement\nID: 5, Type: Section\nElement Number: 3\nSection 3 (우, 3m)"]
+    DE3["DeviceElement<br>ID: 5, Type: Section<br>Element Number: 3<br>Section 3 (우, 3m)"]
 
-    PROP["DeviceProperty\nID: 6\n작업폭 = 9m"]
+    PROP["DeviceProperty<br>ID: 6<br>작업폭 = 9m"]
 
-    DPD_SP1["DeviceProcessData\nID: 7\nDDI=1 Setpoint\n(Section 1)"]
-    DPD_MS1["DeviceProcessData\nID: 8\nDDI=2 Measurement\n(Section 1)"]
-    DPD_SC1["DeviceProcessData\nID: 9\nDDI=141 SectionCtrl\n(Section 1)"]
+    DPD_SP1["DeviceProcessData<br>ID: 7<br>DDI=1 Setpoint<br>(Section 1)"]
+    DPD_MS1["DeviceProcessData<br>ID: 8<br>DDI=2 Measurement<br>(Section 1)"]
+    DPD_SC1["DeviceProcessData<br>ID: 9<br>DDI=141 SectionCtrl<br>(Section 1)"]
 
-    DPD_SP2["DeviceProcessData\nID: 10\nDDI=1 Setpoint\n(Section 2)"]
-    DPD_MS2["DeviceProcessData\nID: 11\nDDI=2 Measurement\n(Section 2)"]
-    DPD_SC2["DeviceProcessData\nID: 12\nDDI=141 SectionCtrl\n(Section 2)"]
+    DPD_SP2["DeviceProcessData<br>ID: 10<br>DDI=1 Setpoint<br>(Section 2)"]
+    DPD_MS2["DeviceProcessData<br>ID: 11<br>DDI=2 Measurement<br>(Section 2)"]
+    DPD_SC2["DeviceProcessData<br>ID: 12<br>DDI=141 SectionCtrl<br>(Section 2)"]
 
-    DPD_SP3["DeviceProcessData\nID: 13\nDDI=1 Setpoint\n(Section 3)"]
-    DPD_MS3["DeviceProcessData\nID: 14\nDDI=2 Measurement\n(Section 3)"]
-    DPD_SC3["DeviceProcessData\nID: 15\nDDI=141 SectionCtrl\n(Section 3)"]
+    DPD_SP3["DeviceProcessData<br>ID: 13<br>DDI=1 Setpoint<br>(Section 3)"]
+    DPD_MS3["DeviceProcessData<br>ID: 14<br>DDI=2 Measurement<br>(Section 3)"]
+    DPD_SC3["DeviceProcessData<br>ID: 15<br>DDI=141 SectionCtrl<br>(Section 3)"]
 
-    DVP["DeviceValuePresentation\nID: 16\nUnit=L/ha, Scale=0.01"]
+    DVP["DeviceValuePresentation<br>ID: 16<br>Unit=L/ha, Scale=0.01"]
 
     DVC --> DE0
     DE0 --> DE1

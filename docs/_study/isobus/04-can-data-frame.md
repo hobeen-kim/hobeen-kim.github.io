@@ -260,13 +260,13 @@ PGN F004 (EEC1) 기준 해석:
 
 ```mermaid
 flowchart LR
-    A["CAN 로그\n0CF004FE#FF3C320000FFFF00"]
-    A --> B["CAN ID\n0x0CF004FE"]
-    A --> C["Data\nFF 3C 32 00 00 FF FF 00"]
+    A["CAN 로그<br>0CF004FE#FF3C320000FFFF00"]
+    A --> B["CAN ID<br>0x0CF004FE"]
+    A --> C["Data<br>FF 3C 32 00 00 FF FF 00"]
 
-    B --> D["Priority: 3\n(상위 3bit)"]
-    B --> E["PGN: 0xF004\n= EEC1 엔진 속도"]
-    B --> F["Source: 0xFE\n= 주소 254"]
+    B --> D["Priority: 3<br>(상위 3bit)"]
+    B --> E["PGN: 0xF004<br>= EEC1 엔진 속도"]
+    B --> F["Source: 0xFE<br>= 주소 254"]
 
     C --> G["Byte 0-1: 토크 정보"]
     C --> H["Byte 2-3: 엔진 RPM"]

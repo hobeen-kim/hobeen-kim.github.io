@@ -67,7 +67,16 @@ const theme = {
       },
       {
         text: '공부하기',
-        link: '/study/',
+        children: [
+          {
+            text: '모두',
+            link: '/study/',
+          },
+          {
+            text: 'ISOBUS',
+            link: '/study/isobus/',
+          },
+        ],
       },
       {
         text: '이력서',

@@ -19,7 +19,7 @@ next: /study/isobus/21-tc-task
 
 ## 1. DDOP란
 
-**DDOP(Device Description Object Pool)**는 작업기가 자기 자신의 구조와 능력을 TC에게 알려주는 데이터 집합입니다.
+<strong>DDOP(Device Description Object Pool)</strong>는 작업기가 자기 자신의 구조와 능력을 TC에게 알려주는 데이터 집합입니다.
 
 > DDOP는 "작업기의 자기소개서"입니다.
 
@@ -141,7 +141,7 @@ sequenceDiagram
 
 ### 전송 프로토콜
 
-DDOP 데이터는 일반적으로 수백 바이트~수 킬로바이트에 달하므로, 단일 CAN 프레임으로 전송할 수 없습니다. ISO 11783의 **TP(Transport Protocol)** 또는 **ETP(Extended Transport Protocol)**를 사용하여 멀티패킷으로 분할 전송합니다.
+DDOP 데이터는 일반적으로 수백 바이트~수 킬로바이트에 달하므로, 단일 CAN 프레임으로 전송할 수 없습니다. ISO 11783의 **TP(Transport Protocol)** 또는 <strong>ETP(Extended Transport Protocol)</strong>를 사용하여 멀티패킷으로 분할 전송합니다.
 
 ---
 

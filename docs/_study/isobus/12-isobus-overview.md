@@ -19,13 +19,13 @@ next: /study/isobus/13-isobus-architecture
 
 ## 1. ISOBUS란
 
-**ISOBUS**는 농업·임업 기계를 위한 직렬 통신 표준입니다. 공식 명칭은 다음과 같습니다.
+<strong>ISOBUS</strong>는 농업·임업 기계를 위한 직렬 통신 표준입니다. 공식 명칭은 다음과 같습니다.
 
 > **ISO 11783 — Tractors and machinery for agriculture and forestry — Serial control and communications data network**
 
 쉽게 말하면, 트랙터와 작업기(Implement) 사이에서 데이터를 주고받기 위한 규칙 모음입니다. 속도, 엔진 RPM, GPS 위치, 작업기 상태 같은 정보를 표준화된 방식으로 교환합니다.
 
-핵심 목표는 **상호운용성(Interoperability)**입니다. 어떤 제조사의 트랙터와 어떤 제조사의 작업기를 조합해도 동일한 방식으로 통신할 수 있어야 합니다.
+핵심 목표는 <strong>상호운용성(Interoperability)</strong>입니다. 어떤 제조사의 트랙터와 어떤 제조사의 작업기를 조합해도 동일한 방식으로 통신할 수 있어야 합니다.
 
 ---
 
@@ -90,7 +90,7 @@ ISO 11783은 14개의 파트(Part)로 구성된 표준입니다.
 
 ## 4. J1939과 ISOBUS의 관계
 
-ISOBUS는 SAE J1939을 기반으로 농업 기계에 맞게 **확장**한 표준입니다. 프로토콜 계층 관점에서 살펴보면 다음과 같습니다.
+ISOBUS는 SAE J1939을 기반으로 농업 기계에 맞게 <strong>확장</strong>한 표준입니다. 프로토콜 계층 관점에서 살펴보면 다음과 같습니다.
 
 ```mermaid
 graph TB

@@ -19,7 +19,7 @@ next: /study/isobus/19-tc-process-data
 
 ## 1. TC란 무엇인가
 
-**Task Controller(TC)**는 ISO 11783-10에 정의된 정밀 농업의 핵심 컴포넌트입니다.
+<strong>Task Controller(TC)</strong>는 ISO 11783-10에 정의된 정밀 농업의 핵심 컴포넌트입니다.
 
 > **ISO 11783 Part 10 — Task Controller and Management Information System Data Interchange**
 
@@ -90,8 +90,8 @@ flowchart LR
     SENSOR --> TCC
 ```
 
-- **TC-Server**는 처방 맵에서 현재 GPS 위치에 해당하는 값을 조회하고, 그 값을 TC-Client에 전달합니다.
-- **TC-Client**는 수신한 Setpoint에 맞게 밸브나 모터를 조절하고, 유량 센서 등으로 실제 값을 측정하여 TC-Server에 보고합니다.
+- <strong>TC-Server</strong>는 처방 맵에서 현재 GPS 위치에 해당하는 값을 조회하고, 그 값을 TC-Client에 전달합니다.
+- <strong>TC-Client</strong>는 수신한 Setpoint에 맞게 밸브나 모터를 조절하고, 유량 센서 등으로 실제 값을 측정하여 TC-Server에 보고합니다.
 
 ---
 
@@ -101,7 +101,7 @@ TC의 두 가지 핵심 제어 기능입니다.
 
 ### Section Control
 
-작업기를 여러 **구획(Section)**으로 나누어 각 구획을 독립적으로 ON/OFF하는 기능입니다. 이미 작업한 영역이나 작업이 필요 없는 영역의 구획을 자동으로 끕니다.
+작업기를 여러 <strong>구획(Section)</strong>으로 나누어 각 구획을 독립적으로 ON/OFF하는 기능입니다. 이미 작업한 영역이나 작업이 필요 없는 영역의 구획을 자동으로 끕니다.
 
 **목적**: 중복 살포(Overlap) 방지 → 비료·농약·씨앗 절감
 

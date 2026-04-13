@@ -103,7 +103,7 @@ DDI(Data Dictionary Identifier)는 ISO 11783-11에 정의된 식별자로, Task 
 
 ## DDI 값 표현 방식
 
-DDI 값은 모두 **부호 있는 32비트 정수(int32)**로 전송된다. 실제 단위 값으로 변환하려면 DDI별 해상도(Resolution)를 적용해야 한다.
+DDI 값은 모두 <strong>부호 있는 32비트 정수(int32)</strong>로 전송된다. 실제 단위 값으로 변환하려면 DDI별 해상도(Resolution)를 적용해야 한다.
 
 예시:
 - DDI 1 (Setpoint Volume Per Area): 1 bit = 0.000001 ml/m²

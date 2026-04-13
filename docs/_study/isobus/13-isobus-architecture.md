@@ -24,7 +24,7 @@ ISOBUS 네트워크는 물리적으로 두 개의 CAN 버스로 구성됩니다.
 - **In-Cab 버스**: 트랙터 내부 ECU들이 연결되는 버스
 - **Implement 버스**: 트랙터 외부에 연결되는 작업기 ECU들이 연결되는 버스
 
-두 버스는 **TBC(Tractor Bus Connector)**를 통해 연결됩니다.
+두 버스는 <strong>TBC(Tractor Bus Connector)</strong>를 통해 연결됩니다.
 
 ```mermaid
 graph LR
@@ -52,7 +52,7 @@ graph LR
     end
 ```
 
-두 버스를 분리하는 이유는 **전기적 안전성**과 **버스 부하 분산**입니다. 작업기를 탈착할 때 발생하는 전기적 충격이 트랙터 내부 버스에 영향을 주지 않도록 격리합니다.
+두 버스를 분리하는 이유는 <strong>전기적 안전성</strong>과 <strong>버스 부하 분산</strong>입니다. 작업기를 탈착할 때 발생하는 전기적 충격이 트랙터 내부 버스에 영향을 주지 않도록 격리합니다.
 
 ---
 

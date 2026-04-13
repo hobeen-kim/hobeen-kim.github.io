@@ -21,10 +21,10 @@ next: /study/isobus/22-practice
 
 ### 1.1 개요
 
-**Sequence Control**은 작업기가 일련의 동작을 **자동 순서대로** 실행하도록 지시하는 표준입니다.
+<strong>Sequence Control</strong>은 작업기가 일련의 동작을 **자동 순서대로** 실행하도록 지시하는 표준입니다.
 운전자가 일일이 스위치를 조작하지 않아도 사전 정의된 시퀀스가 트리거 조건에 따라 자동 실행됩니다.
 
-가장 대표적인 활용 사례가 **Headland Management(두둑 관리)**입니다.
+가장 대표적인 활용 사례가 <strong>Headland Management(두둑 관리)</strong>입니다.
 포전 끝(두둑)에서 방향을 전환할 때 살포 중지 → 작업기 상승 → 선회 → 하강 → 살포 재개를 자동으로 수행합니다.
 
 ---
@@ -137,7 +137,7 @@ GPS 좌표가 Headland Zone 경계를 넘는 순간 SC가 자동으로 시퀀스
 
 ### 2.1 개요
 
-**File Server(FS)**는 ISOBUS 네트워크 위에서 파일을 저장하고 공유하는 서비스입니다.
+<strong>File Server(FS)</strong>는 ISOBUS 네트워크 위에서 파일을 저장하고 공유하는 서비스입니다.
 USB 메모리나 별도 물리 매체 없이 ECU 간에 파일을 주고받을 수 있습니다.
 
 주요 활용 사례:

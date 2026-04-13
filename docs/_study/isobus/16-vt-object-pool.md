@@ -20,7 +20,7 @@ next: /study/isobus/17-vt-commands
 
 ## 1. 오브젝트 풀이란
 
-**오브젝트 풀(Object Pool)**은 VT 화면 전체를 정의하는 **바이너리 데이터 구조**입니다. 작업기 ECU의 플래시 메모리에 저장되어 있다가, VT 연결 시 VT로 전송됩니다.
+<strong>오브젝트 풀(Object Pool)</strong>은 VT 화면 전체를 정의하는 <strong>바이너리 데이터 구조</strong>입니다. 작업기 ECU의 플래시 메모리에 저장되어 있다가, VT 연결 시 VT로 전송됩니다.
 
 각 오브젝트는 세 가지 요소로 구성됩니다.
 
@@ -121,7 +121,7 @@ ISO 11783-6에는 30여 가지 오브젝트 타입이 정의되어 있습니다.
 
 ## 3. 오브젝트 간 계층 관계
 
-오브젝트들은 트리 구조로 조직됩니다. **Working Set Object**가 루트이며, 모든 화면과 요소가 그 아래에 위치합니다.
+오브젝트들은 트리 구조로 조직됩니다. <strong>Working Set Object</strong>가 루트이며, 모든 화면과 요소가 그 아래에 위치합니다.
 
 ```mermaid
 graph TD
@@ -154,10 +154,10 @@ graph TD
 
 계층의 핵심 규칙:
 
-- **Data Mask**는 Working Set에서 active mask로 지정되어야 화면에 표시됩니다.
-- **Soft Key Mask**는 Data Mask에 연결되어 함께 활성화됩니다.
+- <strong>Data Mask</strong>는 Working Set에서 active mask로 지정되어야 화면에 표시됩니다.
+- <strong>Soft Key Mask</strong>는 Data Mask에 연결되어 함께 활성화됩니다.
 - **속성 오브젝트**(Font, Line, Fill Attributes)는 여러 오브젝트에서 공유할 수 있습니다.
-- **Container**는 가시성(visible/hidden) 속성으로 동적으로 표시/숨김이 가능합니다.
+- <strong>Container</strong>는 가시성(visible/hidden) 속성으로 동적으로 표시/숨김이 가능합니다.
 
 ---
 
@@ -194,7 +194,7 @@ sequenceDiagram
 
 ### 버전 관리 (Store/Load Version)
 
-오브젝트 풀이 크면 전송에 수 초가 걸릴 수 있습니다. 이를 개선하기 위해 VT는 오브젝트 풀을 **버전 이름(8바이트 문자열)**과 함께 내부에 저장할 수 있습니다. 다음 연결 시 **Load Version** 명령만으로 저장된 풀을 즉시 복원하여 전송 시간을 절약합니다.
+오브젝트 풀이 크면 전송에 수 초가 걸릴 수 있습니다. 이를 개선하기 위해 VT는 오브젝트 풀을 <strong>버전 이름(8바이트 문자열)</strong>과 함께 내부에 저장할 수 있습니다. 다음 연결 시 **Load Version** 명령만으로 저장된 풀을 즉시 복원하여 전송 시간을 절약합니다.
 
 ---
 

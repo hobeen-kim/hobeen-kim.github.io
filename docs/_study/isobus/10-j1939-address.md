@@ -19,7 +19,7 @@ next: /study/isobus/11-j1939-transport
 
 ## 1. 소스 주소 (SA)
 
-J1939 네트워크에서 모든 ECU는 **소스 주소(Source Address, SA)**를 가집니다. SA는 8비트 값으로, 29비트 CAN ID의 **하위 8비트(비트 7~0)**에 위치합니다.
+J1939 네트워크에서 모든 ECU는 <strong>소스 주소(Source Address, SA)</strong>를 가집니다. SA는 8비트 값으로, 29비트 CAN ID의 <strong>하위 8비트(비트 7~0)</strong>에 위치합니다.
 
 ```
 ┌─────────────────────────────────────────────────┐
@@ -48,7 +48,7 @@ J1939 네트워크에서 모든 ECU는 **소스 주소(Source Address, SA)**를 
 | 128 (0x80) | Task Controller (ISOBUS) |
 | 130 (0x82) | Virtual Terminal (ISOBUS) |
 
-예약 주소는 **우선권**을 가지지 않습니다. 주소 클레임 경쟁에서 NAME 값이 작은 쪽이 이기며, 예약 주소라도 더 작은 NAME을 가진 장치가 있으면 양보해야 합니다.
+예약 주소는 <strong>우선권</strong>을 가지지 않습니다. 주소 클레임 경쟁에서 NAME 값이 작은 쪽이 이기며, 예약 주소라도 더 작은 NAME을 가진 장치가 있으면 양보해야 합니다.
 
 ```mermaid
 graph LR
@@ -68,7 +68,7 @@ graph LR
 
 ## 2. NAME (64비트)
 
-**NAME**은 J1939 네트워크에서 ECU를 전 세계적으로 고유하게 식별하는 64비트 구조체입니다. 주소 클레임 시 충돌이 발생하면 NAME 값을 비교해 우선순위를 결정합니다. NAME 값이 **수치적으로 더 작은** 장치가 주소를 획득합니다.
+<strong>NAME</strong>은 J1939 네트워크에서 ECU를 전 세계적으로 고유하게 식별하는 64비트 구조체입니다. 주소 클레임 시 충돌이 발생하면 NAME 값을 비교해 우선순위를 결정합니다. NAME 값이 **수치적으로 더 작은** 장치가 주소를 획득합니다.
 
 ### NAME 필드 구성
 
@@ -115,7 +115,7 @@ NAME = 0x0000000060000000
 
 ## 3. 주소 클레임 절차
 
-J1939 장치는 네트워크에 연결되면 **Address Claimed 메시지(PGN 60928, 0xEE00)**를 브로드캐스트하여 주소를 선점합니다. 같은 주소를 사용하려는 장치가 있으면 NAME 비교를 통해 충돌을 해결합니다.
+J1939 장치는 네트워크에 연결되면 <strong>Address Claimed 메시지(PGN 60928, 0xEE00)</strong>를 브로드캐스트하여 주소를 선점합니다. 같은 주소를 사용하려는 장치가 있으면 NAME 비교를 통해 충돌을 해결합니다.
 
 ```mermaid
 sequenceDiagram
@@ -164,7 +164,7 @@ sequenceDiagram
 
 ## 4. Commanded Address
 
-**Commanded Address**는 외부 장치가 특정 ECU에게 주소를 강제로 지정하는 메커니즘입니다. **PGN 65240 (0xFED8)**을 사용합니다.
+<strong>Commanded Address</strong>는 외부 장치가 특정 ECU에게 주소를 강제로 지정하는 메커니즘입니다. <strong>PGN 65240 (0xFED8)</strong>을 사용합니다.
 
 ### 메시지 구조
 
@@ -200,7 +200,7 @@ sequenceDiagram
 | 네트워크 재구성 | 시스템 통합 시 주소 충돌 사전 방지 |
 | 진단/유지보수 | 특정 SA로 장치를 강제 이동 |
 
-Commanded Address를 수신한 ECU는 반드시 **Address Claimed 메시지로 응답**해야 합니다. ECU가 새 주소를 클레임할 수 없는 경우 Cannot Claim을 전송합니다.
+Commanded Address를 수신한 ECU는 반드시 <strong>Address Claimed 메시지로 응답</strong>해야 합니다. ECU가 새 주소를 클레임할 수 없는 경우 Cannot Claim을 전송합니다.
 
 ---
 

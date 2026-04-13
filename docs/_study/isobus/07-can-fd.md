@@ -123,7 +123,7 @@ DLC 15    → 64 bytes
 
 ## 두 개의 Phase
 
-CAN FD 프레임은 **두 개의 비트레이트 구간**으로 나뉜다.
+CAN FD 프레임은 <strong>두 개의 비트레이트 구간</strong>으로 나뉜다.
 
 ```mermaid
 gantt
@@ -175,7 +175,7 @@ CAN FD (64바이트, 4 Mbps Data phase):
 
 ## 같은 버스에서 공존할 수 있는가?
 
-CAN FD 노드와 Classic CAN 노드는 **버스를 물리적으로 공유**할 수 있지만, 동작 방식에 따라 두 종류로 나뉜다.
+CAN FD 노드와 Classic CAN 노드는 <strong>버스를 물리적으로 공유</strong>할 수 있지만, 동작 방식에 따라 두 종류로 나뉜다.
 
 ```mermaid
 graph TD
@@ -195,11 +195,11 @@ graph TD
 | **FD Tolerant** | 무시(수신 후 폐기) | 없음 |
 | **Classic CAN** | 인식 불가 | 에러 프레임 발생 |
 
-> Classic CAN 노드가 같은 버스에 존재하면 CAN FD 프레임 전송 시 에러 프레임을 생성한다. 따라서 **혼합 네트워크**에서는 CAN FD를 사용하지 않거나, 게이트웨이로 분리해야 한다.
+> Classic CAN 노드가 같은 버스에 존재하면 CAN FD 프레임 전송 시 에러 프레임을 생성한다. 따라서 <strong>혼합 네트워크</strong>에서는 CAN FD를 사용하지 않거나, 게이트웨이로 분리해야 한다.
 
 ## ISOBUS와 CAN FD
 
-현재 **ISOBUS(ISO 11783)는 CAN 2.0B(29비트 확장 ID) 기반**이다. 250 kbps의 비트레이트를 사용하며, CAN FD를 공식 채택하지 않았다.
+현재 <strong>ISOBUS(ISO 11783)는 CAN 2.0B(29비트 확장 ID) 기반</strong>이다. 250 kbps의 비트레이트를 사용하며, CAN FD를 공식 채택하지 않았다.
 
 ```
 현재 ISOBUS 스택
@@ -214,7 +214,7 @@ CAN FD 채택 동향
 ```
 
 ::: tip 핵심 정리
-- CAN FD는 2012년 Bosch가 발표, **64바이트 페이로드**와 **최대 8 Mbps Data phase**가 핵심 개선점이다.
+- CAN FD는 2012년 Bosch가 발표, <strong>64바이트 페이로드</strong>와 <strong>최대 8 Mbps Data phase</strong>가 핵심 개선점이다.
 - **FDF** 비트로 CAN FD 프레임임을 표시하고, **BRS** 비트로 Data phase 고속 전환, **ESI** 비트로 에러 상태를 나타낸다.
 - Arbitration phase는 기존 속도(Nominal), Data phase만 고속(Data Bit Rate)으로 동작한다.
 - Classic CAN 노드가 혼재하면 CAN FD 프레임을 에러로 처리하므로 혼합 네트워크는 격리가 필요하다.

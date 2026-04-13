@@ -20,7 +20,7 @@ next: /study/isobus/20-tc-ddop
 
 ## 1. DDI (Data Dictionary Identifier)
 
-**DDI**는 TC 프로세스 데이터 항목을 구분하는 표준화된 16비트 번호입니다.
+<strong>DDI</strong>는 TC 프로세스 데이터 항목을 구분하는 표준화된 16비트 번호입니다.
 
 > DDI는 "어떤 종류의 데이터인가"를 나타냅니다. 살포량인지, 속도인지, 면적인지를 숫자로 표현합니다.
 
@@ -42,7 +42,7 @@ next: /study/isobus/20-tc-ddop
 
 ## 2. Element
 
-**Device Element(DeviceElement)**는 작업기의 논리적 구성 단위입니다. 물리적 장치를 계층적으로 표현합니다.
+<strong>Device Element(DeviceElement)</strong>는 작업기의 논리적 구성 단위입니다. 물리적 장치를 계층적으로 표현합니다.
 
 ### Element Type
 
@@ -55,7 +55,7 @@ next: /study/isobus/20-tc-ddop
 | **Connector** | 연결 포인트 | 히치 연결부 |
 | **Navigation Reference** | 위치 기준점 | GPS 안테나 기준 작업 위치 오프셋 |
 
-각 Element는 **Element Number**로 식별됩니다. 예를 들어, Section 1은 Element Number 1, Section 2는 Element Number 2로 구분됩니다.
+각 Element는 <strong>Element Number</strong>로 식별됩니다. 예를 들어, Section 1은 Element Number 1, Section 2는 Element Number 2로 구분됩니다.
 
 ```mermaid
 graph TD

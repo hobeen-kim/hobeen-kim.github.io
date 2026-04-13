@@ -62,7 +62,57 @@ graph TD
     end
 ```
 
-트랙터와 작업기가 모두 ISOBUS 인증을 받았다면, 제조사에 관계없이 조합이 가능한다. 농민은 최적의 장비를 자유롭게 선택할 수 있다.
+트랙터와 작업기가 모두 ISOBUS 인증을 받았다면, 제조사에 관계없이 조합이 가능하다. 농민은 최적의 장비를 자유롭게 선택할 수 있다.
+
+### "프로토콜 준수"란 구체적으로 무엇인가
+
+"ISOBUS를 준수한다"는 것은 ISO 11783에 정의된 메시지 형식, 절차, 전기 규격을 그대로 따른다는 뜻이다. 세 가지 대표 사례를 보자.
+
+**사례 1 — 트랙터 속도 브로드캐스트**
+
+TECU(Tractor ECU)는 PGN 65097(Ground-Based Speed and Distance)을 100ms마다 브로드캐스트해야 한다. 데이터 형식도 정해져 있다.
+
+```
+CAN ID: 0x0CFE610E  (Priority=3, PGN=65097, SA=0x0E)
+Data:   A0 0F 00 00 FF FF FF FF
+        ↑
+  Byte 1-2 = 0x0FA0 = 4000 → 4000 × 0.001 m/s = 4.0 m/s (약 14.4 km/h)
+```
+
+John Deere 트랙터든 Fendt 트랙터든 같은 PGN, 같은 바이트 위치, 같은 분해능(0.001 m/s)으로 전송한다. 덕분에 어떤 제조사의 작업기를 연결해도 속도를 정확히 읽을 수 있다. 만약 제조사가 자체 PGN을 쓰거나 분해능을 바꾸면, 다른 제조사 장비가 속도를 잘못 읽거나 아예 못 읽는다.
+
+**사례 2 — VT 화면 표시**
+
+작업기 ECU가 트랙터 디스플레이에 UI를 표시하려면 Object Pool을 VT로 전송해야 한다. 이 절차도 표준으로 정해져 있다.
+
+```mermaid
+sequenceDiagram
+    participant ECU as 작업기 ECU
+    participant VT as VT (트랙터 디스플레이)
+
+    ECU->>VT: Address Claim (PGN 60928)
+    VT-->>ECU: VT Status (버전, 메모리 정보)
+    ECU->>VT: Object Pool 전송 (ETP)
+    VT-->>ECU: End of Object Pool 응답
+    VT->>VT: 화면 렌더링
+    Note over ECU,VT: 어떤 제조사 조합이든 이 절차를 따르면 화면이 표시된다
+```
+
+Kverneland 파종기를 John Deere 트랙터에 꽂아도, Fendt 트랙터에 꽂아도 같은 절차로 화면이 표시된다. 반면 자체 프로토콜을 사용하면 같은 제조사 디스플레이에서만 동작한다.
+
+**사례 3 — TC 가변 살포 제어**
+
+TC(Task Controller)가 처방 맵 기반으로 구획별 살포량을 조절할 때도, DDOP와 Process Data 형식이 표준이다. 어떤 제조사의 TC 소프트웨어에서 만든 처방 맵이든, ISOXML 형식을 따르면 어떤 살포기에서든 가변 살포가 동작한다.
+
+**준수 vs 미준수 비교**
+
+| 영역 | 준수 | 미준수 |
+|------|------|--------|
+| 메시지 형식 | 정해진 PGN/SPN/분해능으로 전송 | 자체 형식 사용 |
+| 주소 관리 | Address Claim 절차 수행 | 하드코딩된 주소 사용 |
+| VT 화면 | Object Pool로 UI 전송 | 전용 디스플레이에만 표시 |
+| TC 제어 | DDOP + Process Data 표준 명령 | 자체 제어 프로토콜 |
+| 물리 계층 | 250 kbps, TBC 9핀 커넥터 | 다른 속도, 다른 커넥터 |
 
 ---
 

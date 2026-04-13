@@ -282,4 +282,4 @@ flowchart TD
 
 ## 다음 챕터
 
-[CAN FD](/study/isobus/07-can-fd)으로 이어진다.
+- 다음 : [CAN FD](/study/isobus/07-can-fd)

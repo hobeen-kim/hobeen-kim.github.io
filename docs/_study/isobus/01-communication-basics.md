@@ -197,4 +197,4 @@ graph LR
 
 ## 다음 챕터
 
-[CAN 통신 입문](/study/isobus/02-can-intro)으로 이어집니다.
+- 다음 : [CAN 통신 입문](/study/isobus/02-can-intro)

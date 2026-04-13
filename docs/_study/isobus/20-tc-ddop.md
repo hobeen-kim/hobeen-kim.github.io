@@ -267,4 +267,4 @@ graph TD
 
 ## 다음 챕터
 
-[ISOBUS 기타 기능](/study/isobus/21-isobus-misc)으로 이어진다.
+- 다음 : [ISOBUS 기타 기능](/study/isobus/21-isobus-misc)

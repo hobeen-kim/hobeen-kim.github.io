@@ -205,4 +205,4 @@ sequenceDiagram
 
 ## 다음 챕터
 
-[TC DDOP](/study/isobus/20-tc-ddop)으로 이어진다.
+- 다음 : [TC DDOP](/study/isobus/20-tc-ddop)

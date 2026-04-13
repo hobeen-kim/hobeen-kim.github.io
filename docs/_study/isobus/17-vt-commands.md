@@ -231,4 +231,4 @@ sequenceDiagram
 
 ## 다음 챕터
 
-[Task Controller (TC) 기초](/study/isobus/18-tc-basics)로 이어집니다.
+- 다음 : [Task Controller (TC) 기초](/study/isobus/18-tc-basics)

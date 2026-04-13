@@ -402,4 +402,4 @@ PGN      : 65262 (0x0FEEE)
 
 ## 다음 챕터
 
-[J1939 주소 체계](/study/isobus/10-j1939-address)으로 이어진다.
+- 다음 : [J1939 주소 체계](/study/isobus/10-j1939-address)

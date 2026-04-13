@@ -288,4 +288,4 @@ flowchart LR
 
 ## 다음 챕터
 
-[CAN 중재와 우선순위](/study/isobus/05-can-arbitration)으로 이어진다.
+- 다음 : [CAN 중재와 우선순위](/study/isobus/05-can-arbitration)

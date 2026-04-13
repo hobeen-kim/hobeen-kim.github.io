@@ -238,4 +238,4 @@ Priority 7 (ID 앞자리 111): 정보성 메시지, 로그
 
 ## 다음 챕터
 
-[CAN 에러 처리](/study/isobus/06-can-error)으로 이어진다.
+- 다음 : [CAN 에러 처리](/study/isobus/06-can-error)

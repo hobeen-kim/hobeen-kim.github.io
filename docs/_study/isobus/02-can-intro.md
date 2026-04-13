@@ -188,4 +188,4 @@ CAN은 5가지 에러 검출 메커니즘을 내장한다.
 
 ## 다음 챕터
 
-[CAN 물리 계층](/study/isobus/03-can-physical)으로 이어집니다.
+- 다음 : [CAN 물리 계층](/study/isobus/03-can-physical)

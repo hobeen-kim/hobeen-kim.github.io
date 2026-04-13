@@ -192,4 +192,4 @@ sequenceDiagram
 
 ## 다음 챕터
 
-[VT 오브젝트 풀](/study/isobus/16-vt-object-pool)로 이어집니다.
+- 다음 : [VT 오브젝트 풀](/study/isobus/16-vt-object-pool)

@@ -225,4 +225,4 @@ CAN FD 채택 동향
 
 ## 다음 챕터
 
-[SAE J1939 입문](/study/isobus/08-j1939-intro)으로 이어진다.
+- 다음 : [SAE J1939 입문](/study/isobus/08-j1939-intro)

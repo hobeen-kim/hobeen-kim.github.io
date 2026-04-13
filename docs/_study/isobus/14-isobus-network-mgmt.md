@@ -204,4 +204,4 @@ gantt
 
 ## 다음 챕터
 
-[Virtual Terminal 기초](/study/isobus/15-vt-basics)으로 이어진다.
+- 다음 : [Virtual Terminal 기초](/study/isobus/15-vt-basics)

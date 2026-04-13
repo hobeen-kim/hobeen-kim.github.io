@@ -288,4 +288,4 @@ if __name__ == "__main__":
 
 ## 다음 챕터
 
-[종합 실습](/study/isobus/22-practice)으로 이어진다.
+- 다음 : [종합 실습](/study/isobus/22-practice)

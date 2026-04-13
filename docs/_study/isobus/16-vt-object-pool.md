@@ -290,4 +290,4 @@ ECU → VT: Change Numeric Value
 
 ## 다음 챕터
 
-[VT 명령어와 상호작용](/study/isobus/17-vt-commands)으로 이어집니다.
+- 다음 : [VT 명령어와 상호작용](/study/isobus/17-vt-commands)

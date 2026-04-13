@@ -4,7 +4,7 @@ description: "8바이트를 초과하는 데이터를 전송하기 위한 J1939 
 date: 2026-04-13
 tags: [ISOBUS, J1939, CAN, Transport Protocol, BAM, CMDT, ETP]
 prev: /study/isobus/10-j1939-address
-next: /study/isobus/12-isobus-intro
+next: /study/isobus/12-isobus-overview
 ---
 
 # J1939 Transport Protocol
@@ -315,4 +315,4 @@ sequenceDiagram
 
 ## 다음 챕터
 
-[ISOBUS 소개](/study/isobus/12-isobus-intro)으로 이어집니다.
+- 다음 : [ISOBUS 개요](/study/isobus/12-isobus-overview)

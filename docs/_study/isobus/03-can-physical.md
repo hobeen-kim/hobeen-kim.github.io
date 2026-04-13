@@ -429,4 +429,4 @@ void on_can_receive(CAN_Message *msg) {
 
 ## 다음 챕터
 
-[CAN 데이터 프레임](/study/isobus/04-can-data-frame)으로 이어집니다.
+- 다음 : [CAN 데이터 프레임](/study/isobus/04-can-data-frame)

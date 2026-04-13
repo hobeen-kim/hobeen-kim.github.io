@@ -3,7 +3,7 @@ export const nodes = [
   { id: 'study-root', label: '공부', size: 44, status: 'active', link: null },
 
   // === 스마트농업 브랜치 ===
-  { id: 'smart-agriculture', label: '스마트농업', size: 36, status: 'active', link: null },
+  { id: 'smart-agriculture', label: '스마트농업', size: 36, status: 'active', link: '/study/smart-agriculture/' },
   { id: 'isobus', label: 'ISOBUS', size: 28, status: 'active', link: '/study/isobus/' },
   { id: 'can-j1939', label: 'CAN / J1939', size: 22, status: 'planned', link: null },
   { id: 'precision-ag', label: '정밀농업', size: 26, status: 'planned', link: null },

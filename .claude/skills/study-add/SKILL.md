@@ -116,6 +116,7 @@ tags: [관련태그]
 #### Mermaid 다이어그램 규칙
 - 각 챕터에 최소 2개 이상의 Mermaid 다이어그램 포함
 - `<br/>` 사용 금지 — Vue 컴파일 에러 발생. `<br>` 사용
+- `**bold**한글` 패턴 금지 — CommonMark에서 닫는 `**` 뒤에 한글이 바로 오면 bold가 적용되지 않음. `<strong>bold</strong>한글` 사용
 - 다이어그램 유형: flowchart, sequenceDiagram, stateDiagram, packet-beta, mindmap, gantt 등
 - 코드 블록으로 감쌈: ` ```mermaid ... ``` `
 

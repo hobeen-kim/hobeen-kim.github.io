@@ -2,4 +2,6 @@
 sidebar: false
 ---
 
-<StudyList/>
+<ClientOnly>
+  <KnowledgeGraph/>
+</ClientOnly>

@@ -4,6 +4,7 @@ import CustomLayout from "./theme/layouts/CustomLayout.vue";
 import LogList from "./components/LogList.vue";
 import BookList from "./components/BookList.vue";
 import StudyList from "./components/StudyList.vue";
+import KnowledgeGraph from "./components/KnowledgeGraph.vue";
 import Footer from "./theme/Footer.vue";
 import Header from "./theme/Header.vue";
 import Home from "./components/home/Home.vue";
@@ -16,6 +17,7 @@ export default defineClientConfig({
         app.component('LogList', LogList)
         app.component('BookList', BookList)
         app.component('StudyList', StudyList)
+        app.component('KnowledgeGraph', KnowledgeGraph)
         app.component('Footer', Footer)
         app.component('Header', Header)
         app.component('ResumeCover', ResumeCover)

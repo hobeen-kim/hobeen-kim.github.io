@@ -63,6 +63,7 @@ triggers:
   - `packet-beta` — 프레임/패킷 필드 구조
   - `stateDiagram-v2` — 상태 천이 (`\n` 대신 `<br>` 사용)
   - `timeline` — 기술 발전사, 시간순 이벤트 (`<br>` 미지원, 쉼표로 구분)
+  - `quadrantChart` — 2축 비교 (`한글/특수문자 라벨 미지원`, 영문만 사용)
   - `xychart-beta` — 수치 비교 차트
   - `pie` — 비율/분포
   - `mindmap` — 개념 지도

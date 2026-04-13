@@ -127,7 +127,7 @@ tags: [관련태그]
 
 #### Mermaid 다이어그램 규칙
 - 각 챕터에 최소 2개 이상의 Mermaid 다이어그램 포함
-- 활용 가능한 유형: flowchart, sequenceDiagram, packet-beta, stateDiagram-v2, timeline(`<br>` 미지원, 쉼표로 구분), xychart-beta, pie, mindmap, gantt
+- 활용 가능한 유형: flowchart, sequenceDiagram, packet-beta, stateDiagram-v2, timeline(`<br>` 미지원, 쉼표로 구분), xychart-beta, pie, mindmap, gantt, quadrantChart(한글/특수문자 라벨 미지원, 영문만 사용)
 - `stateDiagram-v2`에서 줄바꿈은 `\n` 대신 `<br>` 사용
 - `<br/>` 사용 금지 — Vue 컴파일 에러 발생. `<br>` 사용
 - `**bold**한글` 패턴 금지 — CommonMark에서 닫는 `**` 뒤에 한글이 바로 오면 bold가 적용되지 않음. `<strong>bold</strong>한글` 사용

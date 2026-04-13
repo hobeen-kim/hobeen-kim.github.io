@@ -1,6 +1,6 @@
 ---
 title: "TC 프로세스 데이터"
-description: "Task Controller의 핵심 데이터 단위인 DDI, Element, 그리고 Measurement/Setpoint의 교환 과정을 이해합니다."
+description: "Task Controller의 핵심 데이터 단위인 DDI, Element, 그리고 Measurement/Setpoint의 교환 과정을 이해한다."
 date: 2026-04-13
 tags: [ISOBUS, ISO11783, TaskController, TC, DDI, ProcessData, Measurement, Setpoint]
 prev: /study/isobus/18-tc-basics
@@ -20,11 +20,11 @@ next: /study/isobus/20-tc-ddop
 
 ## 1. DDI (Data Dictionary Identifier)
 
-<strong>DDI</strong>는 TC 프로세스 데이터 항목을 구분하는 표준화된 16비트 번호입니다.
+<strong>DDI</strong>는 TC 프로세스 데이터 항목을 구분하는 표준화된 16비트 번호이다.
 
-> DDI는 "어떤 종류의 데이터인가"를 나타냅니다. 살포량인지, 속도인지, 면적인지를 숫자로 표현합니다.
+> DDI는 "어떤 종류의 데이터인가"를 나타냅니다. 살포량인지, 속도인지, 면적인지를 숫자로 표현한다.
 
-모든 TC 메시지는 DDI를 포함하여 어떤 데이터를 주고받는지 명시합니다. 주요 DDI는 다음과 같습니다.
+모든 TC 메시지는 DDI를 포함하여 어떤 데이터를 주고받는지 명시한다. 주요 DDI는 다음과 같다.
 
 | DDI | 이름 | 방향 | 설명 |
 |-----|------|------|------|
@@ -36,13 +36,13 @@ next: /study/isobus/20-tc-ddop
 | **74** | Actual Mass Per Area | 작업기 → TC | 실제 살포 질량 |
 | **141** | Section Control State | TC → 작업기 | 구획 ON/OFF 상태 |
 
-전체 DDI 목록은 [isobus.net](https://www.isobus.net/isobus/dDI)에서 확인할 수 있습니다. 현재 약 600개 이상의 DDI가 정의되어 있습니다.
+전체 DDI 목록은 [isobus.net](https://www.isobus.net/isobus/dDI)에서 확인할 수 있다. 현재 약 600개 이상의 DDI가 정의되어 있다.
 
 ---
 
 ## 2. Element
 
-<strong>Device Element(DeviceElement)</strong>는 작업기의 논리적 구성 단위입니다. 물리적 장치를 계층적으로 표현합니다.
+<strong>Device Element(DeviceElement)</strong>는 작업기의 논리적 구성 단위이다. 물리적 장치를 계층적으로 표현한다.
 
 ### Element Type
 
@@ -55,7 +55,7 @@ next: /study/isobus/20-tc-ddop
 | **Connector** | 연결 포인트 | 히치 연결부 |
 | **Navigation Reference** | 위치 기준점 | GPS 안테나 기준 작업 위치 오프셋 |
 
-각 Element는 <strong>Element Number</strong>로 식별됩니다. 예를 들어, Section 1은 Element Number 1, Section 2는 Element Number 2로 구분됩니다.
+각 Element는 <strong>Element Number</strong>로 식별된다. 예를 들어, Section 1은 Element Number 1, Section 2는 Element Number 2로 구분된다.
 
 ```mermaid
 graph TD
@@ -77,7 +77,7 @@ graph TD
 
 ## 3. Value Command / Value Request
 
-TC-Server와 TC-Client는 **Process Data** 메시지(PGN: 0x00CB00)를 통해 값을 주고받습니다.
+TC-Server와 TC-Client는 **Process Data** 메시지(PGN: 0x00CB00)를 통해 값을 주고받다.
 
 ### 메시지 방향
 
@@ -107,7 +107,7 @@ sequenceDiagram
 
 ### PGN 0x00CB00 메시지 구조
 
-Process Data 메시지의 데이터 필드는 다음과 같이 구성됩니다.
+Process Data 메시지의 데이터 필드는 다음과 같이 구성된다.
 
 | 바이트 | 필드 | 설명 |
 |--------|------|------|
@@ -120,7 +120,7 @@ Process Data 메시지의 데이터 필드는 다음과 같이 구성됩니다.
 
 ## 4. Measurement / Setpoint
 
-TC 프로세스 데이터는 크게 두 가지로 구분됩니다.
+TC 프로세스 데이터는 크게 두 가지로 구분된다.
 
 | 구분 | 생성 주체 | 방향 | 의미 |
 |------|-----------|------|------|
@@ -141,7 +141,7 @@ graph LR
 
 **제어 오차(Control Error)** = Setpoint − Measurement
 
-작업기의 제어 시스템은 이 오차를 최소화하도록 밸브 개도량, 펌프 속도 등을 조절합니다. TC는 오차가 허용 범위를 벗어나면 알람을 발생시킬 수 있습니다.
+작업기의 제어 시스템은 이 오차를 최소화하도록 밸브 개도량, 펌프 속도 등을 조절한다. TC는 오차가 허용 범위를 벗어나면 알람을 발생시킬 수 있다.
 
 ---
 
@@ -149,7 +149,7 @@ graph LR
 
 ### 시나리오: GPS 기반 살포량 제어
 
-트랙터가 밭을 주행하면서 위치에 따라 비료 살포량을 자동으로 조절하는 시나리오입니다.
+트랙터가 밭을 주행하면서 위치에 따라 비료 살포량을 자동으로 조절하는 시나리오이다.
 
 **조건**
 - 처방 맵: 구역 A = 200 L/ha, 구역 B = 150 L/ha
@@ -190,7 +190,7 @@ sequenceDiagram
     CLIENT -->> TC: Process Data Value<br>[DDI=2, Element=3, Value=151]
 ```
 
-이 시퀀스는 TC 프로세스 데이터의 전체 흐름을 보여줍니다. GPS 위치 변화에 따라 처방 맵의 목표값이 바뀌고, TC는 그 값을 즉시 TC-Client에 전달합니다.
+이 시퀀스는 TC 프로세스 데이터의 전체 흐름을 보여줍니다. GPS 위치 변화에 따라 처방 맵의 목표값이 바뀌고, TC는 그 값을 즉시 TC-Client에 전달한다.
 
 ---
 

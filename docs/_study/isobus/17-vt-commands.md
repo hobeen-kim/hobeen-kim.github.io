@@ -1,6 +1,6 @@
 ---
 title: "VT 명령어와 상호작용"
-description: "VT와 작업기 ECU 사이에서 교환되는 명령어의 종류, 매크로를 이용한 자동화, 그리고 전체 상호작용 흐름을 학습합니다."
+description: "VT와 작업기 ECU 사이에서 교환되는 명령어의 종류, 매크로를 이용한 자동화, 그리고 전체 상호작용 흐름을 학습한다."
 date: 2026-04-13
 tags: [ISOBUS, VT, Commands, PGN, Macro, ISO-11783-6]
 prev: /study/isobus/16-vt-object-pool
@@ -19,9 +19,9 @@ next: /study/isobus/18-tc-basics
 
 ## 1. VT → ECU 명령어
 
-VT Server가 사용자 입력이나 화면 상태 변화를 작업기 ECU(VT Client)에게 알리는 메시지입니다. ECU는 이 메시지를 수신해 작업 제어 로직을 실행합니다.
+VT Server가 사용자 입력이나 화면 상태 변화를 작업기 ECU(VT Client)에게 알리는 메시지이다. ECU는 이 메시지를 수신해 작업 제어 로직을 실행한다.
 
-모든 VT→ECU 메시지는 **Peer-to-Peer** 방식으로 전송되며, PGN <strong>0xE600 (EF00h)</strong>을 기반으로 합니다.
+모든 VT→ECU 메시지는 **Peer-to-Peer** 방식으로 전송되며, PGN <strong>0xE600 (EF00h)</strong>을 기반으로 한다.
 
 | 명령어 이름 | PGN | 트리거 조건 | 주요 데이터 |
 |-------------|-----|-------------|-------------|
@@ -48,9 +48,9 @@ Button Activation과 Soft Key Activation의 `활성화 코드`는 다음 값을 
 
 ## 2. ECU → VT 명령어
 
-작업기 ECU(VT Client)가 VT Server로 전송하는 명령어입니다. 센서 데이터 갱신, 화면 전환, 오브젝트 속성 변경 등에 사용됩니다.
+작업기 ECU(VT Client)가 VT Server로 전송하는 명령어이다. 센서 데이터 갱신, 화면 전환, 오브젝트 속성 변경 등에 사용된다.
 
-ECU → VT 명령어도 **PGN 0xE600 (EF00h)** Peer-to-Peer 메시지로 전송됩니다.
+ECU → VT 명령어도 **PGN 0xE600 (EF00h)** Peer-to-Peer 메시지로 전송된다.
 
 ### 값 갱신 명령어
 
@@ -98,7 +98,7 @@ Byte 5-8: 새로운 값   ← 32bit unsigned integer (Little Endian)
 
 ## 3. 매크로 (Macro)
 
-<strong>매크로(Macro)</strong>는 오브젝트 풀에 사전 정의된 **이벤트 기반 자동 동작** 목록입니다. 특정 이벤트가 발생하면 VT가 자동으로 매크로를 실행합니다. ECU에 메시지를 보내지 않고도 VT 레벨에서 화면 변화를 처리할 수 있어, ECU 부하를 줄이고 반응 속도를 높일 수 있습니다.
+<strong>매크로(Macro)</strong>는 오브젝트 풀에 사전 정의된 **이벤트 기반 자동 동작** 목록이다. 특정 이벤트가 발생하면 VT가 자동으로 매크로를 실행한다. ECU에 메시지를 보내지 않고도 VT 레벨에서 화면 변화를 처리할 수 있어, ECU 부하를 줄이고 반응 속도를 높일 수 있다.
 
 ### 이벤트 종류
 
@@ -120,7 +120,7 @@ Byte 5-8: 새로운 값   ← 32bit unsigned integer (Little Endian)
 
 ### 매크로 바인딩 XML 예시
 
-아래는 "설정 화면" 버튼을 누를 때 Active Mask를 ID 2(설정 화면)로 변경하는 매크로입니다.
+아래는 "설정 화면" 버튼을 누를 때 Active Mask를 ID 2(설정 화면)로 변경하는 매크로이다.
 
 ```xml
 <!-- 매크로 정의: Active Mask를 ID 2로 변경 -->
@@ -140,7 +140,7 @@ Byte 5-8: 새로운 값   ← 32bit unsigned integer (Little Endian)
 </button>
 ```
 
-매크로 내에서는 여러 명령을 순차적으로 나열할 수 있습니다.
+매크로 내에서는 여러 명령을 순차적으로 나열할 수 있다.
 
 ```xml
 <macro id="51">
@@ -156,7 +156,7 @@ Byte 5-8: 새로운 값   ← 32bit unsigned integer (Little Endian)
 
 ## 4. VT 상호작용 시퀀스
 
-사용자가 VT의 "시작" 버튼을 클릭했을 때, 살포 시스템이 시작되고 화면의 상태값이 갱신되는 전체 흐름입니다.
+사용자가 VT의 "시작" 버튼을 클릭했을 때, 살포 시스템이 시작되고 화면의 상태값이 갱신되는 전체 흐름이다.
 
 ```mermaid
 sequenceDiagram
@@ -222,11 +222,11 @@ sequenceDiagram
 ---
 
 ::: tip 핵심 정리
-- VT → ECU 명령어는 사용자 입력 이벤트(버튼, 소프트키, 터치, ESC 등)를 ECU에 전달합니다.
-- ECU → VT 명령어는 화면 값 갱신(Change Numeric/String Value), 화면 전환(Change Active Mask), 속성 변경에 사용됩니다.
-- 모든 명령어는 PGN EF00h(Peer-to-Peer)로 전송됩니다.
-- 매크로는 오브젝트 풀에 사전 정의된 이벤트 기반 자동 동작으로, ECU 개입 없이 VT 레벨에서 실행됩니다.
-- 버튼 클릭 → Button Activation → ECU 처리 → Change Numeric Value → 화면 갱신이 기본 상호작용 패턴입니다.
+- VT → ECU 명령어는 사용자 입력 이벤트(버튼, 소프트키, 터치, ESC 등)를 ECU에 전달한다.
+- ECU → VT 명령어는 화면 값 갱신(Change Numeric/String Value), 화면 전환(Change Active Mask), 속성 변경에 사용된다.
+- 모든 명령어는 PGN EF00h(Peer-to-Peer)로 전송된다.
+- 매크로는 오브젝트 풀에 사전 정의된 이벤트 기반 자동 동작으로, ECU 개입 없이 VT 레벨에서 실행된다.
+- 버튼 클릭 → Button Activation → ECU 처리 → Change Numeric Value → 화면 갱신이 기본 상호작용 패턴이다.
 :::
 
 ## 다음 챕터

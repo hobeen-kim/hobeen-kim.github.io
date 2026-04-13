@@ -1,6 +1,6 @@
 ---
 title: "종합 실습"
-description: "실제 ISOBUS CAN 로그 분석, PGN 디코딩, VT 오브젝트 풀 구성, TC 처방 맵 시나리오 시뮬레이션을 통해 전체 학습 내용을 통합합니다."
+description: "실제 ISOBUS CAN 로그 분석, PGN 디코딩, VT 오브젝트 풀 구성, TC 처방 맵 시나리오 시뮬레이션을 통해 전체 학습 내용을 통합한다."
 date: 2026-04-13
 tags: [ISOBUS, CAN, PGN, VirtualTerminal, TaskController, Python]
 prev: /study/isobus/21-isobus-misc
@@ -21,8 +21,8 @@ next: /study/isobus/23-summary
 
 ### 1.1 캡처 예시 데이터
 
-아래는 실제 ISOBUS 트래픽에서 캡처한 예시 로그입니다.
-형식은 `CAN_ID#DATA` (socketcan candump 포맷)입니다.
+아래는 실제 ISOBUS 트래픽에서 캡처한 예시 로그이다.
+형식은 `CAN_ID#DATA` (socketcan candump 포맷)이다.
 
 ```
 0CF004FE#FF3C320000FFFF00
@@ -39,7 +39,7 @@ next: /study/isobus/23-summary
 18FEF026#FFB4032AFC000000
 ```
 
-각 메시지를 분석합니다.
+각 메시지를 분석한다.
 
 | # | CAN ID | PGN | SA | DA | 분류 |
 |---|--------|-----|----|----|------|
@@ -231,7 +231,7 @@ if __name__ == "__main__":
 
 ### 3.1 화면 구성 개요
 
-아래 VT 오브젝트 풀은 다음 두 화면으로 구성됩니다.
+아래 VT 오브젝트 풀은 다음 두 화면으로 구성된다.
 
 - **메인 화면**: 엔진 RPM, 차속, 작업 상태 표시
 - **설정 화면**: 살포량 목표값 입력

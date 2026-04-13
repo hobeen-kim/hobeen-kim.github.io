@@ -1,6 +1,6 @@
 ---
 title: "ISOBUS 네트워크 관리"
-description: "ISOBUS의 주소 클레임 방식, Working Set 개념, 진단 메시지(DM), 네트워크 초기화 타임라인을 이해합니다."
+description: "ISOBUS의 주소 클레임 방식, Working Set 개념, 진단 메시지(DM), 네트워크 초기화 타임라인을 이해한다."
 date: 2026-04-13
 tags: [ISOBUS, ISO11783, AddressClaim, WorkingSet, Diagnostics, DM1]
 prev: /study/isobus/13-isobus-architecture
@@ -19,11 +19,11 @@ next: null
 
 ## 1. 주소 클레임 (ISOBUS 방식)
 
-ISOBUS의 주소 클레임은 J1939의 방식을 기반으로 하되, 농업 기계에 맞게 확장된 규칙을 적용합니다.
+ISOBUS의 주소 클레임은 J1939의 방식을 기반으로 하되, 농업 기계에 맞게 확장된 규칙을 적용한다.
 
 ### CF (Control Function)
 
-ISOBUS에서는 네트워크에 참여하는 모든 장치를 <strong>CF(Control Function)</strong>라고 부릅니다. 하나의 물리적 ECU가 여러 CF를 포함할 수도 있습니다. 각 CF는 독립적인 주소를 가집니다.
+ISOBUS에서는 네트워크에 참여하는 모든 장치를 <strong>CF(Control Function)</strong>라고 부릅니다. 하나의 물리적 ECU가 여러 CF를 포함할 수도 있다. 각 CF는 독립적인 주소를 가집니다.
 
 ### 주소 범위
 
@@ -35,7 +35,7 @@ ISOBUS에서는 네트워크에 참여하는 모든 장치를 <strong>CF(Control
 | 254 | Null Address (주소 미확정 상태) |
 | 255 | Global Address (브로드캐스트) |
 
-ISOBUS 작업기 ECU는 대부분 **128~247** 범위의 Self-Configurable 주소를 사용합니다. 이 범위의 주소는 여러 장치가 동시에 원할 경우 NAME 값의 우선순위로 자동 협상됩니다.
+ISOBUS 작업기 ECU는 대부분 **128~247** 범위의 Self-Configurable 주소를 사용한다. 이 범위의 주소는 여러 장치가 동시에 원할 경우 NAME 값의 우선순위로 자동 협상된다.
 
 ### 주소 클레임 흐름
 
@@ -64,7 +64,7 @@ sequenceDiagram
 
 ## 2. Working Set
 
-작업기(Implement)는 내부에 여러 ECU를 포함할 수 있습니다. 예를 들어 파종기(Seeder)는 메인 제어 ECU, 섹션 밸브 ECU, 속도 센서 ECU를 각각 가질 수 있습니다. 이 ECU들을 하나의 논리적 단위로 묶는 것이 <strong>Working Set</strong>입니다.
+작업기(Implement)는 내부에 여러 ECU를 포함할 수 있다. 예를 들어 파종기(Seeder)는 메인 제어 ECU, 섹션 밸브 ECU, 속도 센서 ECU를 각각 가질 수 있다. 이 ECU들을 하나의 논리적 단위로 묶는 것이 <strong>Working Set</strong>이다.
 
 ### 마스터-멤버 관계
 
@@ -90,21 +90,21 @@ graph TD
 
 ### Working Set 선언 메시지 (PGN 65070)
 
-WSM은 네트워크에 참여한 후 <strong>PGN 65070 (Working Set Master)</strong>를 브로드캐스트하여 자신이 마스터임을 선언합니다. 이 메시지에는 Working Set에 속한 멤버 수가 포함됩니다.
+WSM은 네트워크에 참여한 후 <strong>PGN 65070 (Working Set Master)</strong>를 브로드캐스트하여 자신이 마스터임을 선언한다. 이 메시지에는 Working Set에 속한 멤버 수가 포함된다.
 
 멤버 ECU들은 <strong>PGN 65075 (Working Set Member)</strong>를 전송하여 자신이 특정 마스터에 속함을 알립니다.
 
-VT와 TC는 이 메시지를 수신하여 작업기의 구조를 파악하고, WSM을 통해서만 작업기와 통신합니다.
+VT와 TC는 이 메시지를 수신하여 작업기의 구조를 파악하고, WSM을 통해서만 작업기와 통신한다.
 
 ---
 
 ## 3. 진단 메시지
 
-ISOBUS는 ISO 11783-12를 통해 표준화된 진단 메시지를 정의합니다. J1939의 진단 메시지 체계를 그대로 사용합니다.
+ISOBUS는 ISO 11783-12를 통해 표준화된 진단 메시지를 정의한다. J1939의 진단 메시지 체계를 그대로 사용한다.
 
 ### 고장 코드 구조: SPN + FMI
 
-모든 고장은 <strong>SPN(Suspect Parameter Number)</strong>과 <strong>FMI(Failure Mode Identifier)</strong>의 조합으로 식별합니다.
+모든 고장은 <strong>SPN(Suspect Parameter Number)</strong>과 <strong>FMI(Failure Mode Identifier)</strong>의 조합으로 식별한다.
 
 - **SPN**: 어떤 파라미터에 문제가 생겼는지 (예: SPN 100 = 엔진 오일 압력)
 - **FMI**: 어떤 종류의 고장인지 (예: FMI 1 = 데이터 낮음, FMI 3 = 전압 높음)
@@ -146,7 +146,7 @@ graph LR
 
 ## 4. 네트워크 관리 타임라인
 
-전원을 켠 순간부터 ISOBUS 통신이 완전히 확립될 때까지의 시간 흐름입니다.
+전원을 켠 순간부터 ISOBUS 통신이 완전히 확립될 때까지의 시간 흐름이다.
 
 ```mermaid
 gantt
@@ -190,7 +190,7 @@ gantt
 | ~1,500 ms | Object Pool 전송 완료, 화면 표시 시작 |
 | ~2,000 ms | TC Device Descriptor 완료, 전체 통신 확립 |
 
-> **실제 현장에서의 차이**: Object Pool 크기, ECU 수, 버스 부하에 따라 타임라인은 달라집니다. 복잡한 작업기의 경우 Object Pool 전송만 수 초가 걸릴 수 있습니다.
+> **실제 현장에서의 차이**: Object Pool 크기, ECU 수, 버스 부하에 따라 타임라인은 달라집니다. 복잡한 작업기의 경우 Object Pool 전송만 수 초가 걸릴 수 있다.
 
 ---
 

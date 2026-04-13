@@ -1,6 +1,6 @@
 ---
 title: "J1939 주소 체계"
-description: "J1939의 소스 주소(SA), 64비트 NAME, 주소 클레임 절차, Commanded Address를 이해합니다."
+description: "J1939의 소스 주소(SA), 64비트 NAME, 주소 클레임 절차, Commanded Address를 이해한다."
 date: 2026-04-13
 tags: [ISOBUS, J1939, CAN, 주소, NAME]
 prev: /study/isobus/09-j1939-message
@@ -19,7 +19,7 @@ next: /study/isobus/11-j1939-transport
 
 ## 1. 소스 주소 (SA)
 
-J1939 네트워크에서 모든 ECU는 <strong>소스 주소(Source Address, SA)</strong>를 가집니다. SA는 8비트 값으로, 29비트 CAN ID의 <strong>하위 8비트(비트 7~0)</strong>에 위치합니다.
+J1939 네트워크에서 모든 ECU는 <strong>소스 주소(Source Address, SA)</strong>를 가집니다. SA는 8비트 값으로, 29비트 CAN ID의 <strong>하위 8비트(비트 7~0)</strong>에 위치한다.
 
 ```
 ┌─────────────────────────────────────────────────┐
@@ -48,7 +48,7 @@ J1939 네트워크에서 모든 ECU는 <strong>소스 주소(Source Address, SA)
 | 128 (0x80) | Task Controller (ISOBUS) |
 | 130 (0x82) | Virtual Terminal (ISOBUS) |
 
-예약 주소는 <strong>우선권</strong>을 가지지 않습니다. 주소 클레임 경쟁에서 NAME 값이 작은 쪽이 이기며, 예약 주소라도 더 작은 NAME을 가진 장치가 있으면 양보해야 합니다.
+예약 주소는 <strong>우선권</strong>을 가지지 않다. 주소 클레임 경쟁에서 NAME 값이 작은 쪽이 이기며, 예약 주소라도 더 작은 NAME을 가진 장치가 있으면 양보해야 한다.
 
 ```mermaid
 graph LR
@@ -68,7 +68,7 @@ graph LR
 
 ## 2. NAME (64비트)
 
-<strong>NAME</strong>은 J1939 네트워크에서 ECU를 전 세계적으로 고유하게 식별하는 64비트 구조체입니다. 주소 클레임 시 충돌이 발생하면 NAME 값을 비교해 우선순위를 결정합니다. NAME 값이 **수치적으로 더 작은** 장치가 주소를 획득합니다.
+<strong>NAME</strong>은 J1939 네트워크에서 ECU를 전 세계적으로 고유하게 식별하는 64비트 구조체이다. 주소 클레임 시 충돌이 발생하면 NAME 값을 비교해 우선순위를 결정한다. NAME 값이 **수치적으로 더 작은** 장치가 주소를 획득한다.
 
 ### NAME 필드 구성
 
@@ -115,7 +115,7 @@ NAME = 0x0000000060000000
 
 ## 3. 주소 클레임 절차
 
-J1939 장치는 네트워크에 연결되면 <strong>Address Claimed 메시지(PGN 60928, 0xEE00)</strong>를 브로드캐스트하여 주소를 선점합니다. 같은 주소를 사용하려는 장치가 있으면 NAME 비교를 통해 충돌을 해결합니다.
+J1939 장치는 네트워크에 연결되면 <strong>Address Claimed 메시지(PGN 60928, 0xEE00)</strong>를 브로드캐스트하여 주소를 선점한다. 같은 주소를 사용하려는 장치가 있으면 NAME 비교를 통해 충돌을 해결한다.
 
 ```mermaid
 sequenceDiagram
@@ -164,7 +164,7 @@ sequenceDiagram
 
 ## 4. Commanded Address
 
-<strong>Commanded Address</strong>는 외부 장치가 특정 ECU에게 주소를 강제로 지정하는 메커니즘입니다. <strong>PGN 65240 (0xFED8)</strong>을 사용합니다.
+<strong>Commanded Address</strong>는 외부 장치가 특정 ECU에게 주소를 강제로 지정하는 메커니즘이다. <strong>PGN 65240 (0xFED8)</strong>을 사용한다.
 
 ### 메시지 구조
 
@@ -200,17 +200,17 @@ sequenceDiagram
 | 네트워크 재구성 | 시스템 통합 시 주소 충돌 사전 방지 |
 | 진단/유지보수 | 특정 SA로 장치를 강제 이동 |
 
-Commanded Address를 수신한 ECU는 반드시 <strong>Address Claimed 메시지로 응답</strong>해야 합니다. ECU가 새 주소를 클레임할 수 없는 경우 Cannot Claim을 전송합니다.
+Commanded Address를 수신한 ECU는 반드시 <strong>Address Claimed 메시지로 응답</strong>해야 한다. ECU가 새 주소를 클레임할 수 없는 경우 Cannot Claim을 전송한다.
 
 ---
 
 ::: tip 핵심 정리
-- SA는 8비트이며 0~253이 일반 사용 가능, 254=Null, 255=Global(브로드캐스트)입니다.
-- SA는 29비트 CAN ID의 하위 8비트에 위치합니다.
-- NAME은 64비트 구조체로 장치를 전 세계적으로 고유 식별하며, **값이 작을수록 우선순위가 높습니다.**
-- 주소 클레임(PGN 60928)은 전원 ON 후 발생하며, 충돌 시 NAME 비교로 승자를 결정합니다.
-- AAC=1인 장치는 충돌 패배 후 다른 주소로 자동 재클레임할 수 있습니다.
-- Commanded Address(PGN 65240)는 외부에서 ECU의 주소를 강제 지정하는 방법입니다.
+- SA는 8비트이며 0~253이 일반 사용 가능, 254=Null, 255=Global(브로드캐스트)이다.
+- SA는 29비트 CAN ID의 하위 8비트에 위치한다.
+- NAME은 64비트 구조체로 장치를 전 세계적으로 고유 식별하며, **값이 작을수록 우선순위가 높다.**
+- 주소 클레임(PGN 60928)은 전원 ON 후 발생하며, 충돌 시 NAME 비교로 승자를 결정한다.
+- AAC=1인 장치는 충돌 패배 후 다른 주소로 자동 재클레임할 수 있다.
+- Commanded Address(PGN 65240)는 외부에서 ECU의 주소를 강제 지정하는 방법이다.
 :::
 
 ## 다음 챕터

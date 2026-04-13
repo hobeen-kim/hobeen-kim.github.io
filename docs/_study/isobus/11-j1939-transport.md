@@ -1,6 +1,6 @@
 ---
 title: "J1939 Transport Protocol"
-description: "8바이트를 초과하는 데이터를 전송하기 위한 J1939 Transport Protocol(BAM, CMDT, ETP)을 이해합니다."
+description: "8바이트를 초과하는 데이터를 전송하기 위한 J1939 Transport Protocol(BAM, CMDT, ETP)을 이해한다."
 date: 2026-04-13
 tags: [ISOBUS, J1939, CAN, Transport Protocol, BAM, CMDT, ETP]
 prev: /study/isobus/10-j1939-address
@@ -20,7 +20,7 @@ next: /study/isobus/12-isobus-intro
 
 ## 1. 왜 Transport Protocol이 필요한가
 
-CAN 프레임의 데이터 필드는 <strong>최대 8바이트</strong>입니다. 단순한 센서 값이나 제어 신호는 8바이트 안에 담을 수 있지만, 다음과 같은 데이터는 그렇지 않습니다.
+CAN 프레임의 데이터 필드는 <strong>최대 8바이트</strong>이다. 단순한 센서 값이나 제어 신호는 8바이트 안에 담을 수 있지만, 다음과 같은 데이터는 그렇지 않다.
 
 | 데이터 유형 | 일반 크기 |
 |-------------|-----------|
@@ -29,7 +29,7 @@ CAN 프레임의 데이터 필드는 <strong>최대 8바이트</strong>입니다
 | 소프트웨어 업데이트 펌웨어 | 수 KB ~ 수 MB |
 | 제품 식별 정보(Product ID) | 수십 바이트 |
 
-이런 데이터는 여러 CAN 프레임으로 **분할(segmentation)<strong> 하여 순서대로 전송해야 합니다. 수신 측은 조각들을 모아 </strong>재조립(reassembly)** 합니다. 이 역할을 담당하는 것이 <strong>J1939 Transport Protocol(TP)</strong>입니다.
+이런 데이터는 여러 CAN 프레임으로 **분할(segmentation)<strong> 하여 순서대로 전송해야 한다. 수신 측은 조각들을 모아 </strong>재조립(reassembly)** 한다. 이 역할을 담당하는 것이 <strong>J1939 Transport Protocol(TP)</strong>이다.
 
 ```mermaid
 graph TD
@@ -45,7 +45,7 @@ graph TD
     R --> D["원본 데이터 복원"]
 ```
 
-TP는 두 가지 모드를 제공합니다.
+TP는 두 가지 모드를 제공한다.
 
 - **BAM (Broadcast Announce Message)**: 1:N 브로드캐스트 전송
 - **CMDT (Connection Mode Data Transfer)**: 1:1 연결 기반 전송 (흐름 제어 포함)
@@ -54,7 +54,7 @@ TP는 두 가지 모드를 제공합니다.
 
 ## 2. BAM (Broadcast Announce Message)
 
-BAM은 특정 수신자를 지정하지 않고 <strong>버스 전체에 브로드캐스트</strong>하는 방식입니다. 흐름 제어가 없으므로 수신자는 확인 응답(ACK)을 보내지 않습니다. 구현이 단순하지만 재전송이 불가능합니다.
+BAM은 특정 수신자를 지정하지 않고 <strong>버스 전체에 브로드캐스트</strong>하는 방식이다. 흐름 제어가 없으므로 수신자는 확인 응답(ACK)을 보내지 않다. 구현이 단순하지만 재전송이 불가능한다.
 
 ### BAM 흐름
 
@@ -98,7 +98,7 @@ Byte 6~8: 전송할 PGN (24bit, Little-Endian)
 
 ## 3. CMDT (Connection Mode Data Transfer)
 
-CMDT는 **특정 수신자와 1:1 연결을 맺고** 흐름 제어를 포함한 데이터 전송을 수행합니다. 수신자가 처리 가능한 패킷 수를 제어(CTS)할 수 있어 버퍼 오버플로를 방지합니다.
+CMDT는 **특정 수신자와 1:1 연결을 맺고** 흐름 제어를 포함한 데이터 전송을 수행한다. 수신자가 처리 가능한 패킷 수를 제어(CTS)할 수 있어 버퍼 오버플로를 방지한다.
 
 ### CMDT 흐름
 
@@ -149,11 +149,11 @@ sequenceDiagram
 
 ## 4. TP.CM과 TP.DT
 
-Transport Protocol은 <strong>두 가지 PGN</strong>으로 동작합니다.
+Transport Protocol은 <strong>두 가지 PGN</strong>으로 동작한다.
 
 ### TP.CM (PGN 60416, 0xEC00) — Connection Management
 
-연결 관리를 담당합니다. BAM 공지, RTS/CTS 흐름 제어, EndOfMsg, Abort 메시지가 모두 이 PGN을 사용하며, <strong>Control Byte(Byte 1)</strong>로 메시지 종류를 구분합니다.
+연결 관리를 담당한다. BAM 공지, RTS/CTS 흐름 제어, EndOfMsg, Abort 메시지가 모두 이 PGN을 사용하며, <strong>Control Byte(Byte 1)</strong>로 메시지 종류를 구분한다.
 
 ```
 TP.CM 메시지 (8 byte):
@@ -166,7 +166,7 @@ TP.CM 메시지 (8 byte):
 
 ### TP.DT (PGN 60160, 0xEB00) — Data Transfer
 
-실제 데이터를 7바이트씩 분할하여 전송합니다. **Byte 1은 시퀀스 번호(1~255)**, Byte 2~8이 페이로드입니다. 마지막 패킷의 남는 바이트는 0xFF로 채웁니다.
+실제 데이터를 7바이트씩 분할하여 전송한다. **Byte 1은 시퀀스 번호(1~255)**, Byte 2~8이 페이로드이다. 마지막 패킷의 남는 바이트는 0xFF로 채웁니다.
 
 ```
 TP.DT 메시지 (8 byte):
@@ -193,7 +193,7 @@ TP.DT Packet #3: [03] C1 C2 FF FF FF FF FF  ← 남은 자리 0xFF 패딩
 
 ## 5. ETP (Extended Transport Protocol)
 
-TP는 최대 **1785 바이트**(255 패킷 × 7 바이트)까지 전송할 수 있습니다. ISOBUS VT 오브젝트 풀처럼 더 큰 데이터를 전송하려면 <strong>ETP(Extended Transport Protocol)</strong>를 사용합니다.
+TP는 최대 **1785 바이트**(255 패킷 × 7 바이트)까지 전송할 수 있다. ISOBUS VT 오브젝트 풀처럼 더 큰 데이터를 전송하려면 <strong>ETP(Extended Transport Protocol)</strong>를 사용한다.
 
 ### ETP vs TP 비교
 
@@ -227,11 +227,11 @@ sequenceDiagram
     RX->>TX: ETP.CM_EndOfMsgACK (PGN 51712)
 ```
 
-ETP는 <strong>CMDT 전용</strong>입니다. BAM 방식의 ETP는 존재하지 않습니다. 이는 대용량 데이터 전송 시 흐름 제어 없이는 수신 버퍼 오버플로가 발생할 수 있기 때문입니다.
+ETP는 <strong>CMDT 전용</strong>이다. BAM 방식의 ETP는 존재하지 않다. 이는 대용량 데이터 전송 시 흐름 제어 없이는 수신 버퍼 오버플로가 발생할 수 있기 때문이다.
 
 ### ISOBUS VT 오브젝트 풀 전송
 
-VT(Virtual Terminal)에 화면을 표시하려면 오브젝트 풀을 전송해야 합니다. 오브젝트 풀은 수십 KB를 초과하는 경우가 많으므로 ETP를 통해 전송됩니다.
+VT(Virtual Terminal)에 화면을 표시하려면 오브젝트 풀을 전송해야 한다. 오브젝트 풀은 수십 KB를 초과하는 경우가 많으므로 ETP를 통해 전송된다.
 
 ```
 작업기 ECU → VT:
@@ -305,12 +305,12 @@ sequenceDiagram
 ---
 
 ::: tip 핵심 정리
-- CAN 프레임은 최대 8바이트이므로, 큰 데이터는 Transport Protocol로 분할 전송합니다.
+- CAN 프레임은 최대 8바이트이므로, 큰 데이터는 Transport Protocol로 분할 전송한다.
 - **BAM**: 브로드캐스트, 흐름 제어 없음. TP.CM_BAM(PGN 60416) → TP.DT(PGN 60160).
 - **CMDT**: 1:1 연결, CTS로 흐름 제어. RTS → CTS → TP.DT → EndOfMsgACK.
 - TP.DT는 패킷당 7바이트 페이로드, Byte 1이 시퀀스 번호(1~255), 남는 바이트는 0xFF 패딩.
 - **ETP**: 1785 바이트 초과 시 사용. PGN 51712(ETP.CM), 51456(ETP.DT). CMDT 전용.
-- 타임아웃 초과 시 Abort(Control Byte=0xFF)를 전송하여 연결을 종료합니다.
+- 타임아웃 초과 시 Abort(Control Byte=0xFF)를 전송하여 연결을 종료한다.
 :::
 
 ## 다음 챕터

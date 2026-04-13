@@ -1,6 +1,6 @@
 ---
 title: "TC 디바이스 디스크립션 (DDOP)"
-description: "작업기가 자신의 구조와 능력을 TC에 알리는 Device Description Object Pool(DDOP)의 구조, 오브젝트 타입, 전송 과정을 이해합니다."
+description: "작업기가 자신의 구조와 능력을 TC에 알리는 Device Description Object Pool(DDOP)의 구조, 오브젝트 타입, 전송 과정을 이해한다."
 date: 2026-04-13
 tags: [ISOBUS, ISO11783, TaskController, TC, DDOP, DeviceDescription, ObjectPool]
 prev: /study/isobus/19-tc-process-data
@@ -19,26 +19,26 @@ next: /study/isobus/21-tc-task
 
 ## 1. DDOP란
 
-<strong>DDOP(Device Description Object Pool)</strong>는 작업기가 자기 자신의 구조와 능력을 TC에게 알려주는 데이터 집합입니다.
+<strong>DDOP(Device Description Object Pool)</strong>는 작업기가 자기 자신의 구조와 능력을 TC에게 알려주는 데이터 집합이다.
 
-> DDOP는 "작업기의 자기소개서"입니다.
+> DDOP는 "작업기의 자기소개서"이다.
 
-TC-Server는 버스에 연결된 작업기에 대해 아무런 사전 정보가 없습니다. 작업기가 어떤 구획(Section)을 가졌는지, 어떤 DDI를 지원하는지, 작업폭이 얼마인지를 TC는 알 수 없습니다. DDOP는 이 정보를 구조화된 형식으로 TC에 전달하여, TC가 작업기를 이해하고 제어할 수 있게 합니다.
+TC-Server는 버스에 연결된 작업기에 대해 아무런 사전 정보가 없다. 작업기가 어떤 구획(Section)을 가졌는지, 어떤 DDI를 지원하는지, 작업폭이 얼마인지를 TC는 알 수 없다. DDOP는 이 정보를 구조화된 형식으로 TC에 전달하여, TC가 작업기를 이해하고 제어할 수 있게 한다.
 
 **DDOP가 없다면:**
 - TC는 작업기에 어떤 명령을 보낼 수 있는지 모릅니다.
-- 처방 맵의 살포량을 어느 DDI로 전달해야 하는지 알 수 없습니다.
-- Section Control을 위해 몇 개의 구획이 있는지 파악하지 못합니다.
+- 처방 맵의 살포량을 어느 DDI로 전달해야 하는지 알 수 없다.
+- Section Control을 위해 몇 개의 구획이 있는지 파악하지 못한다.
 
 **DDOP가 있다면:**
-- TC는 작업기의 구조를 파악하고 적절한 명령을 선택합니다.
-- 지원되지 않는 DDI로의 명령 시도를 사전에 방지합니다.
+- TC는 작업기의 구조를 파악하고 적절한 명령을 선택한다.
+- 지원되지 않는 DDI로의 명령 시도를 사전에 방지한다.
 
 ---
 
 ## 2. DDOP 오브젝트 구조
 
-DDOP는 5가지 타입의 오브젝트로 구성됩니다.
+DDOP는 5가지 타입의 오브젝트로 구성된다.
 
 | 오브젝트 타입 | 역할 | 주요 속성 |
 |--------------|------|-----------|
@@ -78,12 +78,12 @@ graph TD
 ### 오브젝트 타입 상세
 
 **Device**
-- DDOP 전체의 루트 오브젝트입니다.
-- `Structure Label`: DDOP 버전을 나타내는 식별자입니다. TC는 이 라벨을 보고 DDOP를 새로 받을지 캐시된 것을 쓸지 결정합니다.
+- DDOP 전체의 루트 오브젝트이다.
+- `Structure Label`: DDOP 버전을 나타내는 식별자이다. TC는 이 라벨을 보고 DDOP를 새로 받을지 캐시된 것을 쓸지 결정한다.
 - `Localization Label`: 언어·단위 설정
 
 **DeviceElement**
-- 작업기의 논리적 부품입니다. Element Type으로 역할을 정의합니다.
+- 작업기의 논리적 부품이다. Element Type으로 역할을 정의한다.
 - `Device`: 장치 전체를 대표하는 Element
 - `Function`: 살포 펌프, 파종 유닛 등 기능 단위
 - `Section`: 독립 제어 가능한 구획
@@ -91,16 +91,16 @@ graph TD
 - `Connector`: 히치 연결점
 
 **DeviceProcessData**
-- DeviceElement에 연결되며, 해당 Element에서 지원하는 DDI 항목을 정의합니다.
+- DeviceElement에 연결되며, 해당 Element에서 지원하는 DDI 항목을 정의한다.
 - `Property Flag`: Setpoint 지원 여부, Measurement 지원 여부, Default 값 설정 가능 여부
 - `Trigger Methods`: 값 보고 트리거 (시간 기반, 변화량 기반, 요청 기반)
 
 **DeviceProperty**
-- 변하지 않는 고정 속성입니다. 작업폭, 구획 폭 등이 여기에 해당합니다.
-- DeviceProcessData와 달리 TC가 값을 변경하지 않습니다.
+- 변하지 않는 고정 속성이다. 작업폭, 구획 폭 등이 여기에 해당한다.
+- DeviceProcessData와 달리 TC가 값을 변경하지 않다.
 
 **DeviceValuePresentation**
-- 숫자값을 사람이 읽기 쉬운 형식으로 변환하는 규칙입니다.
+- 숫자값을 사람이 읽기 쉬운 형식으로 변환하는 규칙이다.
 - 공식: `표시값 = (원시값 + Offset) × Scale`
 - 예: 원시값 20000, Offset=0, Scale=0.01 → 표시값 200.00 L/ha
 
@@ -108,7 +108,7 @@ graph TD
 
 ## 3. DDOP 전송 과정
 
-작업기가 ISOBUS 네트워크에 연결되면 다음 순서로 DDOP를 전송합니다.
+작업기가 ISOBUS 네트워크에 연결되면 다음 순서로 DDOP를 전송한다.
 
 ```mermaid
 sequenceDiagram
@@ -141,7 +141,7 @@ sequenceDiagram
 
 ### 전송 프로토콜
 
-DDOP 데이터는 일반적으로 수백 바이트~수 킬로바이트에 달하므로, 단일 CAN 프레임으로 전송할 수 없습니다. ISO 11783의 **TP(Transport Protocol)** 또는 <strong>ETP(Extended Transport Protocol)</strong>를 사용하여 멀티패킷으로 분할 전송합니다.
+DDOP 데이터는 일반적으로 수백 바이트~수 킬로바이트에 달하므로, 단일 CAN 프레임으로 전송할 수 없다. ISO 11783의 **TP(Transport Protocol)** 또는 <strong>ETP(Extended Transport Protocol)</strong>를 사용하여 멀티패킷으로 분할 전송한다.
 
 ---
 
@@ -247,7 +247,7 @@ graph TD
 |    |                         | Scale | 0.01 |
 |    |                         | Unit Symbol | L/ha |
 
-이 DDOP를 수신한 TC-Server는 다음을 파악합니다.
+이 DDOP를 수신한 TC-Server는 다음을 파악한다.
 
 - 이 작업기는 3개의 Section을 가진 살포기이다.
 - 각 Section에 DDI 1(Setpoint), DDI 2(Measurement), DDI 141(Section Control)을 지원한다.

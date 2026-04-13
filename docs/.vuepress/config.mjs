@@ -164,6 +164,53 @@ const theme = {
           ],
         },
       ],
+      '/study/smart-agriculture/': [
+        {
+          text: '스마트농업 개론',
+          collapsible: false,
+          children: [
+            { text: '소개', link: '/study/smart-agriculture/' },
+            { text: 'CH1. 스마트농업이란', link: '/study/smart-agriculture/01-what-is-smart-agriculture' },
+            { text: 'CH2. 기술 지도', link: '/study/smart-agriculture/02-technology-map' },
+          ],
+        },
+        {
+          text: '센싱과 데이터',
+          collapsible: false,
+          children: [
+            { text: 'CH3. 농업 IoT와 센서', link: '/study/smart-agriculture/03-iot-sensors' },
+            { text: 'CH4. 항공·위성 센싱', link: '/study/smart-agriculture/04-aerial-satellite' },
+            { text: 'CH5. 측위와 자동조향', link: '/study/smart-agriculture/05-gnss-autosteer' },
+          ],
+        },
+        {
+          text: '통신과 제어',
+          collapsible: false,
+          children: [
+            { text: 'CH6. 농기계 통신', link: '/study/smart-agriculture/06-machine-communication' },
+            { text: 'CH7. 정밀농업', link: '/study/smart-agriculture/07-precision-agriculture' },
+            { text: 'CH8. 스마트 관개', link: '/study/smart-agriculture/08-smart-irrigation' },
+          ],
+        },
+        {
+          text: '자동화와 지능화',
+          collapsible: false,
+          children: [
+            { text: 'CH9. 자율주행 농기계', link: '/study/smart-agriculture/09-autonomous-machinery' },
+            { text: 'CH10. 농업 로보틱스', link: '/study/smart-agriculture/10-agri-robotics' },
+            { text: 'CH11. AI와 농업', link: '/study/smart-agriculture/11-ai-agriculture' },
+          ],
+        },
+        {
+          text: '플랫폼과 생태계',
+          collapsible: false,
+          children: [
+            { text: 'CH12. 농업 데이터', link: '/study/smart-agriculture/12-agri-data' },
+            { text: 'CH13. 스마트팜 개요', link: '/study/smart-agriculture/13-smart-farm' },
+            { text: 'CH14. 생태계와 표준화', link: '/study/smart-agriculture/14-ecosystem' },
+          ],
+        },
+      ],
     },
     lastUpdated: false,
     contributors: false,

@@ -9,11 +9,12 @@ next: /study/isobus/22-practice
 
 # ISOBUS 기타 기능
 
-## 학습 목표
+::: info 학습 목표
 - ISO 11783-14 Sequence Control의 역할과 Headland Management 적용 방법을 설명할 수 있다.
 - Sequence Control이 자동으로 수행하는 작업 단계(하강 → 살포 → 상승)를 순서도로 표현할 수 있다.
 - ISO 11783-13 File Server의 파일 계층 구조(Volume / Directory / File)를 이해한다.
 - File Server를 통해 처방 맵과 작업 로그를 USB 없이 전송하는 흐름을 설명할 수 있다.
+:::
 
 ---
 

@@ -9,12 +9,13 @@ next: /study/isobus/12-isobus-overview
 
 # J1939 Transport Protocol
 
-## 학습 목표
+::: info 학습 목표
 - CAN 프레임의 8바이트 제한과 Transport Protocol의 필요성을 설명할 수 있다.
 - BAM 방식과 CMDT 방식의 차이점과 적용 시나리오를 이해한다.
 - TP.CM과 TP.DT 메시지의 역할과 PGN 번호를 안다.
 - ETP가 필요한 상황과 TP와의 차이를 설명할 수 있다.
 - 타임아웃 규칙을 이해하고 Abort 처리 흐름을 설명할 수 있다.
+:::
 
 ---
 

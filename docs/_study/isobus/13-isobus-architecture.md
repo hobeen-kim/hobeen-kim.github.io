@@ -9,11 +9,12 @@ next: /study/isobus/14-isobus-network-mgmt
 
 # ISOBUS 네트워크 아키텍처
 
-## 학습 목표
+::: info 학습 목표
 - ISOBUS 네트워크가 In-Cab 버스와 Implement 버스로 구분되는 이유를 설명할 수 있다.
 - TBC(Tractor Bus Connector)의 역할과 핀 구성을 이해한다.
 - ISOBUS 상의 주요 ECU 종류와 각 역할을 구분할 수 있다.
 - 장비 시동 후 ISOBUS 통신이 확립되기까지의 메시지 흐름을 순서대로 설명할 수 있다.
+:::
 
 ---
 

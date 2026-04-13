@@ -9,12 +9,13 @@ next: /study/isobus/04-can-data-frame
 
 # CAN 물리 계층
 
-## 학습 목표
+::: info 학습 목표
 - CAN_H와 CAN_L 차동 신호의 원리와 노이즈 내성을 설명할 수 있다.
 - Dominant(0)과 Recessive(1) 상태의 전압을 암기하고 Wired-AND 동작을 이해한다.
 - CAN 버스의 선형 토폴로지와 종단 저항의 역할을 설명할 수 있다.
 - 통신 속도에 따른 최대 버스 길이를 이해한다.
 - DB9 커넥터 핀 배치를 확인할 수 있다.
+:::
 
 ---
 

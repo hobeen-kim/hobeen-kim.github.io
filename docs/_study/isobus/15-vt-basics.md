@@ -9,11 +9,12 @@ next: /study/isobus/16-vt-object-pool
 
 # Virtual Terminal (VT) 기초
 
-## 학습 목표
+::: info 학습 목표
 - Virtual Terminal(VT)이 무엇이며 어떤 문제를 해결하는지 설명할 수 있다.
 - VT의 동작 원리와 오브젝트 풀의 역할을 이해한다.
 - VT 버전별 주요 기능 차이를 비교할 수 있다.
 - AUX(보조 입력) 장치의 개념과 Preferred Assignment를 설명할 수 있다.
+:::
 
 ---
 

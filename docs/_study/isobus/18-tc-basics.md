@@ -9,11 +9,12 @@ next: /study/isobus/19-tc-process-data
 
 # Task Controller (TC) 기초
 
-## 학습 목표
+::: info 학습 목표
 - Task Controller(TC)가 정밀 농업에서 담당하는 역할을 설명할 수 있다.
 - TC-Server와 TC-Client의 차이를 구분하고 각각의 위치를 식별할 수 있다.
 - Section Control과 Rate Control의 목적과 동작 원리를 비교할 수 있다.
 - GPS 위치 데이터가 TC 제어에 어떻게 활용되는지 설명할 수 있다.
+:::
 
 ---
 

@@ -9,12 +9,13 @@ next: /study/isobus/20-tc-ddop
 
 # TC 프로세스 데이터
 
-## 학습 목표
+::: info 학습 목표
 - DDI(Data Dictionary Identifier)의 의미와 주요 번호를 설명할 수 있다.
 - Device Element의 타입과 역할을 구분할 수 있다.
 - Value Command와 Process Data Value의 흐름을 시퀀스 다이어그램으로 그릴 수 있다.
 - Measurement와 Setpoint의 차이를 이해하고 제어 오차의 개념을 설명할 수 있다.
 - 살포량 제어 시나리오를 통해 전체 프로세스 데이터 흐름을 추적할 수 있다.
+:::
 
 ---
 

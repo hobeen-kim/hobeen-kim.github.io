@@ -9,11 +9,12 @@ next: null
 
 # ISOBUS 네트워크 관리
 
-## 학습 목표
+::: info 학습 목표
 - ISOBUS의 주소 클레임 방식과 CF(Control Function) 개념을 설명할 수 있다.
 - Working Set Master와 Member의 관계를 도식으로 이해한다.
 - DM1~DM3 진단 메시지의 역할과 SPN+FMI 조합을 구분할 수 있다.
 - 전원 ON부터 통신 완료까지의 시간 흐름을 설명할 수 있다.
+:::
 
 ---
 

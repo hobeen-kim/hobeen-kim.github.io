@@ -9,11 +9,12 @@ next: /study/isobus/13-isobus-architecture
 
 # ISOBUS (ISO 11783) 개요
 
-## 학습 목표
+::: info 학습 목표
 - ISOBUS가 무엇이고 왜 농업 기계에 필요한지 설명할 수 있다.
 - ISO 11783의 파트 구성을 알고 각 파트의 역할을 구분할 수 있다.
 - J1939과 ISOBUS의 계층적 관계를 도식화할 수 있다.
 - AEF와 적합성 인증의 의미를 이해한다.
+:::
 
 ---
 

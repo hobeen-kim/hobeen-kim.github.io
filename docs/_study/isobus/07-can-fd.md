@@ -13,12 +13,12 @@ tags:
 
 [[toc]]
 
-## 학습 목표
-
+::: info 학습 목표
 - CAN FD가 등장한 배경과 Classic CAN의 한계를 설명할 수 있다.
 - FDF, BRS, ESI 비트의 역할을 이해하고 CAN FD 프레임 구조를 설명할 수 있다.
 - 듀얼 비트레이트 동작 원리와 BRS 비트의 역할을 이해한다.
 - FD tolerant / FD active 노드의 차이를 구분하고, ISOBUS와의 관계를 설명할 수 있다.
+:::
 
 ---
 

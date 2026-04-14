@@ -10,9 +10,7 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { forceSimulation, forceLink, forceManyBody, forceCenter, forceCollide } from 'd3-force'
 import { select } from 'd3-selection'
-// d3-drag removed — 정적 그래프, 드래그 불필요
 import 'd3-transition'
 import { nodes as rawNodes, edges as rawEdges } from '../data/knowledge-graph.js'
 
@@ -20,7 +18,6 @@ const router = useRouter()
 const container = ref(null)
 const svgEl = ref(null)
 
-let simulation = null
 let resizeObserver = null
 
 // Compute depth and branch color for each node
@@ -109,13 +106,21 @@ function computeNodeColors(nodes, edges) {
 }
 
 function initGraph() {
-  const nodes = JSON.parse(JSON.stringify(rawNodes))
-  const edges = JSON.parse(JSON.stringify(rawEdges))
-
-  const { colorMap } = computeNodeColors(rawNodes, rawEdges)
-
   const width = container.value.clientWidth
   const height = container.value.clientHeight
+
+  // 비율 좌표를 실제 픽셀로 변환
+  const nodes = JSON.parse(JSON.stringify(rawNodes)).map(n => ({
+    ...n,
+    px: n.x * width,
+    py: n.y * height,
+  }))
+  const edges = JSON.parse(JSON.stringify(rawEdges))
+  // edge의 source/target을 노드 객체로 매핑
+  const nodeMap = {}
+  nodes.forEach(n => { nodeMap[n.id] = n })
+
+  const { colorMap } = computeNodeColors(rawNodes, rawEdges)
 
   const svg = select(svgEl.value)
     .attr('width', width)
@@ -123,13 +128,17 @@ function initGraph() {
 
   svg.selectAll('*').remove()
 
-  // Edge layer
+  // Edge layer — 고정 좌표로 바로 그리기
   const linkGroup = svg.append('g').attr('class', 'links')
   const linkEls = linkGroup
     .selectAll('line')
     .data(edges)
     .enter()
     .append('line')
+    .attr('x1', d => nodeMap[d.source]?.px || 0)
+    .attr('y1', d => nodeMap[d.source]?.py || 0)
+    .attr('x2', d => nodeMap[d.target]?.px || 0)
+    .attr('y2', d => nodeMap[d.target]?.py || 0)
     .attr('stroke', '#999')
     .attr('stroke-opacity', 0.3)
     .attr('stroke-width', 1.5)
@@ -142,6 +151,7 @@ function initGraph() {
     .enter()
     .append('g')
     .attr('class', d => `node node-${d.id}`)
+    .attr('transform', d => `translate(${d.px},${d.py})`)
     .style('cursor', d => (d.status === 'active' && d.link) ? 'pointer' : 'default')
 
   // Helper: has link (content exists)
@@ -257,60 +267,20 @@ function initGraph() {
     }
   })
 
-  // Force simulation — 초기 배치만 계산하고 멈춤
-  simulation = forceSimulation(nodes)
-    .force('link', forceLink(edges).id(d => d.id).distance(100))
-    .force('charge', forceManyBody().strength(-350))
-    .force('center', forceCenter(width / 2, height / 2))
-    .force('collide', forceCollide().radius(d => d.size + 15))
-    .on('tick', () => {
-      // Clamp nodes within bounds
-      nodes.forEach(d => {
-        const r = d.size + 3
-        d.x = Math.max(r, Math.min(width - r, d.x))
-        d.y = Math.max(r, Math.min(height - r, d.y))
-      })
-
-      linkEls
-        .attr('x1', d => d.source.x)
-        .attr('y1', d => d.source.y)
-        .attr('x2', d => d.target.x)
-        .attr('y2', d => d.target.y)
-
-      nodeEls.attr('transform', d => `translate(${d.x},${d.y})`)
-    })
-    .on('end', () => {
-      // 시뮬레이션 안정화 후 노드 위치 고정
-      nodes.forEach(d => {
-        d.fx = d.x
-        d.fy = d.y
-      })
-    })
 }
 
 onMounted(() => {
   initGraph()
 
   resizeObserver = new ResizeObserver(() => {
-    if (!container.value || !svgEl.value || !simulation) return
-    const width = container.value.clientWidth
-    const height = container.value.clientHeight
-
-    select(svgEl.value)
-      .attr('width', width)
-      .attr('height', height)
-
-    simulation
-      .force('center', forceCenter(width / 2, height / 2))
-      .alpha(0.3)
-      .restart()
+    if (!container.value || !svgEl.value) return
+    initGraph()
   })
 
   resizeObserver.observe(container.value)
 })
 
 onUnmounted(() => {
-  if (simulation) simulation.stop()
   if (resizeObserver) resizeObserver.disconnect()
 })
 </script>

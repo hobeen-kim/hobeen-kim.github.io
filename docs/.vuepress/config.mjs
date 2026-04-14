@@ -258,6 +258,45 @@ const theme = {
           ],
         },
       ],
+      '/study/db-optimization/': [
+        {
+          text: '쿼리 최적화',
+          collapsible: false,
+          children: [
+            { text: '소개', link: '/study/db-optimization/' },
+            { text: 'CH1. 슬로우 쿼리 진단', link: '/study/db-optimization/01-slow-query' },
+            { text: 'CH2. 인덱스가 안 타는 경우', link: '/study/db-optimization/02-index-not-used' },
+            { text: 'CH3. N+1 쿼리 문제', link: '/study/db-optimization/03-n-plus-one' },
+            { text: 'CH4. 쿼리 리팩토링', link: '/study/db-optimization/04-query-refactoring' },
+          ],
+        },
+        {
+          text: '스키마 최적화',
+          collapsible: false,
+          children: [
+            { text: 'CH5. Soft Delete', link: '/study/db-optimization/05-soft-delete' },
+            { text: 'CH6. 반정규화 실전', link: '/study/db-optimization/06-denormalization' },
+          ],
+        },
+        {
+          text: '인프라 최적화',
+          collapsible: false,
+          children: [
+            { text: 'CH7. 캐시와 Redis', link: '/study/db-optimization/07-cache-redis' },
+            { text: 'CH8. 커넥션 관리', link: '/study/db-optimization/08-connection-pool' },
+            { text: 'CH9. DB 마이그레이션', link: '/study/db-optimization/09-migration' },
+          ],
+        },
+        {
+          text: '모니터링과 운영',
+          collapsible: false,
+          children: [
+            { text: 'CH10. 모니터링 지표', link: '/study/db-optimization/10-monitoring' },
+            { text: 'CH11. PostgreSQL 운영', link: '/study/db-optimization/11-postgresql' },
+            { text: 'CH12. MySQL InnoDB', link: '/study/db-optimization/12-mysql-innodb' },
+          ],
+        },
+      ],
     },
     lastUpdated: false,
     contributors: false,

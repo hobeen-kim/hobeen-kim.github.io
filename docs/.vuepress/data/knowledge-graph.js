@@ -22,7 +22,7 @@ export const nodes = [
   { id: 'database', label: '데이터베이스', size: 26, status: 'active', link: '/study/database/', x: 0.70, y: 0.40 },
   { id: 'rdb', label: 'RDB', size: 20, status: 'planned', link: null, x: 0.62, y: 0.56 },
   { id: 'nosql', label: 'NoSQL', size: 20, status: 'planned', link: null, x: 0.72, y: 0.56 },
-  { id: 'db-tuning', label: 'DB 튜닝', size: 18, status: 'planned', link: null, x: 0.67, y: 0.68 },
+  { id: 'db-tuning', label: 'DB 성능\n최적화', size: 22, status: 'active', link: '/study/db-optimization/', x: 0.67, y: 0.68 },
   { id: 'backend', label: '백엔드', size: 26, status: 'planned', link: null, x: 0.88, y: 0.40 },
   { id: 'spring', label: 'Spring', size: 22, status: 'planned', link: null, x: 0.82, y: 0.56 },
   { id: 'api-design', label: 'API 설계', size: 20, status: 'planned', link: null, x: 0.92, y: 0.56 },

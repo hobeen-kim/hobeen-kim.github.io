@@ -177,12 +177,52 @@ Mermaid erDiagram에서 관계를 표현하는 기호는 다음과 같다.
 ```
 
 **JOIN (⋈)**
-두 릴레이션을 공통 속성을 기준으로 결합한다. SQL의 `JOIN`에 대응한다.
+두 릴레이션을 조건에 따라 결합한다. JOIN은 조건의 종류에 따라 세분화된다.
+
+```
+세타조인 (θ-Join)       ← 가장 일반적. 임의의 비교 조건으로 결합
+  └── 동등조인 (Equi-Join)  ← θ가 = 인 특수 경우
+       └── 자연조인 (Natural Join)  ← 동등조인 + 중복 속성 자동 제거
+```
+
+**세타조인(θ-Join)**: 임의의 비교 연산자(=, <, >, ≤, ≥, ≠)를 조건으로 결합한다.
+
+```
+PRODUCT ⋈(PRODUCT.price > ORDER.budget) ORDER
+→ 제품 가격이 주문 예산보다 큰 모든 조합
+```
+
+**동등조인(Equi-Join)**: 세타조인에서 조건이 `=`인 경우이다. 가장 자주 사용된다.
+
+```
+STUDENT ⋈(STUDENT.student_id = ENROLLMENT.student_id) ENROLLMENT
+→ SELECT * FROM STUDENT, ENROLLMENT WHERE STUDENT.student_id = ENROLLMENT.student_id;
+```
+
+**자연조인(Natural Join)**: 동등조인에서 같은 이름의 속성을 자동으로 매칭하고, 중복 속성을 결과에서 제거한다.
 
 ```
 STUDENT ⋈ ENROLLMENT
-→ SELECT * FROM STUDENT JOIN ENROLLMENT ON STUDENT.student_id = ENROLLMENT.student_id;
+→ SELECT * FROM STUDENT NATURAL JOIN ENROLLMENT;
+  (student_id가 양쪽에 있으면 자동으로 매칭, 결과에는 student_id 한 번만 표시)
 ```
+
+**세미조인(⋉)**: 조인 결과에서 한쪽 릴레이션의 속성만 반환한다. 분산 데이터베이스에서 전송량을 줄이기 위해 사용한다.
+
+```
+STUDENT ⋉ ENROLLMENT
+→ ENROLLMENT과 매칭되는 STUDENT 튜플만 반환 (ENROLLMENT 속성은 미포함)
+```
+
+**외부조인(⟕, ⟖, ⟗)**: 매칭되지 않는 튜플도 NULL로 채워서 포함한다. SQL의 LEFT/RIGHT/FULL OUTER JOIN에 대응한다.
+
+| 조인 종류 | 조건 | 중복 속성 제거 | SQL 대응 |
+|-----------|------|---------------|----------|
+| 세타조인 | 임의 비교 (θ) | 안 함 | `JOIN ON A.x > B.y` |
+| 동등조인 | = 비교 | 안 함 | `JOIN ON A.id = B.id` |
+| 자연조인 | 같은 이름 자동 = | 함 | `NATURAL JOIN` |
+| 세미조인 | = 비교 | 한쪽만 반환 | `WHERE EXISTS (...)` |
+| 외부조인 | = 비교 + NULL 포함 | 안 함 | `LEFT/RIGHT/FULL JOIN` |
 
 **DIVISION (÷)**
 한 릴레이션이 다른 릴레이션의 모든 튜플과 연관된 튜플을 반환한다. "모든 X에 대해 Y를 만족하는" 질의에 사용한다.

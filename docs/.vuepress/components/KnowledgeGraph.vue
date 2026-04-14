@@ -196,16 +196,49 @@ function initGraph() {
         if (tgtId === d.id) connectedIds.add(srcId)
       })
 
+      // Dim unrelated nodes/edges
       nodeEls.transition().duration(150).style('opacity', n => connectedIds.has(n.id) ? 1 : 0.15)
       linkEls.transition().duration(150).style('opacity', e => {
         const srcId = typeof e.source === 'object' ? e.source.id : e.source
         const tgtId = typeof e.target === 'object' ? e.target.id : e.target
         return (srcId === d.id || tgtId === d.id) ? 0.8 : 0.05
       })
+
+      const g = select(this)
+
+      if (d.status === 'active' && d.link) {
+        // Active: scale up + saturate
+        g.select('circle')
+          .transition().duration(150)
+          .attr('r', d.size * 1.15)
+          .attr('opacity', 1)
+          .attr('filter', 'saturate(1.4)')
+      } else if (d.status === 'planned' || (d.status === 'active' && !d.link)) {
+        // Planned or no link: show "준비 중" badge
+        g.append('text')
+          .attr('class', 'badge-text')
+          .attr('text-anchor', 'middle')
+          .attr('dy', d.size + 16)
+          .attr('font-size', '10px')
+          .attr('fill', '#9CA3AF')
+          .text('준비 중')
+      }
     })
-    .on('mouseleave', function () {
+    .on('mouseleave', function (event, d) {
       nodeEls.transition().duration(150).style('opacity', 1)
       linkEls.transition().duration(150).style('opacity', 0.3)
+
+      const g = select(this)
+
+      // Restore circle size
+      g.select('circle')
+        .transition().duration(150)
+        .attr('r', d.size)
+        .attr('opacity', 0.9)
+        .attr('filter', null)
+
+      // Remove badge
+      g.selectAll('.badge-text').remove()
     })
 
   // Click interaction

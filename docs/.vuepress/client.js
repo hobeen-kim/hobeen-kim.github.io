@@ -40,8 +40,8 @@ export default defineClientConfig({
                 setTimeout(loadMermaid, 100)
                 const parts = to.path.split('/').filter(Boolean)
                 const section = parts[0]
-                // 스터디 챕터 페이지: /study/{slug}/01-xxx (depth 3+)
-                const isStudyChapter = section === 'study' && parts.length >= 3
+                // 스터디 상세 페이지: /study/{slug}/ 이상 (depth 2+)
+                const isStudyChapter = section === 'study' && parts.length >= 2
                 if (section === 'posts' || section === 'books' || isStudyChapter) {
                     document.body.classList.add('page-has-title')
                 } else {

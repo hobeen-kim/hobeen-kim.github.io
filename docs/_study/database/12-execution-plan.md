@@ -223,11 +223,181 @@ EXPLAIN SELECT * FROM orders WHERE customer_id = 42;
 
 ---
 
+## 5. 물리적 조인 알고리즘
+
+옵티마이저는 JOIN을 실행할 때 세 가지 알고리즘 중 하나를 선택한다. 관계 대수의 조인(세타조인, 자연조인 등)이 "무엇을 결합하는가"라면, 물리적 조인 알고리즘은 "어떻게 결합하는가"에 해당한다.
+
+### Nested Loop Join (중첩 반복)
+
+바깥 테이블(Driving Table)의 각 행마다 안쪽 테이블(Driven Table)을 탐색한다. 이중 for문과 같은 원리다.
+
+```
+employees (10행) × departments (5행)
+
+for each row in employees:         -- 바깥: 10번 반복
+    for each row in departments:   -- 안쪽: 매번 5번 반복
+        if employees.dept_id = departments.id:
+            결과에 추가
+
+→ 총 비교 횟수: 10 × 5 = 50회
+```
+
+안쪽 테이블에 인덱스가 있으면 매번 풀 스캔 대신 인덱스 룩업(O(log N))으로 대체할 수 있다. 이를 <strong>Index Nested Loop Join</strong>이라 한다.
+
+```
+Index Nested Loop:
+
+for each row in employees:         -- 바깥: 10번 반복
+    index_lookup(departments.id)   -- 안쪽: O(log 5) ≈ 3회
+        if 매치: 결과에 추가
+
+→ 총 비교 횟수: 10 × 3 = 30회 (풀 스캔 50회보다 적음)
+```
+
+```mermaid
+flowchart TD
+    A["employees<br>(Driving Table)"] --> B{"각 행마다"}
+    B --> C{"departments에<br>인덱스 있는가?"}
+    C -->|있음| D["Index Lookup<br>O(log N)"]
+    C -->|없음| E["Full Scan<br>O(N)"]
+    D --> F["매칭 행 반환"]
+    E --> F
+```
+
+**EXPLAIN에서의 표시**: `type: eq_ref` 또는 `type: ref` + `Extra: Using join buffer`가 아닌 경우
+
+**적합한 상황**:
+- 한쪽 테이블이 작을 때 (바깥 테이블)
+- 안쪽 테이블에 조인 키 인덱스가 있을 때
+- MySQL InnoDB는 대부분의 조인에서 이 방식을 기본으로 사용한다
+
+---
+
+### Sort-Merge Join (정렬 병합)
+
+두 테이블을 조인 키로 각각 정렬한 뒤, 양쪽을 동시에 순차 스캔하며 매칭한다. 두 줄로 나란히 서 있는 학생 명단을 이름순으로 대조하는 것과 같다.
+
+```
+1단계 — 정렬:
+  employees:   [1, 3, 5, 7, 9]     ← dept_id 기준 정렬
+  departments: [1, 2, 3, 5, 7, 9]  ← id 기준 정렬
+
+2단계 — 병합:
+  포인터 A → employees[0] = 1
+  포인터 B → departments[0] = 1  → 매치! 결과 추가
+  포인터 A → employees[1] = 3
+  포인터 B → departments[1] = 2  → 2 < 3, B 전진
+  포인터 B → departments[2] = 3  → 매치! 결과 추가
+  ...
+
+→ 정렬 후 한 번의 스캔으로 완료 (각 포인터는 앞으로만 이동)
+```
+
+```mermaid
+flowchart LR
+    A["employees"] --> SA["정렬<br>O(N log N)"]
+    B["departments"] --> SB["정렬<br>O(M log M)"]
+    SA --> MG["병합 스캔<br>O(N + M)"]
+    SB --> MG
+    MG --> R["결과"]
+```
+
+**EXPLAIN에서의 표시**: PostgreSQL에서 `Merge Join`, MySQL에서는 직접 지원하지 않음 (ORDER BY 후 Nested Loop로 처리)
+
+**적합한 상황**:
+- 대용량 테이블 양쪽 모두 인덱스가 없을 때
+- 조인 키로 이미 정렬되어 있을 때 (인덱스 스캔 순서와 일치)
+- 범위 조인(θ-Join)에서도 사용 가능
+- PostgreSQL, Oracle에서 주로 사용
+
+---
+
+### Hash Join (해시)
+
+작은 쪽 테이블로 메모리에 해시 테이블을 만들고(Build), 큰 쪽 테이블을 스캔하며 해시 테이블에서 매칭한다(Probe).
+
+```
+예시: employees(10만 행) JOIN departments(50행) ON dept_id = id
+
+1단계 — Build: 작은 테이블(departments)로 해시 테이블 생성
+  hash(1) → {id:1, name:"영업부"}
+  hash(2) → {id:2, name:"개발부"}
+  hash(3) → {id:3, name:"인사부"}
+  ...
+  → 메모리에 50개 엔트리 생성
+
+2단계 — Probe: 큰 테이블(employees)을 한 행씩 스캔
+  for each row in employees:
+      key = hash(row.dept_id)
+      해시 테이블에서 key 검색 → O(1) 매칭
+      매치되면 결과에 추가
+
+→ 총 비교: 해시 테이블 생성 O(50) + 프로브 O(100,000) = O(100,050)
+   (Nested Loop라면 100,000 × 50 = 5,000,000회)
+```
+
+```mermaid
+flowchart TD
+    subgraph build["Build 단계"]
+        S["작은 테이블<br>(departments, 50행)"] --> HT["해시 테이블 생성<br>hash(id) → row"]
+    end
+    subgraph probe["Probe 단계"]
+        L["큰 테이블<br>(employees, 10만행)"] --> SC["한 행씩 스캔"]
+        SC --> LK["hash(dept_id)로<br>해시 테이블 조회<br>O(1)"]
+        LK --> R["매칭 결과"]
+    end
+    build --> probe
+```
+
+**EXPLAIN에서의 표시**: `Hash Join` (MySQL 8.0.18+, PostgreSQL)
+
+**적합한 상황**:
+- 대용량 테이블 간 동등조인(`=`)
+- 조인 키에 인덱스가 없을 때
+- 한쪽 테이블이 메모리에 올라갈 수 있을 때
+
+**제약**:
+- 동등조인(`=`)에서만 사용 가능 (범위 비교 `>`, `<` 불가)
+- Build 테이블이 메모리를 초과하면 디스크로 스필(Spill)이 발생하여 느려진다
+
+---
+
+### 세 알고리즘 비교
+
+| 항목 | Nested Loop | Sort-Merge | Hash Join |
+|------|------------|------------|-----------|
+| 시간 복잡도 | O(N × M) | O(N log N + M log M) | O(N + M) |
+| 인덱스 필요 | 있으면 매우 유리 | 불필요 | 불필요 |
+| 조인 조건 | 모든 조건 가능 | 모든 조건 가능 | 동등조인(`=`)만 |
+| 메모리 | 적게 사용 | 정렬 버퍼 필요 | 해시 테이블 메모리 필요 |
+| 적합한 규모 | 소량 또는 인덱스 있을 때 | 대량 + 이미 정렬 | 대량 + 인덱스 없음 |
+| MySQL | 기본 사용 | 미지원 | 8.0.18+ 지원 |
+| PostgreSQL | 지원 | 지원 | 지원 |
+
+### 옵티마이저의 선택 기준
+
+```mermaid
+flowchart TD
+    Q["JOIN 쿼리 실행"] --> C1{"조인 키에<br>인덱스 있는가?"}
+    C1 -->|있음| NL["Nested Loop Join<br>(인덱스 룩업)"]
+    C1 -->|없음| C2{"동등조인인가?"}
+    C2 -->|"= 조건"| C3{"Build 테이블이<br>메모리에 올라가는가?"}
+    C3 -->|올라감| HJ["Hash Join"]
+    C3 -->|못 올라감| SM["Sort-Merge Join"]
+    C2 -->|"범위 조건"| SM
+```
+
+실제로는 옵티마이저가 통계 정보(행 수, 카디널리티, 메모리 크기)를 바탕으로 각 알고리즘의 예상 비용을 계산하여 가장 저렴한 방법을 선택한다. EXPLAIN 결과에서 어떤 알고리즘이 선택되었는지 확인할 수 있다.
+
+---
+
 ::: tip 핵심 정리
 - CBO는 카디널리티, 선택도, 행 수 등 통계 정보를 바탕으로 최저 비용의 실행 계획을 선택한다.
 - EXPLAIN의 `type` 컬럼에서 `const > eq_ref > ref > range > index > ALL` 순으로 성능이 좋으며, `ALL`은 풀 테이블 스캔이다.
 - `Extra: Using index`는 커버링 인덱스, `Using filesort`/`Using temporary`는 성능 경고 신호다.
 - 인덱스 추가 전후 EXPLAIN을 비교하면 `type`이 ALL에서 ref로 변하고 `rows`가 극적으로 감소한다.
+- 물리적 조인 알고리즘: Nested Loop(인덱스 있을 때), Hash Join(대용량 동등조인), Sort-Merge(대용량 정렬 데이터).
+- 옵티마이저가 인덱스 유무, 테이블 크기, 조인 조건을 보고 알고리즘을 자동 선택한다.
 :::
 
 ## 다음 챕터

@@ -33,8 +33,6 @@ export default {
     }
   },
   mounted() {
-    document.body.classList.add('page-has-title')
-
     if (this.$route.path.split('/')[1] === 'posts') {
       this.setPost()
     } else if (this.$route.path.split('/')[1] === 'books') {

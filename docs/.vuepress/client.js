@@ -36,8 +36,14 @@ export default defineClientConfig({
                 }
                 document.head.appendChild(script)
             }
-            router.afterEach(() => {
+            router.afterEach((to) => {
                 setTimeout(loadMermaid, 100)
+                const section = to.path.split('/')[1]
+                if (section === 'posts' || section === 'books') {
+                    document.body.classList.add('page-has-title')
+                } else {
+                    document.body.classList.remove('page-has-title')
+                }
             })
         }
     },

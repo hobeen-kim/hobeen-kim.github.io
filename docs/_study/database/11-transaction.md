@@ -62,11 +62,71 @@ COMMIT;
 
 동시에 여러 트랜잭션이 실행될 때 격리가 불완전하면 다음 세 가지 이상 현상이 발생할 수 있다.
 
-| 이상 현상 | 설명 |
-|----------|------|
-| <strong>Dirty Read</strong> | 아직 커밋되지 않은 다른 트랜잭션의 변경 데이터를 읽는다. |
-| <strong>Non-Repeatable Read</strong> | 같은 트랜잭션 내에서 같은 행을 두 번 읽었는데 결과가 달라진다(중간에 다른 트랜잭션이 수정·커밋). |
-| <strong>Phantom Read</strong> | 같은 트랜잭션 내에서 같은 조건으로 두 번 조회했는데 행의 개수가 달라진다(중간에 다른 트랜잭션이 삽입·삭제·커밋). |
+**Dirty Read (더티 읽기)** — 커밋되지 않은 데이터를 읽는 현상이다. 상대 트랜잭션이 롤백하면 읽은 데이터가 애초에 존재하지 않았던 것이 된다.
+
+```
+트랜잭션 A                          트랜잭션 B
+─────────                          ─────────
+                                   UPDATE accounts SET balance = 0
+                                   WHERE id = 1;  (커밋 전)
+
+SELECT balance FROM accounts
+WHERE id = 1;
+→ balance = 0  ← 커밋 안 된 값을 읽음!
+
+                                   ROLLBACK;  ← 취소됨. balance는 원래 10000
+
+트랜잭션 A는 존재하지 않는 값(0)을 기반으로 로직을 수행한 셈이다.
+```
+
+**Non-Repeatable Read (반복 불가능 읽기)** — 같은 행을 두 번 읽었는데 값이 달라지는 현상이다. 상대 트랜잭션이 해당 행을 UPDATE + COMMIT 했기 때문에 발생한다.
+
+```
+트랜잭션 A                          트랜잭션 B
+─────────                          ─────────
+SELECT price FROM products
+WHERE id = 1;
+→ price = 10000
+
+                                   UPDATE products SET price = 15000
+                                   WHERE id = 1;
+                                   COMMIT;
+
+SELECT price FROM products
+WHERE id = 1;
+→ price = 15000  ← 같은 행인데 값이 바뀜!
+```
+
+**Phantom Read (팬텀 읽기)** — 같은 조건으로 조회했는데 행의 수가 달라지는 현상이다. 상대 트랜잭션이 INSERT 또는 DELETE + COMMIT 했기 때문에 발생한다.
+
+```
+트랜잭션 A                          트랜잭션 B
+─────────                          ─────────
+SELECT * FROM orders
+WHERE status = 'PENDING';
+→ 3건 반환
+
+                                   INSERT INTO orders (status)
+                                   VALUES ('PENDING');
+                                   COMMIT;
+
+SELECT * FROM orders
+WHERE status = 'PENDING';
+→ 4건 반환  ← 유령 행(Phantom)이 나타남!
+```
+
+**세 이상 현상 비교**
+
+| 구분 | Dirty Read | Non-Repeatable Read | Phantom Read |
+|------|-----------|-------------------|--------------|
+| 변하는 것 | 읽은 값 자체가 무효(롤백) | 기존 행의 값 | 결과 집합의 행 수 |
+| 원인 | 상대의 미커밋 변경 | 상대의 UPDATE + COMMIT | 상대의 INSERT/DELETE + COMMIT |
+| 방어 수단 | 커밋된 데이터만 읽기 | 행 단위 락(Shared Lock 유지) | 범위 락 / Gap Lock |
+| 해결 격리 수준 | READ COMMITTED 이상 | REPEATABLE READ 이상 | SERIALIZABLE (InnoDB는 RR에서도 Gap Lock으로 방어) |
+
+::: info Non-Repeatable Read vs Phantom Read
+둘 다 "두 번 읽었는데 결과가 다른" 현상이지만, Non-Repeatable Read는 **이미 존재하는 행의 값**이 바뀌는 것이고, Phantom Read는 **존재하지 않던 행이 나타나는** 것이다. REPEATABLE READ 격리 수준에서 행 단위 락은 기존 행만 잠글 수 있고 아직 존재하지 않는 행(INSERT 대상)은 잠글 수 없기 때문에, Phantom Read는 별도의 Gap Lock이 필요하다.
+:::
 
 ### 격리 수준 4단계
 

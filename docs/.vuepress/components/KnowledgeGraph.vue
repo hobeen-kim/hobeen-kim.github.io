@@ -12,7 +12,7 @@ import { onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { forceSimulation, forceLink, forceManyBody, forceCenter, forceCollide } from 'd3-force'
 import { select } from 'd3-selection'
-import { drag } from 'd3-drag'
+// d3-drag removed — 정적 그래프, 드래그 불필요
 import 'd3-transition'
 import { nodes as rawNodes, edges as rawEdges } from '../data/knowledge-graph.js'
 
@@ -257,26 +257,7 @@ function initGraph() {
     }
   })
 
-  // Drag interaction
-  const dragHandler = drag()
-    .on('start', function (event, d) {
-      if (!event.active) simulation.alphaTarget(0.3).restart()
-      d.fx = d.x
-      d.fy = d.y
-    })
-    .on('drag', function (event, d) {
-      d.fx = event.x
-      d.fy = event.y
-    })
-    .on('end', function (event, d) {
-      if (!event.active) simulation.alphaTarget(0)
-      d.fx = null
-      d.fy = null
-    })
-
-  nodeEls.call(dragHandler)
-
-  // Force simulation
+  // Force simulation — 초기 배치만 계산하고 멈춤
   simulation = forceSimulation(nodes)
     .force('link', forceLink(edges).id(d => d.id).distance(100))
     .force('charge', forceManyBody().strength(-350))
@@ -297,6 +278,13 @@ function initGraph() {
         .attr('y2', d => d.target.y)
 
       nodeEls.attr('transform', d => `translate(${d.x},${d.y})`)
+    })
+    .on('end', () => {
+      // 시뮬레이션 안정화 후 노드 위치 고정
+      nodes.forEach(d => {
+        d.fx = d.x
+        d.fy = d.y
+      })
     })
 }
 

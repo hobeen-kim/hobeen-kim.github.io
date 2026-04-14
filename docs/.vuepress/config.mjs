@@ -202,6 +202,62 @@ const theme = {
           ],
         },
       ],
+      '/study/database/': [
+        {
+          text: '기초',
+          collapsible: false,
+          children: [
+            { text: '소개', link: '/study/database/' },
+            { text: 'CH1. 데이터베이스란', link: '/study/database/01-what-is-database' },
+            { text: 'CH2. 관계형 모델', link: '/study/database/02-relational-model' },
+          ],
+        },
+        {
+          text: 'SQL',
+          collapsible: false,
+          children: [
+            { text: 'CH3. DDL과 DCL', link: '/study/database/03-ddl-dcl' },
+            { text: 'CH4. SQL 기초', link: '/study/database/04-sql-basics' },
+            { text: 'CH5. JOIN과 서브쿼리', link: '/study/database/05-join-subquery' },
+            { text: 'CH6. 집계와 윈도우 함수', link: '/study/database/06-aggregation-window' },
+            { text: 'CH7. DB 객체', link: '/study/database/07-db-objects' },
+          ],
+        },
+        {
+          text: '설계',
+          collapsible: false,
+          children: [
+            { text: 'CH8. 정규화', link: '/study/database/08-normalization' },
+            { text: 'CH9. 데이터 모델링', link: '/study/database/09-data-modeling' },
+          ],
+        },
+        {
+          text: '내부 구조',
+          collapsible: false,
+          children: [
+            { text: 'CH10. 스토리지 엔진', link: '/study/database/10-storage-engine' },
+            { text: 'CH11. 트랜잭션', link: '/study/database/11-transaction' },
+            { text: 'CH12. 실행 계획', link: '/study/database/12-execution-plan' },
+          ],
+        },
+        {
+          text: '튜닝',
+          collapsible: false,
+          children: [
+            { text: 'CH13. 인덱스 전략', link: '/study/database/13-index-strategy' },
+            { text: 'CH14. 쿼리 튜닝', link: '/study/database/14-query-tuning' },
+          ],
+        },
+        {
+          text: '운영과 확장',
+          collapsible: false,
+          children: [
+            { text: 'CH15. 운영과 보안', link: '/study/database/15-operation-security' },
+            { text: 'CH16. 분산 데이터베이스', link: '/study/database/16-distributed-db' },
+            { text: 'CH17. 데이터 웨어하우스', link: '/study/database/17-data-warehouse' },
+          ],
+        },
+      ],
     },
     lastUpdated: false,
     contributors: false,

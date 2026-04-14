@@ -19,7 +19,7 @@ export const nodes = [
   // === 소프트웨어 브랜치 ===
   { id: 'software', label: '소프트웨어', size: 36, status: 'active', link: null },
   // 곁가지 (depth 2)
-  { id: 'database', label: '데이터베이스', size: 26, status: 'planned', link: null },
+  { id: 'database', label: '데이터베이스', size: 26, status: 'active', link: '/study/database/' },
   { id: 'backend', label: '백엔드', size: 26, status: 'planned', link: null },
   { id: 'infra', label: '인프라\n/ DevOps', size: 24, status: 'planned', link: null },
   { id: 'architecture', label: '소프트웨어\n아키텍처', size: 24, status: 'planned', link: null },

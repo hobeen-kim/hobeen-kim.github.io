@@ -48,6 +48,7 @@ function computeNodeColors(nodes, edges) {
   const branchHues = {
     'smart-agriculture': 140,  // 녹색 계열
     'software': 220,           // 파랑 계열
+    'ai': 280,                 // 보라 계열
   }
 
   const visited = new Set([root.id])

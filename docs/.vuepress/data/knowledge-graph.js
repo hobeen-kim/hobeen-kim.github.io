@@ -37,6 +37,16 @@ export const nodes = [
   { id: 'aws', label: 'AWS', size: 20, status: 'planned', link: null },
   { id: 'kubernetes', label: 'Kubernetes', size: 20, status: 'planned', link: null },
   { id: 'cicd', label: 'CI / CD', size: 18, status: 'planned', link: null },
+  // depth 2 — 데이터 엔지니어링 (소프트웨어 하위)
+  { id: 'data-engineering', label: '데이터\n엔지니어링', size: 24, status: 'planned', link: null },
+
+  // === AI 브랜치 ===
+  { id: 'ai', label: 'AI', size: 36, status: 'active', link: null },
+  { id: 'machine-learning', label: '머신러닝', size: 28, status: 'planned', link: null },
+  { id: 'deep-learning', label: '딥러닝', size: 24, status: 'planned', link: null },
+  { id: 'computer-vision', label: '컴퓨터 비전', size: 24, status: 'planned', link: null },
+  { id: 'time-series', label: '시계열 예측', size: 22, status: 'planned', link: null },
+  { id: 'mlops', label: 'MLOps', size: 22, status: 'planned', link: null },
 ]
 
 export const edges = [
@@ -78,4 +88,17 @@ export const edges = [
   { source: 'infra', target: 'aws' },
   { source: 'infra', target: 'kubernetes' },
   { source: 'infra', target: 'cicd' },
+  // 데이터 엔지니어링 (소프트웨어 하위)
+  { source: 'software', target: 'data-engineering' },
+
+  // === AI ===
+  { source: 'study-root', target: 'ai' },
+  { source: 'ai', target: 'machine-learning' },
+  { source: 'ai', target: 'computer-vision' },
+  { source: 'ai', target: 'time-series' },
+  { source: 'ai', target: 'mlops' },
+  { source: 'machine-learning', target: 'deep-learning' },
+  // 교차 엣지 (스마트농업 ↔ AI)
+  { source: 'crop-analysis', target: 'computer-vision' },
+  { source: 'crop-analysis', target: 'time-series' },
 ]

@@ -76,3 +76,4 @@ next: /study/{slug}/{다음 챕터 경로}
 | Mermaid | `\n` 금지 → `<br>`, `timeline`은 `<br>` 미지원(쉼표), `quadrantChart`은 영문만 |
 | `<br/>` | 금지 → `<br>` 사용 |
 | GitHub callout | `> [!TIP]` 금지 → `:::tip` 사용 |
+| 교차 링크 | 관련 블로그 포스트(`/posts/...`)나 다른 스터디 챕터(`/study/...`)가 있으면 본문에 링크 삽입. 예: `자세한 내용은 [Lateral Join 포스트](/posts/database/2025-04-20-leteraljoin)를 참고한다.` 또는 `:::info 관련 스터디\n[ISOBUS CH6](/study/isobus/06-can-error)에서 상세히 다룬다.\n:::` |

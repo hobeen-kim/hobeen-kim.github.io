@@ -144,6 +144,10 @@ function initGraph() {
     .attr('class', d => `node node-${d.id}`)
     .style('cursor', d => (d.status === 'active' && d.link) ? 'pointer' : 'default')
 
+  // Helper: has link (content exists)
+  const hasContent = d => d.status === 'active' && d.link
+  const noContent = d => !d.link
+
   // Circle with fill + stroke
   nodeEls.append('circle')
     .attr('r', d => d.size)
@@ -153,7 +157,7 @@ function initGraph() {
     })
     .attr('stroke', d => colorMap[d.id]?.stroke || '#4B5563')
     .attr('stroke-width', 2.5)
-    .attr('stroke-dasharray', d => d.status === 'planned' ? '5,3' : null)
+    .attr('stroke-dasharray', d => noContent(d) ? '5,3' : null)
     .attr('opacity', 0.9)
 
   // Label inside circle
@@ -207,21 +211,25 @@ function initGraph() {
 
       const g = select(this)
 
-      if (d.status === 'active' && d.link) {
-        // Active: scale up + saturate
+      if (hasContent(d)) {
+        // Has content: scale up + saturate
         g.select('circle')
           .transition().duration(150)
           .attr('r', d.size * 1.15)
           .attr('opacity', 1)
           .attr('filter', 'saturate(1.4)')
-      } else if (d.status === 'planned' || (d.status === 'active' && !d.link)) {
-        // Planned or no link: show "준비 중" badge
+      } else {
+        // No content: desaturate + show "준비 중" inside circle
+        g.select('circle')
+          .transition().duration(150)
+          .attr('filter', 'saturate(0.5)')
         g.append('text')
           .attr('class', 'badge-text')
           .attr('text-anchor', 'middle')
-          .attr('dy', d.size + 16)
-          .attr('font-size', '10px')
-          .attr('fill', '#9CA3AF')
+          .attr('dominant-baseline', 'central')
+          .attr('dy', d.size * 0.55)
+          .attr('font-size', '9px')
+          .attr('fill', 'rgba(255,255,255,0.7)')
           .text('준비 중')
       }
     })
@@ -231,7 +239,7 @@ function initGraph() {
 
       const g = select(this)
 
-      // Restore circle size
+      // Restore circle
       g.select('circle')
         .transition().duration(150)
         .attr('r', d.size)

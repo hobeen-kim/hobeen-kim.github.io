@@ -73,7 +73,7 @@ flowchart LR
 
 **IE(Information Engineering) 표기**: 실무에서 주로 사용하는 표기법으로, Crow's Foot 기호로 관계의 기수성(Cardinality)을 표현한다.
 
-### Mermaid erDiagram 예시
+### ERD 예시: 학교 수강 시스템
 
 다음은 학교 수강 시스템의 ERD이다.
 

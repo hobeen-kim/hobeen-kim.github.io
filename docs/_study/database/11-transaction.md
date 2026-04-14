@@ -198,6 +198,93 @@ flowchart TD
 
 ---
 
+## 5. 애플리케이션 레벨 락: Optimistic vs Pessimistic
+
+CH11 §3의 병행 제어는 DBMS 내부 메커니즘이다. 실무에서는 애플리케이션 코드에서도 동시성을 제어해야 한다. 대표적인 두 가지 전략이 낙관적 락과 비관적 락이다.
+
+### Pessimistic Lock (비관적 락)
+
+"충돌이 자주 발생할 것"이라고 가정하고 데이터를 읽는 시점에 미리 락을 건다.
+
+- `SELECT FOR UPDATE`로 행에 배타적 락을 건다.
+- 다른 트랜잭션은 락이 풀릴 때까지 대기한다.
+- 장점: 충돌을 원천 차단하여 데이터 정합성이 높다.
+- 단점: 대기 시간 발생, 데드락 위험, 처리량 저하.
+
+```sql
+-- 비관적 락 예제: 락을 걸고 재고를 차감한다
+START TRANSACTION;
+SELECT * FROM products WHERE id = 1 FOR UPDATE;
+UPDATE products SET stock = stock - 1 WHERE id = 1;
+COMMIT;
+```
+
+### Optimistic Lock (낙관적 락)
+
+"충돌이 드물 것"이라고 가정하고 락 없이 진행한 뒤, 커밋 시점에 충돌 여부를 검증한다.
+
+- `version` 컬럼(또는 `updated_at`)을 사용한다.
+- `UPDATE` 시 `version`을 조건에 포함한다. 변경되었으면 실패 → 재시도.
+- JPA에서는 `@Version` 어노테이션으로 자동 처리한다.
+- 장점: 락 없이 동작하여 처리량이 높다.
+- 단점: 충돌 시 재시도 로직이 필요하고, 충돌이 빈번하면 오히려 비효율적이다.
+
+```sql
+-- 낙관적 락 예제: version이 일치할 때만 업데이트한다
+UPDATE products
+SET stock = stock - 1, version = version + 1
+WHERE id = 1 AND version = 1;
+-- 영향받은 행이 0이면 충돌 → 애플리케이션에서 재시도
+```
+
+### 두 방식의 흐름 비교
+
+```mermaid
+sequenceDiagram
+    participant C1 as 클라이언트 1
+    participant DB as 데이터베이스
+    participant C2 as 클라이언트 2
+
+    Note over C1,C2: Pessimistic Lock 흐름
+    C1->>DB: SELECT ... FOR UPDATE (X-Lock 획득)
+    C2->>DB: SELECT ... FOR UPDATE (대기)
+    C1->>DB: UPDATE stock = 9
+    C1->>DB: COMMIT (락 해제)
+    DB-->>C2: 락 획득 허용
+    C2->>DB: UPDATE stock = 8
+    C2->>DB: COMMIT
+
+    Note over C1,C2: Optimistic Lock 흐름
+    C1->>DB: SELECT id=1, version=1
+    C2->>DB: SELECT id=1, version=1
+    C1->>DB: UPDATE ... WHERE version=1 → version=2 (성공)
+    C2->>DB: UPDATE ... WHERE version=1 → 0행 변경 (충돌)
+    C2->>C2: 재시도: SELECT id=1, version=2
+    C2->>DB: UPDATE ... WHERE version=2 → version=3 (성공)
+```
+
+### 선택 기준
+
+| 상황 | 권장 전략 |
+|------|----------|
+| 재고 차감, 좌석 예약 등 충돌 빈도가 높은 경우 | Pessimistic Lock |
+| 게시글 수정, 프로필 변경 등 충돌 빈도가 낮은 경우 | Optimistic Lock |
+| 분산 환경에서 DB 락 사용이 어려운 경우 | Optimistic Lock |
+| 트랜잭션 시간이 길어 락 보유 시간이 긴 경우 | Optimistic Lock |
+
+```mermaid
+flowchart TD
+    Start([동시성 제어 전략 선택]) --> Q1{충돌 발생 빈도는?}
+    Q1 -->|높음| Q2{분산 환경인가?}
+    Q1 -->|낮음| Optimistic["Optimistic Lock<br>(version 컬럼 + 재시도)"]
+    Q2 -->|아니오| Pessimistic["Pessimistic Lock<br>(SELECT FOR UPDATE)"]
+    Q2 -->|예| Q3{Redis 등<br>분산 락 인프라가 있는가?}
+    Q3 -->|예| DistLock["분산 락<br>(Redis SETNX 등)"]
+    Q3 -->|아니오| Optimistic
+```
+
+---
+
 ::: tip 핵심 정리
 - 트랜잭션은 논리적 작업 단위이며 ACID(원자성, 일관성, 격리성, 지속성)를 보장해야 한다.
 - 격리 수준은 READ UNCOMMITTED < READ COMMITTED < REPEATABLE READ < SERIALIZABLE 순으로 높아지며, 높을수록 이상 현상은 줄고 성능 비용은 커진다.

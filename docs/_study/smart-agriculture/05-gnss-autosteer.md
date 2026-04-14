@@ -3,7 +3,11 @@ title: "측위와 자동조향"
 description: "GNSS 위성 측위 원리, RTK 보정, 자동조향 시스템이 농기계에 적용되는 과정을 이해한다."
 date: 2026-04-13
 tags: [스마트농업, GNSS, RTK, GPS, 자동조향]
+prev: /study/smart-agriculture/04-aerial-satellite
+next: /study/smart-agriculture/06-machine-communication
 ---
+
+# 측위와 자동조향
 
 ::: info 학습 목표
 
@@ -14,7 +18,9 @@ tags: [스마트농업, GNSS, RTK, GPS, 자동조향]
 
 :::
 
-## GNSS 위성 측위
+---
+
+## 1. GNSS 위성 측위
 
 GNSS(Global Navigation Satellite System)는 위성 신호를 이용해 지구상 위치를 결정하는 시스템의 총칭이다. 각 국가·지역이 독자적인 시스템을 운영하고 있으며, 농기계에는 여러 위성 시스템을 동시에 수신하는 멀티-GNSS 수신기가 사용된다.
 
@@ -44,7 +50,9 @@ flowchart LR
     E --> F[오차 ~2cm<br>정밀 작업 가능]
 ```
 
-## RTK-GPS
+---
+
+## 2. RTK-GPS
 
 RTK(Real-Time Kinematic)는 정확한 위치를 아는 기지국(Base Station)이 이동국(Rover)에 보정 신호를 실시간으로 전송하여 오차를 제거하는 기법이다. 반송파 위상(carrier phase)을 이용해 단순 코드 측위보다 훨씬 높은 정확도를 달성한다.
 
@@ -71,7 +79,9 @@ sequenceDiagram
 
 NTRIP(Networked Transport of RTCM via Internet Protocol)은 기지국 보정 신호를 인터넷을 통해 이동국에 전달하는 표준 프로토콜이다. 농가에서 직접 기지국을 설치하지 않아도, 이동통신망(LTE)으로 공공 또는 상용 NTRIP 서버에 접속하면 RTK 정확도를 활용할 수 있다.
 
-## 자동조향 시스템
+---
+
+## 3. 자동조향 시스템
 
 자동조향(Auto-Steer) 시스템은 RTK 수신기에서 계산된 위치 정보를 이용해 트랙터의 조향을 자동으로 제어하는 시스템이다. 농업인이 페달과 스로틀만 조작하면 직진·선회 등의 조향이 자동으로 이뤄진다.
 
@@ -98,7 +108,9 @@ flowchart TD
 - **곡선 주행 패턴(Curved Path)**: AB 라인 대신 실제 주행 경로를 기록해 곡선 필지에서도 평행 경로를 생성한다.
 - **오버랩/스킵 방지**: 작업 폭(작업기 너비)을 사전에 입력하면 다음 패스의 간격을 자동 계산해 중복 살포(오버랩)나 미살포 구간(스킵) 없이 작업한다.
 
-## 정밀도 등급
+---
+
+## 4. 정밀도 등급
 
 GNSS 보정 방법에 따라 달성 가능한 정확도와 필요 인프라가 다르다.
 

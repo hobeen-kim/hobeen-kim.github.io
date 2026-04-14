@@ -3,7 +3,11 @@ title: "농업 데이터와 플랫폼"
 description: "FMIS, ISOXML, agrirouter 등 농업 데이터 관리 시스템과 클라우드 플랫폼의 역할을 이해한다."
 date: 2026-04-13
 tags: [스마트농업, FMIS, ISOXML, 클라우드, agrirouter]
+prev: /study/smart-agriculture/11-ai-agriculture
+next: /study/smart-agriculture/13-smart-farm
 ---
+
+# 농업 데이터와 플랫폼
 
 ::: info 학습 목표
 
@@ -14,7 +18,9 @@ tags: [스마트농업, FMIS, ISOXML, 클라우드, agrirouter]
 
 :::
 
-## 농업 데이터의 종류
+---
+
+## 1. 농업 데이터의 종류
 
 현대 농업에서 생성되는 데이터는 성격과 출처에 따라 크게 네 가지로 분류된다. 각 데이터는 서로 독립적으로 존재하는 것이 아니라, 통합·분석될 때 비로소 의사결정 가치를 가진다.
 
@@ -36,7 +42,9 @@ flowchart LR
     F --> G[다음 시즌<br>처방맵 생성]
 ```
 
-## FMIS(Farm Management Information System)
+---
+
+## 2. FMIS(Farm Management Information System)
 
 FMIS는 농장 경영에 필요한 모든 데이터를 통합 관리하는 소프트웨어 시스템이다. 단순한 기록 도구가 아니라 작업 계획부터 결과 분석까지 농장 운영 전 사이클을 지원한다.
 
@@ -71,7 +79,9 @@ flowchart TD
     E -->|피드백| B
 ```
 
-## ISOXML / TaskData
+---
+
+## 3. ISOXML / TaskData
 
 ISOXML은 ISOBUS Task Controller(TC)가 사용하는 국제 표준 데이터 교환 포맷이다. ISO 11783-10 표준에 정의되어 있으며, FMIS와 농기계 간 작업 지시 및 결과 데이터를 교환하는 데 사용된다.
 
@@ -119,7 +129,9 @@ ISOXML TaskData의 핵심 구조는 다음과 같다.
 
 파일 확장자는 `.xml`이며, 포장 경계(shapefile)와 함께 묶여 USB 메모리나 무선 통신으로 기계에 전달된다.
 
-## 데이터 연동 플랫폼
+---
+
+## 4. 데이터 연동 플랫폼
 
 농기계 제조사와 소프트웨어 업체가 각기 다른 데이터 형식과 플랫폼을 운영하면, 농민은 브랜드를 혼용할 때 데이터 연동 문제에 부딪힌다. 이를 해결하기 위해 제조사 중립적인 데이터 허브가 등장했다.
 

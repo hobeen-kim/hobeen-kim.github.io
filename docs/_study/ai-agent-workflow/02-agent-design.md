@@ -186,12 +186,78 @@ flowchart TD
     end
 ```
 
+## 6. 이종 모델 검증자 — Cross-Model Verifier
+
+같은 모델이 자신의 출력을 검증하는 구조는 구조적으로 취약하다. Claude가 구현하고 Claude가 검증하면 동일한 편향이 공유된다. 이를 <strong>Self-review bias</strong>라 부른다.
+
+이종 모델 검증자는 구현에 사용한 모델과 다른 모델을 Verifier 역할에 투입하는 패턴이다. Claude 기반 Executor가 구현하고, Codex(GPT 계열)가 독립적으로 검토한다.
+
+```mermaid
+flowchart TD
+    E[Executor<br>Claude 기반] -->|구현 결과 제출| V[Verifier<br>Claude 기반]
+    V -->|1차 합격 판정| CROSS[Cross-Model Verifier<br>Codex 기반]
+    CROSS -->|ALLOW| DONE[완료 선언]
+    CROSS -->|BLOCK| RETRY[재작업 요청]
+    CROSS -->|불가용| SKIP[스킵 - 워크플로우 계속]
+```
+
+### 역할 분리 원칙
+
+이종 모델 검증자는 <strong>Advisory(자문)</strong> 역할이다. <strong>Authoritative(권위)</strong> 역할은 여전히 Claude 기반 Verifier가 보유한다.
+
+| 역할 | 담당 | 권한 |
+|------|------|------|
+| 1차 Verifier | Claude Verifier | success_criteria 기준 합격 판정 (authoritative) |
+| Cross-Model Verifier | Codex | 독립 품질 검토, 적대적 리뷰 (advisory) |
+
+Cross-Model Verifier가 BLOCK을 내리면 재작업이 필요하다. 하지만 1차 Verifier가 이미 FAIL을 선언한 상태라면 Codex의 ALLOW가 뒤집을 수 없다. <strong>Codex는 품질 기준을 올릴 수만 있고 낮출 수 없다.</strong>
+
+### Verdict 병합 규칙
+
+| 1차 Verifier | Codex | 최종 결과 |
+|-------------|-------|---------|
+| PASS | ALLOW | PASS |
+| PASS | BLOCK | FAIL → 재작업 |
+| PASS | 불가용 | PASS (스킵) |
+| FAIL | (어느 쪽이든) | FAIL |
+
+### Graceful Gate — 폴백 설계
+
+Cross-Model Verifier는 항상 가용하지 않을 수 있다. Codex CLI가 설치되지 않았거나, 인증이 실패하거나, 타임아웃이 발생할 수 있다. 이때 전체 워크플로우가 블로킹되어서는 안 된다.
+
+세션 시작 시 Codex 가용 여부를 감지하고, 불가용이면 Cross-Model 검증 게이트를 조용히 스킵한다. 1차 Verifier의 결과만으로 워크플로우를 완료한다.
+
+```typescript
+// 세션 시작 시 Codex 가용 여부 감지
+const hud = {
+  codex: await isCodexAvailable(),  // CLI 설치 + 인증 확인
+};
+
+// Cross-Model 게이트 실행
+if (hud.codex) {
+  const codexVerdict = await runCodexReview(implementations);
+  if (codexVerdict === 'BLOCK') {
+    return { result: 'FAIL', source: 'cross-model-verifier' };
+  }
+}
+// Codex 불가용이면 이 블록 자체가 스킵됨
+```
+
+::: info 언제 Cross-Model Verifier를 도입하는가
+- 구현 오류의 비용이 높은 작업 (보안, 결제, 인증 모듈)
+- 1차 Verifier와 Executor가 같은 컨텍스트를 공유했을 때
+- Self-review bias가 반복적으로 문제가 된다는 wisdom이 누적됐을 때
+
+도입 비용(Codex CLI 설정, 추가 API 비용)보다 오류 비용이 클 때만 도입한다.
+:::
+
 ::: tip 핵심 정리
 - 에이전트는 목표를 받아 계획·실행·검증을 스스로 수행한다. 도구와의 차이는 판단과 재시도다.
 - 4가지 역할(Orchestrator, Executor, Specialist, Verifier)은 DRI를 기준으로 분리한다.
 - Orchestrator는 "무엇을"을 정의하고, "어떻게"는 Executor의 DRI다. 이 경계를 침범하면 병목이 생긴다.
 - 완료 선언 권한은 Verifier에게만 있다. Verifier를 거치지 않은 완료는 유효하지 않다.
 - 새 에이전트를 만들기 전에 DRI 중복 여부를 먼저 확인한다.
+- 같은 모델이 자신의 출력을 검증하면 Self-review bias가 발생한다. 비용이 높은 작업에서는 Codex 같은 이종 모델을 Advisory Verifier로 추가한다.
 
 다음 챕터: [CH3. 에이전트 간 소통](/study/ai-agent-workflow/03-communication)
 :::

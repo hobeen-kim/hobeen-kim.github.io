@@ -341,6 +341,7 @@ flowchart TD
 - [ ] 완료 기준이 plan 문서에 명시된 것과 일치하는가?
 - [ ] 구현 방법이 아니라 결과를 검증하는가?
 - [ ] 증거를 확인했는가?
+- [ ] (선택) Codex 가용 시 Cross-Model 검증 게이트를 실행했는가?
 
 ---
 
@@ -359,6 +360,18 @@ flowchart TD
 - plans 없이 실행은 없다.
 - 증거 없이 implementations는 없다.
 - 결정 당일 decisions를 작성한다.
+
+## Cross-Model 검증 게이트 (선택)
+
+Codex(또는 다른 이종 LLM)를 Advisory Verifier로 추가하면 Self-review bias를 줄일 수 있다.
+
+**Verdict 병합 규칙:**
+- 1차 Verifier PASS + Codex ALLOW → 최종 PASS
+- 1차 Verifier PASS + Codex BLOCK → 재작업
+- 1차 Verifier PASS + Codex 불가용 → PASS (스킵)
+- 1차 Verifier FAIL + (어느 쪽이든) → FAIL
+
+**Graceful Gate 원칙:** Codex가 불가용이면 게이트를 블로킹 없이 스킵한다. Codex는 품질 기준을 올릴 수만 있고 낮출 수 없다.
 ```
 
 :::

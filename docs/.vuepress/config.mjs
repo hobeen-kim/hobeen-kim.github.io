@@ -297,6 +297,35 @@ const theme = {
           ],
         },
       ],
+      '/study/ai-agent-workflow/': [
+        {
+          text: '원칙',
+          collapsible: false,
+          children: [
+            { text: '소개', link: '/study/ai-agent-workflow/' },
+            { text: 'CH1. 대원칙', link: '/study/ai-agent-workflow/01-core-principles' },
+          ],
+        },
+        {
+          text: '에이전트 설계',
+          collapsible: false,
+          children: [
+            { text: 'CH2. 어떤 에이전트를 만들 것인가', link: '/study/ai-agent-workflow/02-agent-design' },
+            { text: 'CH3. 에이전트 간 소통', link: '/study/ai-agent-workflow/03-communication' },
+            { text: 'CH4. TypeScript 레지스트리 훅 구현', link: '/study/ai-agent-workflow/04-registry-hook' },
+            { text: 'CH5. 에이전트 정의 파일 작성법', link: '/study/ai-agent-workflow/05-agent-definition-files' },
+          ],
+        },
+        {
+          text: '운영',
+          collapsible: false,
+          children: [
+            { text: 'CH6. 문서화 체계', link: '/study/ai-agent-workflow/06-documentation' },
+            { text: 'CH7. 에이전트 헌법', link: '/study/ai-agent-workflow/07-constitution' },
+            { text: 'CH8. Scaffold', link: '/study/ai-agent-workflow/08-scaffold' },
+          ],
+        },
+      ],
     },
     lastUpdated: false,
     contributors: false,

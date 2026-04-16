@@ -184,7 +184,43 @@ GitHub Actions가 자동 배포.
 
 ## 새 스터디 추가 시 수정 필요한 파일
 
-1. `docs/.vuepress/config.mjs` — sidebar에 새 경로 추가 (이것만 수정)
+1. `docs/.vuepress/config.mjs` — sidebar에 새 경로 추가
 2. `docs/_study/{slug}/` — 새 디렉토리에 README.md + 챕터 파일들 생성
+3. `docs/.vuepress/data/knowledge-graph.js` — 노드 + 엣지 추가 (필수)
 
 navbar, client.js, studies.js, 컴포넌트는 수정 불필요 — 자동으로 새 스터디를 인식함.
+
+### knowledge-graph.js 수정 방법
+
+`docs/.vuepress/data/knowledge-graph.js`에 노드와 엣지를 추가한다.
+
+**노드 추가** (nodes 배열):
+```js
+{ id: '{slug}', label: '표시명\n(줄바꿈 가능)', size: 26, status: 'active', link: '/study/{slug}/', x: 0.0~1.0, y: 0.0~1.0 }
+```
+- `size`: 노드 원 크기. 대분류 36, 스터디 26, 하위 항목 20~22
+- `status`: `'active'`(링크 있음) / `'planned'`(준비 중, 점선 원)
+- `x`, `y`: 화면 비율 좌표 (0~1). 부모 노드 주변에 배치
+
+**엣지 추가** (edges 배열):
+```js
+{ source: '부모노드id', target: '{slug}' }
+```
+
+**현재 대분류 노드 id**:
+- `smart-agriculture` — 스마트농업 계열
+- `software` — 소프트웨어 계열 (database, backend, infra 등)
+- `ai` — AI 계열
+
+## 현재 스터디 목록
+
+새 스터디 추가 전 아래 목록을 확인해 중복·연관 스터디 여부를 파악한다.
+
+```
+공부하기
+├── AI Agent 워크플로우 만들기   (ai-agent-workflow)
+├── 데이터베이스                  (database)
+│   └── DB 성능 최적화            (db-optimization)
+└── 스마트농업                    (smart-agriculture)
+    └── ISOBUS 스터디             (isobus)
+```

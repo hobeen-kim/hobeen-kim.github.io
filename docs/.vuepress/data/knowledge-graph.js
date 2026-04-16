@@ -38,11 +38,12 @@ export const nodes = [
 
   // === AI — 하단 중앙 ===
   { id: 'ai', label: 'AI', size: 36, status: 'active', link: null, x: 0.50, y: 0.30 },
-  { id: 'machine-learning', label: '머신러닝', size: 28, status: 'planned', link: null, x: 0.42, y: 0.48 },
-  { id: 'deep-learning', label: '딥러닝', size: 24, status: 'planned', link: null, x: 0.36, y: 0.64 },
-  { id: 'computer-vision', label: '컴퓨터 비전', size: 24, status: 'planned', link: null, x: 0.50, y: 0.48 },
-  { id: 'time-series', label: '시계열 예측', size: 22, status: 'planned', link: null, x: 0.50, y: 0.64 },
-  { id: 'mlops', label: 'MLOps', size: 22, status: 'planned', link: null, x: 0.58, y: 0.48 },
+  { id: 'ai-agent-workflow', label: 'AI Agent\n워크플로우', size: 26, status: 'active', link: '/study/ai-agent-workflow/', x: 0.42, y: 0.44 },
+  { id: 'machine-learning', label: '머신러닝', size: 28, status: 'planned', link: null, x: 0.42, y: 0.60 },
+  { id: 'deep-learning', label: '딥러닝', size: 24, status: 'planned', link: null, x: 0.36, y: 0.75 },
+  { id: 'computer-vision', label: '컴퓨터 비전', size: 24, status: 'planned', link: null, x: 0.52, y: 0.56 },
+  { id: 'time-series', label: '시계열 예측', size: 22, status: 'planned', link: null, x: 0.50, y: 0.72 },
+  { id: 'mlops', label: 'MLOps', size: 22, status: 'planned', link: null, x: 0.60, y: 0.56 },
 ]
 
 export const edges = [
@@ -85,6 +86,7 @@ export const edges = [
   { source: 'infra', target: 'cicd' },
 
   // === AI ===
+  { source: 'ai', target: 'ai-agent-workflow' },
   { source: 'ai', target: 'machine-learning' },
   { source: 'ai', target: 'computer-vision' },
   { source: 'ai', target: 'time-series' },

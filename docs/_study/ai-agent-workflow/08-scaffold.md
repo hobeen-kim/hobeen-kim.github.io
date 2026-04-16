@@ -29,6 +29,12 @@ my-agent-workspace/
 ├── CLAUDE.md                  ← 프로젝트 특화 클로드 파일
 ├── CONSTITUTION.md            ← 에이전트 헌법
 ├── .claude/
+│   ├── goal.md               ← 북극성 문서 (현재 목표)
+│   ├── plans/                ← 실행 전 합의 문서
+│   ├── implementations/      ← 실행 결과 + 증거
+│   ├── decisions/            ← ADR (왜 이 결정?)
+│   ├── wisdom/               ← 패턴 누적 + 실수 방지
+│   ├── skills/               ← 자기 강화 skill 파일
 │   └── settings.json         ← 훅 연결 설정
 └── package.json              ← TypeScript 실행 설정
 ```
@@ -46,18 +52,25 @@ flowchart TD
     HK --> UP[team-registry-updater.ts<br>상태 업데이트]
 
     AG -->|에이전트 생성| CS
+
+    GOAL[.claude/goal.md<br>북극성 문서] --> PLANS[.claude/plans/<br>실행 전 합의]
+    PLANS --> IMPL[.claude/implementations/<br>증거]
+    IMPL --> VER[Verifier 검증]
+    VER --> WISD[.claude/wisdom/<br>패턴 누적]
 ```
 
 ## 2. 설정 순서 (Step by Step)
 
 ```mermaid
 flowchart LR
-    S1[Step 1<br>파일 복사] --> S2[Step 2<br>CLAUDE.md 수정]
+    S0[Step 0<br>goal.md 작성] --> S1[Step 1<br>파일 복사] --> S2[Step 2<br>CLAUDE.md 수정]
     S2 --> S3[Step 3<br>agents/ 팀 이름 수정]
     S3 --> S4[Step 4<br>npm install]
     S4 --> S5[Step 5<br>settings.json 훅 등록]
     S5 --> S6[Step 6<br>동작 테스트]
 ```
+
+**Step 0**: `.claude/goal.md`를 작성한다. objective, success_criteria, non_goals를 먼저 정의해야 에이전트가 자율적으로 작업을 시작할 수 있다.
 
 **Step 1**: 이 챕터의 템플릿 파일을 프로젝트 루트에 복사한다.
 
@@ -246,8 +259,10 @@ dri: "완료 기준 판단"
 
 ## 절대 규칙
 
+- goal.md 없이 작업 시작은 없다.
 - Verifier의 `approved` 없이 완료는 없다.
 - plans 없이 실행은 없다.
+- implementations에 goal_ref와 instruction은 필수다.
 - 증거 없이 implementations는 없다.
 - 결정 당일 decisions를 작성한다.
 ```
@@ -453,7 +468,73 @@ main().catch((err) => {
 
 :::
 
-## 4. 동작 확인
+## 4. 구현 후 문서 업데이트 플로우
+
+구현이 완료된 시점에 에이전트가 반드시 작성해야 하는 문서가 있다. 이 플로우를 지키지 않으면 "왜 이렇게 구현했는가", "어떤 지시에 의해 시작했는가"를 나중에 추적할 수 없다.
+
+```mermaid
+flowchart TD
+    DONE[구현 완료] --> IMPL[implementations/ 작성<br>goal_ref + 증거]
+    IMPL --> DEC{중요한 결정이<br>있었는가?}
+    DEC -->|예| ADR[decisions/ 작성<br>ADR 형식]
+    DEC -->|아니오| WISD
+    ADR --> WISD{실수 또는<br>학습이 있었는가?}
+    WISD -->|예| WIS[wisdom/ 작성]
+    WISD -->|아니오| GOAL
+    WIS --> GOAL[goal.md 확인<br>success_criteria 충족?]
+    GOAL -->|충족| VER[Verifier에게 제출]
+    GOAL -->|미충족| MORE[추가 구현]
+```
+
+### implementations/ 필수 필드
+
+구현이 완료되면 `.claude/implementations/{작업명}.md`를 작성한다. 다음 필드가 모두 있어야 Verifier가 검증할 수 있다.
+
+```yaml
+---
+title: "구현 결과: 작업명"
+date: 2026-04-16
+executor: executor-dev
+goal_ref: ".claude/goal.md"          # 이 구현을 트리거한 goal
+plan_ref: ".claude/plans/작업명.md"  # 기반이 된 plan
+instruction: "사용자가 인증 모듈 OAuth 전환을 지시" # 어떤 지시에 의해 시작했는가
+status: pending_review
+evidence:
+  - path: "src/auth/oauth.ts"
+    commit: "abc1234"
+  - path: "tests/auth.test.ts"
+    commit: "abc1234"
+remaining: []
+---
+
+# 구현 내용
+
+## 달성한 것
+- OAuth 2.0 엔드포인트 구현 완료
+
+## 증거
+위 frontmatter의 evidence 참조
+
+## goal과의 연결
+`.claude/goal.md`의 objective "레거시 인증 코드를 OAuth 2.0 기반으로 전환한다"를 달성하기 위해 실행했다.
+success_criteria 중 "신규 OAuth 엔드포인트 정상 동작 확인"을 충족한다.
+```
+
+`goal_ref`와 `instruction`이 핵심이다. goal_ref는 이 구현이 어떤 목표를 달성하기 위한 것인지 연결한다. instruction은 "어떤 지시에 의해 이 작업이 시작됐는가"를 한 줄로 기록한다.
+
+### 추적 체인
+
+이 세 필드가 모이면 구현 출처를 완전히 역추적할 수 있다.
+
+```
+instruction (어떤 지시?) 
+    → goal_ref → goal.md (무엇을 달성?)
+    → plan_ref → plans/ (어떻게 실행?)
+    → implementations/ (무엇을 했는가?)
+    → decisions/ (왜 그 방식?)
+```
+
+## 5. 동작 확인
 
 ```bash
 # 레지스트리 초기화 확인
@@ -465,7 +546,7 @@ cat ~/.claude/registry/orchestrator.json
 
 Claude Code에서 동일한 이름의 에이전트를 두 번 생성하려 할 때 훅이 차단 메시지를 반환하면 정상 동작이다.
 
-## 5. 자주 발생하는 문제
+## 6. 자주 발생하는 문제
 
 | 문제 | 원인 | 해결 |
 |------|------|------|

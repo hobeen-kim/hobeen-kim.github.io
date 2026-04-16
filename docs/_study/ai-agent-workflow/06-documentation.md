@@ -2,7 +2,7 @@
 title: "CH6. 문서화 체계 — 어떤 폴더에 무엇을 남기는가"
 description: "에이전트 간 정보 공유의 구체적 구현. 4종 문서의 역할과 작성 규칙을 정의한다"
 date: 2026-04-16
-tags: [Documentation, Obsidian, 문서화, 정보공유]
+tags: [Documentation, CLAUDE.md, ADR, 문서화, 정보공유]
 ---
 
 # CH6. 문서화 체계 — 어떤 폴더에 무엇을 남기는가
@@ -219,17 +219,93 @@ sequenceDiagram
     end
 ```
 
-## 6. Obsidian을 허브로
+## 6. 파일 기반 문서 시스템
 
-모든 문서를 Obsidian vault에 보관한다. Obsidian은 마크다운 기반이므로 에이전트가 직접 읽고 쓸 수 있다. 에이전트는 작업 시작 전 vault에서 관련 plans와 wisdom을 조회하여 컨텍스트를 파악한다.
+파일 기반 문서 관리가 AI 에이전트 시스템에서 가장 널리 쓰이는 이유는 세 가지다.
 
-archivist 에이전트가 vault 관리를 담당한다. stale 문서를 정리하고, 중복 wisdom을 통합하고, decisions의 상태를 최신으로 유지한다.
+<strong>Git 버전관리</strong> — 에이전트가 작성한 모든 문서가 커밋 히스토리에 남는다. 언제 어떤 결정이 내려졌는지 `git log`로 추적 가능하다.
+
+<strong>에이전트 직접 접근</strong> — 에이전트는 파일을 Read 도구로 바로 읽는다. 별도 API 호출, 임베딩, 인덱싱 없이 즉시 읽고 쓴다.
+
+<strong>비용 0</strong> — 외부 서비스(Pinecone, Notion, Confluence)가 필요 없다. 파일 시스템만 있으면 된다.
+
+### 디렉토리 구조
+
+```
+{project-root}/
+├── CLAUDE.md                    ← 항상 로드되는 핵심 컨텍스트
+├── .claude/
+│   ├── plans/                   ← 실행 전 합의 문서
+│   ├── implementations/         ← 실행 결과 + 증거
+│   ├── decisions/               ← ADR (Architecture Decision Records)
+│   └── wisdom/                  ← 반복 실수 방지 + 패턴 누적
+└── notepad.md                   ← 세션 간 working memory
+```
+
+### CLAUDE.md — 에이전트의 필독 컨텍스트
+
+`CLAUDE.md`는 대화가 시작될 때마다 자동으로 로드된다. 에이전트 시스템에서는 이 파일에 팀 구성, 역할 정의, 핵심 규칙을 담는다.
+
+```markdown
+# 프로젝트 컨텍스트
+
+## 팀 구성
+- Orchestrator: 작업 분해 + DRI 배분
+- Executor: 구현 + implementations/ 작성
+- Verifier: 기준 충족 여부 검증
+
+## 문서 위치
+- plans/: .claude/plans/{작업명}.md
+- implementations/: .claude/implementations/{작업명}.md
+- decisions/: .claude/decisions/ADR-{번호}-{제목}.md
+- wisdom/: .claude/wisdom/{태그}-{제목}.md
+
+## 규칙
+- plans/ 없이 실행 금지
+- implementations/는 증거(파일 경로, 커밋) 필수
+- decisions/는 결정 당일 작성
+```
+
+`CLAUDE.md`는 Git에 커밋된다. 팀 전체가 같은 규칙을 공유한다.
+
+### notepad.md — 세션 간 working memory
+
+대화(세션)가 초기화되면 에이전트의 컨텍스트 윈도우가 비워진다. `notepad.md`는 세션을 넘어 살아남는 working memory다.
+
+```markdown
+# Priority Context
+<!-- 500자 이하. 세션 시작 시 항상 로드. 가장 중요한 맥락만 -->
+현재 진행 중인 작업: 인증 모듈 리팩토링
+관련 wisdom: auth-null-session-bug.md 참고 필수
+
+# Working Memory
+<!-- 타임스탬프 포함. 7일 후 자동 prune -->
+[2026-04-16] DB 마이그레이션 완료. 롤백 스크립트: scripts/rollback-auth.sql
+
+# MANUAL
+<!-- 절대 삭제 안 됨. 팀 연락처, 배포 정보 등 -->
+프로덕션 배포: GitHub Actions (main 브랜치 push 트리거)
+```
+
+Priority Context는 500자 이하로 유지한다. 길어지면 에이전트가 매 세션마다 과거 컨텍스트 파악에 토큰을 낭비한다.
+
+### 대규모 지식베이스 — 벡터 스토어
+
+문서가 수백~수천 페이지 규모라면 파일 기반 검색이 비효율적이다. 이때는 벡터 스토어를 도입한다.
+
+| 규모 | 방식 | 도구 |
+|------|------|------|
+| 소규모 (~50 파일) | 파일 기반 직접 읽기 | Read 도구 |
+| 중규모 (~500 파일) | Grep + 파일 읽기 조합 | Grep + Read |
+| 대규모 (500+) | 벡터 임베딩 + 시맨틱 검색 | Chroma, Pinecone |
+
+대부분의 에이전트 팀은 소규모~중규모 범위에서 작업한다. 벡터 스토어는 사내 문서 Q&A 에이전트처럼 정형 지식이 많을 때 도입한다.
 
 ::: tip 핵심 정리
 - 문서화는 에이전트 간 비동기 소통 채널이다. 에이전트가 사라져도 문서는 남는다.
 - 4종 문서는 작업 라이프사이클의 각기 다른 시점을 담당한다. plans → implementations → decisions → wisdom 순서로 쌓인다.
 - plans 없이 시작 금지, implementations는 증거 필수, decisions는 당일 작성, wisdom은 팀 공유.
-- Obsidian vault가 문서의 중앙 허브다. 에이전트는 작업 전 vault를 먼저 읽는다.
+- CLAUDE.md가 에이전트의 필독 컨텍스트다. notepad.md는 세션을 넘어 살아남는 working memory다.
 
 다음 챕터: [CH7. 에이전트 헌법](/study/ai-agent-workflow/07-constitution)
 :::

@@ -41,6 +41,7 @@ tags: [AI, Agent, Workflow, Claude, TypeScript]
 
 ```mermaid
 flowchart TD
+    CH0[CH0. 전체 플로우<br>지시에서 완료까지]
     CH1[CH1. 대원칙<br>8가지 행동 규칙]
     CH2[CH2. 에이전트 설계<br>역할 분류 · DRI]
     CH3[CH3. 에이전트 간 소통<br>레지스트리 훅 방식]
@@ -50,6 +51,7 @@ flowchart TD
     CH7[CH7. 에이전트 헌법<br>작업 전후 체크리스트]
     CH8[CH8. Scaffold<br>바로 복사해서 쓰는 템플릿]
 
+    CH0 --> CH1
     CH1 --> CH2
     CH2 --> CH3
     CH3 --> CH4
@@ -62,6 +64,7 @@ flowchart TD
 ## 목차
 
 ### 원칙
+0. [전체 플로우 — 지시에서 완료까지](/study/ai-agent-workflow/00-overview) — PDCA 사이클, 역할별 흐름, 전체 시퀀스
 1. [대원칙 — 에이전트가 지켜야 할 8가지 행동 규칙](/study/ai-agent-workflow/01-core-principles) — Mission, Aim Higher, Focus, Question, Execution, Learn, Urgency, Feedback
 
 ### 에이전트 설계

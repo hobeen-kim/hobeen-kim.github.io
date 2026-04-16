@@ -303,6 +303,7 @@ const theme = {
           collapsible: false,
           children: [
             { text: '소개', link: '/study/ai-agent-workflow/' },
+            { text: 'CH0. 전체 플로우', link: '/study/ai-agent-workflow/00-overview' },
             { text: 'CH1. 대원칙', link: '/study/ai-agent-workflow/01-core-principles' },
           ],
         },

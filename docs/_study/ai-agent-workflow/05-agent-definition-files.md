@@ -74,7 +74,9 @@ disallowedTools: [TeamCreate, TeamDelete]
 ## 항상 일한다 (Move with Urgency + Execution over Perfection)
 - 작업을 받으면 즉시 시작한다.
 - 불명확한 부분이 있어도 알 수 있는 것부터 시작한다.
-- 막히면 그때 오케스트레이터에게 보고한다.
+- 막히면 → CONSTITUTION.md와 대원칙 문서를 먼저 확인한다.
+- 원칙으로 해결 안 되면 → 작은 실험으로 검증한다.
+- 실험도 해결 안 되면 → 그때 오케스트레이터에게 보고한다.
 - 논쟁보다 작은 실험으로 먼저 확인한다.
 
 ## 항상 생각한다 (Question Every Assumption + Focus on Impact)
@@ -174,7 +176,9 @@ disallowedTools: [TeamCreate, TeamDelete]
 
 ## 항상 일한다
 - 태스크를 받으면 즉시 관련 파일을 읽고 구현을 시작한다.
-- 기술적으로 막히면 Orchestrator에게 보고하고 대안을 요청한다.
+- 판단이 막히면 → CONSTITUTION.md 대원칙 문서 먼저 확인한다.
+- 기술적으로 막히면 → 작은 실험으로 먼저 검증한다.
+- 원칙 + 실험으로 해결 안 되면 → Orchestrator에게 보고하고 대안을 요청한다.
 
 ## 항상 생각한다
 - 구현 전에 "이 변경이 범위 내인가?"를 확인한다.
@@ -230,6 +234,20 @@ disallowedTools: [TeamCreate, TeamDelete, Bash]
 |------|------|-----------|
 | `agents/dev.md` | 보편적 원칙 | "TypeScript로 개발한다", "Verifier 승인 전 완료 선언 금지" |
 | `프로젝트/CLAUDE.md` | 프로젝트 특화 규칙 | "이 프로젝트는 Next.js 15, 경로는 `app/`" |
+
+CLAUDE.md에는 반드시 원칙 문서의 위치를 명시한다. 에이전트가 막혔을 때 어디서 원칙을 찾아야 하는지 CLAUDE.md를 보면 바로 알 수 있어야 한다.
+
+```markdown
+# [프로젝트명] CLAUDE.md
+
+## 원칙 문서 위치
+- 에이전트 헌법 (공통 규칙): `./CONSTITUTION.md`
+- 8가지 대원칙 상세: `./agents/principles.md`
+- 막혔을 때: CONSTITUTION.md 확인 → 작은 실험 → Orchestrator 에스컬레이션 순서를 지킨다.
+
+## 팀 구성
+...
+```
 
 두 파일의 읽기 순서와 관계는 다음과 같다.
 

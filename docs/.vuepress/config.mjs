@@ -297,6 +297,59 @@ const theme = {
           ],
         },
       ],
+      '/study/oauth/': [
+        {
+          text: '왜 OAuth가 필요한가',
+          collapsible: false,
+          children: [
+            { text: '소개', link: '/study/oauth/' },
+            { text: 'CH1. 비밀번호를 공유하던 시절', link: '/study/oauth/01-password-sharing-era' },
+            { text: 'CH2. 세션·쿠키 vs 토큰', link: '/study/oauth/02-session-vs-token' },
+            { text: 'CH3. 인증과 인가는 어떻게 다른가', link: '/study/oauth/03-authn-vs-authz' },
+            { text: 'CH4. OAuth는 무엇을 해결했는가', link: '/study/oauth/04-what-oauth-solves' },
+          ],
+        },
+        {
+          text: 'OAuth 2.0 핵심',
+          collapsible: false,
+          children: [
+            { text: 'CH5. 4가지 역할과 용어', link: '/study/oauth/05-roles-and-terms' },
+            { text: 'CH6. Authorization Code Flow', link: '/study/oauth/06-authorization-code-flow' },
+            { text: 'CH7. 나머지 Grant Type과 한계', link: '/study/oauth/07-other-grant-types' },
+            { text: 'CH8. Access·Refresh Token 수명 주기', link: '/study/oauth/08-token-lifecycle' },
+          ],
+        },
+        {
+          text: 'OpenID Connect',
+          collapsible: false,
+          children: [
+            { text: 'CH9. OIDC는 왜 태어났나', link: '/study/oauth/09-why-oidc' },
+            { text: 'CH10. ID Token과 JWT 구조', link: '/study/oauth/10-id-token-jwt' },
+            { text: 'CH11. Discovery · JWKS · UserInfo', link: '/study/oauth/11-discovery-jwks-userinfo' },
+          ],
+        },
+        {
+          text: '보안 심화',
+          collapsible: false,
+          children: [
+            { text: 'CH12. PKCE', link: '/study/oauth/12-pkce' },
+            { text: 'CH13. 토큰 수명 관리 전략', link: '/study/oauth/13-token-strategy' },
+            { text: 'CH14. 토큰 저장·전송과 BFF 패턴', link: '/study/oauth/14-token-storage-bff' },
+            { text: 'CH15. OAuth를 노리는 공격들', link: '/study/oauth/15-attacks' },
+          ],
+        },
+        {
+          text: '실전 구현·운영',
+          collapsible: false,
+          children: [
+            { text: 'CH16. Spring Security OAuth2 Client', link: '/study/oauth/16-spring-security' },
+            { text: 'CH17. Keycloak으로 AS 구축', link: '/study/oauth/17-keycloak' },
+            { text: 'CH18. SSO와 Federation', link: '/study/oauth/18-sso-federation' },
+            { text: 'CH19. 관찰성과 감사', link: '/study/oauth/19-observability' },
+            { text: 'CH20. OAuth의 미래', link: '/study/oauth/20-future' },
+          ],
+        },
+      ],
       '/study/ai-agent-workflow/': [
         {
           text: '원칙',

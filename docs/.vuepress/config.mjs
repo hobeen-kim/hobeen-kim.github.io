@@ -297,6 +297,76 @@ const theme = {
           ],
         },
       ],
+      '/study/keycloak/': [
+        {
+          text: 'Keycloak 입문',
+          collapsible: false,
+          children: [
+            { text: '소개', link: '/study/keycloak/' },
+            { text: 'CH1. Keycloak 개요와 역사', link: '/study/keycloak/01-overview' },
+            { text: 'CH2. 로컬에 Keycloak 기동', link: '/study/keycloak/02-quickstart' },
+            { text: 'CH3. Admin Console 구조', link: '/study/keycloak/03-admin-console' },
+          ],
+        },
+        {
+          text: '핵심 객체 모델',
+          collapsible: false,
+          children: [
+            { text: 'CH4. Realm과 Organizations', link: '/study/keycloak/04-realm-organizations' },
+            { text: 'CH5. Client와 Service Account', link: '/study/keycloak/05-client-service-account' },
+            { text: 'CH6. 사용자와 자격 증명', link: '/study/keycloak/06-user-credentials' },
+            { text: 'CH7. Role·Group과 Composite Role', link: '/study/keycloak/07-role-group' },
+          ],
+        },
+        {
+          text: '토큰·권한·프로토콜',
+          collapsible: false,
+          children: [
+            { text: 'CH8. Client Scope와 Protocol Mapper', link: '/study/keycloak/08-protocol-mapper' },
+            { text: 'CH9. Authorization Services와 UMA', link: '/study/keycloak/09-authz-uma' },
+            { text: 'CH10. SAML 2.0과 Token Exchange', link: '/study/keycloak/10-saml-token-exchange' },
+          ],
+        },
+        {
+          text: '인증 정책과 플로우',
+          collapsible: false,
+          children: [
+            { text: 'CH11. 인증 플로우 커스터마이징', link: '/study/keycloak/11-auth-flow' },
+            { text: 'CH12. Password Policy와 Brute Force', link: '/study/keycloak/12-password-policy' },
+            { text: 'CH13. MFA — TOTP / WebAuthn', link: '/study/keycloak/13-mfa' },
+          ],
+        },
+        {
+          text: '페더레이션',
+          collapsible: false,
+          children: [
+            { text: 'CH14. User Federation (LDAP/AD)', link: '/study/keycloak/14-user-federation' },
+            { text: 'CH15. Identity Brokering', link: '/study/keycloak/15-identity-brokering' },
+          ],
+        },
+        {
+          text: '커스터마이징 (SPI)',
+          collapsible: false,
+          children: [
+            { text: 'CH16. SPI로 Keycloak 확장', link: '/study/keycloak/16-spi-overview' },
+            { text: 'CH17. 커스텀 Authenticator', link: '/study/keycloak/17-custom-authenticator' },
+            { text: 'CH18. 커스텀 User Storage', link: '/study/keycloak/18-custom-user-storage' },
+            { text: 'CH19. Theme 커스터마이징', link: '/study/keycloak/19-theme' },
+          ],
+        },
+        {
+          text: '운영과 확장',
+          collapsible: false,
+          children: [
+            { text: 'CH20. Infinispan HA 클러스터링', link: '/study/keycloak/20-ha-clustering' },
+            { text: 'CH21. Kubernetes + Operator 배포', link: '/study/keycloak/21-k8s-operator' },
+            { text: 'CH22. 데이터베이스와 성능', link: '/study/keycloak/22-database-performance' },
+            { text: 'CH23. Admin REST API와 자동화', link: '/study/keycloak/23-admin-rest-api' },
+            { text: 'CH24. Backup/Restore와 Realm 이관', link: '/study/keycloak/24-backup-restore' },
+            { text: 'CH25. 모니터링·감사와 업그레이드', link: '/study/keycloak/25-monitoring-upgrade' },
+          ],
+        },
+      ],
       '/study/oauth/': [
         {
           text: '왜 OAuth가 필요한가',

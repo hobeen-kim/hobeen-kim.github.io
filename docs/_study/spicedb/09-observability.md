@@ -1,0 +1,169 @@
+---
+title: CH9. 관측성과 튜닝
+description: SpiceDB가 노출하는 Prometheus 메트릭, OpenTelemetry 트레이싱, pprof 프로파일링으로 권한 시스템을 운영자 시선으로 들여다본다.
+date: 2026-04-20
+tags:
+  - SpiceDB
+  - Observability
+  - Metrics
+  - Tracing
+  - Prometheus
+  - OpenTelemetry
+---
+
+# CH9. 관측성과 튜닝
+
+## 학습 목표
+
+- SpiceDB가 기본 제공하는 Prometheus 메트릭의 의미와 임계값을 이해한다.
+- OpenTelemetry 트레이싱으로 느린 Check의 원인을 dispatch 체인 단위로 분해한다.
+- pprof로 CPU·Heap·Goroutine 프로파일을 수집해 스키마 평가 병목을 찾는다.
+- 권한 시스템에 특화된 알림(Alerting) 규칙과 튜닝 체크리스트를 세운다.
+
+## 관측성의 3축 — Metrics, Tracing, Logs
+
+SpiceDB는 다른 어떤 데이터베이스보다도 관측성에 진심이다. 권한 결정은 결과(true/false)만으로는 디버깅이 거의 불가능하기 때문이다. "왜 이 사용자가 이 리소스에 접근할 수 없는가"는 수많은 relation과 arrow를 타고 내려가는 평가 과정의 스냅샷이 있어야 답할 수 있다. 그래서 SpiceDB는 Metrics(수치), Tracing(흐름), Logs(사건)를 모두 1급 시민으로 취급한다.
+
+Metrics는 "시스템이 건강한가"를 초단위로 본다. Tracing은 "이 한 번의 요청이 내부에서 어떤 경로를 탔는가"를 보여준다. Logs는 "이 사건은 언제, 누구에 의해, 어떤 인자로 일어났는가"를 남긴다. 셋 중 하나라도 빠지면 장애 대응이 수사로 바뀐다. SpiceDB 운영자의 눈높이에서는 메트릭을 항상 보고, 이상 징후가 생기면 트레이스로 파고, 감사·규정 준수 이슈는 로그로 증명한다.
+
+## Prometheus Metrics
+
+SpiceDB는 기본으로 HTTP `/metrics` 엔드포인트를 노출한다. 기본 포트는 `9090`이며 `--metrics-addr`로 조정할 수 있다. Prometheus가 주기적으로 긁어가고, Grafana에서 대시보드로 본다. Authzed에서 공식 Grafana 템플릿을 제공하므로 처음에는 그걸 들여와 쓰면 된다.
+
+운영자가 매일 봐야 하는 지표는 네 묶음이다.
+
+첫째는 **Dispatch Cache 계열**이다. `spicedb_dispatch_cache_hits_total`, `spicedb_dispatch_cache_misses_total`이 대표적이다. SpiceDB의 성능은 사실상 dispatch cache가 결정한다고 해도 과언이 아니다. hit rate가 80% 밑으로 떨어지면 cache 크기가 작거나 workload가 산발적이어서 locality가 깨졌다는 신호다.
+
+둘째는 **gRPC 요청 계열**이다. `grpc_server_handled_total`로 초당 요청수(RPS), `grpc_server_handling_seconds` 히스토그램으로 레이턴시 분포를 본다. `CheckPermission`만 따로 라벨 필터링해서 p50/p95/p99를 대시보드 맨 위에 둔다.
+
+셋째는 **Datastore 계열**이다. `spicedb_datastore_query_duration_seconds`는 Postgres나 CockroachDB에 쏘는 쿼리 1회의 레이턴시다. 이게 튀면 Check는 아무리 최적화해도 느려진다. `spicedb_datastore_revision_check_duration_seconds`도 같이 본다.
+
+넷째는 **Dispatch 계열**이다. `spicedb_dispatch_requests_total`, `spicedb_dispatch_depth` 등으로 한 Check가 내부적으로 몇 번의 dispatch를 타는지 본다. depth가 갑자기 올라간다면 schema가 커졌거나, 순환에 가까운 평가 경로가 생긴 것이다.
+
+::: tip 권장 SLO
+Check p99 < 10ms (캐시 hit 기준), 캐시 hit rate > 80%, Datastore p99 < 20ms. 이 세 줄을 대시보드 상단 고정 패널로 두면 "오늘 권한이 건강한가"를 3초 만에 알 수 있다.
+:::
+
+## OpenTelemetry Tracing
+
+메트릭이 "건강 검진"이라면 트레이싱은 "CT 촬영"이다. `--otel-provider=otlphttp`와 `--otel-endpoint=<collector>`로 활성화하면 Check·Lookup 등 모든 API 호출이 span으로 쪼개져 컬렉터로 전송된다. Jaeger·Tempo·Honeycomb 어디에 붙여도 된다.
+
+Trace를 켜면 비로소 보이는 것이 dispatch chain이다. `document:readme#view@user:alice`를 묻는 단 한 번의 Check가 내부적으로는 `document#viewer` 조회, `document#parent` 조회, 상위 `folder#view` 재귀 dispatch 등으로 쪼개진다. 느린 Check의 범인은 대부분 이 체인 속 특정 span이다.
+
+실전에서 가장 자주 마주치는 유형은 세 가지다. 첫째, 깊은 폴더 계층을 타고 올라가는 Drive 스타일 모델에서 `parent->view` 재귀가 길어지는 경우. 둘째, `organization#member` 같은 넓은 subject relation을 풀면서 수천 명의 멤버를 검사하는 경우. 셋째, Caveat 평가가 느려 각 tuple마다 context 계산이 반복되는 경우다. Trace view에서 span 길이만 봐도 어느 유형인지 바로 보인다.
+
+::: info Trace와 Metrics의 역할 분담
+메트릭은 "p99가 튀었다"까지만 말한다. 그 특정 요청의 원인은 trace가 답한다. 트레이스 샘플링은 1%~10%면 충분하다. 느린 요청은 tail-based sampling으로 100% 수집하는 것이 이상적이다.
+:::
+
+## 구조화된 로그
+
+SpiceDB 로그는 JSON으로 내보낼 수 있다. `--log-format=json`, `--log-level=info`(prod) 또는 `debug`(디버깅 한정). 로그는 두 종류로 구분해서 다룬다.
+
+**Runtime log**는 내부 상태·경고·에러다. DB 연결 실패, dispatch 오류, 설정 리로드 같은 이벤트가 여기로 간다. 일반적인 애플리케이션 로그와 동일하게 처리한다.
+
+**Audit log**는 "누가 언제 무엇을 썼는가"다. `WriteRelationships`, `WriteSchema`, `DeleteRelationships` 같은 변경 이벤트는 반드시 별도 sink로 빼서 장기 보관한다. 감사·규정 준수·사고 포렌식에서 이 로그가 증거다. runtime과 섞지 말 것.
+
+## pprof 프로파일링
+
+수치와 trace로도 원인이 안 잡힐 때가 있다. "특정 schema를 쓰고 나서부터 Check p99가 갑자기 2배가 됐다" 같은 상황이 대표적이다. 이럴 때 `--pprof-addr=:6060`을 켜면 Go 표준 pprof 엔드포인트가 열린다.
+
+- CPU profile: `go tool pprof http://host:6060/debug/pprof/profile?seconds=30`
+- Heap profile: `go tool pprof http://host:6060/debug/pprof/heap`
+- Goroutine dump: `curl http://host:6060/debug/pprof/goroutine?debug=2`
+
+실전 사례 하나. 어떤 팀이 새 schema를 올린 뒤 특정 조직에서만 Check p99가 10ms에서 80ms로 뛰었다. trace는 dispatch가 8단계까지 내려간다고 알려줬지만 왜 그렇게 깊은지는 말해주지 않았다. CPU flamegraph를 떴더니 permission rewrite 평가 함수가 전체 CPU의 40%를 잡아먹고 있었다. schema를 봤더니 새로 추가한 permission이 중첩된 `+` 합집합 안에 같은 arrow를 3번 재귀로 타고 있었다. 단순화하자 p99는 다시 12ms로 돌아왔다.
+
+## 알림(Alerting) 기준
+
+대시보드만 있고 알림이 없으면 밤에 못 잔다. 권한 시스템에서는 다음 네 가지가 최소 알림이다.
+
+- **Check p99 latency 임계 초과** — 기본값 50ms 초과 5분 지속. p99가 튀면 사용자 경험이 무너지고, 애플리케이션 전체의 tail latency를 끌어올린다.
+- **캐시 hit rate 급락** — 지난 1시간 평균 대비 20%p 이상 하락. cache warm-up 실패·노드 재시작·신규 workload 유입 등을 의심한다.
+- **Datastore 연결 풀 고갈** — `spicedb_datastore_connections_in_use / max` > 0.9. 풀이 가득 차면 모든 요청이 줄 서고 tail latency가 폭발한다.
+- **Watch consumer lag** — Watch API를 쓰는 외부 consumer가 있다면, revision 지연 초 수를 모니터링하고 임계 초과 시 알림.
+
+## 튜닝 체크리스트
+
+성능 이슈가 보고되면 다음 10개 항목을 순서대로 훑는다. 대부분의 현실 성능 문제는 이 중 1~3개에서 발견된다.
+
+1. Schema가 너무 많은 arrow를 재귀로 타지 않는가. 한 permission이 3단계 이상 깊이로 arrow를 타면 캐시가 있어도 병목이 된다.
+2. Dispatch cache 크기는 충분한가. 기본값은 작은 편이다. 워크로드에 맞춰 `--dispatch-cluster-cache-max-cost` 등을 조정한다.
+3. Consistency 옵션을 `minimize_latency`로 둘 수 있는 경로를 찾았는가. 모든 요청에 `fully_consistent`를 쓰면 캐시가 무의미해진다.
+4. LookupResources에 페이지네이션을 붙였는가. 대량 리소스 조회는 cursor 기반으로 나눠 받는다.
+5. 불필요한 Expand 호출은 없는가. Expand는 디버깅·UI용이지 권한 판정용이 아니다.
+6. Write 후 매 Check에 `fully_consistent`를 찍고 있지 않는가. ZedToken으로 `at_least_as_fresh_as`를 쓰는 것이 정답이다.
+7. Connection pool은 CPU core 수 × 2~4 수준인가. 과하면 DB 쪽이, 부족하면 SpiceDB 쪽이 병목.
+8. Datastore 레이턴시가 Check의 지배 요인이 되고 있지 않은가. 그렇다면 SpiceDB 튜닝보다 Datastore 튜닝이 먼저다.
+9. Wildcards(`user:*`) 남용으로 cache churn이 발생하지 않는가. 광범위 subject는 캐시 효율을 떨어뜨린다.
+10. 감사 로그를 별도 sink로 분리했는가. runtime·audit이 섞이면 로그 파이프라인 비용이 통제를 벗어난다.
+
+## 관측성 데이터 파이프라인
+
+```mermaid
+flowchart LR
+    SpiceDB[SpiceDB 노드] -->|/metrics scrape| Prom[Prometheus]
+    SpiceDB -->|OTLP| Coll[OTel Collector]
+    SpiceDB -->|stdout JSON| Fluent[Fluent Bit]
+    SpiceDB -->|/debug/pprof| Dev[개발자 pprof]
+
+    Prom --> Graf[Grafana 대시보드]
+    Prom --> Alert[Alertmanager]
+    Coll --> Tempo[Tempo / Jaeger]
+    Coll --> Honey[Honeycomb]
+    Fluent --> Loki[Loki]
+    Fluent --> Audit[(Audit Sink)]
+
+    Alert -->|PagerDuty/Slack| On[On-call]
+```
+
+세 축이 각각 다른 파이프라인으로 흐른다. Metrics는 Prometheus로, Trace는 OTel Collector를 거쳐 Tempo나 Honeycomb으로, Log는 Fluent Bit을 거쳐 Loki(runtime)와 감사 저장소(audit)로 분기된다. 이 그림을 그려 두고 팀에 공유하면 신규 입사자가 하루 만에 따라잡는다.
+
+## 느린 Check 트레이스 읽기
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Client
+    participant S as SpiceDB
+    participant Cache as Dispatch Cache
+    participant DS as Datastore
+
+    C->>S: CheckPermission(document:readme#view@user:alice)
+    S->>Cache: lookup document#view cache
+    Cache-->>S: MISS
+    S->>DS: fetch document:readme#viewer
+    DS-->>S: (empty)
+    S->>DS: fetch document:readme#parent
+    DS-->>S: folder:eng
+    S->>S: recurse folder:eng#view
+    S->>Cache: lookup folder#view
+    Cache-->>S: MISS
+    S->>DS: fetch folder:eng#viewer
+    DS-->>S: user:alice found
+    S-->>C: true (8 spans, 42ms)
+```
+
+한 번의 Check가 dispatch cache MISS → datastore 조회 → arrow 따라 folder로 재귀 → 다시 MISS → datastore 조회 순으로 이어진다. trace view에서 각 화살표가 span으로 보인다. 이 그림에서 병목은 "MISS 뒤 datastore 조회 2회"다. cache warm-up을 늘리거나 해당 relation의 TTL을 늘리면 바로 개선된다.
+
+## 실전 운영 팁
+
+::: warning 메트릭 수집 자체가 부하가 되는 함정
+`/metrics` 엔드포인트는 고카디널리티 라벨이 붙으면 scrape 비용이 폭발한다. `grpc_method` 정도까지는 괜찮지만, 사용자 ID·리소스 ID 같은 라벨을 커스텀으로 달면 안 된다. 그건 trace에서 할 일이다.
+:::
+
+::: details Authzed Cloud vs Self-hosted 관측성 차이
+Authzed 관리형(Cloud) 플랜을 쓰면 대시보드가 기본 제공된다. Self-hosted라면 Grafana·Tempo·Loki·Alertmanager를 직접 운영해야 한다. 조직 규모가 크지 않다면 관리형이 TCO에서 유리할 수 있다. 특히 감사 로그 보관 비용은 숨은 지뢰다.
+:::
+
+## 다음 챕터
+
+[CH10. 스키마 마이그레이션](/study/spicedb/10-schema-migration)에서는 relation 이름 변경·permission 재정의·Caveat 추가 같은 파괴적 변경을 무중단으로 넘기는 3단계 패턴(Expand-Migrate-Contract)과 버저닝 전략을 다룬다.
+
+::: tip 핵심 정리
+- 관측성은 Metrics·Tracing·Logs 3축으로 구성되며, 권한 시스템은 셋 다 없으면 디버깅이 거의 불가능하다.
+- 대시보드 상단 고정 패널은 Check p99, 캐시 hit rate, Datastore p99 세 줄이면 충분하다.
+- 느린 Check의 원인은 메트릭이 아니라 trace에 있다. tail-based sampling으로 느린 요청은 100% 수집한다.
+- 알림은 Check p99·캐시 hit rate·Datastore 풀·Watch lag 네 가지가 최소 셋이다.
+- 튜닝 체크리스트 10항목은 대부분 1~3개에서 원인이 드러난다. Schema 복잡도와 consistency 오남용이 단골 범인이다.
+:::

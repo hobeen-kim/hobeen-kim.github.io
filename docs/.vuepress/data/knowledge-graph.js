@@ -35,6 +35,8 @@ export const nodes = [
   { id: 'auth', label: '인증 / 인가', size: 24, status: 'planned', link: null, x: 0.60, y: 0.14 },
   { id: 'oauth', label: 'OAuth\n/ OIDC', size: 26, status: 'active', link: '/study/oauth/', x: 0.52, y: 0.20 },
   { id: 'keycloak', label: 'Keycloak', size: 24, status: 'active', link: '/study/keycloak/', x: 0.45, y: 0.27 },
+  { id: 'zanzibar', label: 'Zanzibar', size: 24, status: 'active', link: '/study/zanzibar/', x: 0.68, y: 0.09 },
+  { id: 'spicedb', label: 'SpiceDB', size: 24, status: 'active', link: '/study/spicedb/', x: 0.72, y: 0.20 },
   { id: 'network', label: '네트워크', size: 22, status: 'planned', link: null, x: 0.70, y: 0.22 },
   { id: 'os', label: '운영체제', size: 22, status: 'planned', link: null, x: 0.92, y: 0.22 },
   { id: 'data-engineering', label: '데이터\n엔지니어링', size: 24, status: 'planned', link: null, x: 0.60, y: 0.40 },
@@ -90,6 +92,9 @@ export const edges = [
   { source: 'software', target: 'auth' },
   { source: 'auth', target: 'oauth' },
   { source: 'oauth', target: 'keycloak' },
+  { source: 'auth', target: 'zanzibar' },
+  { source: 'zanzibar', target: 'spicedb' },
+  { source: 'database', target: 'spicedb' },
 
   // === AI ===
   { source: 'ai', target: 'ai-agent-workflow' },

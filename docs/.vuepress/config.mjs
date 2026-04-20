@@ -419,6 +419,67 @@ const theme = {
           ],
         },
       ],
+      '/study/zanzibar/': [
+        {
+          text: 'Zanzibar',
+          collapsible: false,
+          children: [
+            { text: '소개', link: '/study/zanzibar/' },
+            { text: 'CH1. 인가 모델과 ReBAC', link: '/study/zanzibar/01-authz-models' },
+            { text: 'CH2. Zanzibar 핵심 개념', link: '/study/zanzibar/02-core-concepts' },
+            { text: 'CH3. 관계 기반 데이터 모델', link: '/study/zanzibar/03-data-model' },
+          ],
+        },
+        {
+          text: '아키텍처',
+          collapsible: false,
+          children: [
+            { text: 'CH4. Userset Rewrite Rules', link: '/study/zanzibar/04-userset-rewrite' },
+            { text: 'CH5. Consistency와 Zookie', link: '/study/zanzibar/05-consistency-zookie' },
+            { text: 'CH6. Check/Expand 평가 알고리즘', link: '/study/zanzibar/06-check-expand' },
+            { text: 'CH7. Watch와 Leopard 인덱스', link: '/study/zanzibar/07-watch-leopard' },
+          ],
+        },
+      ],
+      '/study/spicedb/': [
+        {
+          text: 'SpiceDB 시작',
+          collapsible: false,
+          children: [
+            { text: '소개', link: '/study/spicedb/' },
+            { text: 'CH1. SpiceDB 개요', link: '/study/spicedb/01-overview' },
+            { text: 'CH2. Schema 언어', link: '/study/spicedb/02-schema' },
+            { text: 'CH3. Relationship과 ZedToken', link: '/study/spicedb/03-relationship-zedtoken' },
+            { text: 'CH4. API 전체', link: '/study/spicedb/04-api' },
+          ],
+        },
+        {
+          text: '실전 모델링',
+          collapsible: false,
+          children: [
+            { text: 'CH5. 모델링 패턴', link: '/study/spicedb/05-modeling-patterns' },
+            { text: 'CH6. Caveats 실전', link: '/study/spicedb/06-caveats' },
+          ],
+        },
+        {
+          text: '운영',
+          collapsible: false,
+          children: [
+            { text: 'CH7. 배포 토폴로지', link: '/study/spicedb/07-deployment' },
+            { text: 'CH8. 캐싱과 성능', link: '/study/spicedb/08-caching-performance' },
+            { text: 'CH9. 관측성과 튜닝', link: '/study/spicedb/09-observability' },
+            { text: 'CH10. 스키마 마이그레이션', link: '/study/spicedb/10-schema-migration' },
+          ],
+        },
+        {
+          text: '통합',
+          collapsible: false,
+          children: [
+            { text: 'CH11. Keycloak/OAuth 경계', link: '/study/spicedb/11-keycloak-integration' },
+            { text: 'CH12. 리소스·관계 동기화', link: '/study/spicedb/12-resource-sync' },
+          ],
+        },
+      ],
       '/study/ai-agent-workflow/': [
         {
           text: '원칙',

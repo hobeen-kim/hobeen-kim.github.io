@@ -262,12 +262,104 @@ kc.sh import --dir /tmp/realm-export
 
 로컬에서 Realm 구조를 여러 번 실험할 때는 "Realm을 통째로 Export → 삭제 → Import"가 가장 빠른 롤백이다. DB 볼륨을 지우지 않고도 Realm 단위로 깨끗한 상태를 재현할 수 있다.
 
+## 7. 같은 Realm으로 멀티 도메인 SSO
+
+한 회사가 여러 도메인의 앱(예: `app1.company.com`, `shop.partner.io`, `admin.tool.io`)을 운영할 때 SSO를 붙이는 표준 패턴은 <strong>하나의 Realm + 앱별 Client</strong>다. Realm을 나누는 것이 아니라 Realm을 공유하고 Client만 여러 개 등록한다.
+
+### SSO가 동작하는 원리
+
+Keycloak의 SSO는 <strong>Keycloak 서버 도메인에 붙는 쿠키</strong>(`KEYCLOAK_IDENTITY`, `AUTH_SESSION_ID`)로 User Session을 유지한다. 앱 도메인과는 무관하다.
+
+| 요소 | 예시 | 설명 |
+|------|------|------|
+| Keycloak 서버 | `auth.company.com` | SSO 쿠키가 여기 붙음 |
+| Realm | `company` | 모든 앱이 공유하는 사용자 공간 |
+| Client 1 | `app1-web` | Redirect: `https://app1.company.com/callback` |
+| Client 2 | `shop-web` | Redirect: `https://shop.partner.io/callback` |
+| Client 3 | `admin-tool` | Redirect: `https://admin.tool.io/callback` |
+
+### A 로그인 후 B 접속 시퀀스
+
+```mermaid
+sequenceDiagram
+    participant U as 브라우저
+    participant A as A 사이트
+    participant B as B 사이트
+    participant KC as auth.company.com
+    U->>A: A 접속
+    A->>U: Keycloak으로 리다이렉트(client_id=A_client)
+    U->>KC: /authorize
+    KC->>U: 로그인 화면
+    U->>KC: username/password
+    Note over KC: User Session 생성<br>KEYCLOAK_IDENTITY 쿠키 발급
+    KC->>U: A의 callback으로 code
+    U->>A: /callback?code=...
+    A->>KC: /token
+    KC->>A: A_client 토큰
+    Note over U,A: 시간이 흐른 후 B 접속
+    U->>B: B 접속
+    B->>U: Keycloak으로 리다이렉트(client_id=B_client)
+    U->>KC: /authorize (쿠키 자동 동봉)
+    Note over KC: 쿠키로 User Session 확인 → 유효
+    KC->>U: 즉시 B의 callback으로 code<br>(로그인 화면 없음)
+    U->>B: /callback?code=...
+    B->>KC: /token
+    KC->>B: B_client 토큰
+```
+
+사용자 입장에서는 <strong>비밀번호 입력 없이 잠깐 깜빡임 후 B에 로그인</strong>된다. 세 번의 HTTP 리다이렉트가 일어나지만 UI 프롬프트는 없다.
+
+### User Session과 Client Session
+
+| 구분 | 공유 여부 | 설명 |
+|------|---------|------|
+| User Session | 공유 | 사용자가 한 번 로그인한 "인증 사실" |
+| Client Session | Client별 분리 | A용 토큰, B용 토큰 각각 발급 |
+| Access Token | 분리 | `aud=A_client` vs `aud=B_client` |
+| Refresh Token | 분리 | Client별 갱신 체인 |
+
+즉, "사용자가 로그인했다"는 사실은 공유되지만 토큰은 Client마다 따로 발급된다. Client가 받은 토큰으로 다른 Client의 API를 호출할 수는 없다(audience 검증 실패). Client 간 토큰 이동이 필요하면 [CH9. Token Exchange](/study/keycloak/09-saml-token-exchange)를 쓴다.
+
+### B의 자동 로그인 타이밍
+
+B가 SSO를 어떻게 트리거하느냐에 따라 사용자 경험이 달라진다.
+
+| B의 동작 | 사용자 경험 |
+|---------|-----------|
+| 접속 즉시 `/authorize` 호출 (protected route) | 접속하자마자 자동 로그인 |
+| "로그인" 버튼 클릭 시 `/authorize` 호출 | 클릭하면 비밀번호 없이 바로 로그인 |
+| `prompt=none` silent check | 백그라운드 iframe/fetch로 확인. 이미 로그인돼 있으면 토큰, 아니면 게스트 모드 유지 |
+
+### SSO가 깨지는 경우
+
+- <strong>SSO Session Idle/Max 만료</strong>: 설정값(기본 30분/10시간)이 지나면 쿠키는 있지만 서버 세션이 무효
+- <strong>브라우저 완전 종료</strong>: 세션 쿠키가 사라짐. Remember Me 옵션으로 영속 쿠키 발급 가능
+- <strong>명시 로그아웃</strong>: Single Sign-Out 설정 시 A에서 로그아웃하면 B 세션도 같이 종료
+- <strong>서드파티 쿠키 차단</strong>: Safari ITP·Chrome의 third-party cookie 제한 강화 환경에서 Keycloak 도메인이 앱 도메인과 <strong>완전히 다른 톱 레벨</strong>이면 SSO가 깨질 수 있음
+
+### 실전 권장
+
+- Keycloak을 앱과 같은 톱 레벨 도메인의 <strong>서브도메인</strong>에 둔다. 예: 앱이 `*.company.com`이면 Keycloak은 `auth.company.com`
+- Client마다 <strong>Valid Redirect URIs</strong>와 <strong>Web Origins</strong>을 명시한다. 와일드카드 `*`는 서브도메인 탈취 위험이 있어 피한다([CH4. Client](/study/keycloak/04-client-service-account) 참조)
+- SSO Session 만료 정책은 Realm Settings → Sessions에서 조정하며, UX와 보안의 균형점을 정한다
+- 외부 파트너 도메인(`shop.partner.io`처럼 톱 레벨이 다름)을 붙이려면 서드파티 쿠키 정책을 테스트하고, 필요 시 파트너 측을 CNAME으로 `partner.company.com` 같은 서브도메인에 매핑한다
+
+### 멀티 도메인 SSO와 Realm 분리의 판단
+
+| 상황 | 선택 |
+|------|------|
+| 같은 회사의 여러 자사 서비스 | 하나의 Realm + Client 여러 개 |
+| B2B 고객사가 각자 다른 도메인 | Realm per tenant 또는 Organizations(v26+) |
+| 토큰 `iss`를 서비스별로 분리해야 함 | Realm 분리 |
+| 자회사·계열사 간 별도 보안 정책 | Realm 분리 + Identity Brokering |
+
 ::: tip 핵심 정리
 - Realm은 사용자·Client·Role·Key·Flow를 모두 격리하는 Keycloak의 최상위 경계다.
 - master realm은 "관리자의 관리자" 전용으로만 쓰고, 서비스 사용자는 별도 Realm에 둔다.
 - 멀티테넌시는 Realm per tenant(강한 격리) vs Single realm + Groups(운영 단순) 사이에서 선택한다.
 - v26+ Organizations는 Single realm 안에서 B2B 조직 단위를 표현하고, 이메일 도메인 기반 IdP 라우팅을 표준화한다.
 - 대규모 SaaS는 지역별 Realm + 조직별 Organization 하이브리드가 자주 쓰인다.
+- 한 회사의 여러 자사 도메인을 SSO로 묶을 때는 Realm을 공유하고 Client만 여러 개 등록한다. SSO 쿠키는 Keycloak 서버 도메인에 붙으므로 앱 도메인과는 무관하다.
 :::
 
 ## 다음 챕터

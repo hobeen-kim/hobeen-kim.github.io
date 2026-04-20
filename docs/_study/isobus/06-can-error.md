@@ -22,8 +22,6 @@ tags:
 - Bus Off에서 자동 복구 메커니즘을 이해한다
 :::
 
----
-
 ## 1. 에러 검출 메커니즘 5가지
 
 CAN은 하드웨어 레벨에서 5가지 독립적인 방법으로 오류를 감지한다. 이 중 하나라도 오류를 감지하면 즉시 에러 프레임을 전송한다.
@@ -91,8 +89,6 @@ ACK Slot 전송: 1 (Recessive)
 
 이 5가지 중 하나라도 오류를 감지하면, 다음 단계는 이를 버스 전체에 알리는 것이다. 이때 사용되는 것이 에러 프레임이다.
 
----
-
 ## 2. 에러 프레임
 
 오류를 감지한 노드는 즉시 <strong>에러 프레임(Error Frame)</strong>을 전송해 버스 전체에 오류 발생을 알린다.
@@ -136,8 +132,6 @@ sequenceDiagram
 
 에러 프레임이 전송될 때마다 CAN 컨트롤러는 내부적으로 오류 횟수를 기록한다. 이 카운터 값에 따라 노드의 동작이 달라진다.
 
----
-
 ## 3. 에러 카운터
 
 CAN 컨트롤러는 <strong>TEC(Transmit Error Counter)</strong>와 **REC(Receive Error Counter)** 두 개의 카운터를 유지한다. 이 카운터로 노드의 에러 상태를 추적한다.
@@ -164,8 +158,6 @@ CAN 컨트롤러는 <strong>TEC(Transmit Error Counter)</strong>와 **REC(Receiv
 :::
 
 그렇다면 카운터가 특정 임계값에 도달하면 어떤 일이 벌어질까? CAN은 카운터 값에 따라 노드의 동작 상태를 세 단계로 구분한다.
-
----
 
 ## 4. 에러 상태 천이
 
@@ -216,8 +208,6 @@ stateDiagram-v2
 | Error Active | Active (6 Dominant) | 가능 | 가능 | 없음 |
 | Error Passive | Passive (6 Recessive) | 가능 | 가능 | 있음 (8bit) |
 | Bus Off | 없음 | **불가** | **불가** | — |
-
----
 
 ## 5. Bus Off 복구
 
@@ -277,8 +267,6 @@ flowchart TD
 - <strong>Bus Off 자동 복구</strong>는 버스에서 128번의 11-recessive-bit 시퀀스를 감지한 뒤 Error Active로 복귀한다.
 
 :::
-
----
 
 ## 다음 챕터
 

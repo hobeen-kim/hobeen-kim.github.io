@@ -16,8 +16,6 @@ next: /study/isobus/18-tc-basics
 - 버튼 클릭부터 화면 갱신까지 전체 상호작용 흐름을 추적할 수 있다.
 :::
 
----
-
 ## 1. VT → ECU 명령어
 
 VT Server가 사용자 입력이나 화면 상태 변화를 작업기 ECU(VT Client)에게 알리는 메시지이다. ECU는 이 메시지를 수신해 작업 제어 로직을 실행한다.
@@ -44,8 +42,6 @@ Button Activation과 Soft Key Activation의 `활성화 코드`는 다음 값을 
 | 1 | Pressed (누름) |
 | 2 | Held (길게 누르는 중, 반복 전송) |
 | 3 | Aborted (누르다 취소) |
-
----
 
 ## 2. ECU → VT 명령어
 
@@ -94,8 +90,6 @@ Byte 3: MSB of Object ID
 Byte 4: 0xFF          ← 예약 바이트
 Byte 5-8: 새로운 값   ← 32bit unsigned integer (Little Endian)
 ```
-
----
 
 ## 3. 매크로 (Macro)
 
@@ -152,8 +146,6 @@ Byte 5-8: 새로운 값   ← 32bit unsigned integer (Little Endian)
                     value="255" />
 </macro>
 ```
-
----
 
 ## 4. VT 상호작용 시퀀스
 
@@ -219,8 +211,6 @@ sequenceDiagram
 
     VT->>User: 일반 작업 화면 복원
 ```
-
----
 
 ::: tip 핵심 정리
 - VT → ECU 명령어는 사용자 입력 이벤트(버튼, 소프트키, 터치, ESC 등)를 ECU에 전달한다.

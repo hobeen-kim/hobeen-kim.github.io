@@ -16,8 +16,6 @@ next: /study/oauth/09-why-oidc
 - 로그아웃 시 어떤 토큰을 어떻게 무효화해야 하는지 체크리스트로 정리할 수 있다.
 :::
 
----
-
 ## 1. Access Token — 짧은 수명, 자원 접근 증표
 
 Access Token은 OAuth의 핵심 산출물이다. "이 토큰을 가진 누군가가 특정 Scope 안에서 특정 자원에 접근할 권리가 있다"는 증표다.
@@ -57,8 +55,6 @@ DPoP(Demonstrating Proof-of-Possession)와 mTLS(Mutual TLS)는 "토큰 소지자
 - <strong>민감 API</strong> (결제, 관리자): 5~15분
 - <strong>일반 API</strong>: 30분~1시간
 - <strong>읽기 전용 API</strong>: 1~2시간 (드물게 더 길게)
-
----
 
 ## 2. Refresh Token — 긴 수명, AS와만 통신
 
@@ -142,8 +138,6 @@ sequenceDiagram
 - <strong>브라우저 SPA</strong>: `localStorage` 금지. HttpOnly 쿠키 또는 BFF 서버가 대신 보관.
 - <strong>모바일 앱</strong>: iOS Keychain, Android EncryptedSharedPreferences 또는 Keystore.
 - <strong>데스크톱 앱</strong>: OS의 Credential Store (macOS Keychain, Windows Credential Manager).
-
----
 
 ## 3. Opaque Token vs Self-contained (JWT)
 
@@ -238,8 +232,6 @@ flowchart TB
 
 JWT의 짧은 수명이 무효화 난점을 완화하고, Refresh Token의 opaque 속성이 즉시 취소 가능성을 보장한다.
 
----
-
 ## 4. Token Introspection (RFC 7662)
 
 Introspection은 AS가 RS에게 "이 토큰 유효한가, 어떤 정보인가"를 실시간 응답하는 엔드포인트다.
@@ -316,8 +308,6 @@ sequenceDiagram
 
 Introspection 엔드포인트는 <strong>RS(또는 허가된 클라이언트)만</strong> 호출할 수 있어야 한다. 아니면 공격자가 탈취한 토큰의 정보를 조회하는 데 악용될 수 있다. RS에게 별도 Client Credentials를 발급해 Basic Auth로 인증한다.
 
----
-
 ## 5. Token Revocation (RFC 7009)
 
 Revocation은 <strong>토큰을 명시적으로 폐기</strong>하는 엔드포인트다. 로그아웃, 기기 분실, 권한 철회 시나리오에서 쓰인다.
@@ -366,8 +356,6 @@ flowchart TD
 
 - <strong>JWT Access Token</strong>은 RS가 서명만 보고 판단하므로, AS의 폐기가 RS에 즉시 반영되지 않는다. 블랙리스트 공유 또는 Introspection 호출이 필요하다.
 - AS에 재요청이 가지 않는 한 만료까지 유효하다.
-
----
 
 ## 6. 로그아웃 체크리스트
 
@@ -447,8 +435,6 @@ timeline
 | JWT인데 블랙리스트 없음 | 만료까지 유효 | 짧은 TTL + 블랙리스트 |
 | 로그아웃 후 리다이렉트 없음 | 캐시된 페이지 노출 | Cache-Control 헤더 + 302 |
 | OIDC 세션 종료 안 함 | 재로그인 시 자동 재인증 | `end_session_endpoint` 호출 |
-
----
 
 ::: tip 핵심 정리
 - Access Token은 짧은 수명(5~60분)의 자원 접근 증표로 RS에게만 제시하고, Refresh Token은 장기(며칠~몇 개월) 자격으로 AS `/token`에만 전송한다. Bearer 방식은 탈취 시 즉시 오남용되므로 HTTPS와 짧은 수명이 필수다.

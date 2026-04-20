@@ -16,8 +16,6 @@ next: /study/oauth/17-keycloak
 - OAuth2LoginAuthenticationFilter의 흐름을 설명할 수 있다.
 :::
 
----
-
 ## 1. 의존성과 기본 설정
 
 Spring Security는 OAuth 2.0 Client 기능을 `spring-boot-starter-oauth2-client` 한 줄로 통합 제공한다. 이 스타터는 RP(Relying Party)로 동작하는 데 필요한 필터, 엔드포인트, 자동 설정을 모두 포함한다.
@@ -100,8 +98,6 @@ class SecurityConfig {
 
 `oauth2Login()` DSL을 켜는 순간 Spring Security는 위에서 설명한 필터 체인을 자동으로 조립한다.
 
----
-
 ## 2. CommonOAuth2Provider
 
 Spring Security는 주요 공급자 4곳에 대한 프로바이더 템플릿을 내장한다. `org.springframework.security.config.oauth2.client.CommonOAuth2Provider` enum이 그 주체다.
@@ -147,8 +143,6 @@ class ProviderInspector(
 ```
 
 디버깅할 때 "내가 지금 어떤 엔드포인트를 호출하고 있는지" 빠르게 확인할 수 있어 유용하다.
-
----
 
 ## 3. Naver·Kakao 커스텀 등록
 
@@ -219,8 +213,6 @@ spring:
 | client_secret 위치 | Basic 가능 | Basic 가능 | Basic 가능 | Body(Post) 필수 |
 | 비표준 포인트 | — | scope 표기 | 응답 래핑 | 토큰 엔드포인트 인증 방식 |
 
----
-
 ## 4. 카카오의 client_id 이슈
 
 실제 프로젝트에서 시간을 가장 많이 잡아먹는 대목이다. [카카오 OAuth API 스펙 문제 포스트](/posts/spring/2025-02-13-security)에서 다룬 실전 사례를 스터디 관점에서 재정리한다.
@@ -274,8 +266,6 @@ sequenceDiagram
 - Redirect URI가 카카오 콘솔과 yml에서 문자 단위로 일치하는가 (끝의 `/` 포함)
 - `scope`에 사용자 동의 항목을 정확히 나열했는가 (미등록 scope는 무음 실패)
 :::
-
----
 
 ## 5. OAuth2AccessTokenResponseClient 커스터마이징
 
@@ -355,8 +345,6 @@ class KakaoTokenResponseConverter : Converter<Map<String, Any>, OAuth2AccessToke
 ```
 
 이런 방식으로 "Spring Security가 기본으로 모르는 모든 비표준"을 흡수한다.
-
----
 
 ## 6. OAuth2LoginAuthenticationFilter 흐름
 
@@ -454,8 +442,6 @@ http.oauth2Login { oauth ->
 ```
 
 이 지점이 "OAuth 로그인으로 들어온 사용자 ↔ 앱 내부 `User`"를 연결하는 공식 확장 포인트다.
-
----
 
 ::: tip 핵심 정리
 - `spring-boot-starter-oauth2-client` 한 줄로 RP에 필요한 필터·저장소·컨트롤러가 자동 조립된다.

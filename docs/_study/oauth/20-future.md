@@ -16,8 +16,6 @@ next: null
 - 앞으로 3~5년 OAuth/Identity 지형을 전망한다.
 :::
 
----
-
 ## 1. OAuth 2.0의 구조적 한계
 
 OAuth 2.0은 2012년 RFC 6749로 자리 잡은 이후 13년 넘게 업계 표준 역할을 했다. 동시에 다음 세대 표준이 필요하다는 논의도 같은 기간 이어져 왔다. 왜 새로운 표준이 요구되는지 한계를 정리한다.
@@ -55,8 +53,6 @@ flowchart LR
 ```
 
 이 세 가지 한계를 <strong>처음부터 다시 설계</strong>하자는 움직임에서 나온 것이 GNAP이다.
-
----
 
 ## 2. GNAP (Grant Negotiation and Authorization Protocol)
 
@@ -160,8 +156,6 @@ GNAP은 OAuth 2.0을 즉시 대체할 물건이 아니다. IETF의 공식 기록
 
 일반 로그인 수준이라면 OAuth 2.0 + OIDC가 당분간 계속 주력이다.
 
----
-
 ## 3. Passkey와 WebAuthn/FIDO2
 
 OAuth가 <strong>권한 위임</strong>을 다룬다면, 인증 자체의 차세대는 <strong>Passkey</strong>다. Passkey는 비밀번호를 완전히 없애려는 업계 합의의 결과물이며, 그 기술적 기반이 WebAuthn과 FIDO2다.
@@ -240,8 +234,6 @@ FIDO U2F 시절의 하드웨어 보안 키(YubiKey 등)는 <strong>디바이스 
 
 휴대폰에 등록된 Passkey로 PC에 로그인하는 시나리오는 CTAP 2.2가 정의한 <strong>hybrid transport</strong>로 동작한다. PC에 QR 코드가 뜨고, 휴대폰으로 스캔하면 BLE로 근접 검증 후 서명이 전달된다. "내가 근처에 있다"는 물리적 증거까지 인증에 포함되는 셈이다.
 
----
-
 ## 4. Passkey + OIDC
 
 OAuth/OIDC와 Passkey는 경쟁이 아니다. <strong>보완 관계</strong>다. Passkey는 AS에서 일어나는 <strong>인증 수단</strong>으로 자리 잡고, 그 결과는 OIDC 토큰으로 각 RP에 전달된다.
@@ -316,8 +308,6 @@ AS는 이미 로그인된 사용자라도 <strong>Passkey 재인증</strong>을 
 
 Apple, Google, Microsoft가 2022년 FIDO Alliance와 함께 "Passkey 공동 지원"을 선언한 이후 브라우저·OS 레벨 지원이 완료되었다. 남은 허들은 <strong>계정 복구</strong>(디바이스 분실 시 어떻게 복구할 것인가)와 <strong>엔터프라이즈 환경의 정책 관리</strong>다.
 
----
-
 ## 5. 앞으로의 방향
 
 OAuth·OIDC·Identity 생태계의 향후 3~5년을 정리한다. 스터디의 마지막 장이기도 하니, 지금까지 다룬 모든 개념을 축으로 삼아 관통한다.
@@ -375,8 +365,6 @@ flowchart TD
 ::: warning 마지막 조언
 표준은 내일도 바뀌지만 원칙은 그대로다. 특정 RFC 번호를 외우기보다 <strong>왜 그 설계가 나왔는지</strong>를 이해하는 쪽으로 공부를 이어가라. 그러면 GNAP이 OAuth 3.0으로 명명되든, Passkey가 새 이름을 얻든, 설명서를 다시 읽지 않아도 바로 읽힌다.
 :::
-
----
 
 ::: tip 핵심 정리
 - OAuth 2.0은 Grant Type 난립·경직된 URL 파라미터·의도 표현 부족이라는 구조적 한계가 있고, GNAP(RFC 9635)은 JSON 협상 기반으로 이를 재설계한다.

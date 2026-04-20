@@ -16,8 +16,6 @@ next: /study/keycloak/05-client-service-account
 - v26+ Organizations 기능의 용도와 Realm과의 차이를 판단할 수 있다.
 :::
 
----
-
 ## 1. Realm 경계의 의미
 
 Realm은 Keycloak의 <strong>격리 경계</strong>(isolation boundary)다. 한 Realm 안의 모든 객체는 다른 Realm에서 보이지 않는다. 물리적으로는 같은 DB 테이블에 저장되지만, Realm ID로 완벽히 분리돼 있다.
@@ -64,8 +62,6 @@ flowchart TB
 - 토큰은 Realm 경계를 넘지 못한다. `myshop` Realm의 토큰으로는 `hr` API를 부를 수 없다(의도된 설계).
 - Realm 간 사용자 공유가 필요하면 Identity Brokering이나 User Federation으로 명시적 연결을 만들어야 한다.
 
----
-
 ## 2. Master Realm
 
 master realm은 Realm 중 "특별한 것"이다.
@@ -87,8 +83,6 @@ master realm은 Realm 중 "특별한 것"이다.
 - master realm에는 Keycloak 운영자 계정만 둔다.
 - 서비스 사용자는 반드시 별도 업무 Realm에 생성한다.
 - 업무 Realm마다 "Realm Admin" 권한을 가진 관리자를 두고, master 관리자는 최후의 수단으로만 개입한다.
-
----
 
 ## 3. 멀티테넌시 설계 패턴
 
@@ -140,8 +134,6 @@ flowchart LR
 | B2C 대중 서비스 | Single realm |
 | B2B SaaS 수천 테넌트, 테넌트마다 가벼운 커스터마이징 | Single realm + Organizations (§4) |
 | 규제 산업(금융·의료) 데이터 격리 필수 | Realm per tenant |
-
----
 
 ## 4. Organizations (v26+)
 
@@ -197,8 +189,6 @@ flowchart TB
 | 속성/메타데이터 | 있음 | 더 풍부 |
 | 용도 | 권한 묶음·부서 | B2B 고객사 |
 
----
-
 ## 5. Realm vs Organization 의사결정
 
 실제 설계에서 "Realm을 쪼갤까, Organization으로 갈까"는 자주 맞닥뜨리는 질문이다.
@@ -238,8 +228,6 @@ flowchart TB
     end
 ```
 
----
-
 ## 6. Realm 간 이동
 
 Realm 경계가 강하다 보니, 환경 이관(Dev→Stage→Prod)이나 고객사 이전은 별도 기능으로 처리한다.
@@ -273,8 +261,6 @@ kc.sh import --dir /tmp/realm-export
 ### 실습 팁
 
 로컬에서 Realm 구조를 여러 번 실험할 때는 "Realm을 통째로 Export → 삭제 → Import"가 가장 빠른 롤백이다. DB 볼륨을 지우지 않고도 Realm 단위로 깨끗한 상태를 재현할 수 있다.
-
----
 
 ::: tip 핵심 정리
 - Realm은 사용자·Client·Role·Key·Flow를 모두 격리하는 Keycloak의 최상위 경계다.

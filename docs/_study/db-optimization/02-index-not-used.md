@@ -17,8 +17,6 @@ next: /study/db-optimization/03-n-plus-one
 - LIKE 선행 와일드카드를 pg_trgm GIN 또는 Full-Text Search로 대체한다.
 :::
 
----
-
 ## 1. 컬럼에 함수/연산 적용
 
 ### 문제 패턴
@@ -76,8 +74,6 @@ CREATE INDEX idx_lower_email ON users (LOWER(email));
 
 함수 인덱스를 사용하려면 WHERE 절의 표현식이 인덱스 정의와 정확히 일치해야 한다.
 
----
-
 ## 2. 묵시적 타입 변환
 
 ### 문제 패턴
@@ -123,8 +119,6 @@ SELECT * FROM users WHERE phone = '01012345678';
 ```
 
 애플리케이션 레이어에서 파라미터 바인딩 타입을 컬럼 타입과 일치시키는 것이 근본 해결책이다.
-
----
 
 ## 3. NOT IN, !=, IS NULL
 
@@ -183,8 +177,6 @@ graph LR
     E["!= 조건"] --> F["Full Scan 가능성 높음"]
     F --> G["IN 변환 또는 인덱스 힌트 검토"]
 ```
-
----
 
 ## 4. LIKE 선행 와일드카드
 
@@ -255,8 +247,6 @@ LIKE를 복합 인덱스와 함께 사용할 때는 LIKE 컬럼을 인덱스 마
 SELECT * FROM products
 WHERE category = 'ELECTRONICS' AND name LIKE 'Apple%';
 ```
-
----
 
 ::: tip 핵심 정리
 - WHERE 절의 인덱스 컬럼에 함수/연산을 적용하면 인덱스가 무력화된다. 조건을 변환하거나 함수 인덱스를 생성한다.

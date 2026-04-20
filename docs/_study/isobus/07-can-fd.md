@@ -20,8 +20,6 @@ tags:
 - FD tolerant / FD active 노드의 차이를 구분하고, ISOBUS와의 관계를 설명할 수 있다.
 :::
 
----
-
 # 1. CAN FD가 나온 이유
 
 ## 기존 CAN의 한계
@@ -54,8 +52,6 @@ CAN FD 개선
   페이로드:   최대 64 bytes  (8배)
   비트레이트: Data phase 최대 8 Mbps (8배)
 ```
-
----
 
 # 2. CAN FD의 구조
 
@@ -117,8 +113,6 @@ DLC 14    → 48 bytes
 DLC 15    → 64 bytes
 ```
 
----
-
 # 3. 듀얼 비트레이트
 
 ## 두 개의 Phase
@@ -169,8 +163,6 @@ CAN FD (64바이트, 4 Mbps Data phase):
   총 전송 시간 ≈ 310 µs → 약 2 Mbps 유효 처리량
 ```
 
----
-
 # 4. CAN 2.0과의 호환성
 
 ## 같은 버스에서 공존할 수 있는가?
@@ -220,8 +212,6 @@ CAN FD 채택 동향
 - Classic CAN 노드가 혼재하면 CAN FD 프레임을 에러로 처리하므로 혼합 네트워크는 격리가 필요하다.
 - ISOBUS는 현재 CAN 2.0B 기반이며 CAN FD 채택은 진행 중이다.
 :::
-
----
 
 ## 다음 챕터
 

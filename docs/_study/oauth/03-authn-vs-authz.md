@@ -16,8 +16,6 @@ next: /study/oauth/04-what-oauth-solves
 - "OAuth로 로그인"이라는 표현이 왜 기술적으로 부정확한지, OIDC가 필요한 이유 예고를 이해한다.
 :::
 
----
-
 ## 1. 인증(Authentication)
 
 인증은 "당신이 주장하는 그 사람이 맞는지" 확인하는 과정이다. 영어 표기가 길어 실무에서는 흔히 <strong>AuthN</strong>이라고 줄여 쓴다. 주체의 <strong>정체성(identity)</strong>을 검증하는 단계다.
@@ -52,8 +50,6 @@ flowchart LR
     style I fill:#efe
     style X fill:#fee
 ```
-
----
 
 ## 2. 인가(Authorization)
 
@@ -96,8 +92,6 @@ flowchart LR
     style F fill:#fee
 ```
 
----
-
 ## 3. 비유 — 공항의 신분증과 탑승권
 
 가장 자주 쓰이는 비유가 공항 출국장이다. 이 비유가 좋은 이유는 <strong>인증과 인가가 물리적으로 다른 서류로 분리되어 있기</strong> 때문이다.
@@ -138,8 +132,6 @@ stateDiagram-v2
 | 좌석 정보 | 권한 정보 | Scope |
 
 OAuth 2.0의 Access Token은 본질적으로 <strong>탑승권</strong>이다. 그 안에는 "이 토큰을 들고 있는 누군가가 특정 자원에 접근할 권리"만 명시되어 있고, "들고 있는 사람이 누구인지"는 확실히 말해주지 않는다.
-
----
 
 ## 4. OAuth 2.0은 '인가 프레임워크'다
 
@@ -194,8 +186,6 @@ OAuth 2.0의 Access Token은 다음을 <strong>보장하지 않는다</strong>.
 - 토큰이 언제 발급됐는지, 누구에게 발급됐는지 (표준 필드가 없음)
 
 이 때문에 <strong>OAuth 위에서 인증을 하려면 추가 규격이 필요</strong>했고, 그것이 OpenID Connect(OIDC)다. CH9에서 자세히 다룬다.
-
----
 
 ## 5. 인증 오남용의 함정
 
@@ -272,8 +262,6 @@ OAuth와 OIDC를 정확히 구분해 쓰면 두 가지 효과가 있다.
 
 - <strong>보안</strong>: Confused Deputy·토큰 재생 공격을 원천적으로 막는다.
 - <strong>설계 명료성</strong>: 서비스 간 책임 경계가 분명해진다. "AS는 인증과 인가 모두, RS는 인가만"이라는 역할 분담이 선명해진다.
-
----
 
 ::: tip 핵심 정리
 - 인증(AuthN)은 "너는 누구인가", 인가(AuthZ)는 "너는 무엇을 할 수 있는가"를 묻는다. HTTP 401과 403이 이 차이를 반영한다.

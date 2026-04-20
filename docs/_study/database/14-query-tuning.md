@@ -17,8 +17,6 @@ next: /study/database/15-operation-security
 - 튜닝 전후의 EXPLAIN 결과를 비교해 성능 개선 효과를 확인할 수 있다.
 :::
 
----
-
 ## 1. 슬로우 쿼리 분석
 
 ### slow_query_log 설정
@@ -91,8 +89,6 @@ SELECT order_id, total_amount
 FROM orders
 WHERE customer_id = 100 AND status = 'COMPLETED';
 ```
-
----
 
 ## 2. 쿼리 안티패턴
 
@@ -190,8 +186,6 @@ INNER JOIN (
 WHERE e.salary > dept_avg.avg_salary;
 ```
 
----
-
 ## 3. 개선 기법
 
 ### 인덱스 활용
@@ -269,8 +263,6 @@ DELETE FROM logs WHERE created_at < '2023-01-01' LIMIT 1000;
 | 쿼리 캐시 | MySQL 8.0에서 제거됨. 이전 버전에서는 동일 쿼리의 결과를 메모리에 캐시했으나 쓰기 시 무효화 비용이 커서 실효성 낮음 |
 | InnoDB 버퍼 풀 | 자주 접근하는 데이터 페이지와 인덱스를 메모리에 캐시. `innodb_buffer_pool_size`를 서버 메모리의 70~80%로 설정 권장 |
 | 애플리케이션 캐시 | Redis, Memcached를 사용해 빈번한 쿼리 결과를 애플리케이션 레벨에서 캐시. DB 부하를 근본적으로 줄임 |
-
----
 
 ## 4. 실습: 튜닝 전후 비교
 
@@ -363,8 +355,6 @@ flowchart LR
     end
     Before -->|"인덱스 추가<br>쿼리 개선"| After
 ```
-
----
 
 ::: tip 핵심 정리
 - 슬로우 쿼리 분석 순서: 로그 식별 → EXPLAIN → 원인 파악 → 개선 → 재확인

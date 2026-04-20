@@ -16,8 +16,6 @@ next: /study/keycloak/24-backup-restore
 - Terraform `keycloak` Provider로 Realm·Client·Role을 선언적으로 관리하고 CI에서 검증하는 워크플로우를 설계한다.
 :::
 
----
-
 ## 1. Admin REST API 개요
 
 Keycloak의 Admin Console은 내부적으로 Admin REST API를 호출하는 얇은 SPA다. 즉, Console에서 할 수 있는 모든 작업은 API로도 가능하다. 이 원칙을 기억하면 자동화 포인트를 잡기 쉽다.
@@ -59,8 +57,6 @@ kcadm.sh create clients -r acme \
 ```
 
 `kcadm.sh`는 탐색과 일회성 작업에 편하지만, 반복 자동화에는 토큰 발급 후 직접 REST 호출이 더 명시적이다.
-
----
 
 ## 2. Service Account 인증
 
@@ -120,8 +116,6 @@ echo "$TOKEN"
 ```
 
 토큰 수명은 기본 5분이다. 스크립트가 오래 걸리면 중간에 재발급한다.
-
----
 
 ## 3. 주요 엔드포인트
 
@@ -191,8 +185,6 @@ curl -s -X POST \
 
 Event는 [CH25. 모니터링·감사와 업그레이드](/study/keycloak/25-monitoring-upgrade)에서 자세히 다룬다.
 
----
-
 ## 4. 쿼리와 페이징
 
 대규모 Realm에서는 사용자 목록 하나 가져오는 것도 조심해야 한다. 기본 페이징 파라미터를 반드시 쓴다.
@@ -235,8 +227,6 @@ done
 ### Rate Limit
 
 Keycloak 자체는 기본 Rate Limit이 없다. 대량 스크립트를 돌릴 때는 Ingress 쪽에 Rate Limit을 걸거나, 스크립트에서 동시성을 조절한다. 초당 수백 요청을 쏘면 Agroal 풀이 금방 고갈된다.
-
----
 
 ## 5. Terraform keycloak Provider
 
@@ -320,8 +310,6 @@ terraform apply tfplan
 | Terraform | Realm 내부 구조(Client, Role, Group, IdP, Mapper) 세밀 관리 |
 
 둘을 같이 쓰는 구조가 가장 흔하다. Operator가 Realm을 "만들고", Terraform이 내부 객체를 "채워 넣는다".
-
----
 
 ## 6. 자동화 패턴
 
@@ -409,8 +397,6 @@ echo "healthy"
 - Service Account의 Client Secret은 Secret Manager(HashiCorp Vault, AWS Secrets Manager)에 보관.
 - Admin API 호출 실패 시 401이 자주 나오면 Service Account Role 부여를 재확인.
 - `keycloak_realm.acme`의 소규모 속성을 바꾸는 것만으로 많은 하위 리소스가 재생성되는 경우가 있다. Plan을 꼼꼼히 읽는다.
-
----
 
 ::: tip 핵심 정리
 - Admin Console이 하는 모든 일은 Admin REST API로 가능하다. 자동화의 출발점은 이 사실을 인식하는 것.

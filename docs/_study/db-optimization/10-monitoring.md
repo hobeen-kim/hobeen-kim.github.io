@@ -16,8 +16,6 @@ next: /study/db-optimization/11-postgresql
 - 알림 피로 없이 실효성 있는 알림 규칙을 설계한다.
 :::
 
----
-
 ## 1. 핵심 메트릭 5가지
 
 효과적인 DB 모니터링은 수십 개의 지표를 보는 것이 아니라 소수의 핵심 지표를 정확히 이해하는 것에서 시작한다.
@@ -89,8 +87,6 @@ SELECT
 FROM pg_stat_database;
 ```
 
----
-
 ## 2. Prometheus Exporter
 
 ### Exporter 종류
@@ -160,8 +156,6 @@ docker run -d \
   -e REDIS_ADDR="redis://localhost:6379" \
   oliver006/redis_exporter
 ```
-
----
 
 ## 3. Grafana 대시보드
 
@@ -235,8 +229,6 @@ graph LR
     E -->|알림 규칙| H[AlertManager]
     H -->|알림 전송| I[Slack / PagerDuty]
 ```
-
----
 
 ## 4. 알림 설계
 

@@ -16,8 +16,6 @@ next: /study/database/08-normalization
 - 시퀀스, 시노님, 사용자 정의 함수의 역할을 간략히 설명할 수 있다.
 :::
 
----
-
 ## 1. 뷰(VIEW)
 
 ### 가상 테이블
@@ -75,8 +73,6 @@ DROP VIEW v_emp_dept;
 - DISTINCT, GROUP BY, HAVING, 집계 함수를 사용하지 않는다.
 - 서브쿼리를 포함하지 않는다.
 - 모든 NOT NULL 컬럼이 뷰에 포함된다.
-
----
 
 ## 2. 저장 프로시저(Stored Procedure)
 
@@ -137,8 +133,6 @@ SELECT @cnt;  -- OUT 매개변수 확인
 - <strong>재사용성</strong>: 공통 로직을 프로시저로 정의해 여러 애플리케이션에서 재사용한다.
 - <strong>보안</strong>: 직접 테이블 접근 없이 프로시저를 통해서만 데이터를 처리하도록 제한할 수 있다.
 - <strong>성능</strong>: 최초 실행 시 컴파일된 실행 계획이 캐시되어 이후 호출이 빠르다.
-
----
 
 ## 3. 트리거(Trigger)
 
@@ -204,8 +198,6 @@ flowchart TD
     AL --> End
 ```
 
----
-
 ## 4. 기타 객체
 
 ### 시퀀스(SEQUENCE)
@@ -269,8 +261,6 @@ FROM employees;
 | SELECT 절 사용 | 불가 | 가능 |
 | CALL 호출 | CALL 필요 | SELECT 절에서 직접 호출 |
 | 트랜잭션 제어 | 가능 (COMMIT, ROLLBACK) | 불가 (일부 DBMS) |
-
----
 
 ::: tip 핵심 정리
 - VIEW는 가상 테이블로 보안·편의성 목적으로 사용하며, 복잡한 뷰는 성능 저하가 있을 수 있다.

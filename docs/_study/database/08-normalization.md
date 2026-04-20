@@ -16,8 +16,6 @@ next: /study/database/09-data-modeling
 - 반정규화가 필요한 상황과 주요 기법을 설명할 수 있다.
 :::
 
----
-
 ## 1. 이상 현상(Anomaly)
 
 ### 왜 이상 현상이 발생하는가
@@ -52,8 +50,6 @@ next: /study/database/09-data-modeling
 
 이상 현상의 근본 원인은 하나의 테이블에 <strong>서로 다른 주제의 데이터가 뒤섞여</strong> 있기 때문이다. 학생 정보와 수강 정보는 분리되어야 한다.
 
----
-
 ## 2. 함수적 종속(Functional Dependency)
 
 ### 정의
@@ -82,8 +78,6 @@ next: /study/database/09-data-modeling
 `X → Y`이고 `Y → Z`일 때, `X → Z`가 성립하는 경우이다.
 
 - `학번 → 학과` 이고 `학과 → 학과사무실` → 결국 `학번 → 학과사무실`: <strong>이행 함수 종속</strong>
-
----
 
 ## 3. 정규형 단계
 
@@ -211,8 +205,6 @@ flowchart TD
     Q4 -->|No| OK([BCNF 만족])
 ```
 
----
-
 ## 4. 반정규화
 
 ### 왜 정규화를 깨야 하는가
@@ -260,8 +252,6 @@ ALTER TABLE departments ADD COLUMN emp_count INT DEFAULT 0;
 **테이블 분할 (파티셔닝)**
 
 데이터가 너무 많은 테이블을 수직(컬럼) 또는 수평(행)으로 분리해 각 테이블의 크기를 줄인다.
-
----
 
 ::: tip 핵심 정리
 - 이상 현상(삽입/갱신/삭제)은 중복과 구조 문제에서 발생하며, 정규화로 해소한다.

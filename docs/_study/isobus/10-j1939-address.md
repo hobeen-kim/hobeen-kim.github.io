@@ -16,8 +16,6 @@ next: /study/isobus/11-j1939-transport
 - Commanded Address(PGN 65240)의 동작 원리를 이해한다.
 :::
 
----
-
 ## 1. 소스 주소 (SA)
 
 J1939 네트워크에서 모든 ECU는 <strong>소스 주소(Source Address, SA)</strong>를 가진다. SA는 8비트 값으로, 29비트 CAN ID의 <strong>하위 8비트(비트 7~0)</strong>에 위치한다.
@@ -65,8 +63,6 @@ graph LR
     style SA fill:#ffd700,stroke:#b8860b,color:#000
 ```
 
----
-
 ## 2. NAME (64비트)
 
 <strong>NAME</strong>은 J1939 네트워크에서 ECU를 전 세계적으로 고유하게 식별하는 64비트 구조체이다. 주소 클레임 시 충돌이 발생하면 NAME 값을 비교해 우선순위를 결정한다. NAME 값이 **수치적으로 더 작은** 장치가 주소를 획득한다.
@@ -111,8 +107,6 @@ NAME = 0x0000000060000000
          Manufacturer Code = 0,
          Identity Number = 0
 ```
-
----
 
 ## 3. 주소 클레임 절차
 
@@ -161,8 +155,6 @@ sequenceDiagram
 | 클레임 후 대기 시간 | 250ms (다른 장치 응답 대기) |
 | 요청 후 응답 시간 | 최대 1250ms |
 
----
-
 ## 4. Commanded Address
 
 <strong>Commanded Address</strong>는 외부 장치가 특정 ECU에게 주소를 강제로 지정하는 메커니즘이다. <strong>PGN 65240 (0xFED8)</strong>을 사용한다.
@@ -202,8 +194,6 @@ sequenceDiagram
 | 진단/유지보수 | 특정 SA로 장치를 강제 이동 |
 
 Commanded Address를 수신한 ECU는 반드시 <strong>Address Claimed 메시지로 응답</strong>해야 한다. ECU가 새 주소를 클레임할 수 없는 경우 Cannot Claim을 전송한다.
-
----
 
 ::: tip 핵심 정리
 - SA는 8비트이며 0~253이 일반 사용 가능, 254=Null, 255=Global(브로드캐스트)이다.

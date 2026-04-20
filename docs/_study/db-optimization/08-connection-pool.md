@@ -16,8 +16,6 @@ next: /study/db-optimization/09-migration
 - PgBouncer와 ProxySQL의 역할과 필요한 상황을 설명할 수 있다.
 :::
 
----
-
 ## 1. 커넥션 풀 원리
 
 ### DB 커넥션 생성 비용
@@ -60,8 +58,6 @@ flowchart LR
     F -->|conn1 반환 후| B
     B -->|conn1 재사용| E
 ```
-
----
 
 ## 2. HikariCP 최적 설정
 
@@ -111,8 +107,6 @@ spring:
 ```
 
 `max-lifetime`은 DB 서버의 `wait_timeout`(MySQL)이나 `tcp_keepalives_idle`(PostgreSQL)보다 짧게 설정해야 DB가 먼저 커넥션을 끊는 상황을 방지한다.
-
----
 
 ## 3. 커넥션 누수 탐지
 
@@ -179,8 +173,6 @@ spring:
 
 PostgreSQL의 기본 `max_connections`는 100이다. 마이크로서비스 환경에서는 이 한계를 쉽게 초과하므로 PgBouncer 같은 커넥션 풀러가 필요하다.
 
----
-
 ## 4. PgBouncer / ProxySQL
 
 ### PgBouncer Transaction 모드
@@ -238,8 +230,6 @@ flowchart LR
 | MySQL 읽기 트래픽 분산 필요 | 레플리카로 SELECT 자동 라우팅 | ProxySQL |
 
 Serverless 환경에서는 함수 인스턴스가 수천 개로 늘어날 수 있어 각 인스턴스가 커넥션을 최소 1개라도 유지하면 DB 커넥션 한계를 즉시 초과한다. AWS RDS Proxy나 PgBouncer를 반드시 앞에 배치해야 한다.
-
----
 
 ::: tip 핵심 정리
 - DB 커넥션 생성은 TCP 핸드셰이크, 인증 등 수십~수백ms가 소요된다. 커넥션 풀로 미리 생성해 재사용한다.

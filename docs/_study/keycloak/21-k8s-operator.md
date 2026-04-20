@@ -16,8 +16,6 @@ next: /study/keycloak/22-database-performance
 - Argo CD/Flux 기반 GitOps에서 Realm 변경을 반영하는 전형적인 워크플로우를 설계한다.
 :::
 
----
-
 ## 1. Operator 패턴과 Keycloak Operator
 
 Keycloak을 쿠버네티스에 올리는 방법은 크게 세 가지다.
@@ -85,8 +83,6 @@ kubectl apply -n keycloak -f \
 
 - `keycloaks.k8s.keycloak.org` — Keycloak 인스턴스 자체
 - `keycloakrealmimports.k8s.keycloak.org` — 선언적 Realm 관리
-
----
 
 ## 2. Keycloak Custom Resource
 
@@ -169,8 +165,6 @@ keycloak-prod   True    Running
 
 `kubectl describe`로 `Status.Conditions`을 보면 "Has the deployment finished rolling out?" 수준의 세부 정보가 표시된다. Operator가 DB 접근 실패 같은 문제를 만나면 이 필드에 이유가 기록된다.
 
----
-
 ## 3. KeycloakRealmImport
 
 Realm을 수동으로 Admin Console에서 만들면 환경이 늘어날수록 관리가 무너진다. Operator는 `KeycloakRealmImport` CR로 Realm을 선언적으로 생성·동기화한다.
@@ -234,8 +228,6 @@ Operator는 Admin REST API([CH23](/study/keycloak/23-admin-rest-api) 참조)를 
 - <strong>부분 업데이트 아님</strong>: `KeycloakRealmImport`는 최초 생성과 덮어쓰기를 처리하지만, 기존 Realm의 사용자를 보존하면서 특정 필드만 바꾸는 용도로는 설계되지 않았다. 운영 중인 Realm의 설정 변경은 Admin REST API나 Terraform을 쓰는 게 안전하다.
 - <strong>Secret 주의</strong>: Realm JSON에 Client Secret을 하드코딩하면 Git에 평문이 올라간다. External Secrets Operator나 SealedSecrets로 감싸야 한다.
 - <strong>CR 상태</strong>: `.status.conditions`에 Import 결과가 기록된다. 실패 시 Operator 로그와 함께 확인한다.
-
----
 
 ## 4. Ingress와 TLS
 
@@ -308,8 +300,6 @@ spec:
 
 `proxy-buffer-size`를 키우는 이유는 Keycloak 로그인 쿠키가 큰 경우(특히 JWT 기반 세션) 기본 4KB 버퍼를 초과하기 때문이다. 이 설정을 빼먹으면 로그인 중간에 502가 뜬다.
 
----
-
 ## 5. GitOps 워크플로우
 
 Realm을 CR로 선언하면 Argo CD/Flux 같은 GitOps 도구가 전체 IAM 상태를 관리할 수 있다. [CH23. Admin REST API](/study/keycloak/23-admin-rest-api)에서 Terraform 접근법을 다루는데, Operator + GitOps는 그 첫 번째 대안이다.
@@ -378,8 +368,6 @@ spec:
 
 `selfHeal: true`가 핵심이다. Admin Console에서 실수로 설정을 바꿔도 Git 상태로 자동 되돌린다. 반대로 말하면, <strong>Admin Console은 읽기 전용에 가까운 도구로 재정의된다</strong>. 설정 변경은 PR로.
 
----
-
 ## 6. 운영 주의사항
 
 Operator가 많은 것을 자동으로 해 주지만, 몇 가지는 여전히 운영자의 판단이 필요하다.
@@ -430,8 +418,6 @@ Operator CR의 `instances` 필드는 수동 값이라 HPA가 직접 조작하지
 - `/health/ready`, `/health/live`로 Liveness/Readiness Probe
 - Infinispan XSite 복제 지연은 Grafana 대시보드에서 모니터링
 - Operator 자체 로그(`kubectl logs -n keycloak deploy/keycloak-operator`)도 별도 수집
-
----
 
 ::: tip 핵심 정리
 - Keycloak Operator는 `Keycloak` CR 하나로 HA 클러스터·DB 연결·Ingress를 선언적으로 관리한다.

@@ -16,8 +16,6 @@ next: /study/keycloak/19-theme
 - Caching 정책(NO_CACHE/EVICT_DAILY/DEFAULT)과 운영 시 주의점을 구분할 수 있다.
 :::
 
----
-
 ## 1. 왜 User Federation 대신 커스텀이 필요한가
 
 [CH14. User Federation](/study/keycloak/14-user-federation)에서 다룬 LDAP/Kerberos는 잘 정의된 디렉토리 프로토콜이 있을 때의 표준 답이다. 그러나 현실에서는 다음과 같은 비표준 케이스가 흔하다.
@@ -46,8 +44,6 @@ flowchart TD
 ```
 
 LDAP도 사실 내부적으로는 UserStorage SPI의 한 구현이다. 즉 커스텀 User Storage는 "내가 직접 구현한 Federation"이다.
-
----
 
 ## 2. UserStorageProviderFactory와 생명주기
 
@@ -88,8 +84,6 @@ public MyProvider create(KeycloakSession session, ComponentModel model) {
 }
 ```
 
----
-
 ## 3. Capability 인터페이스 패턴
 
 `UserStorageProvider`만 구현해서는 아무 일도 안 일어난다. Keycloak은 "조회 능력", "비밀번호 검증 능력" 같은 기능별로 <strong>Capability 인터페이스</strong>를 따로 두고, Provider가 어떤 인터페이스를 구현했는지에 따라 위임 여부를 결정한다.
@@ -129,8 +123,6 @@ flowchart LR
 - <strong>Query</strong>는 "이 조건에 맞는 사용자 목록을 달라"는 요청이다. Admin Console 사용자 검색 화면이 호출한다.
 
 외부 시스템이 대량 조회를 허용하지 않거나 부담이 크다면 Query는 구현하지 말고 Lookup만 제공해도 된다. Admin Console에서 목록은 비어 보이지만 로그인은 정상 동작한다.
-
----
 
 ## 4. UserModel 어댑터
 
@@ -284,8 +276,6 @@ sequenceDiagram
 
 `CredentialInputUpdater`를 추가로 구현하면 Account Console에서 비밀번호 변경 요청을 레거시 DB에 반영할 수 있다. 마이그레이션 중 "기존 사용자도 Keycloak에서 비밀번호 바꾸면 레거시 규칙으로 해시 저장"하는 전략에 쓴다.
 
----
-
 ## 5. Caching 정책
 
 외부 시스템을 매 요청마다 조회하면 레거시 DB/API가 죽는다. Keycloak은 UserModel을 Realm 단위로 캐싱하며 정책을 선택할 수 있다.
@@ -309,8 +299,6 @@ Admin Console의 User Federation → 내가 만든 Provider → Cache Policy 항
 ### 선택적 무효화
 
 `OnUserCache`를 구현하면 캐시에 들어가기 직전에 속성을 덧붙일 수 있다. 또 Admin REST API `POST /admin/realms/{realm}/user-storage/{id}/remove-imported-users`를 호출해 외부 삭제 사용자를 일괄 정리할 수도 있다.
-
----
 
 ## 6. 운영 팁
 
@@ -353,8 +341,6 @@ flowchart LR
 - EventListener SPI로 `USER_STORAGE_FAILURE` 같은 이벤트를 추려 알람
 - DataSource 레벨 JMX로 Hikari 풀 상태 추적
 - `org.keycloak.storage` 로거를 DEBUG로 띄워 캐시 히트/미스 확인
-
----
 
 ::: tip 핵심 정리
 - LDAP로 해결되지 않는 레거시 DB·SaaS·커스텀 해시 상황에서 UserStorage SPI로 직접 Federation을 구현한다.

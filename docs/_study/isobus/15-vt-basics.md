@@ -16,8 +16,6 @@ next: /study/isobus/16-vt-object-pool
 - AUX(보조 입력) 장치의 개념과 Preferred Assignment를 설명할 수 있다.
 :::
 
----
-
 ## 1. VT란 무엇인가
 
 <strong>Virtual Terminal(VT)</strong>은 ISO 11783-6에 정의된 표준 사용자 인터페이스 시스템이다. 트랙터 운전석에 장착된 디스플레이에 **작업기의 UI를 표시하고 사용자 입력을 받는** 인터페이스 역할을 한다.
@@ -44,8 +42,6 @@ graph LR
     ECU -- "오브젝트 풀 전송<br>사용자 입력 수신" --> VTS
     VTS -- "사용자 입력 이벤트" --> ECU
 ```
-
----
 
 ## 2. 왜 VT가 혁신적인가
 
@@ -84,8 +80,6 @@ graph TD
     D -- "오브젝트 풀 D" --> VT
 ```
 
----
-
 ## 3. VT 동작 원리
 
 VT와 작업기 ECU 사이의 동작은 크게 세 단계로 나뉜다.
@@ -116,8 +110,6 @@ sequenceDiagram
     VT->>User: 새로운 값 화면 표시
 ```
 
----
-
 ## 4. VT 버전
 
 ISO 11783-6은 지속적으로 개정되어 왔으며, VT Server와 Client가 지원하는 <strong>버전(Version)</strong>에 따라 사용 가능한 기능이 달라진다.
@@ -142,8 +134,6 @@ graph LR
         V --> R
     end
 ```
-
----
 
 ## 5. AUX (보조 입력)
 
@@ -181,8 +171,6 @@ sequenceDiagram
     AUX->>VT: AUX Input Status (입력값 전달)
     VT->>ECU: AUX Input Maintenance (기능에 매핑된 입력값 전달)
 ```
-
----
 
 ::: tip 핵심 정리
 - VT는 ISO 11783-6에 정의된 표준 디스플레이 인터페이스로, 트랙터 디스플레이(VT Server)와 작업기 ECU(VT Client)로 구성된다.

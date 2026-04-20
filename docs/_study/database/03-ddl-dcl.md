@@ -16,8 +16,6 @@ next: /study/database/04-sql-basics
 - GRANT, REVOKE로 사용자 권한을 부여하고 회수할 수 있다.
 :::
 
----
-
 ## 1. SQL 분류
 
 SQL(Structured Query Language)은 관계형 데이터베이스를 다루기 위한 표준 언어다. 기능에 따라 4가지로 분류한다.
@@ -50,8 +48,6 @@ mindmap
       ROLLBACK
       SAVEPOINT
 ```
-
----
 
 ## 2. DDL(Data Definition Language)
 
@@ -124,8 +120,6 @@ TRUNCATE TABLE employees;
 | 데이터 | 삭제됨 | 전체 삭제 | 조건부 삭제 가능 |
 | 롤백 | 불가 | 불가(대부분) | 가능 |
 | 속도 | 빠름 | 빠름 | 느림 |
-
----
 
 ## 3. 제약 조건
 
@@ -213,8 +207,6 @@ CREATE TABLE logs (
 );
 ```
 
----
-
 ## 4. DCL(Data Control Language)
 
 DCL은 데이터베이스 객체에 대한 접근 권한을 관리하는 언어다. 보안과 접근 제어의 핵심이다.
@@ -287,8 +279,6 @@ flowchart LR
 | 임의적 접근 제어(DAC) | 객체 소유자가 접근 권한을 부여한다. SQL의 GRANT/REVOKE가 이에 해당한다. |
 | 강제적 접근 제어(MAC) | 시스템이 보안 등급에 따라 접근을 통제한다. 군사·정부 시스템에서 사용한다. |
 | 역할 기반 접근 제어(RBAC) | 역할(ROLE)을 통해 권한을 관리한다. 대부분의 DBMS가 지원한다. |
-
----
 
 ::: tip 핵심 정리
 - SQL은 DDL(구조 정의), DML(데이터 조작), DCL(권한 제어), TCL(트랜잭션 제어) 4가지로 분류한다.

@@ -22,8 +22,6 @@ tags:
 - 실제 CAN 메시지 문자열을 직접 파싱해 온도값을 추출할 수 있다.
 :::
 
----
-
 # 1. 29비트 ID 해부
 
 ## 필드별 상세 설명
@@ -71,8 +69,6 @@ hex → binary (29비트):
   PS       : 1110 1110 = 0xEE = 238
   SA       : 0000 0000 = 0x00 = 0 (엔진 ECU)
 ```
-
----
 
 # 2. PGN (Parameter Group Number)
 
@@ -130,8 +126,6 @@ CAN ID (Priority=3, SA=0x00):
   0x0CF00400
 ```
 
----
-
 # 3. SPN (Suspect Parameter Number)
 
 ## SPN이란
@@ -170,8 +164,6 @@ PGN 65262 (Engine Temperature) 내 SPN 목록:
 SPN 110, raw = 0xB0 = 176:
   실제 온도 = 176 * 1 + (-40) = 136 °C
 ```
-
----
 
 # 4. PDU1 vs PDU2
 
@@ -227,8 +219,6 @@ PS = Group Extension (PGN의 일부)
 | PS 의미 | Destination Address | Group Extension (PGN의 일부) |
 | 전송 방식 | 특정 노드 지정 | 버스 전체 브로드캐스트 |
 | 주요 용도 | 요청/응답, 진단 | 센서 데이터 주기적 전송 |
-
----
 
 # 5. PGN/SPN 디코딩 실습
 
@@ -397,8 +387,6 @@ PGN      : 65262 (0x0FEEE)
 - PDU1(PF < 240)은 특정 노드 지정, PDU2(PF >= 240)는 브로드캐스트 전송이다.
 - `18FEEE00#FFB03204FFFFFFFF` 파싱 결과: Priority=6, PGN=65262, SA=0x00, 냉각수 온도=136°C.
 :::
-
----
 
 ## 다음 챕터
 

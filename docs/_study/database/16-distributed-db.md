@@ -16,8 +16,6 @@ next: /study/database/17-data-warehouse
 - Range, Hash, Directory 샤딩의 차이와 샤딩 키 선택 기준을 설명할 수 있다.
 :::
 
----
-
 ## 1. 분산 데이터베이스 개념
 
 ### 정의
@@ -50,8 +48,6 @@ flowchart TD
 |------|------|
 | 장점 | 수평 확장(scale-out)으로 대용량 처리, 지리적 분산으로 가용성 향상, 장애 격리 |
 | 단점 | 분산 트랜잭션의 복잡성, 데이터 일관성 유지 어려움, 네트워크 지연, 운영 복잡도 증가 |
-
----
 
 ## 2. CAP 정리
 
@@ -86,8 +82,6 @@ flowchart TD
     CP --> CPEx["파티션 발생 시<br>쓰기 차단 또는 오류 반환<br>HBase, ZooKeeper, etcd"]
     AP --> APEx["파티션 발생 시<br>오래된 데이터 허용<br>Cassandra, DynamoDB, CouchDB"]
 ```
-
----
 
 ## 3. 2PC (Two-Phase Commit)
 
@@ -132,8 +126,6 @@ sequenceDiagram
 Phase 1 이후 모든 참여자가 Yes를 응답했지만 Phase 2 전에 코디네이터가 장애를 겪으면, 참여자들은 락을 잡은 채로 무한 대기 상태에 빠진다. 이를 <strong>블로킹 문제(Blocking Problem)</strong>라 한다.
 
 이를 해결하기 위한 대안으로 3PC(Three-Phase Commit), Paxos, Raft 같은 합의 알고리즘이 사용된다.
-
----
 
 ## 4. 샤딩 (Sharding)
 
@@ -201,8 +193,6 @@ customer_id 501~1000 → 샤드 2
 샤드를 추가하거나 제거할 때 기존 데이터를 새 샤드로 이동시켜야 한다. Hash Sharding에서 샤드를 4개에서 5개로 늘리면 `hash(key) % 4`와 `hash(key) % 5`의 결과가 달라져 거의 모든 데이터를 이동해야 한다.
 
 이 문제를 완화하기 위해 <strong>Consistent Hashing(일관된 해싱)</strong>을 사용한다. 가상 노드(Virtual Node)를 링 구조에 배치해 샤드를 추가/제거할 때 이동하는 데이터를 최소화한다.
-
----
 
 ::: tip 핵심 정리
 - 분산 DB의 다섯 가지 투명성: 위치, 분할, 복제, 병행, 장애 투명성.

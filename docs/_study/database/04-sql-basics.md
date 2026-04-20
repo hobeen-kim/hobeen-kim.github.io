@@ -16,8 +16,6 @@ next: /study/database/05-join-subquery
 - 문자열·날짜·조건 함수를 SQL 쿼리에 적용할 수 있다.
 :::
 
----
-
 ## 1. SELECT 기본
 
 SELECT 문은 데이터베이스에서 원하는 데이터를 조회하는 가장 기본적인 명령이다.
@@ -82,8 +80,6 @@ SELECT * FROM employees WHERE dept = 'IT' OR dept = 'HR';
 SELECT * FROM employees WHERE NOT dept = 'IT';
 ```
 
----
-
 ## 2. DML(Data Manipulation Language)
 
 DML은 테이블의 데이터를 삽입, 수정, 삭제하는 언어다. SELECT도 넓은 의미의 DML에 포함되지만, 일반적으로는 INSERT/UPDATE/DELETE를 DML이라 한다.
@@ -146,8 +142,6 @@ WHERE  created_at < '2023-01-01';
 WHERE 절을 생략하면 테이블의 <strong>모든</strong> 행이 삭제된다. TRUNCATE TABLE과 달리 롤백이 가능하지만, 대용량 데이터의 경우 속도가 느리다.
 :::
 
----
-
 ## 3. 정렬과 제한
 
 ### ORDER BY — 정렬
@@ -195,8 +189,6 @@ SELECT DISTINCT dept_id FROM employees;
 -- 여러 컬럼 조합의 중복 제거
 SELECT DISTINCT dept_id, job_title FROM employees;
 ```
-
----
 
 ## 4. 연산자와 함수
 
@@ -285,8 +277,6 @@ flowchart TD
     B -- Yes --> C["IFNULL: 대체값 반환<br>COALESCE: 다음 인자 평가"]
     B -- No --> D[원래 값 반환]
 ```
-
----
 
 ::: tip 핵심 정리
 - SELECT 실행 순서는 FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT이다. 별칭은 ORDER BY에서만 사용 가능하다.

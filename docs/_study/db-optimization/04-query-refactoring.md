@@ -16,8 +16,6 @@ next: /study/db-optimization/05-soft-delete
 - Lateral Join으로 Top-N 행별 쿼리를 효율적으로 처리한다.
 :::
 
----
-
 ## 1. 서브쿼리 → JOIN 변환
 
 ### 상관 서브쿼리의 문제
@@ -87,8 +85,6 @@ graph TD
     E --> F["Hash Join 또는 Index Join"]
     F --> G["O(N + M)"]
 ```
-
----
 
 ## 2. OFFSET 페이징 vs Keyset 페이징
 
@@ -165,8 +161,6 @@ graph LR
     F --> G["일정한 응답 시간"]
 ```
 
----
-
 ## 3. Covering Index 활용
 
 ### Index Only Scan 원리
@@ -236,8 +230,6 @@ CREATE INDEX idx_orders_cov ON orders (user_id, status, created_at DESC, id, tot
 - 인덱스 크기가 증가한다. 많은 컬럼을 포함할수록 인덱스 파일이 커진다.
 - INSERT/UPDATE 성능이 저하된다. 인덱스 유지 비용이 늘어난다.
 - 쓰기가 잦은 테이블에는 신중하게 적용해야 한다.
-
----
 
 ## 4. Lateral Join
 
@@ -322,8 +314,6 @@ graph TD
 - 파티션 키 + 정렬 키로 구성된 복합 인덱스가 존재할 때
 
 [데이터베이스 CH12 실행 계획](/study/database/12-execution-plan)에서 물리적 조인 알고리즘(Hash Join, Nested Loop Join, Merge Join)의 비용 모델을 다룬다.
-
----
 
 ::: tip 핵심 정리
 - 상관 서브쿼리는 O(N × M) 비용이 발생한다. Derived Table + JOIN으로 변환하면 Hash Join이 적용되어 O(N + M)이 된다.

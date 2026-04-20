@@ -16,8 +16,6 @@ next: /study/database/12-execution-plan
 - REDO/UNDO, WAL, 체크포인트를 이용한 회복 기법을 설명할 수 있다.
 :::
 
----
-
 ## 1. 트랜잭션과 ACID
 
 ### 트랜잭션이란
@@ -53,8 +51,6 @@ COMMIT;
 - `COMMIT`: 트랜잭션의 모든 변경을 영구 반영한다.
 - `ROLLBACK`: 트랜잭션의 모든 변경을 취소하고 이전 상태로 되돌린다.
 - `SAVEPOINT`: 트랜잭션 내에 중간 복귀 지점을 설정한다.
-
----
 
 ## 2. 격리 수준
 
@@ -144,8 +140,6 @@ SQL 표준은 격리 수준을 4단계로 정의한다.
 - <strong>REPEATABLE READ</strong>: 트랜잭션 시작 시점의 스냅샷을 기준으로 읽는다. MySQL InnoDB의 기본값.
 - <strong>SERIALIZABLE</strong>: 트랜잭션을 순차적으로 실행한 것과 동일한 결과를 보장한다. 가장 안전하지만 성능 비용이 크다.
 
----
-
 ## 3. 병행 제어 기법
 
 ### 로킹(Locking)
@@ -216,8 +210,6 @@ sequenceDiagram
 | <strong>Wound-Wait</strong> | 오래된 트랜잭션이 젊은 트랜잭션을 강제 롤백(Wound), 젊은 트랜잭션은 기다림(Wait). |
 | 데드락 탐지 후 롤백 | 대기 그래프(Wait-for Graph)에서 사이클을 탐지하면 비용이 낮은 트랜잭션을 희생(victim)으로 선택해 롤백. |
 
----
-
 ## 4. 회복 기법
 
 ### REDO와 UNDO
@@ -255,8 +247,6 @@ flowchart TD
     Redo --> Done([복구 완료])
     Undo --> Done
 ```
-
----
 
 ## 5. 애플리케이션 레벨 락: Optimistic vs Pessimistic
 
@@ -342,8 +332,6 @@ flowchart TD
     Q3 -->|예| DistLock["분산 락<br>(Redis SETNX 등)"]
     Q3 -->|아니오| Optimistic
 ```
-
----
 
 ::: tip 핵심 정리
 - 트랜잭션은 논리적 작업 단위이며 ACID(원자성, 일관성, 격리성, 지속성)를 보장해야 한다.

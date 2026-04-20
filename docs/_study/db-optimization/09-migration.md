@@ -16,8 +16,6 @@ next: /study/db-optimization/10-monitoring
 - 마이그레이션 롤백 전략과 실전 주의사항을 파악한다.
 :::
 
----
-
 ## 1. 마이그레이션 도구
 
 ### Flyway vs Liquibase
@@ -87,8 +85,6 @@ spring:
 ```
 
 Liquibase는 `rollback` 블록을 명시적으로 작성할 수 있어 복잡한 롤백 시나리오에 유리하다.
-
----
 
 ## 2. Zero-Downtime DDL
 
@@ -184,8 +180,6 @@ graph TD
 
 실무에서는 쓰기가 많은 테이블, 트리거가 이미 존재하는 테이블, 부하 조절이 중요한 환경에서 gh-ost를 선호한다.
 
----
-
 ## 3. 컬럼 추가/삭제 안전 순서
 
 무중단 배포 환경에서 컬럼 추가/삭제는 반드시 단계를 나누어 진행해야 한다. 코드와 DB 스키마는 항상 한 단계씩 차이나도 정상 동작해야 한다.
@@ -251,8 +245,6 @@ flowchart TD
 -- 4단계: 컬럼 삭제
 ALTER TABLE orders DROP COLUMN legacy_field;
 ```
-
----
 
 ## 4. 실전 주의사항
 

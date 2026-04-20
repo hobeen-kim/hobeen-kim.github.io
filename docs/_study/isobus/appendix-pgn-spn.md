@@ -7,8 +7,6 @@ tags: [ISOBUS, 부록]
 
 # PGN/SPN 주요 목록
 
----
-
 ## PGN (Parameter Group Number) 주요 목록
 
 PGN은 J1939 29비트 CAN ID에서 추출되는 18비트 값으로, 메시지의 종류를 식별한다.
@@ -39,8 +37,6 @@ PGN은 J1939 29비트 CAN ID에서 추출되는 18비트 값으로, 메시지의
 | 65226 | 0xFECA | DM1 (Active DTCs) | 현재 활성 고장 코드 목록 | 가변 | 1000 ms |
 | 65227 | 0xFECB | DM2 (Previously Active DTCs) | 이전 발생 고장 코드 목록 | 가변 | 요청 시 |
 
----
-
 ## SPN (Suspect Parameter Number) 주요 목록
 
 SPN은 PGN 내에서 개별 측정 파라미터를 식별하는 번호다.
@@ -64,8 +60,6 @@ SPN은 PGN 내에서 개별 측정 파라미터를 식별하는 번호다.
 | 1114 | Longitude | Vehicle Position (65267) | 5-8 | 32 | 10⁻⁷ deg/bit | -210° | -180 ~ 180° |
 | 1213 | Malfunction Indicator Lamp Status | DM1 (65226) | 1 (bit 7-8) | 2 | - | - | On / Off |
 | 1215 | Protect Lamp Status | DM1 (65226) | 1 (bit 3-4) | 2 | - | - | On / Off |
-
----
 
 ## PGN 구조 요약
 

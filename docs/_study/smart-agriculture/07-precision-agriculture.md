@@ -18,8 +18,6 @@ next: /study/smart-agriculture/08-smart-irrigation
 
 :::
 
----
-
 ## 1. 정밀농업이란
 
 정밀농업(Precision Agriculture)은 <strong>적시(Right Time), 적소(Right Place), 적량(Right Amount)</strong>의 세 원칙에 따라 농업 자원을 투입하는 방식이다. 필지 전체에 동일한 양을 살포하는 균일 살포 방식과 달리, 구역별로 실제 필요한 양만 정확히 투입한다.
@@ -46,8 +44,6 @@ flowchart LR
     B -->|비옥도 높음| D[투입 과잉<br>비용 낭비·환경오염]
     E[가변 살포<br>구역별 처방량] --> F[투입 최적화<br>비료 15~30% 절감<br>수확량 5~10% 향상]
 ```
-
----
 
 ## 2. 데이터 수집 → 분석 → 실행 사이클
 
@@ -94,8 +90,6 @@ sequenceDiagram
 - 수확기에 장착된 유량 센서와 GPS로 구역별 수확량을 기록한다.
 - 수확량 맵이 다음 시즌 처방맵 생성의 핵심 입력 데이터가 된다.
 
----
-
 ## 3. 처방맵(Prescription Map)
 
 처방맵은 필지를 격자(Grid) 또는 관리 구역으로 나누고, 각 구역에 적용할 살포량(비료·농약·씨앗)을 지정한 데이터 파일이다.
@@ -121,8 +115,6 @@ flowchart TD
     D --> E[작업기 ECU에<br>명령 전송]
     E --> F[모터·밸브 제어<br>실시간 살포량 조절]
 ```
-
----
 
 ## 4. 수확량 매핑(Yield Mapping)
 

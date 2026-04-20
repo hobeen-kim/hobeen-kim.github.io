@@ -16,8 +16,6 @@ next: /study/db-optimization/04-query-refactoring
 - MultipleBagFetchException, 카테시안 곱, 페이징 제한 등 주의사항을 파악한다.
 :::
 
----
-
 ## 1. N+1 문제란
 
 ### 정의
@@ -65,8 +63,6 @@ graph TD
 - 로드가 있는 환경(레이턴시 10ms)에서는 100번 왕복 = 1000ms = 1초
 
 N이 커질수록(데이터 증가) 선형적으로 느려지며, 커넥션 풀도 그만큼 오래 점유한다.
-
----
 
 ## 2. 해결 전략 비교
 
@@ -123,8 +119,6 @@ SELECT * FROM members WHERE id IN (1, 2, 3, ..., 20);
 - 페이징과 함께 사용할 수 있다.
 - 컬렉션이 여러 개여도 각각 IN 절로 처리되어 MultipleBagFetchException이 발생하지 않는다.
 - 쿼리 수는 `1 + ceil(N / batch_size)`개이다.
-
----
 
 ## 3. 실전 코드 패턴
 
@@ -238,8 +232,6 @@ public Page<OrderResponse> getOrders(OrderStatus status, int page, int size) {
 }
 ```
 
----
-
 ## 4. 주의사항
 
 ### MultipleBagFetchException
@@ -317,8 +309,6 @@ graph TD
     F -->|아니오| G[Set으로 변경 후 Fetch Join]
     F -->|예| H[Batch Size 사용 또는 쿼리 분리]
 ```
-
----
 
 ::: tip 핵심 정리
 - N+1 문제는 부모 1번 조회 후 연관 엔티티를 N번 추가 조회하는 패턴으로, DB 왕복 비용이 선형적으로 증가한다.

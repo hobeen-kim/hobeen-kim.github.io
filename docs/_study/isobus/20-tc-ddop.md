@@ -16,8 +16,6 @@ next: /study/isobus/21-tc-task
 - 3구획 살포기의 DDOP를 직접 설계하고 오브젝트 표를 작성할 수 있다.
 :::
 
----
-
 ## 1. DDOP란
 
 <strong>DDOP(Device Description Object Pool)</strong>는 작업기가 자기 자신의 구조와 능력을 TC에게 알려주는 데이터 집합이다.
@@ -34,8 +32,6 @@ TC-Server는 버스에 연결된 작업기에 대해 아무런 사전 정보가 
 **DDOP가 있다면:**
 - TC는 작업기의 구조를 파악하고 적절한 명령을 선택한다.
 - 지원되지 않는 DDI로의 명령 시도를 사전에 방지한다.
-
----
 
 ## 2. DDOP 오브젝트 구조
 
@@ -105,8 +101,6 @@ graph TD
 - 공식: `표시값 = (원시값 + Offset) × Scale`
 - 예: 원시값 20000, Offset=0, Scale=0.01 → 표시값 200.00 L/ha
 
----
-
 ## 3. DDOP 전송 과정
 
 작업기가 ISOBUS 네트워크에 연결되면 다음 순서로 DDOP를 전송한다.
@@ -143,8 +137,6 @@ sequenceDiagram
 ### 전송 프로토콜
 
 DDOP 데이터는 일반적으로 수백 바이트~수 킬로바이트에 달하므로, 단일 CAN 프레임으로 전송할 수 없다. ISO 11783의 **TP(Transport Protocol)** 또는 <strong>ETP(Extended Transport Protocol)</strong>를 사용하여 멀티패킷으로 분할 전송한다.
-
----
 
 ## 4. DDOP 설계 예제
 
@@ -255,16 +247,12 @@ graph TD
 - 전체 작업폭은 9m이다.
 - 값의 단위는 L/ha이며 스케일 인자는 0.01이다.
 
----
-
 > **핵심 정리**
 > - DDOP(Device Description Object Pool)는 작업기가 TC에게 자신의 구조와 능력을 알리는 데이터로, "작업기의 자기소개서"이다.
 > - DDOP는 Device, DeviceElement, DeviceProcessData, DeviceProperty, DeviceValuePresentation 5가지 오브젝트로 구성된다.
 > - TC-Client는 연결 시 Structure Label을 먼저 전달하고, TC가 요청하면 DDOP 전체를 멀티패킷으로 전송한다.
 > - TC는 DDOP를 파싱하여 지원 DDI, Section 구성, 작업폭 등을 파악한 뒤 Task를 활성화한다.
 > - 3구획 살포기 DDOP에는 Section별로 DDI 1(Setpoint), DDI 2(Measurement), DDI 141(Section Control) 항목이 정의된다.
-
----
 
 ## 다음 챕터
 

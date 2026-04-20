@@ -16,8 +16,6 @@ next: /study/db-optimization/08-connection-pool
 - Redis Eviction Policy와 영속성 옵션의 차이를 설명할 수 있다.
 :::
 
----
-
 ## 1. 캐시 패턴
 
 ### Cache-Aside (Lazy Loading)
@@ -101,8 +99,6 @@ eventQueue.publish(new UserUpdateEvent(userId, user));
 | Write-Through | 항상 빠름 | 느림 (동기 쓰기) | 높음 | 없음 |
 | Write-Behind | 항상 빠름 | 빠름 (비동기) | 낮음 | 있음 |
 
----
-
 ## 2. 캐시 스탬피드(Thundering Herd)
 
 ### 문제 정의
@@ -181,8 +177,6 @@ long jitter = (long) (Math.random() * 60) - 30; // -30 ~ +30
 redis.set(key, value, Duration.ofSeconds(300 + jitter));
 ```
 
----
-
 ## 3. 캐시 무효화
 
 ### Tag-based Invalidation
@@ -245,8 +239,6 @@ DB 변경이 발생하면 자동으로 캐시가 무효화되어 애플리케이
 EXPIRE session:abc123 1800
 ```
 
----
-
 ## 4. Redis 운영 주의사항
 
 ### 히트율(Hit Rate)
@@ -303,8 +295,6 @@ flowchart TD
     E --> G
     F --> H[appendfsync always/everysec]
 ```
-
----
 
 ::: tip 핵심 정리
 - Cache-Aside는 가장 일반적인 패턴으로 Cache Miss 시 DB 조회 후 캐시에 저장한다. Write-Through는 쓰기 시 동기 갱신, Write-Behind는 비동기 갱신이다.

@@ -16,8 +16,6 @@ next: /study/db-optimization/02-index-not-used
 - 수집 → 식별 → EXPLAIN → 개선 → 재측정의 진단 프로세스를 따른다.
 :::
 
----
-
 ## 1. 슬로우 쿼리란
 
 ### 정의
@@ -47,8 +45,6 @@ graph LR
 **Lock 경합 문제**
 
 슬로우 쿼리가 테이블이나 행 락을 오래 잡고 있으면, 다른 트랜잭션이 블로킹되어 연쇄적인 지연이 발생한다.
-
----
 
 ## 2. MySQL 슬로우 쿼리 로그
 
@@ -117,8 +113,6 @@ pt-query-digest --limit 10 /var/log/mysql/slow.log
 - Calls가 많은데 R/Call이 낮더라도 누적 시간이 크면 우선순위가 높다.
 - V/M이 높은 쿼리는 특정 파라미터 값에서만 느린 경우가 많다.
 
----
-
 ## 3. PostgreSQL pg_stat_statements
 
 ### 설치
@@ -184,8 +178,6 @@ LIMIT 10;
 SELECT pg_stat_statements_reset();
 ```
 
----
-
 ## 4. 진단 프로세스
 
 슬로우 쿼리 진단은 일회성이 아닌 반복 사이클로 운영해야 한다.
@@ -243,8 +235,6 @@ SELECT * FROM orders WHERE user_id = 1 AND status = 'PENDING';
 **5단계 - 재측정**
 
 개선 전후 `total_exec_time` 또는 평균 응답 시간을 비교한다. 단일 수치보다 p95, p99를 기준으로 판단한다.
-
----
 
 ::: tip 핵심 정리
 - 슬로우 쿼리는 테일 레이턴시와 커넥션 점유를 통해 서비스 전체에 영향을 준다.

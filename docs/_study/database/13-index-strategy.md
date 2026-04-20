@@ -16,8 +16,6 @@ next: /study/database/14-query-tuning
 - 인덱스 설계 원칙과 주요 안티패턴을 설명할 수 있다.
 :::
 
----
-
 ## 1. 인덱스 기본 원리
 
 ### 왜 인덱스가 빠른가
@@ -61,8 +59,6 @@ flowchart LR
 ```
 
 인덱스가 10개인 테이블에 INSERT 하나를 실행하면 내부적으로 최대 11번의 B+Tree 갱신이 발생한다. 이커머스처럼 주문이 초당 수천 건씩 들어오는 환경에서 과도한 인덱스는 오히려 심각한 성능 문제를 유발한다.
-
----
 
 ## 2. 복합 인덱스(Composite Index)
 
@@ -115,8 +111,6 @@ flowchart TD
 
 실무 원칙: <strong>더 자주 단독으로 사용되는 컬럼을 앞에</strong> 배치한다.
 
----
-
 ## 3. 커버링 인덱스
 
 ### 커버링 인덱스란
@@ -165,8 +159,6 @@ EXPLAIN SELECT amount FROM orders WHERE customer_id = 100;
 - 조회 빈도가 매우 높은 쿼리
 - 테이블이 커서 랜덤 I/O 비용이 클 때
 
----
-
 ## 4. 인덱스 설계 원칙
 
 ### 좋은 인덱스를 만드는 원칙
@@ -211,8 +203,6 @@ SELECT * FROM sys.schema_index_statistics
 WHERE table_schema = 'mydb'
 ORDER BY rows_selected DESC;
 ```
-
----
 
 ::: tip 핵심 정리
 - B+Tree 인덱스는 O(log N) 탐색을 가능하게 하지만, 쓰기 시 모든 인덱스를 갱신해야 하는 오버헤드가 발생한다.

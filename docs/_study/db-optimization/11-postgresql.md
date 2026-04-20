@@ -17,11 +17,7 @@ next: /study/db-optimization/12-mysql-innodb
 - Transaction ID Wraparound 위험을 사전에 감지하고 대응한다.
 :::
 
----
-
 > MVCC 기초 개념은 [데이터베이스 CH11 트랜잭션](/study/database/11-transaction)에서 다룬다.
-
----
 
 ## 1. Dead Tuple과 VACUUM
 
@@ -78,8 +74,6 @@ VACUUM ANALYZE users;
 -- 테이블 완전 재작성 (서비스 중단 필요)
 VACUUM FULL users;
 ```
-
----
 
 ## 2. Autovacuum 튜닝
 
@@ -152,8 +146,6 @@ ORDER BY relname;
 ALTER TABLE audit_logs SET (autovacuum_enabled = false);
 ```
 
----
-
 ## 3. Table Bloat 대응
 
 ### Table Bloat 측정
@@ -225,8 +217,6 @@ ALTER TABLE large_table SET (autovacuum_vacuum_cost_delay = 20);
 ```
 
 `vacuum_cost_delay`를 높이면 VACUUM이 느려지지만 서비스 쿼리에 미치는 영향이 줄어든다. 야간 배치처럼 부하가 낮은 시간대에는 0으로 설정하여 빠르게 처리할 수 있다.
-
----
 
 ## 4. Transaction ID Wraparound
 

@@ -16,8 +16,6 @@ next: /study/keycloak/14-user-federation
 - MFA 강제를 Required Actions로 붙이는 방식과 Conditional Authenticator로 분기하는 방식을 비교할 수 있다.
 :::
 
----
-
 ## 1. OTP Policy
 
 OTP(One-Time Password)는 "짧은 시간만 유효한 코드"로 추가 인증을 수행하는 가장 오래된 MFA 방식이다. Keycloak은 TOTP(RFC 6238)와 HOTP(RFC 4226) 둘 다 지원한다.
@@ -69,8 +67,6 @@ otpauth://totp/Corp:alice?secret=JBSWY3DPEHPK3PXP&issuer=Corp&algorithm=SHA1&dig
 ```
 
 파라미터가 Realm OTP Policy와 일치해야 올바른 OTP가 생성된다.
-
----
 
 ## 2. WebAuthn 정책
 
@@ -126,8 +122,6 @@ Realm Settings → Authentication → WebAuthn Policy와 <strong>WebAuthn Passwo
 - Token Binding 없이도 중간자 공격(adversary-in-the-middle) 저항성이 높다.
 - 자세한 공격 분류와 대응은 [OAuth CH15. 공격과 방어](/study/oauth/15-attacks)를 참조한다.
 
----
-
 ## 3. Recovery Codes
 
 MFA 기기를 잃어버리면 계정에 접근할 수 없다. 이를 구제하는 수단이 **Recovery Codes**(Authentication Recovery Codes). Keycloak은 사용자 셀프 백업 코드 발급을 기본 제공한다.
@@ -158,8 +152,6 @@ MFA가 걸린 로그인 단계에서 "복구 코드 사용" 링크 → 발급받
 
 - **백업 MFA 필수**: MFA를 강제하면서 Recovery Codes를 강제하지 않으면 "기기 분실 = 지원팀 고객센터 폭주"가 된다.
 - **재발급 감사**: 사용자 본인 인증 채널이 약하다면(예: 이메일만) 재발급 프로세스를 관리자 승인 절차로 보강.
-
----
 
 ## 4. MFA 강제
 
@@ -212,8 +204,6 @@ flowchart TD
 2. 관리자·민감 Role부터 Conditional Authenticator로 강제.
 3. 점진적으로 대상 확대, 매 단계 KPI(등록률·로그인 성공률·CS 문의량) 관찰.
 4. 전사 전환 완료 후 Required Actions로 미등록자 남은 계정 처리.
-
----
 
 ## 5. 사용자 경험
 
@@ -280,8 +270,6 @@ sequenceDiagram
 - **Passkey만 등록한 사용자가 모든 기기를 교체**: 비밀번호 경로가 살아 있다면 재로그인 후 재등록, 전환 초기 Passwordless만 쓰면 위험 — Passkey 롤아웃 초기엔 비밀번호 fallback을 유지.
 - **WebAuthn 브라우저 호환성 문제**: 정책에서 `ES256`·`RS256` 모두 허용, Attestation을 `none`으로 낮춰 범용성 확보.
 - **OTP 시계 표류 재발**: NTP 동기화 점검, Look Around Window 임시 확대 후 원인 해결 시 원복.
-
----
 
 ::: tip 핵심 정리
 - OTP Policy는 TOTP/HOTP 선택·해시 알고리즘·자리수·Look Around Window를 조절하며 Google Authenticator 호환을 위해 SHA-1이 기본이고 고위험 환경은 SHA-256·8자리를 고려한다.

@@ -16,11 +16,7 @@ next: null
 - MySQL 8.0 Online DDL과 binlog ROW/STATEMENT 포맷의 차이를 학습한다.
 :::
 
----
-
 > InnoDB B+Tree 구조와 스토리지 엔진 기초는 [데이터베이스 CH10 스토리지 엔진](/study/database/10-storage-engine)에서 다룬다.
-
----
 
 ## 1. 버퍼 풀 설정
 
@@ -98,8 +94,6 @@ ORDER BY pages DESC
 LIMIT 20;
 ```
 
----
-
 ## 2. Change Buffer와 Adaptive Hash Index
 
 ### Change Buffer
@@ -157,8 +151,6 @@ innodb_adaptive_hash_index = OFF
 SET GLOBAL innodb_adaptive_hash_index = OFF;
 ```
 
----
-
 ## 3. innodb_flush_log_at_trx_commit
 
 ### fsync 동작 원리
@@ -201,8 +193,6 @@ innodb_flush_log_at_trx_commit = 0
 값 2를 사용하면 OS 크래시(서버 전원 차단, 커널 패닉)에만 데이터 유실이 발생한다. MySQL 프로세스 크래시에는 안전하므로 대부분의 서비스는 값 2로 운영한다.
 
 `sync_binlog = 1`과 함께 사용하면 binlog도 커밋마다 fsync를 수행하므로 완전한 내구성을 보장한다.
-
----
 
 ## 4. Online DDL과 binlog
 

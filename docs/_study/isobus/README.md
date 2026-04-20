@@ -19,8 +19,6 @@ tags: [CAN, J1939, ISOBUS, VT, TC]
 - **Virtual Terminal(VT)** — 트랙터 디스플레이에 화면을 그리는 방법
 - **Task Controller(TC)** — 정밀 농업을 위한 작업 데이터 교환 방법
 
----
-
 ## 학습 로드맵
 
 ```mermaid
@@ -53,8 +51,6 @@ flowchart TD
     T --> U
     U --> V["22 종합 실습"]
 ```
-
----
 
 ## 전체 목차
 
@@ -116,8 +112,6 @@ flowchart TD
 |--|------|------|
 | | [용어집 (Glossary)](/study/isobus/appendix-glossary) | ISOBUS/CAN 주요 용어를 A-Z 순으로 정리 |
 | | [PGN/SPN 주요 목록](/study/isobus/appendix-pgn-spn) | 자주 사용하는 PGN과 SPN을 표로 정리한 참조 자료 |
-
----
 
 ## 대상
 

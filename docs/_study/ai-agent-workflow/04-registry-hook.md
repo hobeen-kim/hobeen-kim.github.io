@@ -14,8 +14,6 @@ tags: [TypeScript, Hook, Registry, ClaudeCode]
 - hooks.json 설정 방법을 익힌다.
 :::
 
----
-
 ## 1. oh-my-claudecode 훅 패턴 개요
 
 [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) 는 Claude Code에 훅 기반 에이전트 확장 패턴을 제안한다. 핵심 아이디어는 단순하다.
@@ -40,8 +38,6 @@ flowchart TD
 ```
 
 훅이 `continue: false`를 반환하면 Claude는 도구를 실행하지 않고 `stopReason`을 읽는다. 이 메시지에 기존 에이전트 id를 담아두면 Claude가 `SendMessage`로 경로를 바꾼다.
-
----
 
 ## 2. 타입 정의
 
@@ -74,8 +70,6 @@ interface HookOutput {
 ```
 
 `AgentRecord.last_ping`은 에이전트가 마지막으로 활동한 시각을 ISO 8601로 기록한다. 이 값이 오래됐으면 stale로 판정한다.
-
----
 
 ## 3. 레지스트리 유틸리티
 
@@ -119,8 +113,6 @@ flowchart LR
     B -->|5분 미만| C[active — 차단 대상]
     B -->|5분 초과| D[stale — 삭제 후 생성 허용]
 ```
-
----
 
 ## 4. PreToolUse 훅 — TeamCreate 중복 방지
 
@@ -174,8 +166,6 @@ if (existing) {
 ::: warning stale 임계값 조정
 5분은 예시 값이다. 에이전트가 무거운 작업을 처리 중이라면 ping 간격이 더 길어질 수 있다. 실제 운영에서는 `STALE_THRESHOLD_MS`를 환경 변수로 주입하는 것이 안전하다.
 :::
-
----
 
 ## 5. PostToolUse 훅 — 레지스트리 등록 및 ping 갱신
 
@@ -231,8 +221,6 @@ if (input.tool_name === 'Ping') {
 
 console.log(JSON.stringify({ continue: true }));
 ```
-
----
 
 ## 6. hooks.json 설정
 
@@ -299,8 +287,6 @@ flowchart TD
     D --> I[SendMessage로 전환]
 ```
 
----
-
 ## 7. 전체 디렉토리 구조
 
 ```
@@ -310,8 +296,6 @@ hooks/
 ├── team-registry-enforcer.ts      # PreToolUse — 중복 생성 방지
 └── team-registry-updater.ts       # PostToolUse — 등록 및 ping 갱신
 ```
-
----
 
 ::: tip 핵심 정리
 - PreToolUse 훅은 `continue: false` + `stopReason`으로 도구 실행을 차단하고 Claude에게 대안을 알려준다.

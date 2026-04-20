@@ -16,8 +16,6 @@ next: null
 - 전원 ON부터 통신 완료까지의 시간 흐름을 설명할 수 있다.
 :::
 
----
-
 ## 1. 주소 클레임 (ISOBUS 방식)
 
 ISOBUS의 주소 클레임은 J1939의 방식을 기반으로 하되, 농업 기계에 맞게 확장된 규칙을 적용한다.
@@ -61,8 +59,6 @@ sequenceDiagram
     ECU_B->>BUS: Address Claimed (129) 확정
 ```
 
----
-
 ## 2. Working Set
 
 작업기(Implement)는 내부에 여러 ECU를 포함할 수 있다. 예를 들어 파종기(Seeder)는 메인 제어 ECU, 섹션 밸브 ECU, 속도 센서 ECU를 각각 가질 수 있다. 이 ECU들을 하나의 논리적 단위로 묶는 것이 <strong>Working Set</strong>이다.
@@ -96,8 +92,6 @@ WSM은 네트워크에 참여한 후 <strong>PGN 65070 (Working Set Master)</str
 멤버 ECU들은 <strong>PGN 65075 (Working Set Member)</strong>를 전송하여 자신이 특정 마스터에 속함을 알린다.
 
 VT와 TC는 이 메시지를 수신하여 작업기의 구조를 파악하고, WSM을 통해서만 작업기와 통신한다.
-
----
 
 ## 3. 진단 메시지
 
@@ -142,8 +136,6 @@ graph LR
 | 6 | 전류 높음 / 단락 (GND) |
 | 12 | 고장 모드 불명확 |
 | 19 | 수신 네트워크 데이터 오류 |
-
----
 
 ## 4. 네트워크 관리 타임라인
 
@@ -193,15 +185,11 @@ gantt
 
 > **실제 현장에서의 차이**: Object Pool 크기, ECU 수, 버스 부하에 따라 타임라인은 달라진다. 복잡한 작업기의 경우 Object Pool 전송만 수 초가 걸릴 수 있다.
 
----
-
 > **핵심 정리**
 > - ISOBUS에서 ECU는 CF(Control Function)라 불리며, Self-Configurable 주소(128~247)를 NAME 우선순위로 동적 협상한다.
 > - Working Set은 작업기 내 여러 ECU를 하나의 논리 단위로 묶으며, WSM이 VT·TC와의 모든 통신을 대표한다.
 > - DM1은 현재 활성 고장, DM2는 이전 고장 이력, DM3는 고장 코드 초기화 명령이다.
 > - 전원 ON 후 약 2초 안에 주소 클레임 → Working Set → VT 연결 → 정상 동작 순으로 초기화가 완료된다.
-
----
 
 ## 다음 챕터
 

@@ -16,8 +16,6 @@ next: /study/keycloak/20-ha-clustering
 - messages 번들로 다국어를 지원하고 Locale Selector로 사용자가 언어를 전환하게 만든다.
 :::
 
----
-
 ## 1. Theme 타입
 
 Keycloak이 사용자에게 보여 주는 HTML·메일은 모두 Theme으로 추상화되어 있다. 브랜딩을 바꾸고 싶다면 Keycloak 코드를 건드릴 필요 없이 Theme만 갈아 끼우면 된다. Theme 타입은 5가지다.
@@ -35,8 +33,6 @@ Keycloak은 내장 Theme으로 `keycloak`(v2, 기본), `keycloak.v2`(Account v2 
 ### Account Console v2와 Theme
 
 Keycloak 19부터 Account Console은 React 기반 SPA(`keycloak.v2`)가 기본이다. HTML 템플릿이 아니라 리소스 번들(CSS/JS/로고)만 교체하는 방식이라 FreeMarker 오버라이드는 주로 login/email 쪽에서 일어난다.
-
----
 
 ## 2. themes/ 디렉토리 구조
 
@@ -102,8 +98,6 @@ kcLoginClass=login-pf-page
 ### Realm 적용
 
 Admin Console → Realm Settings → Themes 탭에서 Login/Account/Email Theme을 Realm 단위로 지정한다. 지정 즉시 반영되며 캐시는 개발 중에는 `kc.sh start-dev` 또는 `spi-theme-default-cache-themes=false`로 꺼 둔다.
-
----
 
 ## 3. FreeMarker 기초
 
@@ -171,8 +165,6 @@ Keycloak이 자동 주입하는 주요 객체들이다.
 
 모델 구조는 Keycloak `LoginFormsProvider` 구현체를 보면 정확히 확인할 수 있다.
 
----
-
 ## 4. 부분 오버라이드 — 상속 활용
 
 Theme을 처음부터 다 짜면 Keycloak 업그레이드마다 유지보수 지옥에 빠진다. 원칙은 <strong>"바꿀 파일만 덮어쓰기"</strong>다.
@@ -221,8 +213,6 @@ styles=css/login.css css/brand.css
 ```
 
 이것만으로 로그인 페이지 배경 이미지와 색상이 바뀐다. 템플릿을 복사하지 않았기 때문에 Keycloak 버전을 올려도 템플릿은 최신 것을 그대로 쓴다.
-
----
 
 ## 5. 다국어 지원
 
@@ -286,8 +276,6 @@ sequenceDiagram
     T-->>KC: Response
     KC-->>U: 한국어 로그인 화면
 ```
-
----
 
 ::: tip 핵심 정리
 - Theme 타입은 Login/Account/Email/Welcome/Admin 다섯이며 실무 커스터마이징은 Login과 Email에 집중된다.

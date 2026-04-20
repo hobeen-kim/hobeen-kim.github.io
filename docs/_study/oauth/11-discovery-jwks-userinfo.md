@@ -16,8 +16,6 @@ next: /study/oauth/12-pkce
 - 표준 Scope(openid / profile / email / address / phone)로 반환되는 클레임 세트를 구분한다.
 :::
 
----
-
 ## 1. Discovery 엔드포인트
 
 OIDC 이전에는 클라이언트가 OP(OpenID Provider)의 각종 URL과 설정을 <strong>하드코딩</strong>해야 했다. 공급자마다 엔드포인트 경로가 달라 라이브러리는 "Google용", "Facebook용" 코드를 따로 가졌다.
@@ -71,8 +69,6 @@ GET https://{issuer}/.well-known/openid-configuration
 ### OAuth 2.0 Authorization Server Metadata와의 관계
 
 RFC 8414는 OAuth 2.0용으로 같은 개념을 일반화했다. 경로는 `/.well-known/oauth-authorization-server`. OIDC OP는 대개 두 경로 모두 제공한다.
-
----
 
 ## 2. JWKS — JSON Web Key Set
 
@@ -162,8 +158,6 @@ const client = jwksRsa({
 });
 ```
 
----
-
 ## 3. UserInfo 엔드포인트
 
 UserInfo는 표준화된 사용자 프로필 조회 API다. <strong>Access Token</strong>을 Bearer로 실어 호출하면 JSON으로 클레임 세트가 돌아온다.
@@ -210,8 +204,6 @@ Content-Type: application/json
 - ID Token에 없는 상세 프로필(주소·전화번호·사진 URL)이 필요할 때.
 - 프로필이 바뀔 수 있는 장수명 세션에서 <strong>최신 상태</strong>를 주기적으로 재조회할 때.
 - ID Token만 받은 Hybrid Flow에서 Access Token이 유효해진 이후의 확장 조회.
-
----
 
 ## 4. 표준 Scope와 클레임 매핑
 
@@ -271,8 +263,6 @@ GET /authorize?
 
 복잡성 때문에 실무에서는 스코프 기반 접근이 훨씬 흔하다.
 
----
-
 ## 5. ID Token vs UserInfo — 언제 무엇을 쓰는가
 
 두 가지 모두 사용자 정보를 담지만 목적이 다르다. 실무 선택 기준을 정리한다.
@@ -312,8 +302,6 @@ GET /authorize?
 ### 블로그 포스트 참고
 
 실제 OP별 Discovery·JWKS 응답 차이와 Keycloak에서의 UserInfo 사용 예는 [Keycloak 개념 및 간단 사용](/posts/tech/2025-10-01-keycloak) 포스트에 정리되어 있다.
-
----
 
 ::: tip 핵심 정리
 - OIDC Discovery는 `/.well-known/openid-configuration`에서 모든 엔드포인트와 지원 기능을 JSON으로 공개한다. 클라이언트는 issuer URL 하나로 자동 초기화할 수 있다.

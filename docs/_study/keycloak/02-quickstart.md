@@ -16,8 +16,6 @@ next: /study/keycloak/03-admin-console
 - 데이터 영속성(볼륨·DB 백업)과 첫 관리자 프로비저닝 절차를 파악한다.
 :::
 
----
-
 ## 1. 최소 Docker Compose
 
 Keycloak 26.x와 PostgreSQL 16으로 최소 스택을 구성한다. Keycloak은 내장 H2 DB도 지원하지만 로컬에서조차 외부 DB를 쓰는 편이 "운영 환경과 닮은 문제"를 먼저 만나게 해서 좋다.
@@ -102,8 +100,6 @@ Running the server in development mode. DO NOT use this configuration in product
 Keycloak 26.1.x on JVM (powered by Quarkus 3.x.x) started in 3.542s.
 ```
 
----
-
 ## 2. start-dev vs start
 
 Keycloak은 <strong>개발 모드</strong>(`start-dev`)와 <strong>운영 모드</strong>(`start`) 두 가지를 명확히 구분한다. Quarkus의 "빌드 타임 최적화" 철학이 여기서 드러난다.
@@ -156,8 +152,6 @@ ENTRYPOINT ["/opt/keycloak/bin/kc.sh", "start", "--optimized"]
 - 로컬 개발·이 스터디 진행 중: `start-dev`
 - CI 파이프라인의 통합 테스트: `start-dev` (편의 > 실전성)
 - 스테이지·프로덕션: `start --optimized` 고정
-
----
 
 ## 3. Reverse Proxy 연결
 
@@ -212,8 +206,6 @@ server {
 
 핵심은 <strong>X-Forwarded-Proto: https</strong>와 Host 헤더다. 이 둘이 없으면 Keycloak이 redirect URL을 `http://internal-host:8080/...`으로 만들어 버려 브라우저 리다이렉트가 깨진다.
 
----
-
 ## 4. HTTPS와 인증서
 
 Reverse Proxy에서 TLS를 종료하는 패턴 외에, Keycloak이 직접 TLS를 다루는 옵션도 있다.
@@ -243,8 +235,6 @@ kc.sh start \
 
 - 인증서 갱신 후 Keycloak이 옛 인증서를 계속 쓴다 → Pod/컨테이너 재시작 필요. Keycloak은 기동 시 키스토어를 읽는다.
 - 브라우저는 HTTPS 정상인데 JS 클라이언트가 `ERR_CERT_AUTHORITY_INVALID` → 내부 호스트명(`keycloak.default.svc.cluster.local`)을 `KC_HOSTNAME`으로 쓰고 있다. 외부 노출 URL을 지정해야 한다.
-
----
 
 ## 5. 데이터 영속성
 
@@ -283,8 +273,6 @@ kc.sh export --dir /tmp/realm-export --realm myrealm --users realm_file
 
 이 둘은 용도가 다르다. DB 백업은 재해 복구, Export는 환경 간 이관(Dev→Stage→Prod)이다.
 
----
-
 ## 6. 첫 로그인 검증
 
 Compose를 띄운 뒤 가장 먼저 할 일은 <strong>master realm</strong>에 관리자로 로그인해서 정상 구동을 확인하는 것이다.
@@ -319,8 +307,6 @@ curl http://localhost:9000/metrics
 ### 블로그 포스트 참고
 
 이 섹션의 Docker Compose 예제는 [Keycloak 개념 및 간단 사용 포스트](/posts/tech/2025-10-01-keycloak)의 실습 편과 유사하다. 포스트는 "처음 띄워본다"에 초점이 있고, 이 챕터는 운영 모드·Proxy·영속성까지 시야를 넓힌 버전이다.
-
----
 
 ::: tip 핵심 정리
 - 최소 스택은 Keycloak + PostgreSQL + (운영 시) Reverse Proxy다. Compose로 한 번에 관리한다.

@@ -16,8 +16,6 @@ next: /study/db-optimization/06-denormalization
 - 파티션 기반 아카이빙의 동작 방식과 DROP PARTITION의 이점을 설명할 수 있다.
 :::
 
----
-
 ## 1. Soft Delete란
 
 ### 물리 삭제 vs 논리 삭제
@@ -66,8 +64,6 @@ flowchart LR
     F --> G[감사 이력 보존]
 ```
 
----
-
 ## 2. 인덱스 영향
 
 ### 카디널리티 문제
@@ -114,8 +110,6 @@ flowchart TD
     C --> E[삭제 안된 행만 인덱싱<br>인덱스 크기 최소화]
     D --> F[전체 행 인덱싱<br>is_deleted 선두 컬럼]
 ```
-
----
 
 ## 3. JPA에서의 자동화
 
@@ -178,8 +172,6 @@ Session session = entityManager.unwrap(Session.class);
 session.enableFilter("deletedFilter").setParameter("isDeleted", false);
 ```
 
----
-
 ## 4. 파티션 기반 아카이빙
 
 ### 오래된 데이터 이관 전략
@@ -240,8 +232,6 @@ flowchart TD
 ```
 
 파티션 없이 배치 DELETE를 사용하면 수억 건 삭제 시 테이블 락, 복제 지연, I/O 과부하가 발생할 수 있다. 파티션 기반 설계가 아카이빙을 안전하고 빠르게 만든다.
-
----
 
 ::: tip 핵심 정리
 - Soft Delete는 `is_deleted` 컬럼으로 논리적 삭제를 표현하며 감사 추적, 복구가 가능하다. 모든 쿼리에 필터 조건 추가가 필수다.

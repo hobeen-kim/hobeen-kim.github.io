@@ -18,8 +18,6 @@ next: /study/smart-agriculture/13-smart-farm
 
 :::
 
----
-
 ## 1. 농업 데이터의 종류
 
 현대 농업에서 생성되는 데이터는 성격과 출처에 따라 크게 네 가지로 분류된다. 각 데이터는 서로 독립적으로 존재하는 것이 아니라, 통합·분석될 때 비로소 의사결정 가치를 가진다.
@@ -41,8 +39,6 @@ flowchart LR
     E --> F[분석 및<br>의사결정]
     F --> G[다음 시즌<br>처방맵 생성]
 ```
-
----
 
 ## 2. FMIS(Farm Management Information System)
 
@@ -78,8 +74,6 @@ flowchart TD
     D --> E
     E -->|피드백| B
 ```
-
----
 
 ## 3. ISOXML / TaskData
 
@@ -128,8 +122,6 @@ ISOXML TaskData의 핵심 구조는 다음과 같다.
 ```
 
 파일 확장자는 `.xml`이며, 포장 경계(shapefile)와 함께 묶여 USB 메모리나 무선 통신으로 기계에 전달된다.
-
----
 
 ## 4. 데이터 연동 플랫폼
 

@@ -16,8 +16,6 @@ next: /study/isobus/23-summary
 - TC 처방 맵 기반 가변 살포 시나리오 전체 흐름을 순서도로 표현할 수 있다.
 :::
 
----
-
 ## 1. CAN 로그 종합 분석
 
 ### 1.1 캡처 예시 데이터
@@ -57,8 +55,6 @@ next: /study/isobus/23-summary
 | 11 | `0CF00426` | 0xF004 (EEC1) | 0x26 | - | Engine Speed (SA=0x26 ECU) |
 | 12 | `18FEF026` | 0xFEF0 (VT-to-ECU) | 0x26 | 0xFF | VT 소프트키 상태 전송 |
 
----
-
 ### 1.2 분석 도구 소개
 
 **python-can**
@@ -83,8 +79,6 @@ with can.Bus(interface="virtual", channel="test") as bus:
 - ISOBUS 전용 디코더 플러그인 지원
 - J1939 PGN 데이터베이스 내장
 - 다운로드: https://www.savvycan.com
-
----
 
 ## 2. PGN 디코딩 종합
 
@@ -226,8 +220,6 @@ if __name__ == "__main__":
  'sa': '0x26', 'engine_speed_rpm': 2444.0, 'accel_position_pct': 0.0, 'raw_id': '0x0CF00426'}
 ```
 
----
-
 ## 3. VT 오브젝트 풀 전체 구성
 
 ### 3.1 화면 구성 개요
@@ -313,8 +305,6 @@ graph TD
              VariableReference="0">
 </InputNumber>
 ```
-
----
 
 ## 4. TC 시나리오 시뮬레이션
 
@@ -499,13 +489,9 @@ GPS(37.5025,127.0025) → Target=   0.0 L/ha  Sections=[0, 0, 0, 0]
 Total as-applied records: 5
 ```
 
----
-
 > **종합 실습 핵심 정리**
 > - CAN ID 29비트에서 Priority / PGN / DA / SA를 분리하면 모든 ISOBUS 메시지를 분류할 수 있다.
 > - EEC1(0xF004) SPN 190은 0.125 rpm/bit 해상도로 엔진 RPM을 인코딩한다.
 > - VT 오브젝트 풀은 Working Set → Data Mask → Container → Output/Input 계층으로 구성된다.
 > - TC 시나리오는 처방 맵 로드 → GPS 위치 수신 → 셀 조회 → 명령 전송 → As-Applied 로그 순서로 동작한다.
-
----
 

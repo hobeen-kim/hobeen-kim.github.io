@@ -17,8 +17,6 @@ next: /study/database/07-db-objects
 - ROW_NUMBER, RANK, DENSE_RANK의 차이를 설명하고, LAG/LEAD와 이동평균을 계산할 수 있다.
 :::
 
----
-
 ## 1. 집계 함수
 
 <strong>집계 함수(Aggregate Function)</strong>는 여러 행의 값을 하나의 결과로 요약한다.
@@ -59,8 +57,6 @@ NULL을 0으로 처리하려면 `COALESCE`를 사용한다.
 ```sql
 AVG(COALESCE(salary, 0))  -- NULL을 0으로 대체 후 평균
 ```
-
----
 
 ## 2. GROUP BY와 HAVING
 
@@ -124,8 +120,6 @@ LIMIT 5;                                  -- 7. 행 수 제한
 ```
 
 WHERE 절에서는 아직 그룹이 만들어지지 않았으므로 `AVG(salary)`와 같은 집계 함수를 사용할 수 없다.
-
----
 
 ## 3. 윈도우 함수
 
@@ -243,8 +237,6 @@ FROM orders;
 | N FOLLOWING | 현재 행에서 N행 뒤 |
 | UNBOUNDED FOLLOWING | 파티션의 마지막 행 |
 
----
-
 ## 4. 실습: 매출 분석
 
 ```sql
@@ -334,8 +326,6 @@ flowchart LR
     Agg --> W2["AVG() OVER ROWS<br>이동 평균"]
     Agg --> W3["LAG()<br>전월 비교"]
 ```
-
----
 
 ::: tip 핵심 정리
 - 집계 함수(COUNT/SUM/AVG/MIN/MAX)는 NULL을 무시한다. `COUNT(*)`만 NULL 포함이다.

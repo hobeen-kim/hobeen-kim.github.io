@@ -14,8 +14,6 @@ tags: [AI, Agent, CLAUDE.md, 정의파일]
 - 역할별 정의 파일 예시를 작성할 수 있다.
 :::
 
----
-
 ## 1. 왜 정의 파일이 필요한가
 
 에이전트는 새 세션을 시작할 때 컨텍스트가 전혀 없다. 오케스트레이터가 에이전트를 생성하면서 프롬프트를 전달하지만, 그 프롬프트에는 "무엇을 하라"는 지시만 있을 뿐 "어떻게 행동해야 하는가"는 담겨 있지 않다.
@@ -35,8 +33,6 @@ flowchart TD
 ```
 
 oh-my-claudecode 패턴은 YAML frontmatter + 마크다운 본문으로 정의 파일을 구성한다. frontmatter는 레지스트리와 훅이 읽고, 본문은 에이전트가 직접 읽어 행동 기준으로 삼는다.
-
----
 
 ## 2. 정의 파일 형식
 
@@ -61,8 +57,6 @@ disallowedTools: [TeamCreate, TeamDelete]
 | `disallowedTools` | 이 에이전트가 사용해서는 안 되는 도구 목록. |
 
 `disallowedTools`는 역할 경계를 강제하는 핵심 필드다. `dev` 에이전트가 `TeamCreate`를 호출하는 것은 역할 침범이므로 목록에 추가한다.
-
----
 
 ## 3. "항상 일하고, 항상 생각하고, 두 번 생각하도록" 내장
 
@@ -118,8 +112,6 @@ flowchart LR
 ```
 
 세 원칙은 순서대로 작동한다. 먼저 시작하고, 진행하면서 전제를 검증하고, 완료 전에 다시 한 번 검토한다.
-
----
 
 ## 4. 역할별 정의 파일 예시
 
@@ -224,8 +216,6 @@ disallowedTools: [TeamCreate, TeamDelete, Bash]
 
 :::
 
----
-
 ## 5. 프로젝트 특화 CLAUDE.md
 
 에이전트 정의 파일과 CLAUDE.md는 역할이 다르다.
@@ -267,8 +257,6 @@ CLAUDE.md가 정의 파일보다 나중에 읽히므로, 프로젝트 특화 규
 ::: warning 정의 파일과 CLAUDE.md 충돌 방지
 `agents/dev.md`에 "TypeScript를 사용한다"고 명시했더라도 CLAUDE.md에 "이 프로젝트는 JavaScript"라고 적혀 있으면 JavaScript가 우선된다. 의도하지 않은 덮어쓰기를 막으려면 두 파일의 범위를 명확히 분리해야 한다.
 :::
-
----
 
 ## 6. SessionStart 훅으로 자동 로드
 
@@ -319,8 +307,6 @@ if (fs.existsSync(definitionPath)) {
 ```
 
 `AGENT_NAME` 환경 변수는 오케스트레이터가 `TeamCreate` 시 `env` 옵션으로 주입한다. 이 값을 기반으로 적절한 정의 파일을 로드한다.
-
----
 
 ::: tip 핵심 정리
 - 정의 파일은 에이전트의 헌법이다. 역할, 원칙, 금지사항을 담아 에이전트가 일관된 기준으로 판단하게 만든다.

@@ -16,8 +16,6 @@ next: /study/oauth/08-token-lifecycle
 - 클라이언트 유형·사용자 유무·보안 수준에 따른 Grant Type 선택 체크리스트를 만들 수 있다.
 :::
 
----
-
 ## 1. Implicit Flow — 프래그먼트로 토큰을 바로 받는다
 
 Implicit Flow는 OAuth 2.0 초기에 <strong>SPA·Native 앱을 위해</strong> 고안됐다. Authorization Code Flow의 Code 교환 단계를 생략하고, `/authorize` 응답 자체에 Access Token을 싣는다.
@@ -100,8 +98,6 @@ Implicit은 설계상 <strong>Refresh Token을 발급하지 않는다</strong>. 
 
 대체안은 <strong>Authorization Code + PKCE</strong>다. CORS가 보편화된 현재 SPA도 `/token`을 직접 호출할 수 있으므로, Implicit의 존재 이유가 사라졌다.
 
----
-
 ## 2. ROPC — Resource Owner Password Credentials
 
 ROPC는 OAuth 2.0의 네 가지 기본 Grant Type 중 하나이지만, 이름만 들어도 왜 위험한지 짐작이 간다. 클라이언트가 <strong>사용자의 ID와 비밀번호를 직접 받아서</strong> AS에 전달하는 방식이다.
@@ -183,8 +179,6 @@ mindmap
 
 기존에 ROPC를 쓰던 코드가 있다면 즉시 Authorization Code + PKCE로 마이그레이션해야 한다.
 
----
-
 ## 3. Client Credentials — 서버 간 인증
 
 Client Credentials Grant는 OAuth 2.0의 네 가지 Grant 중 유일하게 <strong>사용자가 등장하지 않는</strong> 플로우다. M2M(Machine-to-Machine) 통신용이다.
@@ -262,8 +256,6 @@ public void writeFile(@PathVariable String userId, @RequestBody String content) 
 
 이 경우 <strong>비즈니스 레이어의 인가</strong>가 별도로 필요하다. OAuth 토큰은 "무엇을 할 수 있는가"를 알려주지만, "누구의 자원에 접근하는가"는 앱이 직접 검증해야 한다.
 
----
-
 ## 4. Grant Type 선택 가이드
 
 지금까지 본 네 가지 Grant Type을 어떻게 선택할지 체계적으로 정리한다.
@@ -324,8 +316,6 @@ mindmap
       M2M → IP 화이트리스트 병행
 ```
 
----
-
 ## 5. OAuth 2.1 방향성
 
 OAuth 2.1은 현재 IETF에서 드래프트로 진행 중인 규격으로, 2.0의 다양한 RFC와 Best Current Practice를 통합·단순화한다. 핵심 변경은 다음과 같다.
@@ -377,8 +367,6 @@ OAuth 2.0 기반 코드를 유지보수한다면 다음을 점검한다.
 ### 앞으로의 여정
 
 다음 챕터(CH8)는 Access Token과 Refresh Token의 수명 주기를 다룬다. OAuth 2.1의 권장 사항(Rotation, Introspection, Revocation)이 왜 필요한지가 명확해진다. 이어지는 CH12(PKCE), CH13(토큰 수명 관리 전략), CH14(BFF)에서 실무 구현 패턴으로 들어간다.
-
----
 
 ::: tip 핵심 정리
 - Implicit Flow는 토큰을 URL 프래그먼트로 전달해 브라우저 이력·Referer·Token Injection 공격에 취약하며, OAuth 2.1에서 제거된다. 대체는 Authorization Code + PKCE다.

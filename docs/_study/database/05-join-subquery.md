@@ -17,8 +17,6 @@ next: /study/database/06-aggregation-window
 - EXISTS와 IN의 차이를 이해하고 적절히 선택할 수 있다.
 :::
 
----
-
 ## 1. JOIN의 개념
 
 ### 왜 JOIN이 필요한가
@@ -53,8 +51,6 @@ graph LR
     A["employees<br>3행"] -->|"CROSS JOIN"| C["결과<br>3 x 4 = 12행"]
     B["departments<br>4행"] --> C
 ```
-
----
 
 ## 2. JOIN 종류
 
@@ -185,8 +181,6 @@ FROM employees e
 LEFT JOIN employees m ON e.manager_id = m.emp_id;
 ```
 
----
-
 ## 3. 서브쿼리
 
 <strong>서브쿼리(Subquery)</strong>는 다른 SQL 문 내부에 포함된 SELECT 문이다. 사용 위치에 따라 세 가지로 나뉜다.
@@ -258,8 +252,6 @@ WHERE EXISTS (
 ```
 
 `NOT IN`에서 서브쿼리 결과에 NULL이 포함되면 전체 결과가 빈 집합이 된다. 이 경우 `NOT EXISTS`를 사용하는 것이 안전하다.
-
----
 
 ## 4. 실습: 직원-부서 조회
 
@@ -335,8 +327,6 @@ WHERE e.salary > (
     WHERE e2.dept_id = e.dept_id
 );
 ```
-
----
 
 ::: tip 핵심 정리
 - INNER JOIN은 양쪽 테이블에 모두 일치하는 행만, LEFT JOIN은 왼쪽 테이블의 모든 행을 반환한다.

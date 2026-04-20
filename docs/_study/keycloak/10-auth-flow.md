@@ -12,7 +12,7 @@ next: /study/keycloak/11-password-policy
 ::: info 학습 목표
 - Authentication Flow의 트리 구조(Flow·Subflow·Execution)를 이해한다.
 - Execution Requirement의 네 가지 값(Required/Alternative/Conditional/Disabled)과 평가 규칙을 안다.
-- 사전 정의된 6가지 Flow의 목적과 바인딩 위치를 구분할 수 있다.
+- 사전 정의된 7가지 Flow의 목적과 바인딩 위치를 구분할 수 있다.
 - 플로우 복제 후 편집 패턴으로 실무 요구에 맞춘 분기(예: 사내 IP 분기)를 구성할 수 있다.
 :::
 
@@ -78,7 +78,7 @@ Flow 트리의 핵심은 각 Execution/Subflow에 설정된 <strong>Requirement<
 
 - **Required는 AND**: 하나라도 실패하면 해당 Subflow 실패.
 - **Alternative는 OR**: 하나라도 성공하면 해당 Subflow 성공(이후 Alternative는 스킵).
-- **Required와 Alternative의 혼합**: Required는 먼저 전부 평가 후, Alternative는 Required가 "성공"만 아니라 "사용자 요구 상태"일 때 여전히 평가된다. 실제로는 <strong>같은 Subflow에 Required와 Alternative를 혼용하지 말 것</strong>이 권고다.
+- **Required와 Alternative의 혼합**: Alternative는 같은 Subflow 안에서 Required가 모두 성공한 뒤 평가 대상이 되며, 두 Requirement를 섞어 쓰면 결과가 비직관적이라 비권장이다. 실제로는 <strong>같은 Subflow에 Required와 Alternative를 혼용하지 말 것</strong>이 권고다.
 
 ### Conditional의 작동
 
@@ -111,11 +111,11 @@ flowchart TD
     Q -->|Disabled| SKIP2[무시]
 ```
 
-## 3. 사전 정의 Flow 6가지
+## 3. 사전 정의 Flow 7가지
 
-설치 직후 Realm에는 목적별로 6가지 기본 Flow가 들어 있다. 각 Flow는 특정 상황에서 호출된다.
+설치 직후 Realm에는 목적별로 7가지 기본 Flow가 들어 있다. 각 Flow는 특정 상황에서 호출된다.
 
-### 기본 6종
+### 기본 7종
 
 | Flow | 호출 시점 | 핵심 단계 |
 |------|------|------|
@@ -125,6 +125,7 @@ flowchart TD
 | Reset Credentials | "비밀번호 찾기" 링크 | Choose User, Send Reset Email, Reset Password |
 | Clients | Client 인증 전용(비밀번호/JWT/SecretJwt) | Client Id and Secret, Signed JWT, etc. |
 | First Broker Login | 외부 IdP 최초 로그인 | Review Profile, Create User or Link Existing, Verify Email |
+| Docker Auth | Docker Registry v2 인증 전용(선택 사용) | Docker Authenticator |
 
 ### Browser Flow
 
@@ -163,7 +164,7 @@ Keycloak의 철칙은 <strong>"기본 Flow를 직접 수정하지 말 것"</stro
 
 ### 단계 1 — Browser Flow 복제
 
-Authentication → Flows → Browser Flow → **Duplicate** → "Browser - Corp" 이름으로 복제.
+Authentication → Flows → Browser Flow 상세 화면 상단 <strong>Action</strong> 메뉴 → <strong>Duplicate</strong> → "Browser - Corp" 이름으로 복제.
 
 ### 단계 2 — IP 조건 Subflow 추가
 
@@ -176,7 +177,7 @@ Keycloak 기본에는 IP 기반 Condition이 없으므로 실무에선 SPI로 `I
 
 ### 단계 3 — OTP Subflow 조건화
 
-기존 "Browser - Conditional OTP" Subflow를 복제해 "Corp Conditional OTP"로 만든 뒤, 내부에 <strong>Condition - Is Corp IP</strong>를 `Required=NEGATE`로 배치한다. 결과적으로 "사내 IP가 아닐 때만 OTP 실행" 구조가 된다.
+기존 "Browser - Conditional OTP" Subflow를 복제해 "Corp Conditional OTP"로 만든 뒤, 내부에 <strong>Condition - Is Corp IP</strong>를 배치하고 해당 Execution의 <strong>Negate output</strong> 토글을 On으로 설정한다(Requirement는 Required 유지). "사내 IP가 아닐 때"라는 부정 조건은 이 토글로 구현한다. 결과적으로 "사내 IP가 아닐 때만 OTP 실행" 구조가 된다.
 
 ### 단계 4 — 바인딩
 
@@ -230,10 +231,10 @@ if (dept === "security") {
 ### 제약과 대안
 
 - 런타임 스크립트는 성능 프로파일과 보안 감사에 불리하다.
-- Nashorn/Rhino 엔진 의존으로 버전 호환성 이슈가 간간이 발생.
+- 번들된 Nashorn 엔진 기반이라 ECMAScript 버전과 성능 제약이 있다.
 - 스크립트 실수가 전사 로그인 장애로 번질 수 있어 Staging에서 반드시 시나리오 검증.
 
-단순 조건은 Script로, 복잡한 로직·외부 연동이 필요하면 <strong>Java 기반 커스텀 Authenticator SPI</strong>가 표준 답이다.
+단순 조건은 Script로, 복잡한 로직·외부 연동이 필요하면 <strong>Java 기반 커스텀 Authenticator SPI</strong>가 표준 답이다. 프로덕션에서는 Script 대신 SPI 기반 Java Authenticator를 권장한다.
 
 ## 6. 바인딩
 
@@ -275,7 +276,7 @@ Flow는 Realm 정의 JSON에 `authenticationFlows` 배열로 포함된다. GitOp
 
 ::: tip 핵심 정리
 - Authentication Flow는 Flow/Subflow/Execution으로 이루어진 트리이며, 각 노드의 Requirement(Required·Alternative·Conditional·Disabled)로 평가 순서와 통과 조건이 결정된다.
-- 기본 제공되는 Flow는 Browser·Direct Grant·Registration·Reset Credentials·Clients·First Broker Login 6가지이며 각각 특정 호출 지점에 바인딩된다.
+- 기본 제공되는 Flow는 Browser·Direct Grant·Registration·Reset Credentials·Clients·First Broker Login·Docker Auth 7가지이며 각각 특정 호출 지점에 바인딩된다.
 - 기본 Flow는 절대 직접 수정하지 말고 Duplicate한 뒤 편집·바인딩하는 것이 원칙이며, 바인딩은 Realm 수준과 Client 수준 오버라이드로 구분된다.
 - Conditional Subflow 안에 Condition Execution을 넣어 "OTP 등록자만 OTP 요구", "사내 IP가 아니면 OTP 요구" 같은 세밀한 분기를 표현한다.
 - Script Authenticator는 Preview이고 성능·감사에 불리하므로 단순 조건에만 쓰며, 운영 품질이 필요하면 Java 기반 커스텀 Authenticator SPI를 쓴다.

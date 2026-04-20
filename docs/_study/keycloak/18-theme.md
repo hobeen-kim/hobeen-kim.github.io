@@ -28,7 +28,16 @@ Keycloak이 사용자에게 보여 주는 HTML·메일은 모두 Theme으로 추
 | `welcome` | `kc.sh` 첫 기동 시의 Welcome 페이지 | 낮음(거의 안 함) |
 | `admin` | Admin Console 자체의 CSS/로고 | 낮음(구조적 제한 큼) |
 
-Keycloak은 내장 Theme으로 `keycloak`(v2, 기본), `keycloak.v2`(Account v2 SPA), `base`(추상 부모)을 제공한다. 실무에서는 이들을 부모로 상속해 자사 Theme을 만든다.
+Keycloak은 내장 Theme을 타입별로 제공한다.
+
+| 타입 | 기본 Theme |
+|------|----------|
+| login | `keycloak` |
+| account | `keycloak.v2` (React SPA) |
+| admin | `keycloak.v2` |
+| email | `keycloak` |
+
+`base` Theme은 다른 모든 Theme의 추상 부모로, 공통 템플릿과 리소스를 담당한다. 실무에서는 이들을 부모로 상속해 자사 Theme을 만든다.
 
 ### Account Console v2와 Theme
 
@@ -83,7 +92,7 @@ import=common/keycloak
 styles=css/login.css css/brand.css
 scripts=js/brand.js
 
-# 국가 목록(프로필 드롭다운 등)
+# 지원 언어 목록(로그인 화면 언어 드롭다운용)
 locales=en,ko,ja
 
 # 기본 공통 속성

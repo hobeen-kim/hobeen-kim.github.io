@@ -72,6 +72,8 @@ spec:
 
 <strong>Manifest 설치</strong>. 순수 Kubernetes에서는 공식 배포 YAML을 직접 적용한다. 설치가 단순해서 대부분 이쪽을 쓴다.
 
+아래 예시의 `KC_VERSION`은 집필 시점 값이다. 최신 안정 버전은 [Keycloak Releases](https://www.keycloak.org/docs/latest/release_notes/)에서 확인한다.
+
 ```bash
 KC_VERSION=26.0.0
 kubectl create namespace keycloak
@@ -298,7 +300,7 @@ spec:
                   number: 8443
 ```
 
-`proxy-buffer-size`를 키우는 이유는 Keycloak 로그인 쿠키가 큰 경우(특히 JWT 기반 세션) 기본 4KB 버퍼를 초과하기 때문이다. 이 설정을 빼먹으면 로그인 중간에 502가 뜬다.
+`proxy-buffer-size`를 키우는 이유는 Keycloak 로그인 쿠키가 큰 경우(Identity Broker 상태, 인증 헤더 누적 등)에는 기본 4KB 버퍼를 초과해 502가 발생한다. 이 설정을 빼먹으면 로그인 중간에 502가 뜬다.
 
 ## 5. GitOps 워크플로우
 
@@ -404,9 +406,9 @@ spec:
 | 지표 | 관찰 포인트 | 조치 |
 |------|------------|------|
 | JVM Heap 사용률 | `container_memory_usage_bytes` | `-Xmx`를 Pod 메모리의 75%로 |
-| Infinispan 캐시 엔트리 수 | `vendor_jgrp_total_cache_entries` | 많으면 External Infinispan으로 |
+| Infinispan 캐시 엔트리 수 | `vendor_cache_*` 계열 (실제 이름은 `/metrics` 출력에서 확인) | 많으면 External Infinispan으로 |
 | HTTP Request Latency | `http_server_requests_seconds` | p95 > 500ms면 replicas 증설 |
-| DB Pool Active | `agroal_active_count` | 상한 도달 시 `poolMaxSize` 증가 |
+| DB Pool Active | `agroal_active_count` (버전별 지표명은 `/metrics` 출력 확인) | 상한 도달 시 `poolMaxSize` 증가 |
 
 ### HorizontalPodAutoscaler
 

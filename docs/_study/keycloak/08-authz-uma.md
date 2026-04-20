@@ -145,29 +145,29 @@ grant_type=urn:ietf:params:oauth:grant-type:uma-ticket
 
 ### 성공 응답
 
-성공하면 Keycloak은 평가 결과가 담긴 RPT를 반환한다.
+성공하면 Keycloak은 평가 결과가 담긴 RPT를 반환한다. `access_token` 필드에 JWT 형태의 RPT가 실려오며, 이를 디코딩한 페이로드는 다음과 같다.
 
 ```json
 {
-  "access_token": "eyJhbGciOi...",
-  "token_type": "Bearer",
-  "expires_in": 300
-}
-```
-
-RPT 페이로드(`access_token`을 디코딩)에는 `authorization.permissions`가 포함된다.
-
-```json
-{
-  "sub": "a7f1...",
-  "aud": "doc-service",
+  "jti": "...",
+  "exp": 1700000300,
+  "iat": 1700000000,
+  "aud": "document-api",
+  "iss": "https://auth.example.com/realms/docs",
+  "sub": "alice",
   "authorization": {
     "permissions": [
-      { "rsid": "doc-42", "rsname": "Document/42", "scopes": ["write", "read"] }
+      {
+        "rsid": "doc-42",
+        "rsname": "Document 42",
+        "scopes": ["read", "edit"]
+      }
     ]
   }
 }
 ```
+
+`authorization.permissions`가 RPT를 일반 Access Token과 구분하는 핵심 클레임이다.
 
 ### 평가 흐름
 
@@ -190,13 +190,13 @@ sequenceDiagram
 
 두 단계로 나뉜다. 먼저 RS가 요청을 거절하며 permission ticket을 내려주고, Client가 이 ticket으로 Keycloak에서 RPT를 발급받는다. 이어 RPT로 재요청하면 RS는 페이로드만 검사해 허용한다.
 
-### 간이 모드 — Bearer Only에서 바로 평가
+### 간이 모드 — Resource Server 모드에서 바로 평가
 
-RS가 UMA 대화를 중계하지 않고, Keycloak 어댑터가 Access Token의 Subject·Role을 받아 <strong>로컬에서 정책 엔진과 통신</strong>해 즉시 평가하는 모드도 있다. 이 경우 Client는 UMA ticket을 몰라도 되며, RS(어댑터)가 내부적으로 평가를 마친다.
+RS가 UMA 대화를 중계하지 않고, Policy Enforcer가 Access Token의 Subject·Role을 받아 <strong>로컬에서 정책 엔진과 통신</strong>해 즉시 평가하는 모드도 있다(구 어댑터 시절 "Bearer Only"로 불리던 구성이며, 현재는 Spring Security OAuth2 Resource Server 같은 Resource Server 모드에 Policy Enforcer를 결합한 형태다). 이 경우 Client는 UMA ticket을 몰라도 되며, RS가 내부적으로 평가를 마친다.
 
 ## 5. Policy Enforcer
 
-애플리케이션 코드에 "이 URL은 이 리소스·스코프"를 매핑해 자동으로 정책을 강제하는 모듈이 <strong>Policy Enforcer</strong>다. Keycloak은 Java/Spring/Quarkus용 어댑터를 제공하며, 설정은 `keycloak.json` 또는 `application.yml`에 선언한다.
+애플리케이션 코드에 "이 URL은 이 리소스·스코프"를 매핑해 자동으로 정책을 강제하는 모듈이 <strong>Policy Enforcer</strong>다. Keycloak 구 Java Adapter(keycloak.json 기반 Spring Security Adapter, Tomcat Adapter, JEE Adapter 등)는 Keycloak 22부터 공식 제거됐다. 26.x 기준 Policy Enforcer는 Quarkus `quarkus-keycloak-authorization` 확장이나 Spring Boot 3의 Spring Security OAuth2 Resource Server + `keycloak-policy-enforcer` 라이브러리로 구성한다.
 
 ### 설정 예시 (Quarkus)
 
@@ -238,7 +238,7 @@ quarkus:
 
 ## 6. UMA 2.0 — 사용자 관리형 액세스
 
-표준 OAuth에서 "누가 접근할지"는 보통 관리자나 앱이 정책으로 정한다. <strong>UMA 2.0(RFC 7662 기반)</strong>은 리소스 소유자 본인이 타인에게 공유를 허가하는 모델을 정식화한 프로파일이다. Keycloak은 UMA 2.0을 Authorization Services의 일부로 구현한다.
+표준 OAuth에서 "누가 접근할지"는 보통 관리자나 앱이 정책으로 정한다. <strong>UMA 2.0</strong>은 Kantara Initiative가 표준화한 OAuth 2.0 프로파일로, "UMA 2.0 Grant for OAuth 2.0 Authorization"과 "Federated Authorization for UMA 2.0" 두 스펙으로 구성된다. 리소스 소유자 본인이 타인에게 공유를 허가하는 모델을 정식화했다. Keycloak은 UMA 2.0을 Authorization Services의 일부로 구현한다.
 
 ### 등장 배경
 

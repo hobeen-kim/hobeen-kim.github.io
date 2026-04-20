@@ -122,7 +122,7 @@ export-acme/
 
 ### 기동 모드 vs 전용 모드
 
-예전에는 Keycloak을 먼저 멈추고 export하거나, 기동 중에 특정 옵션으로 export해야 했다. v26에서는 운영 중인 인스턴스에서 <strong>같이 실행 가능한 분리 모드</strong>가 됐다. 단, 성능 영향이 있으니 피크 타임은 피한다.
+예전에는 Keycloak을 먼저 멈추고 export하거나, 기동 중에 특정 옵션으로 export해야 했다. v26에서는 운영 중인 Keycloak을 중단하지 않고 <strong>별도 프로세스</strong>로 export를 실행할 수 있다(동일 DB를 공유). 단, 성능 영향이 있으니 피크 타임은 피한다.
 
 Operator 환경에서는 Admin REST API([CH22](/study/keycloak/22-admin-rest-api))의 Partial Export 엔드포인트로 Realm 상태를 JSON으로 받을 수도 있다.
 
@@ -143,6 +143,8 @@ Import는 두 가지 방식이 있다.
 ### 기동 시 import
 
 `kc.sh start` 시 특정 디렉토리를 자동으로 import한다. 주로 초기 부트스트랩용.
+
+`--import-realm` 플래그는 `kc.sh start` / `start-dev`에서 지원되며, 기본 import 디렉토리는 `/opt/keycloak/data/import/`다. 옵션 조합은 버전에 따라 달라질 수 있으니 `kc.sh start --help`로 확인한다.
 
 ```bash
 /opt/keycloak/bin/kc.sh start \
@@ -182,7 +184,7 @@ Import는 두 가지 방식이 있다.
 - `--users different_files`로 쪼갠 파일을 순서대로 import.
 - import 중 Infinispan 캐시가 부풀어오를 수 있다. 사전에 리소스 증설.
 - 진행 상황은 Keycloak 로그에 `User {username} imported` 형태로 나온다.
-- 실패 시 트랜잭션 단위를 줄이는 옵션(`--override`)을 실험.
+- 실패 시 부분 import 재시도 전략(realm 단위 분리, partial JSON으로 쪼개기)을 실험한다.
 
 ## 4. Realm 이관 시나리오
 

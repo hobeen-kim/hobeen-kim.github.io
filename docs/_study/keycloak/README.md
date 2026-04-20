@@ -39,6 +39,7 @@ flowchart TD
     CH19 --> CH20[CH20. K8s · Operator]
     CH20 --> CH21[CH21. DB 성능]
     CH3 --> CH22[CH22. Admin REST API]
+    CH20 --> CH22
     CH22 --> CH23[CH23. Backup · Realm 이관]
     CH20 --> CH24[CH24. 모니터링 · 업그레이드]
     CH23 --> CH24

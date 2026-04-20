@@ -234,7 +234,7 @@ Realm 경계가 강하다 보니, 환경 이관(Dev→Stage→Prod)이나 고객
 
 ### Realm Export/Import
 
-Admin CLI나 서버 커맨드로 Realm 전체를 JSON으로 뽑을 수 있다.
+Admin CLI나 서버 커맨드로 Realm 전체를 JSON으로 뽑을 수 있다. 다음은 Keycloak 26.x 기준 CLI 예시다. 옵션 이름은 버전별로 미세하게 변경될 수 있으므로 `kc.sh export --help`로 확인한다.
 
 ```bash
 # 서버 모드 Export (Realm 전체 + 사용자)
@@ -253,10 +253,10 @@ kc.sh import --dir /tmp/realm-export
 
 - Client Secret은 export에 포함된다. 파일 관리 주의.
 - 사용자 비밀번호 해시도 포함된다. 이관 파일은 민감 자료로 취급.
-- Realm의 <strong>ID</strong>는 보존되지만, Keys(서명 키)는 신규 발급되는 것이 안전하다. 외부 앱의 JWKS 캐시 갱신이 필요할 수 있다.
+- 기본적으로 서명 키는 export 파일에 포함되어 그대로 복원된다. 운영 관점에서는 이관 후 Keys를 신규 발급하고 외부 앱의 JWKS 캐시를 재동기화하는 편이 안전하다.
 - Import 시 "Policy: OVERWRITE vs IGNORE_EXISTING"을 명시적으로 결정해야 한다.
 
-상세한 백업·이관 전략은 <strong>CH23. Backup·Realm 이관</strong>에서 DR 시나리오까지 포함해 다룬다.
+상세한 백업·이관 전략은 [CH23. Backup·Realm 이관](/study/keycloak/23-backup-restore)에서 DR 시나리오까지 포함해 다룬다.
 
 ### 실습 팁
 

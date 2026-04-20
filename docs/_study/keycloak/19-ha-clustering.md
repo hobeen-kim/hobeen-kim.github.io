@@ -152,6 +152,8 @@ flowchart TB
 
 Kubernetes에서는 `DNS_PING`이 사실상 표준이다. Headless Service가 Pod IP 목록을 DNS A 레코드로 뿌려 주면, JGroups가 그 리스트를 읽어 클러스터를 구성한다.
 
+Keycloak 배포에서는 XML을 직접 수정하는 대신 `--cache-stack=kubernetes` 빌드 옵션이나 커스텀 `cache-config-file`로 지정하는 것이 표준이다.
+
 ```conf
 # cache-ispn.xml 스니펫 — DNS_PING 예시
 <stack name="tcp-dns-ping">
@@ -230,7 +232,7 @@ cache-remote-password=<secret>
 cache-remote-tls-enabled=true
 ```
 
-v26의 "Persistent user sessions" 기능과 맞물리면 Keycloak 재기동 시에도 세션이 살아남는다. 이제 세션이 Infinispan 클러스터에 모여 있으므로, Keycloak Pod 하나가 죽어도 사용자는 재로그인할 필요가 없다.
+v26의 `persistent-user-sessions` 기능과 맞물리면(기본 활성화 여부는 마이너 버전별로 다르므로 릴리스 노트 확인) Keycloak 재기동 시에도 세션이 살아남는다. 이제 세션이 Infinispan 클러스터에 모여 있으므로, Keycloak Pod 하나가 죽어도 사용자는 재로그인할 필요가 없다.
 
 ## 5. 캐시 동기화 모드
 
@@ -277,7 +279,7 @@ sequenceDiagram
 | `authenticationSessions` | SYNC | 로그인 진행 중 상태가 사라지면 플로우 실패 |
 | `offlineSessions` | SYNC | Refresh 토큰 일관성 필요 |
 | `loginFailures` | ASYNC | 카운터 약간 부정확해도 무방 |
-| `actionTokens` | SYNC | 한 번 쓰고 버리는 토큰, 정확도가 보안 |
+| `actionTokens` | SYNC | 한 번 쓰고 버리는 토큰이라 노드 간 중복·누락이 곧 보안 사고 |
 
 로그인 실패 카운터만 ASYNC를 쓰면 약간의 성능 이득이 있지만, 대부분 실무에서는 전부 SYNC로 통일한다. Brute Force 카운터가 노드 간 불일치면 공격자가 노드를 바꿔가며 시도 횟수를 우회할 수 있기 때문이다.
 

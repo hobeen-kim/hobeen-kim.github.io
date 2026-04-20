@@ -17,7 +17,7 @@ OAuth 2.0과 OpenID Connect의 기본 개념은 [OAuth 스터디](/study/oauth/)
 
 ```mermaid
 flowchart TD
-    CH1[CH1. 개요와 역사] --> CH2[CH2. 로컬 기동]
+    CH1[CH1. 개요] --> CH2[CH2. 로컬 기동]
     CH2 --> CH3[CH3. Admin Console]
     CH3 --> CH4[CH4. Realm · Organizations]
     CH4 --> CH5[CH5. Client · Service Account]
@@ -47,8 +47,8 @@ flowchart TD
 
 ## 목차
 
-### Keycloak 입문
-1. [Keycloak 개요와 역사](/study/keycloak/01-overview) — IAM 개요, Wildfly→Quarkus 전환, 라이선스
+### Keycloak
+1. [Keycloak 개요](/study/keycloak/01-overview) — IAM 개요, 라이선스, OAuth 스터디와의 관계
 2. [로컬에 Keycloak 기동](/study/keycloak/02-quickstart) — Docker Compose + PostgreSQL, start-dev vs start
 3. [Admin Console 구조](/study/keycloak/03-admin-console) — 메뉴 지도와 주요 워크플로우
 

@@ -299,11 +299,11 @@ const theme = {
       ],
       '/study/keycloak/': [
         {
-          text: 'Keycloak 입문',
+          text: 'Keycloak',
           collapsible: false,
           children: [
             { text: '소개', link: '/study/keycloak/' },
-            { text: 'CH1. Keycloak 개요와 역사', link: '/study/keycloak/01-overview' },
+            { text: 'CH1. Keycloak 개요', link: '/study/keycloak/01-overview' },
             { text: 'CH2. 로컬에 Keycloak 기동', link: '/study/keycloak/02-quickstart' },
             { text: 'CH3. Admin Console 구조', link: '/study/keycloak/03-admin-console' },
           ],

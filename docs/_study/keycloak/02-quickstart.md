@@ -318,5 +318,5 @@ curl http://localhost:9000/metrics
 
 ## 다음 챕터
 
-- 이전 : [Keycloak 개요와 역사](/study/keycloak/01-overview)
+- 이전 : [Keycloak 개요](/study/keycloak/01-overview)
 - 다음 : [Admin Console 구조](/study/keycloak/03-admin-console)

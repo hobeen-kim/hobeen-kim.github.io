@@ -3,8 +3,8 @@ title: "SPI로 Keycloak 확장"
 description: "Keycloak의 Service Provider Interface(SPI) 구조, providers 디렉토리 배포 방식, Quarkus 클래스로더 이슈를 다룬다."
 date: 2026-04-17
 tags: [Keycloak, SPI, 확장, Quarkus]
-prev: /study/keycloak/13-identity-brokering
-next: /study/keycloak/15-custom-authenticator
+prev: /study/keycloak/14-identity-brokering
+next: /study/keycloak/16-custom-authenticator
 ---
 
 # SPI로 Keycloak 확장
@@ -248,12 +248,12 @@ public class NoopEventListenerFactory implements EventListenerProviderFactory {
 
 | SPI | 인터페이스 | 용도 | 실습 챕터 |
 |-----|-----------|------|----------|
-| Authenticator | `Authenticator`, `AuthenticatorFactory` | 로그인 플로우에 커스텀 단계 삽입 | [CH15](/study/keycloak/15-custom-authenticator) |
-| UserStorage | `UserStorageProviderFactory`, Capability 인터페이스들 | 레거시 DB를 사용자 소스로 | [CH16](/study/keycloak/16-custom-user-storage) |
+| Authenticator | `Authenticator`, `AuthenticatorFactory` | 로그인 플로우에 커스텀 단계 삽입 | [CH16](/study/keycloak/16-custom-authenticator) |
+| UserStorage | `UserStorageProviderFactory`, Capability 인터페이스들 | 레거시 DB를 사용자 소스로 | [CH17](/study/keycloak/17-custom-user-storage) |
 | ProtocolMapper | `OIDCProtocolMapper`, `SAMLProtocolMapper` | 토큰에 임의 클레임 추가 | — |
 | EventListener | `EventListenerProvider` | 로그인/관리자 이벤트를 Kafka·외부 API로 | — |
 | Policy | `PolicyProvider` | Authorization Services의 커스텀 정책 | — |
-| Theme | `Theme`, `ThemeProvider` | 로그인/메일 템플릿 브랜딩 | [CH17](/study/keycloak/17-theme) |
+| Theme | `Theme`, `ThemeProvider` | 로그인/메일 템플릿 브랜딩 | [CH18](/study/keycloak/18-theme) |
 | RealmResource | `RealmResourceProvider` | Realm 하위 커스텀 REST 엔드포인트 | — |
 | IdentityProvider | `IdentityProviderFactory` | 비표준 IdP 통합(독자 프로토콜) | — |
 
@@ -293,5 +293,5 @@ SPI 확장을 실제 운영에 올릴 때 확인해야 할 항목이다.
 
 ## 다음 챕터
 
-- 이전 : [Identity Brokering](/study/keycloak/13-identity-brokering)
-- 다음 : [커스텀 Authenticator](/study/keycloak/15-custom-authenticator)
+- 이전 : [Identity Brokering](/study/keycloak/14-identity-brokering)
+- 다음 : [커스텀 Authenticator](/study/keycloak/16-custom-authenticator)

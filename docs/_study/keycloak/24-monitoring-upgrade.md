@@ -3,7 +3,7 @@ title: "모니터링·감사와 업그레이드"
 description: "Keycloak Event Listener, Metrics, 감사 로그와 메이저 버전 업그레이드(Wildfly→Quarkus 포함)를 다룬다."
 date: 2026-04-17
 tags: [Keycloak, 모니터링, 감사로그, 업그레이드, Prometheus]
-prev: /study/keycloak/22-backup-restore
+prev: /study/keycloak/23-backup-restore
 next: null
 ---
 
@@ -80,7 +80,7 @@ flowchart LR
 
 ## 2. Event Listener SPI
 
-[CH14. SPI 개요](/study/keycloak/14-spi-overview)에서 본 SPI 중 하나가 `EventListenerProvider`다. 기본 제공되는 Listener는 두 개고, 필요하면 커스텀 Listener를 추가한다.
+[CH15. SPI 개요](/study/keycloak/15-spi-overview)에서 본 SPI 중 하나가 `EventListenerProvider`다. 기본 제공되는 Listener는 두 개고, 필요하면 커스텀 Listener를 추가한다.
 
 ### 기본 제공 Listener
 
@@ -122,7 +122,7 @@ public class SiemEventListenerProvider implements EventListenerProvider {
 }
 ```
 
-ProviderFactory에서 Kafka 클라이언트를 초기화하고, `providers/` 디렉토리에 JAR를 넣어 배포한다([CH14](/study/keycloak/14-spi-overview)).
+ProviderFactory에서 Kafka 클라이언트를 초기화하고, `providers/` 디렉토리에 JAR를 넣어 배포한다([CH15](/study/keycloak/15-spi-overview)).
 
 ### Listener 여러 개 연결
 
@@ -241,7 +241,7 @@ private String maskEmail(String email) {
 
 ### 보존 기간
 
-[CH20. DB와 성능](/study/keycloak/20-database-performance)에서 경고했듯 `EVENT_ENTITY`는 방치하면 무한정 커진다. Realm 설정의 `eventsExpiration`으로 자동 삭제를 걸고, 장기 보존은 외부 SIEM에 맡긴다.
+[CH21. DB와 성능](/study/keycloak/21-database-performance)에서 경고했듯 `EVENT_ENTITY`는 방치하면 무한정 커진다. Realm 설정의 `eventsExpiration`으로 자동 삭제를 걸고, 장기 보존은 외부 SIEM에 맡긴다.
 
 | 저장소 | 보존 기간 예 | 용도 |
 |--------|-------------|------|
@@ -276,7 +276,7 @@ sequenceDiagram
     Ops->>Stg: 스테이징 배포 + DB 마이그레이션 테스트
     Stg-->>Ops: 검증 통과
     Ops->>Prod: DB 백업 (pg_basebackup + WAL)
-    Ops->>Prod: Realm JSON Export (CH22)
+    Ops->>Prod: Realm JSON Export (CH23)
     Ops->>Prod: 롤링 업그레이드 or 블루/그린
     Prod-->>Ops: Health Check 통과
     Ops->>Prod: Smoke Test (로그인/토큰 발급)
@@ -286,7 +286,7 @@ sequenceDiagram
 
 1. <strong>Release Notes 확인</strong>. 특히 "Upgrading Guide" 섹션과 Removed/Deprecated 기능.
 2. <strong>스테이징에서 DB 마이그레이션 먼저</strong>. 메이저 업그레이드는 스키마 변경을 동반할 수 있다.
-3. <strong>백업</strong>: DB 덤프 + Realm JSON Export([CH22](/study/keycloak/22-backup-restore)).
+3. <strong>백업</strong>: DB 덤프 + Realm JSON Export([CH23](/study/keycloak/23-backup-restore)).
 4. <strong>배포 전략 결정</strong>: 롤링 vs 블루/그린 vs 다운타임.
 5. <strong>Smoke Test</strong>: 로그인, Refresh Token, Service Account Client Credentials, Admin API.
 
@@ -393,7 +393,7 @@ Maven 기준으로는 `keycloak-core`, `keycloak-services`, `keycloak-server-spi
 
 ### 테마·커스텀 Authenticator
 
-[CH15. 커스텀 Authenticator](/study/keycloak/15-custom-authenticator), [CH17. Theme](/study/keycloak/17-theme)에서 본 구조는 Quarkus에서도 크게 바뀌지 않는다. 다만.
+[CH16. 커스텀 Authenticator](/study/keycloak/16-custom-authenticator), [CH18. Theme](/study/keycloak/18-theme)에서 본 구조는 Quarkus에서도 크게 바뀌지 않는다. 다만.
 
 - Theme의 `meta-inf/keycloak-themes.json` 경로는 동일.
 - FreeMarker 템플릿도 그대로 동작.
@@ -432,5 +432,5 @@ Maven 기준으로는 `keycloak-core`, `keycloak-services`, `keycloak-server-spi
 
 OAuth 스터디와 결합해 쓰면 IAM 전 영역의 한 사이클을 갖춘 셈이다. 새 기능 도입이나 문제 진단에서 이 스터디의 챕터 번호를 북마크로 삼아 빠르게 돌아올 수 있도록 구성했다.
 
-- 이전: [CH22. Backup/Restore와 Realm 이관](/study/keycloak/22-backup-restore)
+- 이전: [CH23. Backup/Restore와 Realm 이관](/study/keycloak/23-backup-restore)
 - 처음으로: [Keycloak 실전 목차](/study/keycloak/)

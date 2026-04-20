@@ -3,8 +3,8 @@ title: "Backup/Restore와 Realm 이관"
 description: "Realm JSON Export/Import, 데이터베이스 백업 전략, 재해 복구 계획을 다룬다."
 date: 2026-04-17
 tags: [Keycloak, Backup, Restore, Export, Import]
-prev: /study/keycloak/21-admin-rest-api
-next: /study/keycloak/23-monitoring-upgrade
+prev: /study/keycloak/22-admin-rest-api
+next: /study/keycloak/24-monitoring-upgrade
 ---
 
 # Backup/Restore와 Realm 이관
@@ -124,7 +124,7 @@ export-acme/
 
 예전에는 Keycloak을 먼저 멈추고 export하거나, 기동 중에 특정 옵션으로 export해야 했다. v26에서는 운영 중인 인스턴스에서 <strong>같이 실행 가능한 분리 모드</strong>가 됐다. 단, 성능 영향이 있으니 피크 타임은 피한다.
 
-Operator 환경에서는 Admin REST API([CH21](/study/keycloak/21-admin-rest-api))의 Partial Export 엔드포인트로 Realm 상태를 JSON으로 받을 수도 있다.
+Operator 환경에서는 Admin REST API([CH22](/study/keycloak/22-admin-rest-api))의 Partial Export 엔드포인트로 Realm 상태를 JSON으로 받을 수도 있다.
 
 ```bash
 curl -s -X POST \
@@ -165,7 +165,7 @@ Import는 두 가지 방식이 있다.
 
 ### Operator의 KeycloakRealmImport와의 관계
 
-[CH19](/study/keycloak/19-k8s-operator)에서 본 `KeycloakRealmImport` CR은 내부적으로 이 import 메커니즘을 쿠버네티스 방식으로 감싼 것이다.
+[CH20](/study/keycloak/20-k8s-operator)에서 본 `KeycloakRealmImport` CR은 내부적으로 이 import 메커니즘을 쿠버네티스 방식으로 감싼 것이다.
 
 | 방법 | 장점 | 단점 |
 |------|------|------|
@@ -173,7 +173,7 @@ Import는 두 가지 방식이 있다.
 | Operator CR | Git으로 관리 가능, 자동 reconcile | Realm JSON을 YAML로 감싸는 래핑 필요 |
 | Admin REST API | Partial Export/Import 가능 | 세밀한 설정 제어 필요 |
 
-프로덕션에서는 Operator CR 또는 Terraform([CH21](/study/keycloak/21-admin-rest-api))이 장기 관리에 적합하고, `kc.sh import`는 초기 세팅이나 재해 복구 시 쓴다.
+프로덕션에서는 Operator CR 또는 Terraform([CH22](/study/keycloak/22-admin-rest-api))이 장기 관리에 적합하고, `kc.sh import`는 초기 세팅이나 재해 복구 시 쓴다.
 
 ### 대용량 import 팁
 
@@ -329,7 +329,7 @@ sequenceDiagram
     SiteB-->>User: 응답
 ```
 
-- Site B가 [CH18](/study/keycloak/18-ha-clustering)에서 본 XSite 복제를 통해 세션을 이미 가지고 있다.
+- Site B가 [CH19](/study/keycloak/19-ha-clustering)에서 본 XSite 복제를 통해 세션을 이미 가지고 있다.
 - DB는 PostgreSQL 스트리밍 복제로 따라오고 있다.
 - 사용자 체감: 잠시 지연 후 재로그인 없이 복구.
 
@@ -350,7 +350,7 @@ sequenceDiagram
     KC-->>Admin: Client 복구 완료
 ```
 
-Terraform + GitOps([CH19](/study/keycloak/19-k8s-operator), [CH21](/study/keycloak/21-admin-rest-api))가 실질적인 Realm 백업 역할을 한다. Git 히스토리가 Realm 변경 히스토리가 된다.
+Terraform + GitOps([CH20](/study/keycloak/20-k8s-operator), [CH22](/study/keycloak/22-admin-rest-api))가 실질적인 Realm 백업 역할을 한다. Git 히스토리가 Realm 변경 히스토리가 된다.
 
 ### DR 계획서 예시
 
@@ -395,7 +395,7 @@ Terraform + GitOps([CH19](/study/keycloak/19-k8s-operator), [CH21](/study/keyclo
 
 ## 다음 챕터
 
-백업과 복구로 데이터 측면의 안전망이 갖춰졌다. 마지막 챕터에서는 "운영이 정상인지 어떻게 알까"와 "메이저 버전을 어떻게 올리나"를 다룬다. [CH23. 모니터링·감사와 업그레이드](/study/keycloak/23-monitoring-upgrade)에서 Event Listener, Prometheus Metrics, 감사 로그 설계, 그리고 Wildfly→Quarkus 이관까지 포함한 업그레이드 절차를 살펴본다.
+백업과 복구로 데이터 측면의 안전망이 갖춰졌다. 마지막 챕터에서는 "운영이 정상인지 어떻게 알까"와 "메이저 버전을 어떻게 올리나"를 다룬다. [CH24. 모니터링·감사와 업그레이드](/study/keycloak/24-monitoring-upgrade)에서 Event Listener, Prometheus Metrics, 감사 로그 설계, 그리고 Wildfly→Quarkus 이관까지 포함한 업그레이드 절차를 살펴본다.
 
-- 이전: [CH21. Admin REST API와 자동화](/study/keycloak/21-admin-rest-api)
-- 다음: [CH23. 모니터링·감사와 업그레이드](/study/keycloak/23-monitoring-upgrade)
+- 이전: [CH22. Admin REST API와 자동화](/study/keycloak/22-admin-rest-api)
+- 다음: [CH24. 모니터링·감사와 업그레이드](/study/keycloak/24-monitoring-upgrade)

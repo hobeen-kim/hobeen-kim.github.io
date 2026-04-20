@@ -3,8 +3,8 @@ title: "커스텀 User Storage"
 description: "레거시 DB나 외부 사용자 시스템을 Keycloak의 사용자 소스로 연결하는 User Storage SPI를 구현한다."
 date: 2026-04-17
 tags: [Keycloak, UserStorage, SPI, 레거시]
-prev: /study/keycloak/15-custom-authenticator
-next: /study/keycloak/17-theme
+prev: /study/keycloak/16-custom-authenticator
+next: /study/keycloak/18-theme
 ---
 
 # 커스텀 User Storage
@@ -18,7 +18,7 @@ next: /study/keycloak/17-theme
 
 ## 1. 왜 User Federation 대신 커스텀이 필요한가
 
-[CH12. User Federation](/study/keycloak/12-user-federation)에서 다룬 LDAP/Kerberos는 잘 정의된 디렉토리 프로토콜이 있을 때의 표준 답이다. 그러나 현실에서는 다음과 같은 비표준 케이스가 흔하다.
+[CH13. User Federation](/study/keycloak/13-user-federation)에서 다룬 LDAP/Kerberos는 잘 정의된 디렉토리 프로토콜이 있을 때의 표준 답이다. 그러나 현실에서는 다음과 같은 비표준 케이스가 흔하다.
 
 | 상황 | User Federation이 안 되는 이유 |
 |------|------------------------------|
@@ -62,7 +62,7 @@ public interface UserStorageProviderFactory<T extends UserStorageProvider>
 }
 ```
 
-Factory는 [CH14](/study/keycloak/14-spi-overview)에서 설명한 대로 서버 기동 시 싱글톤으로 생성된다. Provider 인스턴스는 요청마다 `create()`로 새로 만들지만, `ComponentModel`에 담긴 Realm 설정(연결 문자열, 스키마명, 타임아웃 등)이 함께 주입된다.
+Factory는 [CH15](/study/keycloak/15-spi-overview)에서 설명한 대로 서버 기동 시 싱글톤으로 생성된다. Provider 인스턴스는 요청마다 `create()`로 새로 만들지만, `ComponentModel`에 담긴 Realm 설정(연결 문자열, 스키마명, 타임아웃 등)이 함께 주입된다.
 
 ### Provider Model과 Instance의 차이
 
@@ -351,5 +351,5 @@ flowchart LR
 
 ## 다음 챕터
 
-- 이전 : [커스텀 Authenticator](/study/keycloak/15-custom-authenticator)
-- 다음 : [Theme 커스터마이징](/study/keycloak/17-theme)
+- 이전 : [커스텀 Authenticator](/study/keycloak/16-custom-authenticator)
+- 다음 : [Theme 커스터마이징](/study/keycloak/18-theme)

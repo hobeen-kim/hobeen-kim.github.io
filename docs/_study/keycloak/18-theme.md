@@ -3,8 +3,8 @@ title: "Theme 커스터마이징"
 description: "Keycloak 로그인·계정·이메일 Theme을 브랜딩하고 FreeMarker·i18n·CSS를 커스터마이징한다."
 date: 2026-04-17
 tags: [Keycloak, Theme, FreeMarker, i18n]
-prev: /study/keycloak/16-custom-user-storage
-next: /study/keycloak/18-ha-clustering
+prev: /study/keycloak/17-custom-user-storage
+next: /study/keycloak/19-ha-clustering
 ---
 
 # Theme 커스터마이징
@@ -286,5 +286,5 @@ sequenceDiagram
 
 ## 다음 챕터
 
-- 이전 : [커스텀 User Storage](/study/keycloak/16-custom-user-storage)
-- 다음 : [HA 클러스터링](/study/keycloak/18-ha-clustering)
+- 이전 : [커스텀 User Storage](/study/keycloak/17-custom-user-storage)
+- 다음 : [HA 클러스터링](/study/keycloak/19-ha-clustering)

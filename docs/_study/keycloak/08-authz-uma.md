@@ -3,8 +3,8 @@ title: "Authorization Services와 UMA 2.0"
 description: "Keycloak의 Fine-grained Authorization Services와 UMA 2.0 기반 사용자 관리형 액세스를 다룬다."
 date: 2026-04-17
 tags: [Keycloak, AuthorizationServices, UMA, FineGrained]
-prev: /study/keycloak/06-protocol-mapper
-next: /study/keycloak/08-saml-token-exchange
+prev: /study/keycloak/07-protocol-mapper
+next: /study/keycloak/09-saml-token-exchange
 ---
 
 # Authorization Services와 UMA 2.0
@@ -18,7 +18,7 @@ next: /study/keycloak/08-saml-token-exchange
 
 ## 1. Role 기반의 한계
 
-[CH5](/study/keycloak/05-role-group)에서 본 Role·Group·Composite Role은 "무엇을 할 수 있는가"를 행위자 관점에서 묶는 도구다. 하지만 실제 업무 요건은 종종 <strong>특정 데이터 인스턴스</strong>에 묶인다.
+[CH6](/study/keycloak/06-role-group)에서 본 Role·Group·Composite Role은 "무엇을 할 수 있는가"를 행위자 관점에서 묶는 도구다. 하지만 실제 업무 요건은 종종 <strong>특정 데이터 인스턴스</strong>에 묶인다.
 
 ### Role로 안 풀리는 요건
 
@@ -275,7 +275,7 @@ quarkus:
 ### 실전 적용 시 주의
 
 - UMA는 개념이 풍부한 만큼 **초기 학습 비용이 크다**. 단순 RBAC으로 충분하면 도입을 보류하는 편이 낫다.
-- Account Console의 My Resources UI는 기본 테마에서 제공되지만, 커스텀 테마를 쓰면 해당 화면을 별도로 구현·검증해야 한다([CH17. Theme](/study/keycloak/17-theme)).
+- Account Console의 My Resources UI는 기본 테마에서 제공되지만, 커스텀 테마를 쓰면 해당 화면을 별도로 구현·검증해야 한다([CH18. Theme](/study/keycloak/18-theme)).
 - UMA Protection API는 별도 Service Account가 필요하다. RS가 이 계정으로 리소스를 등록·수정·삭제한다.
 
 ::: tip 핵심 정리
@@ -288,5 +288,5 @@ quarkus:
 
 ## 다음 챕터
 
-- 이전 : [Client Scope와 Protocol Mapper](/study/keycloak/06-protocol-mapper)
-- 다음 : [SAML 2.0과 Token Exchange](/study/keycloak/08-saml-token-exchange)
+- 이전 : [Client Scope와 Protocol Mapper](/study/keycloak/07-protocol-mapper)
+- 다음 : [SAML 2.0과 Token Exchange](/study/keycloak/09-saml-token-exchange)

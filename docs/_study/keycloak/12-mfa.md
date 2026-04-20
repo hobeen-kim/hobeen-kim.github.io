@@ -3,8 +3,8 @@ title: "MFA — TOTP / WebAuthn"
 description: "TOTP와 WebAuthn(FIDO2/Passkey)을 Keycloak MFA로 구성하는 방법과 Recovery Codes를 다룬다."
 date: 2026-04-17
 tags: [Keycloak, MFA, TOTP, WebAuthn, FIDO2]
-prev: /study/keycloak/10-password-policy
-next: /study/keycloak/12-user-federation
+prev: /study/keycloak/11-password-policy
+next: /study/keycloak/13-user-federation
 ---
 
 # MFA — TOTP / WebAuthn
@@ -207,7 +207,7 @@ flowchart TD
 
 ## 5. 사용자 경험
 
-기능이 있어도 UX가 나쁘면 사용자는 MFA를 우회하거나 비활성 계정을 방치한다. Keycloak의 기본 UI를 점검하고 필요 시 Theme([CH17. Theme](/study/keycloak/17-theme))로 보완한다.
+기능이 있어도 UX가 나쁘면 사용자는 MFA를 우회하거나 비활성 계정을 방치한다. Keycloak의 기본 UI를 점검하고 필요 시 Theme([CH18. Theme](/study/keycloak/18-theme))로 보완한다.
 
 ### TOTP 등록 UX
 
@@ -262,7 +262,7 @@ sequenceDiagram
 | Passkey 전환율 | OTP 대비 Passkey 등록 비율 | 전략 목표 대비 진척도 |
 | Step-up 요청 횟수 | ACR 기반 재인증 빈도 | 급증 시 세션 수명·민감 기능 분기 재검토 |
 
-이 지표는 Event Listener SPI로 `LOGIN`·`LOGIN_ERROR`·`USER_UPDATE`·`VERIFY_WEBAUTHN` 이벤트를 관측 백엔드로 보내 계산한다. 이벤트 리스너와 메트릭은 [CH23. 모니터링·감사](/study/keycloak/23-monitoring-upgrade)에서 통합적으로 다룬다.
+이 지표는 Event Listener SPI로 `LOGIN`·`LOGIN_ERROR`·`USER_UPDATE`·`VERIFY_WEBAUTHN` 이벤트를 관측 백엔드로 보내 계산한다. 이벤트 리스너와 메트릭은 [CH24. 모니터링·감사](/study/keycloak/24-monitoring-upgrade)에서 통합적으로 다룬다.
 
 ### 실패 시나리오와 회복 경로
 
@@ -281,5 +281,5 @@ sequenceDiagram
 
 ## 다음 챕터
 
-- 이전 : [Password Policy와 Brute Force](/study/keycloak/10-password-policy)
-- 다음 : [User Federation (LDAP/AD + SCIM)](/study/keycloak/12-user-federation)
+- 이전 : [Password Policy와 Brute Force](/study/keycloak/11-password-policy)
+- 다음 : [User Federation (LDAP/AD + SCIM)](/study/keycloak/13-user-federation)

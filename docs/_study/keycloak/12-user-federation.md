@@ -3,8 +3,8 @@ title: "User Federation (LDAP/AD + SCIM)"
 description: "기업 내부 LDAP·Active Directory를 Keycloak에 연동하고 SCIM 2.0으로 프로비저닝을 자동화한다."
 date: 2026-04-17
 tags: [Keycloak, LDAP, ActiveDirectory, SCIM, UserFederation]
-prev: /study/keycloak/13-mfa
-next: /study/keycloak/15-identity-brokering
+prev: /study/keycloak/11-mfa
+next: /study/keycloak/13-identity-brokering
 ---
 
 # User Federation (LDAP/AD + SCIM)
@@ -49,11 +49,11 @@ Keycloak은 로컬 DB와 Federation Provider를 체인으로 연결해 사용자
 - **LDAP** (OpenLDAP, ApacheDS 등): 범용 LDAPv3.
 - **Active Directory**: LDAP과 호환되지만 AD 고유 속성 매핑이 다름.
 - **Kerberos**: 단독 Provider로 SPNEGO/자격 위임 처리.
-- **커스텀 User Storage SPI**: 레거시 DB·외부 API를 Provider로 구현([CH18. 커스텀 User Storage](/study/keycloak/18-custom-user-storage) 예고).
+- **커스텀 User Storage SPI**: 레거시 DB·외부 API를 Provider로 구현([CH16. 커스텀 User Storage](/study/keycloak/16-custom-user-storage) 예고).
 
 ### 외부 IdP와의 차이
 
-User Federation은 "외부 사용자 DB에 대한 **직접 조회·인증**"이다. 반면 Identity Brokering은 "외부 **IdP에 로그인 위임**"이다. 구분을 헷갈리면 설계가 엉킨다. Brokering 쪽은 [CH15. Identity Brokering](/study/keycloak/15-identity-brokering)에서 다룬다.
+User Federation은 "외부 사용자 DB에 대한 **직접 조회·인증**"이다. 반면 Identity Brokering은 "외부 **IdP에 로그인 위임**"이다. 구분을 헷갈리면 설계가 엉킨다. Brokering 쪽은 [CH13. Identity Brokering](/study/keycloak/13-identity-brokering)에서 다룬다.
 
 | 항목 | User Federation | Identity Brokering |
 |------|------|------|
@@ -219,7 +219,7 @@ sequenceDiagram
 
 ### Mapper 커스터마이징
 
-내장 Mapper로 표현되지 않는 매핑은 SPI로 구현한다. 예: LDAP의 특정 속성 조합을 Keycloak Attribute로 가공. [CH16. SPI 개요](/study/keycloak/16-spi-overview)에서 Provider 패키징을 다룬다.
+내장 Mapper로 표현되지 않는 매핑은 SPI로 구현한다. 예: LDAP의 특정 속성 조합을 Keycloak Attribute로 가공. [CH14. SPI 개요](/study/keycloak/14-spi-overview)에서 Provider 패키징을 다룬다.
 
 ## 5. Kerberos 통합
 
@@ -319,5 +319,5 @@ LDAP이 "사람을 어디서 인증할까"라면, SCIM은 "사람이 쓰는 SaaS
 
 ## 다음 챕터
 
-- 이전 : [MFA — TOTP / WebAuthn](/study/keycloak/13-mfa)
-- 다음 : [Identity Brokering](/study/keycloak/15-identity-brokering)
+- 이전 : [MFA — TOTP / WebAuthn](/study/keycloak/11-mfa)
+- 다음 : [Identity Brokering](/study/keycloak/13-identity-brokering)

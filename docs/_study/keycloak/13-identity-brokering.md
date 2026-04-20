@@ -3,8 +3,8 @@ title: "Identity Brokering"
 description: "외부 OIDC/SAML IdP(Google/GitHub/Kakao/기업 Azure AD)를 Keycloak에 브로커링하는 방법과 First Broker Login 플로우를 다룬다."
 date: 2026-04-17
 tags: [Keycloak, IdentityBrokering, 소셜로그인, Azure]
-prev: /study/keycloak/14-user-federation
-next: /study/keycloak/16-spi-overview
+prev: /study/keycloak/12-user-federation
+next: /study/keycloak/14-spi-overview
 ---
 
 # Identity Brokering
@@ -28,7 +28,7 @@ Keycloak이 외부 사용자 소스를 다루는 방식은 크게 두 가지다.
 | 로그인 화면 | 외부 IdP로 리다이렉트 | Keycloak 자체 로그인 폼 |
 | 대표 케이스 | Google/Kakao 소셜 로그인, 기업 SSO | 사내 AD 사용자 직접 로그인 |
 
-[CH14. User Federation](/study/keycloak/14-user-federation)에서 다룬 LDAP 연동은 Keycloak이 디렉토리에서 사용자 정보를 읽어 들여 <strong>직접</strong>인증을 수행한다. 반면 Identity Brokering은 사용자를 외부 IdP로 넘긴 뒤 그 결과(ID Token/SAML Assertion)만 신뢰한다.
+[CH12. User Federation](/study/keycloak/12-user-federation)에서 다룬 LDAP 연동은 Keycloak이 디렉토리에서 사용자 정보를 읽어 들여 <strong>직접</strong>인증을 수행한다. 반면 Identity Brokering은 사용자를 외부 IdP로 넘긴 뒤 그 결과(ID Token/SAML Assertion)만 신뢰한다.
 
 ```mermaid
 sequenceDiagram
@@ -59,7 +59,7 @@ sequenceDiagram
 - 사내 직원이 AD 비밀번호로 Keycloak에 직접 로그인 → User Federation
 - Google/Kakao로 일반 사용자 가입 → Identity Brokering
 - 자회사가 이미 Okta/Azure AD를 쓰고 있음 → Identity Brokering(SAML 또는 OIDC)
-- 레거시 사용자 DB를 그대로 사용 → [CH18. 커스텀 User Storage](/study/keycloak/18-custom-user-storage)
+- 레거시 사용자 DB를 그대로 사용 → [CH16. 커스텀 User Storage](/study/keycloak/16-custom-user-storage)
 
 ## 2. 내장 IdP 목록
 
@@ -272,5 +272,5 @@ Azure AD의 `http://schemas.microsoft.com/ws/2008/06/identity/claims/groups` 속
 
 ## 다음 챕터
 
-- 이전 : [User Federation](/study/keycloak/14-user-federation)
-- 다음 : [SPI로 Keycloak 확장](/study/keycloak/16-spi-overview)
+- 이전 : [User Federation](/study/keycloak/12-user-federation)
+- 다음 : [SPI로 Keycloak 확장](/study/keycloak/14-spi-overview)

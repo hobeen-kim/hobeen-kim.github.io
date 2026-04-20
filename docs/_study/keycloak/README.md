@@ -17,74 +17,70 @@ OAuth 2.0과 OpenID Connect의 기본 개념은 [OAuth 스터디](/study/oauth/)
 
 ```mermaid
 flowchart TD
-    CH1[CH1. 개요] --> CH2[CH2. 로컬 기동]
-    CH2 --> CH3[CH3. Admin Console]
-    CH3 --> CH4[CH4. Realm · Organizations]
-    CH4 --> CH5[CH5. Client · Service Account]
-    CH4 --> CH6[CH6. 사용자와 자격 증명]
-    CH5 --> CH7[CH7. Role · Group · Composite]
-    CH6 --> CH7
-    CH7 --> CH8[CH8. Scope · Protocol Mapper]
-    CH8 --> CH9[CH9. Authorization Services · UMA]
-    CH8 --> CH10[CH10. SAML · Token Exchange]
-    CH5 --> CH11[CH11. Authentication Flow]
-    CH11 --> CH12[CH12. Password Policy · Brute Force]
-    CH11 --> CH13[CH13. MFA]
-    CH6 --> CH14[CH14. User Federation]
-    CH14 --> CH15[CH15. Identity Brokering]
-    CH11 --> CH16[CH16. SPI 개요]
-    CH16 --> CH17[CH17. 커스텀 Authenticator]
-    CH16 --> CH18[CH18. 커스텀 User Storage]
-    CH16 --> CH19[CH19. Theme]
-    CH5 --> CH20[CH20. Infinispan HA]
-    CH20 --> CH21[CH21. K8s · Operator]
-    CH21 --> CH22[CH22. DB 성능]
-    CH3 --> CH23[CH23. Admin REST API]
-    CH23 --> CH24[CH24. Backup · Realm 이관]
-    CH21 --> CH25[CH25. 모니터링 · 업그레이드]
-    CH24 --> CH25
+    CH1[CH1. 개요] --> CH2[CH2. Realm · Organizations]
+    CH2 --> CH3[CH3. Client · Service Account]
+    CH2 --> CH4[CH4. 사용자와 자격 증명]
+    CH3 --> CH5[CH5. Role · Group · Composite]
+    CH4 --> CH5
+    CH5 --> CH6[CH6. Scope · Protocol Mapper]
+    CH6 --> CH7[CH7. Authorization Services · UMA]
+    CH6 --> CH8[CH8. SAML · Token Exchange]
+    CH3 --> CH9[CH9. Authentication Flow]
+    CH9 --> CH10[CH10. Password Policy · Brute Force]
+    CH9 --> CH11[CH11. MFA]
+    CH4 --> CH12[CH12. User Federation]
+    CH12 --> CH13[CH13. Identity Brokering]
+    CH9 --> CH14[CH14. SPI 개요]
+    CH14 --> CH15[CH15. 커스텀 Authenticator]
+    CH14 --> CH16[CH16. 커스텀 User Storage]
+    CH14 --> CH17[CH17. Theme]
+    CH3 --> CH18[CH18. Infinispan HA]
+    CH18 --> CH19[CH19. K8s · Operator]
+    CH19 --> CH20[CH20. DB 성능]
+    CH2 --> CH21[CH21. Admin REST API]
+    CH21 --> CH22[CH22. Backup · Realm 이관]
+    CH19 --> CH23[CH23. 모니터링 · 업그레이드]
+    CH22 --> CH23
 ```
 
 ## 목차
 
 ### Keycloak
 1. [Keycloak 개요](/study/keycloak/01-overview) — IAM 개요, 라이선스, OAuth 스터디와의 관계
-2. [로컬에 Keycloak 기동](/study/keycloak/02-quickstart) — Docker Compose + PostgreSQL, start-dev vs start
-3. [Admin Console 구조](/study/keycloak/03-admin-console) — 메뉴 지도와 주요 워크플로우
 
 ### 핵심 객체 모델
-4. [Realm과 Organizations](/study/keycloak/04-realm-organizations) — 멀티테넌시 설계, v26+ Organizations
-5. [Client와 Service Account](/study/keycloak/05-client-service-account) — Access Type, Client Authenticator, 시크릿 관리
-6. [사용자와 자격 증명](/study/keycloak/06-user-credentials) — 해싱(Argon2/PBKDF2), OTP, WebAuthn 등록
-7. [Role·Group과 Composite Role](/study/keycloak/07-role-group) — 권한 모델링 패턴
+2. [Realm과 Organizations](/study/keycloak/02-realm-organizations) — 멀티테넌시 설계, v26+ Organizations
+3. [Client와 Service Account](/study/keycloak/03-client-service-account) — Access Type, Client Authenticator, 시크릿 관리
+4. [사용자와 자격 증명](/study/keycloak/04-user-credentials) — 해싱(Argon2/PBKDF2), OTP, WebAuthn 등록
+5. [Role·Group과 Composite Role](/study/keycloak/05-role-group) — 권한 모델링 패턴
 
 ### 토큰·권한·프로토콜
-8. [Client Scope와 Protocol Mapper](/study/keycloak/08-protocol-mapper) — 토큰 클레임 커스터마이징, Consent
-9. [Authorization Services와 UMA 2.0](/study/keycloak/09-authz-uma) — Fine-grained 리소스 권한
-10. [SAML 2.0과 Token Exchange](/study/keycloak/10-saml-token-exchange) — SAML 지원, RFC 8693 임퍼소네이션
+6. [Client Scope와 Protocol Mapper](/study/keycloak/06-protocol-mapper) — 토큰 클레임 커스터마이징, Consent
+7. [Authorization Services와 UMA 2.0](/study/keycloak/07-authz-uma) — Fine-grained 리소스 권한
+8. [SAML 2.0과 Token Exchange](/study/keycloak/08-saml-token-exchange) — SAML 지원, RFC 8693 임퍼소네이션
 
 ### 인증 정책과 플로우
-11. [인증 플로우 커스터마이징](/study/keycloak/11-auth-flow) — Browser/Direct Grant/Reset 플로우 편집
-12. [Password Policy와 Brute Force](/study/keycloak/12-password-policy) — Required Actions, 계정 잠금
-13. [MFA — TOTP / WebAuthn](/study/keycloak/13-mfa) — 2단계 인증과 Recovery Codes
+9. [인증 플로우 커스터마이징](/study/keycloak/09-auth-flow) — Browser/Direct Grant/Reset 플로우 편집
+10. [Password Policy와 Brute Force](/study/keycloak/10-password-policy) — Required Actions, 계정 잠금
+11. [MFA — TOTP / WebAuthn](/study/keycloak/11-mfa) — 2단계 인증과 Recovery Codes
 
 ### 페더레이션
-14. [User Federation (LDAP/AD + SCIM)](/study/keycloak/14-user-federation) — 기업 내부 사용자 소스 연동
-15. [Identity Brokering](/study/keycloak/15-identity-brokering) — Google/GitHub/Kakao 외부 IdP 연결
+12. [User Federation (LDAP/AD + SCIM)](/study/keycloak/12-user-federation) — 기업 내부 사용자 소스 연동
+13. [Identity Brokering](/study/keycloak/13-identity-brokering) — Google/GitHub/Kakao 외부 IdP 연결
 
 ### 커스터마이징 (SPI)
-16. [SPI로 Keycloak 확장](/study/keycloak/16-spi-overview) — providers/ 디렉토리, Quarkus 클래스로더
-17. [커스텀 Authenticator](/study/keycloak/17-custom-authenticator) — 사내 사번 검증 같은 추가 단계
-18. [커스텀 User Storage](/study/keycloak/18-custom-user-storage) — 레거시 DB를 사용자 소스로
-19. [Theme 커스터마이징](/study/keycloak/19-theme) — 로그인 화면 브랜딩
+14. [SPI로 Keycloak 확장](/study/keycloak/14-spi-overview) — providers/ 디렉토리, Quarkus 클래스로더
+15. [커스텀 Authenticator](/study/keycloak/15-custom-authenticator) — 사내 사번 검증 같은 추가 단계
+16. [커스텀 User Storage](/study/keycloak/16-custom-user-storage) — 레거시 DB를 사용자 소스로
+17. [Theme 커스터마이징](/study/keycloak/17-theme) — 로그인 화면 브랜딩
 
 ### 운영과 확장
-20. [Infinispan HA 클러스터링](/study/keycloak/20-ha-clustering) — 분산 캐시, Multi-site
-21. [Kubernetes + Operator 배포](/study/keycloak/21-k8s-operator) — Keycloak Operator, Custom Resource
-22. [데이터베이스와 성능](/study/keycloak/22-database-performance) — PostgreSQL 튜닝, 오프라인 세션
-23. [Admin REST API와 자동화](/study/keycloak/23-admin-rest-api) — 운영 자동화, GitOps
-24. [Backup/Restore와 Realm 이관](/study/keycloak/24-backup-restore) — Realm Import/Export, 재해 복구
-25. [모니터링·감사와 업그레이드](/study/keycloak/25-monitoring-upgrade) — Event Listener, Metrics, 메이저 업그레이드
+18. [Infinispan HA 클러스터링](/study/keycloak/18-ha-clustering) — 분산 캐시, Multi-site
+19. [Kubernetes + Operator 배포](/study/keycloak/19-k8s-operator) — Keycloak Operator, Custom Resource
+20. [데이터베이스와 성능](/study/keycloak/20-database-performance) — PostgreSQL 튜닝, 오프라인 세션
+21. [Admin REST API와 자동화](/study/keycloak/21-admin-rest-api) — 운영 자동화, GitOps
+22. [Backup/Restore와 Realm 이관](/study/keycloak/22-backup-restore) — Realm Import/Export, 재해 복구
+23. [모니터링·감사와 업그레이드](/study/keycloak/23-monitoring-upgrade) — Event Listener, Metrics, 메이저 업그레이드
 
 ## 관련 자료
 

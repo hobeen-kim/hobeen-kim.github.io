@@ -3,8 +3,8 @@ title: "Realm과 Organizations"
 description: "Realm 경계의 의미와 멀티테넌시 설계, v26+ Organizations 기능을 다룬다."
 date: 2026-04-17
 tags: [Keycloak, Realm, Organizations, 멀티테넌시]
-prev: /study/keycloak/03-admin-console
-next: /study/keycloak/05-client-service-account
+prev: /study/keycloak/01-overview
+next: /study/keycloak/03-client-service-account
 ---
 
 # Realm과 Organizations
@@ -256,7 +256,7 @@ kc.sh import --dir /tmp/realm-export
 - Realm의 <strong>ID</strong>는 보존되지만, Keys(서명 키)는 신규 발급되는 것이 안전하다. 외부 앱의 JWKS 캐시 갱신이 필요할 수 있다.
 - Import 시 "Policy: OVERWRITE vs IGNORE_EXISTING"을 명시적으로 결정해야 한다.
 
-상세한 백업·이관 전략은 <strong>CH24. Backup·Realm 이관</strong>에서 DR 시나리오까지 포함해 다룬다.
+상세한 백업·이관 전략은 <strong>CH22. Backup·Realm 이관</strong>에서 DR 시나리오까지 포함해 다룬다.
 
 ### 실습 팁
 
@@ -272,5 +272,5 @@ kc.sh import --dir /tmp/realm-export
 
 ## 다음 챕터
 
-- 이전 : [Admin Console 구조](/study/keycloak/03-admin-console)
-- 다음 : [Client와 Service Account](/study/keycloak/05-client-service-account)
+- 이전 : [Keycloak 개요](/study/keycloak/01-overview)
+- 다음 : [Client와 Service Account](/study/keycloak/03-client-service-account)

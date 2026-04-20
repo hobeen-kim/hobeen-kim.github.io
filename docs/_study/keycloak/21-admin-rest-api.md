@@ -3,8 +3,8 @@ title: "Admin REST API와 자동화"
 description: "Keycloak Admin REST API 사용, Service Account 기반 인증, Terraform/GitOps 자동화 패턴을 다룬다."
 date: 2026-04-17
 tags: [Keycloak, AdminAPI, Terraform, 자동화]
-prev: /study/keycloak/22-database-performance
-next: /study/keycloak/24-backup-restore
+prev: /study/keycloak/20-database-performance
+next: /study/keycloak/22-backup-restore
 ---
 
 # Admin REST API와 자동화
@@ -183,7 +183,7 @@ curl -s -X POST \
 | POST | `/admin/realms/{realm}/logout-all` | 전체 로그아웃 |
 | DELETE | `/admin/realms/{realm}/sessions/{sessionId}` | 세션 강제 종료 |
 
-Event는 [CH25. 모니터링·감사와 업그레이드](/study/keycloak/25-monitoring-upgrade)에서 자세히 다룬다.
+Event는 [CH23. 모니터링·감사와 업그레이드](/study/keycloak/23-monitoring-upgrade)에서 자세히 다룬다.
 
 ## 4. 쿼리와 페이징
 
@@ -222,7 +222,7 @@ done
 - `max`를 너무 크게(예: 10000) 잡으면 DB 쿼리가 무거워진다. 100~500이 현실적.
 - `search`는 기본적으로 username prefix 매칭. 이메일·이름 검색이 필요하면 `email`, `firstName` 파라미터 사용.
 - `exact=true`를 붙이면 정확 일치.
-- count는 별도 엔드포인트(`/users/count`)로 호출([CH22](/study/keycloak/22-database-performance))에서 본 "count가 느려지는" 문제와 연결.
+- count는 별도 엔드포인트(`/users/count`)로 호출([CH20](/study/keycloak/20-database-performance))에서 본 "count가 느려지는" 문제와 연결.
 
 ### Rate Limit
 
@@ -302,7 +302,7 @@ terraform apply tfplan
 
 ### Operator + Terraform 역할 분리
 
-[CH21](/study/keycloak/21-k8s-operator)에서 본 `KeycloakRealmImport`와 Terraform이 겹쳐 보일 수 있다. 실전에서는 보통 역할을 분리한다.
+[CH19](/study/keycloak/19-k8s-operator)에서 본 `KeycloakRealmImport`와 Terraform이 겹쳐 보일 수 있다. 실전에서는 보통 역할을 분리한다.
 
 | 도구 | 적합한 범위 |
 |------|------------|
@@ -389,7 +389,7 @@ echo "healthy"
 
 - Terraform: `terraform plan`을 주기적(예: 매 시간)으로 실행해 변경이 있으면 알림.
 - Argo CD: `selfHeal=false`로 두고 `OutOfSync` 상태를 경고.
-- Admin Event: [CH25](/study/keycloak/25-monitoring-upgrade)의 Admin Events를 SIEM으로 전달해 누가·무엇을·언제 바꿨는지 추적.
+- Admin Event: [CH23](/study/keycloak/23-monitoring-upgrade)의 Admin Events를 SIEM으로 전달해 누가·무엇을·언제 바꿨는지 추적.
 
 ### 실전 팁
 
@@ -408,7 +408,7 @@ echo "healthy"
 
 ## 다음 챕터
 
-자동화로 Realm 상태를 일관되게 관리하는 방법을 배웠다. 이제 그 상태를 안전하게 백업·복구하는 영역으로 넘어간다. [CH24. Backup/Restore와 Realm 이관](/study/keycloak/24-backup-restore)에서 Realm JSON Export/Import와 DB 백업의 차이, 재해 복구 관점의 RTO/RPO 전략을 다룬다.
+자동화로 Realm 상태를 일관되게 관리하는 방법을 배웠다. 이제 그 상태를 안전하게 백업·복구하는 영역으로 넘어간다. [CH22. Backup/Restore와 Realm 이관](/study/keycloak/22-backup-restore)에서 Realm JSON Export/Import와 DB 백업의 차이, 재해 복구 관점의 RTO/RPO 전략을 다룬다.
 
-- 이전: [CH22. 데이터베이스와 성능](/study/keycloak/22-database-performance)
-- 다음: [CH24. Backup/Restore와 Realm 이관](/study/keycloak/24-backup-restore)
+- 이전: [CH20. 데이터베이스와 성능](/study/keycloak/20-database-performance)
+- 다음: [CH22. Backup/Restore와 Realm 이관](/study/keycloak/22-backup-restore)

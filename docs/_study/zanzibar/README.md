@@ -7,7 +7,7 @@ tags: [Zanzibar, ReBAC, Authorization, IAM, Google]
 
 # Zanzibar 이해하기
 
-구글의 Zanzibar는 YouTube·Drive·Photos·Cloud 등 수많은 서비스의 권한 검사를 초당 수천만 건 단위로 처리하는 글로벌 인가 시스템이다. 2019년 발표된 논문 *"Zanzibar: Google's Consistent, Global Authorization System"*은 관계 기반 접근 제어(ReBAC) 모델의 사실상 표준이 됐다. SpiceDB·OpenFGA 같은 오픈소스 구현은 모두 이 논문을 재료로 삼는다.
+구글의 Zanzibar는 YouTube·Drive·Photos·Cloud 등 수많은 서비스의 권한 검사를 초당 수백만 건 단위로 처리하는 글로벌 인가 시스템이다. 2019년 발표된 논문 *"Zanzibar: Google's Consistent, Global Authorization System"*은 관계 기반 접근 제어(ReBAC) 모델의 사실상 표준이 됐다. SpiceDB·OpenFGA 같은 오픈소스 구현은 모두 이 논문을 재료로 삼는다.
 
 이 스터디는 Zanzibar 논문을 읽어내는 데 목적이 있다. **개념과 알고리즘**에 집중하고, 실제 API 호출이나 배포는 후속 스터디인 [SpiceDB](/study/spicedb/)에서 다룬다.
 

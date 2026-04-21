@@ -87,7 +87,7 @@ Zanzibar 논문이 가정한 DB가 Spanner다. SpiceDB on Spanner는 의미상 "
 
 ### MySQL — 제약 있음
 
-이미 MySQL 표준 환경이라 유지비용 때문에 Postgres로 못 가는 조직에만 추천한다. SpiceDB의 <strong>Watch API</strong>가 제한되는 등 기능 격차가 실제로 존재한다. 새 프로젝트를 MySQL로 시작할 이유는 없다.
+이미 MySQL 표준 환경이라 유지비용 때문에 Postgres로 못 가는 조직에만 추천한다. MySQL datastore는 Watch API가 지원되긴 하지만 CockroachDB/Postgres 대비 <strong>checkpoint 간격이 크고 이벤트 지연이 크다</strong>. 새 프로젝트를 MySQL로 시작할 이유는 없다.
 
 ### memdb — 테스트·개발 전용
 
@@ -146,7 +146,7 @@ spec:
 # SpiceDB 기동 옵션
 # --dispatch-cluster-enabled
 # --dispatch-upstream-addr=dns:///spicedb-dispatch.default.svc.cluster.local:50053
-# --dispatch-cluster-cache-size=10000
+# --dispatch-cluster-cache-max-cost=70%
 ```
 
 인스턴스 N개를 띄우면 dispatch 캐시 총량도 N배로 늘어난다. 메모리 가용분이 곧 캐시 크기다.
@@ -168,7 +168,7 @@ SpiceDB 장애 중 가장 피해가 큰 건 <strong>tuple 손실</strong>이다.
 
 **2. Bulk Export** — SpiceDB API 수준.
 
-`BulkExport` gRPC로 현재 시점 스냅샷을 NDJSON으로 뽑는다. datastore 엔진이 다른 환경으로 마이그레이션할 때 유용하고, schema + tuples 묶음을 버전 관리 저장소에 밀어 넣기도 쉽다.
+`ExportBulkRelationships` gRPC로 현재 시점 스냅샷을 NDJSON으로 뽑는다. datastore 엔진이 다른 환경으로 마이그레이션할 때 유용하고, schema + tuples 묶음을 버전 관리 저장소에 밀어 넣기도 쉽다.
 
 ### RPO / RTO 설계
 
@@ -245,11 +245,11 @@ SpiceDB 인스턴스 1개 (2 vCPU / 4GB RAM) ≈ 1000~3000 QPS
 **3. Dispatch 캐시 메모리**
 
 ```
---dispatch-cluster-cache-size=N 엔트리당 ≈ 1~2KB
-10만 엔트리면 ≈ 150MB
+--dispatch-cluster-cache-max-cost=70%  # 인스턴스 메모리의 70%를 dispatch 캐시로
+--dispatch-cache-max-cost=30%          # 로컬 dispatch 캐시 비율
 ```
 
-인스턴스 수가 늘어날수록 총 캐시가 커지므로, 수평 확장이 곧 캐시 확장이다.
+SpiceDB 캐시는 Ristretto 기반이라 엔트리 수가 아니라 <strong>메모리 비용(바이트 or 메모리 비율)</strong>으로 한도를 설정한다. 인스턴스 수가 늘어날수록 총 캐시가 커지므로, 수평 확장이 곧 캐시 확장이다.
 
 ## 핵심 정리
 
@@ -257,7 +257,7 @@ SpiceDB 인스턴스 1개 (2 vCPU / 4GB RAM) ≈ 1000~3000 QPS
 - <strong>배포는 3계층</strong>: stateless API / consistent-hashing Dispatch / 영속 Datastore. 각자 확장 축이 다르다.
 - <strong>Datastore 기본값은 Postgres</strong>. 멀티 리전·글로벌 규모는 CRDB나 Spanner로. MySQL은 기존 고정 환경만, memdb는 테스트 전용.
 - <strong>Dispatch는 cache locality가 전부</strong>. 같은 (object, relation)이 항상 같은 노드로 가야 한다. bounded-load consistent hashing이 그걸 보장한다.
-- <strong>백업은 PITR + BulkExport 이중화</strong>. RPO ≤ 5분, RTO ≤ 30분을 목표로 <strong>정기 DR 리허설</strong>과 스키마 회귀 테스트를 함께 돌린다.
+- <strong>백업은 PITR + ExportBulkRelationships 이중화</strong>. RPO ≤ 5분, RTO ≤ 30분을 목표로 <strong>정기 DR 리허설</strong>과 스키마 회귀 테스트를 함께 돌린다.
 - <strong>멀티 리전</strong>: Active-Passive는 Postgres로도 가능. Active-Active는 CRDB/Spanner만 현실적. ZedToken은 리전을 넘어서도 consistency를 유지한다.
 - <strong>용량 계획</strong>: tuple은 생각보다 작다(~200B). 진짜 비싼 건 <strong>캐시 메모리와 CPU</strong>. 인스턴스 수 = 캐시 총량.
 :::

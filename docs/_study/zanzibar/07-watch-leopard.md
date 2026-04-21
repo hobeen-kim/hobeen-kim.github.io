@@ -78,21 +78,11 @@ group:platform#member@user:alice
 
 ## Leopard의 아이디어
 
-Leopard는 "group 체인을 미리 플랫하게 만들어 저장하자"는 인덱스 시스템이다. 위 예시에서 Leopard는 다음 쌍들을 precompute해 저장한다.
+Zanzibar 논문(§3.2.5)은 Leopard를 "group-focused skip-list-based subject expansion index"로 정의한다. 깊은 그룹 중첩의 transitive closure를 효율적으로 재계산할 수 있는 skip-list 기반 인덱스 구조이며, union·intersection·difference 같은 set 연산을 빠르게 처리하도록 설계됐다.
 
-```
-(group:company, user:alice)
-(group:company, group:eng)
-(group:company, group:backend)
-(group:company, group:platform)
-(group:eng, user:alice)
-(group:eng, group:backend)
-...
-```
+위 예시에서 `Check(group:company, member, alice)`를 물으면 Leopard는 group:company의 subject 확장을 skip-list 표현으로 조회해 membership 여부를 답한다. 원래 평가였다면 네 홉의 pointer chasing을 돌았을 쿼리가, Leopard에서는 인덱스 탐색 한 번 수준으로 압축된다.
 
-즉 transitive closure를 flat table로 펼쳐둔다. 이러면 `Check(group:company, member, alice)`는 한 번의 인덱스 조회로 끝난다. pointer chasing 없이 "해당 쌍이 존재하는가"만 보면 된다.
-
-당연히 공간이 늘어난다. N 개 그룹과 M 개 멤버십이 있을 때, 최악의 경우 closure 크기는 N * M까지 커질 수 있다. 그래서 Leopard는 모든 관계가 아니라 **그룹 멤버십처럼 넓게 퍼지고 자주 조회되는 특정 패턴**에 대해서만 인덱스를 만든다.
+Leopard는 모든 관계를 인덱싱하지는 않는다. **그룹 멤버십처럼 넓게 퍼지고 자주 조회되는 특정 패턴**에 대해서만 인덱스를 만든다. skip-list로 set 연산을 효율화한다는 특성이 그룹 멤버십의 유니온/교집합 쿼리에 잘 맞기 때문이다.
 
 ## 인덱스 빌드 방식
 

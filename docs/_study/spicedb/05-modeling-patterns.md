@@ -55,9 +55,10 @@ definition folder {
   relation parent: folder
   relation owner: user
   relation editor: user | folder#editor
-  relation viewer: user | folder#viewer | user:*
+  relation viewer: user | folder#viewer
+  relation public_viewer: user:*
   permission edit = owner + editor + parent->edit
-  permission view = viewer + edit + parent->view
+  permission view = viewer + edit + public_viewer + parent->view
 }
 
 definition file {
@@ -76,7 +77,7 @@ definition file {
 
 둘째, `editor: user | folder#editor`에서 `folder#editor` 부분은 "다른 폴더의 editor 전원"을 subject로 받는 문법이다. "이 공유 폴더의 editor는 팀 공용 폴더의 editor와 동일" 같은 위임 관계를 만들 때 쓴다.
 
-셋째, `viewer: user | ... | user:*`의 `user:*`가 바로 "링크 있는 누구나"를 표현하는 wildcard다. 이 relation에 `folder:shared#viewer@user:*`를 하나 써두면 모든 user가 viewer로 취급된다.
+셋째, `public_viewer: user:*`가 바로 "링크 있는 누구나"를 표현하는 wildcard다. 공개용 relation을 `viewer`와 분리해 두면 `folder:shared#public_viewer@user:*`처럼 공개 공유 의도가 이름에서 드러나고, 스키마 리뷰·감사 단계에서 실수로 전원 공개가 되는 사고를 줄인다.
 
 넷째, 파일의 `permission view = viewer + edit + parent->view` 순서가 중요하다. `edit`이 먼저 들어가면, 개별 파일 edit 권한이 있는 사람은 자동으로 view도 받는다. `parent->view`는 폴더의 뷰어 상속이다.
 
@@ -96,14 +97,14 @@ flowchart TB
   U2[user:bob]
   U2 -->|viewer| F2
   W[user:*]
-  W -->|viewer| F1
+  W -->|public_viewer| F1
   subgraph derived[상속된 권한]
     F2 -. parent->view .-> F1
     FIL -. parent->view .-> F2
   end
 ```
 
-이 그래프로 보면 "root의 owner인 alice는 parent 체인을 타고 spec.md의 edit까지 얻고, root의 공개 viewer인 누구나도 view로 접근"되는 흐름이 한눈에 들어온다.
+이 그래프로 보면 "root의 owner인 alice는 parent 체인을 타고 spec.md의 edit까지 얻고, root의 `public_viewer`에 들어간 누구나도 view로 접근"되는 흐름이 한눈에 들어온다.
 
 ## 패턴 2: GitHub 스타일 조직·팀·저장소
 
@@ -155,7 +156,7 @@ flowchart TB
   U2[user:dev-bob]
   U2 -->|member| T2
   T1 -. team#member .-> R1
-  R1 -.|maintainer|.-> T1
+  R1 -. maintainer .-> T1
 ```
 
 alice는 조직 admin이라 모든 repository의 read를 자동 획득하고, bob은 platform-backend 멤버이자 그 상위 팀 platform을 통해 repository:api의 maintainer가 된다. 스키마 한 장이 이 흐름 전부를 표현한다.

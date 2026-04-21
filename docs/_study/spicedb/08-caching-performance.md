@@ -69,20 +69,20 @@ flowchart TB
 
 ```bash
 spicedb serve \
-  --namespace-cache-size=10000 \
-  --dispatch-cache-size=50000 \
-  --dispatch-cluster-cache-size=100000
+  --namespace-cache-max-cost=32MiB \
+  --dispatch-cache-max-cost=30% \
+  --dispatch-cluster-cache-max-cost=70%
 ```
 
-대략적인 메모리 가이드다.
+SpiceDB 캐시는 내부적으로 <strong>Ristretto</strong>를 쓰기 때문에, 한도는 엔트리 수가 아니라 <strong>메모리 비용(바이트 단위 또는 인스턴스 메모리 비율)</strong>으로 지정한다. 엔트리 수에 해당하는 `--dispatch-cache-num-counters`도 있지만, 운영 튜닝의 핵심 레버는 `max-cost` 쪽이다.
 
-| 설정 | 엔트리당 크기 | 10만 엔트리 기준 |
+| 설정 | 의미 | 권장값 |
 |---|---|---|
-| `--namespace-cache-size` | 수 KB (스키마 통째) | 거의 무시 가능 |
-| `--dispatch-cache-size` | 1~2KB | ≈ 150MB |
-| `--dispatch-cluster-cache-size` | 1~2KB | ≈ 150MB |
+| `--namespace-cache-max-cost` | 스키마 캐시 메모리 한도 (절대값) | 32MiB 정도로 충분 |
+| `--dispatch-cache-max-cost` | 로컬 dispatch 결과 캐시 비율 | 인스턴스 메모리의 30% |
+| `--dispatch-cluster-cache-max-cost` | 클러스터 dispatch 캐시 비율 | 인스턴스 메모리의 70% |
 
-인스턴스당 2~4GB RAM이면 dispatch 캐시를 수십만 엔트리까지 편하게 잡는다. OOM을 보기보다는 <strong>넉넉하게 주고</strong> 모니터링으로 실제 사용량을 추적하는 게 안전하다.
+인스턴스 메모리의 30~70%를 캐시에 할당하는 비율 관점으로 조정한다. OOM을 보기보다는 <strong>비율을 넉넉히 주고</strong> 모니터링으로 실제 사용량·히트율을 추적하는 게 안전하다.
 
 ::: tip 캐시 크기는 "너무 작게"가 가장 위험하다
 캐시가 LRU로 계속 쫓겨나면 hit rate가 급락하면서 DB QPS가 폭증한다. 차라리 메모리를 더 주고 90%+ hit rate를 유지하는 편이 훨씬 싸다. DB 비용 한 단위가 SpiceDB RAM 비용보다 비싼 경우가 많다.
@@ -290,7 +290,7 @@ visible = [id for id, r in zip(candidates, results) if r.has_permission]
 ## Anti-pattern 목록
 
 ::: danger 이것들은 하지 마라
-- <strong>매 요청 fully_consistent</strong> — 모든 Check에 최신 consistency를 요구하면 캐시가 통째로 무의미해진다. 상태 변경 직후에만 ZedToken at_least_as_fresh를 쓰고, 나머지는 minimize_latency나 at_exact_snapshot(주기적 갱신)으로.
+- <strong>매 요청 fully_consistent</strong> — 모든 Check에 최신 consistency를 요구하면 캐시가 통째로 무의미해진다. 상태 변경 직후에만 ZedToken `at_least_as_fresh`를 쓰고, 나머지 경로는 `minimize_latency`로 기본 설정한다. `at_exact_snapshot`은 특정 ZedToken 시점을 고정하는 옵션이라 주기적 갱신용이 아니라 <strong>재현·디버깅이 필요할 때만</strong> 쓴다.
 - <strong>고루틴 대량 병렬 Check</strong> — 1000개 Check를 무제한 고루틴으로 뿌리면 connection/concurrency 폭발. 반드시 `CheckBulkPermissions`나 semaphore로 동시성 제한.
 - <strong>LookupResources로 UI 목록 만들기</strong> — 목록은 애플리케이션 DB 기본, 권한은 Check로 post-filter.
 - <strong>재시도 타임아웃 중첩</strong> — 클라이언트 타임아웃 5s, 서버 재시도 3번×2s = 실제 대기 더 길어짐. budget을 전체 관점에서 설계.

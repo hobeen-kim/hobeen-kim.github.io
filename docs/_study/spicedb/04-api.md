@@ -94,14 +94,14 @@ resp = client.CheckPermission(CheckPermissionRequest(
 allowed = resp.permissionship == CheckPermissionResponse.PERMISSIONSHIP_HAS_PERMISSION
 ```
 
-### BulkCheckPermission
+### CheckBulkPermissions
 
-같은 subject에 대해 여러 resource를 한 번에 확인하고 싶을 때가 있다. 페이지에 문서 100개를 띄우는데 각 문서별로 view/edit 버튼 노출 여부를 판단하는 경우 같은 상황이다. 100번의 Check를 RPC 100번으로 보내는 대신 `BulkCheckPermission`에 100개의 (resource, permission, subject) 쌍을 묶어 보낼 수 있다.
+같은 subject에 대해 여러 resource를 한 번에 확인하고 싶을 때가 있다. 페이지에 문서 100개를 띄우는데 각 문서별로 view/edit 버튼 노출 여부를 판단하는 경우 같은 상황이다. 100번의 Check를 RPC 100번으로 보내는 대신 `CheckBulkPermissions`에 100개의 (resource, permission, subject) 쌍을 묶어 보낼 수 있다.
 
 서버 측은 내부적으로 최대한 공통 부분을 캐시/재활용해 개별 Check보다 훨씬 적은 비용으로 처리한다.
 
 ::: info CheckBulkPermissions vs LookupResources
-이 둘은 혼동하기 쉽다. BulkCheckPermission은 **resource 목록이 이미 결정된 상황**에서 각각 권한을 확인한다. 반면 LookupResources는 resource 목록 자체를 **권한으로부터 역산**한다. DB 쿼리 결과가 먼저 있고 그 위에 권한 필터를 얹는 UX라면 BulkCheck가 맞고, 처음부터 "이 user가 볼 수 있는 모든 문서"를 구하고 싶다면 LookupResources다.
+이 둘은 혼동하기 쉽다. CheckBulkPermissions는 **resource 목록이 이미 결정된 상황**에서 각각 권한을 확인한다. 반면 LookupResources는 resource 목록 자체를 **권한으로부터 역산**한다. DB 쿼리 결과가 먼저 있고 그 위에 권한 필터를 얹는 UX라면 CheckBulkPermissions가 맞고, 처음부터 "이 user가 볼 수 있는 모든 문서"를 구하고 싶다면 LookupResources다.
 :::
 
 ## Expand API
@@ -164,7 +164,7 @@ cursor 기반 페이지네이션이 지원된다. 첫 호출로 cursor를 받고
 LookupResources는 subject의 권한 범위가 커질수록 느려진다. 한 user가 수만 개 resource에 권한을 가진 상황이면 답을 만드는 데 시간이 걸린다. 실전에서는 대개 이런 패턴으로 감싼다.
 
 - 검색어 기반 후보 resource를 DB에서 먼저 좁힌다.
-- 그 id 목록에 대해 BulkCheckPermission으로 권한 확인.
+- 그 id 목록에 대해 CheckBulkPermissions로 권한 확인.
 - 페이지가 끝나면 다음 페이지로.
 
 "전체 resource에서 권한 있는 것만 필터"를 LookupResources 하나로 해결하려 들면 대규모 사용자에게서 금세 문제 된다는 걸 기억해 두자.
@@ -220,7 +220,7 @@ Watch 소비자는 잦은 재시작을 가정해야 한다. 메모리에만 curs
 | API | latency | cost | 사용 빈도 | 주 사용처 |
 | --- | --- | --- | --- | --- |
 | Check | 매우 낮음 | 작음(캐시 잘 먹음) | 매우 높음 | hot path / 가드 |
-| BulkCheckPermission | 낮음 | 중 | 높음 | 목록 화면 버튼 상태 |
+| CheckBulkPermissions | 낮음 | 중 | 높음 | 목록 화면 버튼 상태 |
 | Expand | 중간 | 큼 | 낮음 | 권한 관리 UI |
 | LookupResources | 중간~높음 | 권한 범위에 비례 | 중간 | 내 리소스 목록 |
 | LookupSubjects | 중간 | resource의 멤버 수에 비례 | 낮음 | 공유 후보 UI |
@@ -240,7 +240,7 @@ sequenceDiagram
     U->>App: "budget"으로 문서 검색
     App->>ES: 제목 match 쿼리
     ES-->>App: doc:1, doc:2, ..., doc:50
-    App->>S: BulkCheckPermission<br>(user:alice, view, doc:1..50)
+    App->>S: CheckBulkPermissions<br>(user:alice, view, doc:1..50)
     S-->>App: doc:1, doc:3, doc:7 ... 권한 있음
     App-->>U: 권한 있는 문서만 렌더
 ```
@@ -253,14 +253,14 @@ sequenceDiagram
 - Expand를 매 요청마다 호출 — 지연과 대역폭이 금방 터진다. UI 렌더 한정으로만 쓴다.
 - LookupResources 결과를 캐시하지 않음 — 동일한 "my stuff" 화면을 짧은 시간 내 여러 번 계산하게 된다.
 - Watch 재연결 시 cursor를 초기화 — 누락이 발생한다. cursor는 반드시 durable storage에.
-- CheckPermission을 loop로 N번 — BulkCheckPermission으로 묶자.
+- CheckPermission을 loop로 N번 — CheckBulkPermissions으로 묶자.
 - Check의 consistency를 항상 `fully_consistent` — hot path라면 대부분 `at_least_as_fresh`로 충분하다. [CH3. ZedToken](/study/spicedb/03-relationship-zedtoken)의 옵션 표를 다시 보자.
 :::
 
 ## 핵심 정리
 
 ::: tip 핵심 정리
-- Check는 hot path. boolean 하나를 빠르게. BulkCheckPermission으로 묶을 수 있으면 묶는다.
+- Check는 hot path. boolean 하나를 빠르게. CheckBulkPermissions으로 묶을 수 있으면 묶는다.
 - Expand는 UI 렌더용. 멤버 트리를 통째로 받아 화면에서 그린다. hot path 금지.
 - LookupResources는 "내가 볼 수 있는 것들" 역방향 질의. 권한 범위가 크면 DB 후보를 먼저 좁히고 BulkCheck로 필터하는 패턴이 안전하다.
 - LookupSubjects는 "이걸 볼 수 있는 사람들". 공유/관리 UI에서 주로 쓴다.

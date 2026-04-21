@@ -122,7 +122,7 @@ group:backend#member@group:eng#member
 3) doc:readme#viewer@group:eng#member
 4) group:eng#member@user:charlie
 5) group:backend#member@group:eng#member
-6) folder:2023#parent@doc:readme
+6) doc:readme#parent@folder:2023
 ```
 
 각 줄을 한국어로 읽어 보면:
@@ -132,7 +132,7 @@ group:backend#member@group:eng#member
 3. eng 그룹의 모든 member는 doc:readme의 viewer다.
 4. Charlie는 eng 그룹의 member다.
 5. eng 그룹의 모든 member는 backend 그룹의 member다(그룹의 그룹).
-6. folder:2023은 doc:readme의 parent다(상속의 뿌리).
+6. doc:readme의 parent는 folder:2023이다(상속의 뿌리).
 
 6번이 조금 특별하다. subject 자리에 single user도 userset도 아닌 object가 들어갔다. 문법적으로는 `folder:2023`도 `{namespace}:{id}` 형태라 그대로 들어갈 수 있다. 실제로 Zanzibar는 `folder:2023`을 "...의 relation이 암묵적으로 지정되지 않은 userset"처럼 취급하는 패턴을 userset rewrite와 함께 사용한다. 구체적인 계산 방식은 CH4의 tuple-to-userset 규칙에서 설명된다. 지금은 "parent 관계를 tuple로 표현할 수 있다"는 것까지만 받아들이자.
 
@@ -176,12 +176,12 @@ group:eng#member@user:charlie
 group:eng#member@user:dave
 
 folder:2023#viewer@user:eve
-folder:2023#parent@doc:report
+doc:report#parent@folder:2023
 ```
 
 주목할 점은 두 가지다.
 
-- **상속의 뿌리**는 `folder:2023#parent@doc:report` 하나뿐이다. 폴더 하위에 문서를 수천 개 두더라도 parent tuple만 하나씩 추가하면 된다.
+- **상속의 뿌리**는 `doc:report#parent@folder:2023` 하나뿐이다. 폴더 하위에 문서를 수천 개 두더라도 parent tuple만 하나씩 추가하면 된다.
 - **"folder의 viewer는 하위 doc의 viewer"라는 규칙**은 여기 tuple에는 없다. namespace 정의의 userset rewrite 규칙에서 표현된다(CH4). 데이터(tuple)와 규칙(namespace config)의 분리가 명확하다.
 
 이 상태에서 "eve가 doc:report를 볼 수 있는가?"라는 질문은 다음과 같은 경로를 찾는 그래프 탐색 문제가 된다.

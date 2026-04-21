@@ -54,7 +54,7 @@ user.dept == resource.dept AND time < 18:00 AND user.clearance >= resource.class
 단, 두 가지 실전 문제가 따라붙는다.
 
 - **역방향 조회가 어렵다**: "이 리소스에 접근 가능한 모든 사용자 목록을 내놔"라는 질문에 답하려면 모든 사용자에 대해 정책식을 재평가해야 한다. 문서 공유 UI에서 "공유된 사용자 N명" 표시 같은 단순한 기능이 비싸진다.
-- **정책 문법 복잡도와 평가 비용**: XACML이나 Rego는 표현력이 뛰어난 대신 러닝커브가 크고, 정책 엔진이 매 요청마다 속성을 가져와 평가해야 한다. 수억 개 리소스, 초당 수천만 쿼리 규모에서는 부담이 된다.
+- **정책 문법 복잡도와 평가 비용**: XACML이나 Rego는 표현력이 뛰어난 대신 러닝커브가 크고, 정책 엔진이 매 요청마다 속성을 가져와 평가해야 한다. 수억 개 리소스, 초당 수백만 쿼리 규모에서는 부담이 된다.
 
 ABAC은 정책이 "데이터 바깥에 규칙 형태로" 존재한다. Zanzibar의 관점에서 보면 이 점이 결정적인 차이를 만든다.
 
@@ -123,7 +123,7 @@ flowchart LR
 
 ## 6. Zanzibar의 자리
 
-구글은 YouTube·Drive·Photos·Calendar·Cloud 같은 제품이 각자 권한 시스템을 운영하던 상황을 통합하기 위해 Zanzibar를 만들었다. 2019년 USENIX ATC에서 공개된 논문 *"Zanzibar: Google's Consistent, Global Authorization System"*이 그 결과물이다. 수조 개의 ACL tuple, 초당 수천만 쿼리, p95 10ms 목표라는 숫자가 논문의 핵심 주장이다.
+구글은 YouTube·Drive·Photos·Calendar·Cloud 같은 제품이 각자 권한 시스템을 운영하던 상황을 통합하기 위해 Zanzibar를 만들었다. 2019년 USENIX ATC에서 공개된 논문 *"Zanzibar: Google's Consistent, Global Authorization System"*이 그 결과물이다. 수조 개의 ACL tuple, 초당 수백만 쿼리, p95 10ms 목표라는 숫자가 논문의 핵심 주장이다.
 
 Zanzibar는 ReBAC을 "Spanner 위에 올린 글로벌 인덱스"로 구현했다. 구글이 직접 만든 이 시스템은 외부에 공개되지 않지만, 논문의 설계는 그대로 오픈소스 구현으로 이식됐다.
 

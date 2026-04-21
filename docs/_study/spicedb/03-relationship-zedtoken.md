@@ -66,12 +66,13 @@ resp, err := client.WriteRelationships(ctx, &pb.WriteRelationshipsRequest{
 Python SDK도 구조는 같다.
 
 ```python
+# authzed SDK는 async 기반이 기본. 동기 환경이면 SyncClient 또는 asyncio.run으로 래핑해 쓴다.
 from authzed.api.v1 import (
     Client, WriteRelationshipsRequest, RelationshipUpdate,
     Relationship, ObjectReference, SubjectReference,
 )
 
-resp = client.WriteRelationships(WriteRelationshipsRequest(
+resp = await client.WriteRelationships(WriteRelationshipsRequest(
     updates=[RelationshipUpdate(
         operation=RelationshipUpdate.Operation.OPERATION_TOUCH,
         relationship=Relationship(
@@ -159,7 +160,7 @@ ReadRelationships는 **저장된 raw tuple**을 돌려준다. Schema의 permissi
 
 Zanzibar에는 Zookie라는 개념이 있었다. [Zanzibar CH5. Consistency와 Zookie](/study/zanzibar/05-consistency-zookie)에서 다룬 것처럼, "이 쓰기가 반영된 시점"을 가리키는 opaque token이다. 클라이언트가 보기에는 불투명한 문자열이지만, 서버는 이걸로 읽기 시 어떤 snapshot을 잡을지 결정한다.
 
-SpiceDB의 ZedToken은 정확히 Zookie의 역할이다.
+개념적으로는 Zookie와 같은 역할이다. 다만 내부 구조는 다르다 — Zookie는 Spanner commit timestamp를 담지만, ZedToken은 SpiceDB가 사용하는 datastore의 revision을 opaque하게 인코딩한다.
 
 - 모든 쓰기 응답(`WriteRelationships`, `DeleteRelationships`, `WriteSchema`)이 ZedToken을 반환한다.
 - Check / Expand / Lookup 류 호출에 ZedToken을 넘기면, 그 시점 이후의 상태로 평가하도록 강제할 수 있다.
@@ -229,20 +230,23 @@ flowchart TD
 
 ## Bulk Import — 초기 적재
 
-RBAC/LDAP 같은 기존 시스템에서 SpiceDB로 이관할 때, 수백만 tuple을 한 번에 싣는 경로가 필요하다. 일반 `WriteRelationships`는 트랜잭션 크기 제약이 있어 수천 건 단위 배치가 한계다. 대량 초기 적재용으로 `BulkImportRelationships` 스트리밍 RPC가 따로 있다.
+RBAC/LDAP 같은 기존 시스템에서 SpiceDB로 이관할 때, 수백만 tuple을 한 번에 싣는 경로가 필요하다. 일반 `WriteRelationships`는 트랜잭션 크기 제약이 있어 수천 건 단위 배치가 한계다. 대량 초기 적재용으로 `ImportBulkRelationships` 스트리밍 RPC가 따로 있다.
 
-zed CLI의 `zed import`가 래핑해 준다. 입력은 relationship 한 줄씩의 텍스트 또는 NDJSON이다.
+zed CLI의 `zed import`는 schema와 relationships를 모두 담은 validation YAML 한 파일을 인자로 받는다.
 
 ```bash
-zed import --schema-file schema.zed relationships.zed
+zed import path/to/validation.yaml
+
+# schema만 / relationships만 적용하고 싶다면
+zed import path/to/validation.yaml --schema=false --relationships=true
 ```
 
 Go로 직접 스트림을 쓴다면 다음과 같은 형태다.
 
 ```go
-stream, _ := client.BulkImportRelationships(ctx)
+stream, _ := client.ImportBulkRelationships(ctx)
 for _, batch := range batches {
-    stream.Send(&pb.BulkImportRelationshipsRequest{Relationships: batch})
+    stream.Send(&pb.ImportBulkRelationshipsRequest{Relationships: batch})
 }
 resp, _ := stream.CloseAndRecv()
 // resp.NumLoaded 로 적재 건수 확인
@@ -258,7 +262,7 @@ resp, _ := stream.CloseAndRecv()
 
 ## Bulk Export — 운영 snapshot
 
-반대로 현재 상태를 덤프해야 할 때는 `BulkExportRelationships`를 쓴다. 주요 용도는 다음과 같다.
+반대로 현재 상태를 덤프해야 할 때는 `ExportBulkRelationships`를 쓴다. 주요 용도는 다음과 같다.
 
 - 별도 환경(스테이징, DR)으로 상태 복제.
 - 주기적 감사용 snapshot 보관(관계 변화 감사).
@@ -284,7 +288,7 @@ Watch API(CH4에서 다룬다)가 실시간 변경 스트림이라면, Bulk Expo
 - `ReadRelationships`는 저장된 raw tuple 조회 전용이다. permission 규칙은 평가되지 않으므로 Check의 대체가 아니다.
 - ZedToken은 Zanzibar Zookie의 SpiceDB 이름이다. 쓰기 응답으로 받아 두고, 이후 읽기에 같이 보내면 "내 변경 이상" 최신성이 보장된다.
 - consistency 네 옵션 중 `at_least_as_fresh`가 사실상 기본값이다. `fully_consistent`는 진짜 필요한 경계에만, `at_exact_snapshot`은 재현/디버깅용.
-- 초기 이관은 `BulkImportRelationships` 스트리밍, 운영 중 전체 스냅샷은 `BulkExportRelationships`. 실시간 변경 스트림은 다음 챕터의 Watch가 맡는다.
+- 초기 이관은 `ImportBulkRelationships` 스트리밍, 운영 중 전체 스냅샷은 `ExportBulkRelationships`. 실시간 변경 스트림은 다음 챕터의 Watch가 맡는다.
 :::
 
 ## 다음 챕터

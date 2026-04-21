@@ -78,6 +78,10 @@ definition document {
 document:plan#viewer@user:alice[within_business_hours:{"tz":"Asia/Seoul"}]
 ```
 
+::: info relationship 문자열의 caveat 표기
+위 표기는 SpiceDB의 relationship 문자열 문법이다. zed CLI에서 직접 쓰려면 `zed relationship create "document:plan" viewer "user:alice" --caveat 'within_business_hours:{"tz":"Asia/Seoul"}'` 형태로 `--caveat` 플래그를 쓰거나, gRPC WriteRelationships API에서 `ContextualizedCaveat`을 설정한다.
+:::
+
 셋째, <strong>Check 요청</strong> 시 request context를 같이 넘긴다. 이 시점에야 알 수 있는 런타임 값(현재 시각, 요청 IP 등)이 여기 들어간다. SpiceDB는 relationship context와 request context를 합쳐 caveat expression을 평가한다.
 
 ::: tip 어디에 무슨 값을 넣을지 감 잡기

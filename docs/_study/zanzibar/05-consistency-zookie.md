@@ -101,20 +101,22 @@ sequenceDiagram
 클라이언트는 zookie 내부 구조를 알 필요가 없고, 알아서도 안 된다. Zanzibar 구현이 훗날 timestamp 외 정보를 추가할 수 있도록 바이트 배열로 통일했다. 덕분에 호환성을 깨지 않고 내부 표현을 진화시킬 수 있다.
 :::
 
-## 5. Consistency 수준 세 가지
+## 5. SpiceDB의 Consistency 옵션 (개념 매핑)
 
-Zanzibar의 읽기 API는 세 가지 consistency 모드를 제공한다.
+SpiceDB는 Zanzibar의 일관성 개념을 네 가지 Consistency 옵션으로 구체화했다. Zanzibar 논문은 다른 어휘를 섞어 쓰지만, 실무에서 가장 많이 마주치는 이름은 SpiceDB의 이 네 가지다.
 
-- **Fully consistent**: 항상 최신. 모든 읽기가 외부 일관 — 가장 안전하지만 latency/비용 최대. 실전에서는 거의 안 쓴다.
-- **At-least-as-fresh** (zookie 기반, **권장**): "내가 본 마지막 쓰기 이후"의 상태. 인과관계만 지키고 나머지는 최적화.
-- **Bounded staleness**: "최근 N초 이내의 아무 스냅샷". zookie 없이 가장 빠르다. 관리 대시보드처럼 **절대 직전의 내 쓰기를 되읽을 필요가 없는** 조회에만.
+- **`minimize_latency`**: "가능한 가장 빠른 스냅샷". zookie 없이 latency 최소화. 인과관계를 반드시 지켜야 할 경로에는 쓰지 않는다.
+- **`at_least_as_fresh`** (zookie 기반, **권장**): "내가 본 마지막 쓰기 이후"의 상태. 인과관계만 지키고 나머지는 최적화.
+- **`at_exact_snapshot`**: zookie가 가리키는 정확히 그 스냅샷에서만 읽는다. 과거 버전의 권한을 재현할 때 쓴다.
+- **`fully_consistent`**: 항상 최신. 모든 읽기가 외부 일관 — 가장 안전하지만 latency/비용 최대. 실전에서는 거의 안 쓴다.
 
 실무 규칙은 간단하다.
 
 ::: tip 실전 규칙
-- **내가 방금 쓴 tuple에 의존하는 Check** → 반드시 zookie(at-least-as-fresh)로.
-- **세션/요청 로그 조회 같은 파생 조회** → bounded staleness로 latency 이득.
-- **감사/규제 목적의 정확한 스냅샷** → fully consistent.
+- **내가 방금 쓴 tuple에 의존하는 Check** → 반드시 zookie와 함께 `at_least_as_fresh`로.
+- **세션/요청 로그 조회 같은 파생 조회** → `minimize_latency`로 latency 이득.
+- **과거 특정 시점의 권한 재현** → zookie와 함께 `at_exact_snapshot`.
+- **감사/규제 목적의 정확한 스냅샷** → `fully_consistent`.
 :::
 
 SpiceDB는 같은 메커니즘을 **ZedToken**이라 부른다. 이름만 다를 뿐 의미는 같다 — zookie든 zedtoken이든 "이 시점 이후의 상태를 보여다오"라는 부적이다.

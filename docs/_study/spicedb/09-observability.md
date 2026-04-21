@@ -32,13 +32,13 @@ SpiceDB는 기본으로 HTTP `/metrics` 엔드포인트를 노출한다. 기본 
 
 운영자가 매일 봐야 하는 지표는 네 묶음이다.
 
-첫째는 **Dispatch Cache 계열**이다. `spicedb_dispatch_cache_hits_total`, `spicedb_dispatch_cache_misses_total`이 대표적이다. SpiceDB의 성능은 사실상 dispatch cache가 결정한다고 해도 과언이 아니다. hit rate가 80% 밑으로 떨어지면 cache 크기가 작거나 workload가 산발적이어서 locality가 깨졌다는 신호다.
+첫째는 **Dispatch Cache 계열**이다. `spicedb_cache_hits_total{cache="dispatch"}`, `spicedb_cache_misses_total{cache="dispatch"}`가 대표적이다. 캐시 종류는 `cache` 라벨로 구분되므로 dispatch·namespace 등을 라벨 필터로 나눠 본다. SpiceDB의 성능은 사실상 dispatch cache가 결정한다고 해도 과언이 아니다. hit rate가 80% 밑으로 떨어지면 cache 크기가 작거나 workload가 산발적이어서 locality가 깨졌다는 신호다.
 
 둘째는 **gRPC 요청 계열**이다. `grpc_server_handled_total`로 초당 요청수(RPS), `grpc_server_handling_seconds` 히스토그램으로 레이턴시 분포를 본다. `CheckPermission`만 따로 라벨 필터링해서 p50/p95/p99를 대시보드 맨 위에 둔다.
 
-셋째는 **Datastore 계열**이다. `spicedb_datastore_query_duration_seconds`는 Postgres나 CockroachDB에 쏘는 쿼리 1회의 레이턴시다. 이게 튀면 Check는 아무리 최적화해도 느려진다. `spicedb_datastore_revision_check_duration_seconds`도 같이 본다.
+셋째는 **Datastore 계열**이다. datastore 레이턴시(`spicedb_datastore_*`)는 Postgres나 CockroachDB에 쏘는 쿼리 1회의 레이턴시를 보여준다. 이게 튀면 Check는 아무리 최적화해도 느려진다. 정확한 메트릭 이름은 배포 버전마다 다르므로 `/metrics` 출력을 기준으로 삼고, revision check·쿼리 duration 계열을 같이 본다.
 
-넷째는 **Dispatch 계열**이다. `spicedb_dispatch_requests_total`, `spicedb_dispatch_depth` 등으로 한 Check가 내부적으로 몇 번의 dispatch를 타는지 본다. depth가 갑자기 올라간다면 schema가 커졌거나, 순환에 가까운 평가 경로가 생긴 것이다.
+넷째는 **Dispatch 계열**이다. 분산 dispatch 지연과 체인 깊이는 `grpc_server_handling_seconds` 계열 + SpiceDB 내부 dispatch 메트릭(`spicedb_dispatch_*`)으로 관측한다. 정확한 지표 이름은 배포 버전에 따라 다르므로 `/metrics` 출력을 기준으로 삼는다. depth가 갑자기 올라간다면 schema가 커졌거나, 순환에 가까운 평가 경로가 생긴 것이다.
 
 ::: tip 권장 SLO
 Check p99 < 10ms (캐시 hit 기준), 캐시 hit rate > 80%, Datastore p99 < 20ms. 이 세 줄을 대시보드 상단 고정 패널로 두면 "오늘 권한이 건강한가"를 3초 만에 알 수 있다.

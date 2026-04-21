@@ -6,7 +6,7 @@ export const nodes = [
   // === 스마트농업 — 좌측 ===
   { id: 'smart-agriculture', label: '스마트농업', size: 36, status: 'active', link: '/study/smart-agriculture/', x: 0.18, y: 0.22 },
   { id: 'isobus', label: 'ISOBUS', size: 28, status: 'active', link: '/study/isobus/', x: 0.06, y: 0.40 },
-  { id: 'can-j1939', label: 'CAN / J1939', size: 22, status: 'planned', link: null, x: 0.03, y: 0.56 },
+  { id: 'can', label: 'CAN 통신\n심화', size: 24, status: 'active', link: '/study/can/', x: 0.03, y: 0.56 },
   { id: 'embedded', label: '임베디드\n시스템', size: 22, status: 'planned', link: null, x: 0.14, y: 0.56 },
   { id: 'isoxml', label: 'ISOXML', size: 22, status: 'planned', link: null, x: 0.08, y: 0.70 },
   { id: 'precision-ag', label: '정밀농업', size: 26, status: 'planned', link: null, x: 0.22, y: 0.40 },
@@ -62,7 +62,7 @@ export const edges = [
   { source: 'smart-agriculture', target: 'precision-ag' },
   { source: 'smart-agriculture', target: 'agri-iot' },
   { source: 'smart-agriculture', target: 'autonomous' },
-  { source: 'isobus', target: 'can-j1939' },
+  { source: 'isobus', target: 'can' },
   { source: 'isobus', target: 'isoxml' },
   { source: 'isobus', target: 'embedded' },
   { source: 'precision-ag', target: 'rtk-gps' },

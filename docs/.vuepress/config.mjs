@@ -419,6 +419,93 @@ const theme = {
           ],
         },
       ],
+      '/study/can/': [
+        {
+          text: '전기·물리 심화',
+          collapsible: false,
+          children: [
+            { text: '소개', link: '/study/can/' },
+            { text: 'CH1. 차동 신호와 버스 전기', link: '/study/can/01-differential-signal' },
+            { text: 'CH2. 파형·계측', link: '/study/can/02-waveform-measurement' },
+            { text: 'CH3. 물리 variant', link: '/study/can/03-physical-variants' },
+          ],
+        },
+        {
+          text: '비트 타이밍',
+          collapsible: false,
+          children: [
+            { text: 'CH4. Bit Time 구조', link: '/study/can/04-bit-time' },
+            { text: 'CH5. 동기화', link: '/study/can/05-synchronization' },
+          ],
+        },
+        {
+          text: '프레임 심화',
+          collapsible: false,
+          children: [
+            { text: 'CH6. Classical CAN 심화', link: '/study/can/06-classical-frame-deep' },
+            { text: 'CH7. CAN FD 심화', link: '/study/can/07-can-fd-deep' },
+            { text: 'CH8. CAN XL 개요', link: '/study/can/08-can-xl' },
+          ],
+        },
+        {
+          text: '신뢰성',
+          collapsible: false,
+          children: [
+            { text: 'CH9. 오류 감지·격리', link: '/study/can/09-error-handling' },
+            { text: 'CH10. 버스 부하·응답시간', link: '/study/can/10-busload-response-time' },
+          ],
+        },
+        {
+          text: '구현',
+          collapsible: false,
+          children: [
+            { text: 'CH11. 컨트롤러·트랜시버', link: '/study/can/11-controller-transceiver' },
+            { text: 'CH12. MCU 드라이버', link: '/study/can/12-mcu-driver' },
+            { text: 'CH13. SocketCAN 기초', link: '/study/can/13-socketcan-basics' },
+          ],
+        },
+        {
+          text: '고급 구현과 툴',
+          collapsible: false,
+          children: [
+            { text: 'CH14. SocketCAN 고급', link: '/study/can/14-socketcan-advanced' },
+            { text: 'CH15. 하드웨어 툴', link: '/study/can/15-hardware-tools' },
+            { text: 'CH16. DBC와 시그널 인코딩', link: '/study/can/16-dbc-signals' },
+          ],
+        },
+        {
+          text: '상위 프로토콜',
+          collapsible: false,
+          children: [
+            { text: 'CH17. Network Management', link: '/study/can/17-network-management' },
+            { text: 'CH18. XCP / CCP', link: '/study/can/18-xcp-ccp' },
+            { text: 'CH19. ISO-TP', link: '/study/can/19-iso-tp' },
+          ],
+        },
+        {
+          text: '진단',
+          collapsible: false,
+          children: [
+            { text: 'CH20. UDS (ISO 14229)', link: '/study/can/20-uds' },
+            { text: 'CH21. OBD-II (ISO 15031)', link: '/study/can/21-obd2' },
+          ],
+        },
+        {
+          text: '보안',
+          collapsible: false,
+          children: [
+            { text: 'CH22. 공격 벡터', link: '/study/can/22-attack-vectors' },
+            { text: 'CH23. 방어 (SecOC/IDS)', link: '/study/can/23-defense-secoc' },
+          ],
+        },
+        {
+          text: '트러블슈팅',
+          collapsible: false,
+          children: [
+            { text: 'CH24. 실전 트러블슈팅', link: '/study/can/24-troubleshooting' },
+          ],
+        },
+      ],
       '/study/zanzibar/': [
         {
           text: 'Zanzibar',

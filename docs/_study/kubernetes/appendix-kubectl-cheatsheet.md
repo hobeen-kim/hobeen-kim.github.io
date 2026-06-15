@@ -3,7 +3,7 @@ title: "부록 A. kubectl 치트시트"
 description: "자주 쓰는 kubectl 명령을 조회·생성/적용·디버깅·컨텍스트·리소스 관리·출력 포맷·JSONPath 카테고리별 표로 정리한다. 실무에서 바로 꺼내 쓰는 레퍼런스."
 date: 2026-06-15
 tags: [Kubernetes, kubectl, Cheatsheet, Reference]
-prev: /study/kubernetes/47-practice
+prev: /study/kubernetes/appendix-imperative-drills
 next: /study/kubernetes/appendix-glossary
 ---
 

@@ -169,6 +169,7 @@ flowchart TD
 
 | | 제목 | 설명 |
 |--|------|------|
+| | [imperative 명령 드릴](/study/kubernetes/appendix-imperative-drills) | kubectl 명령형으로 리소스를 빠르게 생성·편집하는 속도 훈련 |
 | | [kubectl 치트시트](/study/kubernetes/appendix-kubectl-cheatsheet) | 자주 쓰는 kubectl 명령어 모음 |
 | | [용어집](/study/kubernetes/appendix-glossary) | 쿠버네티스 핵심 용어 정리 |
 | | [참고 자료](/study/kubernetes/appendix-references) | 공식 문서·표준·심화 학습 링크 |

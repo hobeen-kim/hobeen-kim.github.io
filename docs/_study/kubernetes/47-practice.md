@@ -4,7 +4,7 @@ description: "API 서버 + DB로 구성된 웹앱을 Dockerfile 빌드부터 이
 date: 2026-06-15
 tags: [Kubernetes, Practice, Deployment, Ingress, HPA, RBAC, Troubleshooting]
 prev: /study/kubernetes/46-multi-tenancy-cluster
-next: /study/kubernetes/appendix-kubectl-cheatsheet
+next: /study/kubernetes/appendix-imperative-drills
 ---
 
 # 종합 실습

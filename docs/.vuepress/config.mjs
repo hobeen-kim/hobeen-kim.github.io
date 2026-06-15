@@ -722,6 +722,7 @@ const theme = {
           text: '부록',
           collapsible: false,
           children: [
+            { text: 'imperative 명령 드릴', link: '/study/kubernetes/appendix-imperative-drills' },
             { text: 'kubectl 치트시트', link: '/study/kubernetes/appendix-kubectl-cheatsheet' },
             { text: '용어집', link: '/study/kubernetes/appendix-glossary' },
             { text: '참고 자료', link: '/study/kubernetes/appendix-references' },

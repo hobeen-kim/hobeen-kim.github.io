@@ -6,6 +6,10 @@
         <div class="header3">자격증</div>
         <div class="certification-list">
           <div class="certification-item">
+            <div class="certification-name">정보처리기사</div>
+            <div class="certification-date">2026.06.12</div>
+          </div>
+          <div class="certification-item">
             <div class="certification-name">SQL Developer</div>
             <div class="certification-date">2025.12.12</div>
           </div>

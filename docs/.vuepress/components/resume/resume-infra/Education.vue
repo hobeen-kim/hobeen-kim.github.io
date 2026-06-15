@@ -6,19 +6,31 @@
         <div class="header3">자격증</div>
         <div class="certification-list">
           <div class="certification-item">
-            <div class="certification-name">정보처리기사</div>
+            <div class="cert-name-group">
+              <div class="cert-logo-box"><img class="cert-logo" src="/images/cert/hrdk.svg" alt="한국산업인력공단" /></div>
+              <div class="certification-name">정보처리기사</div>
+            </div>
             <div class="certification-date">2026.06.12</div>
           </div>
           <div class="certification-item">
-            <div class="certification-name">SQL Developer</div>
+            <div class="cert-name-group">
+              <div class="cert-logo-box"><img class="cert-logo" src="/images/cert/sqld.png" alt="데이터자격검정" /></div>
+              <div class="certification-name">SQL Developer</div>
+            </div>
             <div class="certification-date">2025.12.12</div>
           </div>
           <div class="certification-item">
-            <div class="certification-name">AWS DevOps Engineer - Professional</div>
+            <div class="cert-name-group">
+              <div class="cert-logo-box"><img class="cert-logo" src="/images/cert/aws-devops-pro.png" alt="AWS DevOps Engineer Professional" /></div>
+              <div class="certification-name">AWS DevOps Engineer - Professional</div>
+            </div>
             <div class="certification-date">2024.03.27</div>
           </div>
           <div class="certification-item">
-            <div class="certification-name">AWS Solutions Architect - Professional</div>
+            <div class="cert-name-group">
+              <div class="cert-logo-box"><img class="cert-logo" src="/images/cert/aws-sa-pro.png" alt="AWS Solutions Architect Professional" /></div>
+              <div class="certification-name">AWS Solutions Architect - Professional</div>
+            </div>
             <div class="certification-date">2024.02.14</div>
           </div>
         </div>
@@ -81,7 +93,30 @@ export default {
 .certification-item {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 0.5rem;
+}
+
+.cert-name-group {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.cert-logo-box {
+  width: 84px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-shrink: 0;
+}
+
+.cert-logo {
+  max-height: 26px;
+  max-width: 84px;
+  width: auto;
+  object-fit: contain;
 }
 
 .certification-name {

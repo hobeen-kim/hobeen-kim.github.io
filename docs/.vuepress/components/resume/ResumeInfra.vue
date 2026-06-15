@@ -1,10 +1,10 @@
 <template>
-  <div class="resume-container">
+  <div class="resume-variant">
     <div class="resume-header">
       <h1>김호빈</h1>
-      <div class="resume-header-sub">백엔드 엔지니어</div>
+      <div class="resume-header-sub">인프라 엔지니어</div>
     </div>
-    
+
     <!-- 각 섹션을 컴포넌트로 분리 -->
     <BasicInfo />
     <Summary />
@@ -16,16 +16,16 @@
 </template>
 
 <script>
-// 각 섹션 컴포넌트 가져오기
-import BasicInfo from './resume/BasicInfo.vue'
-import Summary from './resume/Summary.vue'
-import Project from './resume/Project.vue'
-import Experience from './resume/Experience.vue'
-import Skills from './resume/Skills.vue'
-import Education from './resume/Education.vue'
+// 인프라 이력서 섹션 컴포넌트 (resume-infra/)
+import BasicInfo from './resume-infra/BasicInfo.vue'
+import Summary from './resume-infra/Summary.vue'
+import Project from './resume-infra/Project.vue'
+import Experience from './resume-infra/Experience.vue'
+import Skills from './resume-infra/Skills.vue'
+import Education from './resume-infra/Education.vue'
 
 export default {
-  name: "ResumeSection",
+  name: "ResumeInfra",
   components: {
     BasicInfo,
     Summary,
@@ -37,9 +37,8 @@ export default {
 }
 </script>
 
-<style>
-/* Resume 고유 스타일 */
-.resume-container {
+<style scoped>
+.resume-variant {
   display: flex;
   flex-direction: column;
   gap: 1rem;

@@ -4,24 +4,28 @@
     <div class="skills-container">
       <div class="skill-description">*실무에서 사용한 기술입니다.</div>
       <div class="skill-category">
-        <div class="skill-category-title">언어/프레임워크</div>
-        <div class="skill-list"> Java, Kotlin, Spring Boot, Spring Batch</div>
+        <div class="skill-category-title">IaC / GitOps</div>
+        <div class="skill-list"> Terraform, ArgoCD, Helm</div>
       </div>
       <div class="skill-category">
-        <div class="skill-category-title">메시징/스트리밍</div>
-        <div class="skill-list"> Kafka, Kafka Streams, AWS SQS/SNS, AWS IoT(MQTT)</div>
+        <div class="skill-category-title">컨테이너 / 오케스트레이션</div>
+        <div class="skill-list"> Kubernetes(EKS), Docker</div>
+      </div>
+      <div class="skill-category">
+        <div class="skill-category-title">클라우드 (AWS)</div>
+        <div class="skill-list"> EKS, IoT Core, SQS/SNS, Lambda, S3/CloudFront/Route53, Aurora, ECR, SSM, KMS</div>
+      </div>
+      <div class="skill-category">
+        <div class="skill-category-title">관측성</div>
+        <div class="skill-list"> Grafana, Prometheus, Loki, Tempo, Pyroscope, Datadog</div>
       </div>
       <div class="skill-category">
         <div class="skill-category-title">인증/보안</div>
-        <div class="skill-list"> Keycloak(OIDC), Spring Security</div>
+        <div class="skill-list"> Keycloak, IAM Identity Center, KMS</div>
       </div>
       <div class="skill-category">
-        <div class="skill-category-title">데이터베이스</div>
-        <div class="skill-list"> Postgres, Redis, MongoDB</div>
-      </div>
-      <div class="skill-category">
-        <div class="skill-category-title">테스트</div>
-        <div class="skill-list"> JUnit, Testcontainers, Kover</div>
+        <div class="skill-category-title">CI/CD</div>
+        <div class="skill-list"> GitHub Actions, AWS SAM</div>
       </div>
     </div>
   </div>

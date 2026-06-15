@@ -5,25 +5,28 @@
       <div class="experience-item">
         <div class="experience-header">
           <div class="experience-name">아그모</div>
-          <div class="position">TD팀 백엔드 엔지니어</div>
+          <div class="position">TD팀 인프라/DevOps 엔지니어</div>
           <div class="period">25.02 ~ 현재 / 1년</div>
         </div>
         <div>
           <span class="company-description"> 농기계 자율주행 시스템 및 ISOBUS 기반 OS 플랫폼 스타트업</span>
           <div class="experience-descriptions">
-            <div class="experience-description"> • <span>SEAMOS</span> : 농기계/건설기계 OS 플랫폼 서비스. 앱 마켓플레이스, 디바이스 OTA 관리, 통합 Keycloak 인증 서버 구축</div>
-            <div class="experience-description"> • <span>자율주행 데이터 파이프라인</span> : 차량 이벤트 로그 수집·실시간 집계·배치 적재·모니터링 API 까지 E2E 파이프라인 개발 </div>
-            <div class="experience-description"> • <span>NISHIBE</span> : 일본 택시 운행관리 서비스 백엔드 신규 설계·구축 (ReBAC 권한 시스템, 운행일보 배치) </div>
+            <div class="experience-description"> • <span>EKS 클러스터 운영</span> : Terraform IaC + ArgoCD GitOps 기반 dev/prod 클러스터 구성·배포 및 무중단 운영 </div>
+            <div class="experience-description"> • <span>관측성 / 보안</span> : Grafana·Prometheus·Loki·Tempo·Pyroscope 관측성 구축, IAM·KMS·보안 점검 수행 </div>
+            <div class="experience-description"> • <span>AWS IoT / 이벤트 인프라</span> : IoT Core·SNS/SQS 메시징 인프라 및 Keycloak 인증 인프라 구축 </div>
+            <div class="experience-description"> • <span>NISHIBE</span> : 일본 택시 운행관리 서비스 클라우드 인프라 신규 설계·구축 (EKS+Aurora+Redis+ArgoCD, Terraform CI) </div>
             <div class="experience-skills">
               <div class="tech-stack">
-                <span class="tag">Kotlin/Spring</span>
-                <span class="tag">Kafka Streams</span>
-                <span class="tag">Spring Batch</span>
-                <span class="tag">Keycloak</span>
+                <span class="tag">AWS</span>
+                <span class="tag">EKS</span>
+                <span class="tag">Terraform</span>
+                <span class="tag">ArgoCD</span>
+                <span class="tag">Grafana</span>
+                <span class="tag">Prometheus</span>
+                <span class="tag">Loki</span>
                 <span class="tag">AWS IoT</span>
-                <span class="tag">Postgres</span>
-                <span class="tag">MongoDB</span>
-                <span class="tag">Redis</span>
+                <span class="tag">Keycloak</span>
+                <span class="tag">KMS</span>
               </div>
             </div>
           </div>
@@ -38,18 +41,15 @@
         <div>
           <span class="company-description"> 고객 활동 이력을 바탕으로 한 초개인화 추천 서비스 스타트업</span>
           <div class="experience-descriptions">
-            <div class="experience-description"> • <span>Interest detection</span> : 사용자가 선택한 상품을 통해 GPT 로 관심사 키워드를 추출하고 상품을 추천하는 LLM 서비스 개발 </div>
-            <div class="experience-description"> • <span>연합뉴스 추천 시스템</span> : 뉴스 추천 서비스를 위한 뉴스 피드 이벤트 데이터 수집 ETL 파이프라인 개발 </div>
-            <div class="experience-description"> • 하루 8000만 건의 쇼핑몰 사용자 로그를 수집하고 분석하는 ETL 파이프라인 관리 </div>
+            <div class="experience-description"> • <span>비용 최적화</span> : 자사 6개 서비스 부하/기능 테스트 후 리소스 재조정으로 AWS 비용 월 56% 절감 </div>
+            <div class="experience-description"> • <span>모니터링 구축</span> : Datadog PoC 및 도입·고도화로 일 8000만 건 로그 서비스의 실시간 모니터링 체계 구축 </div>
             <div class="experience-skills">
               <div class="tech-stack">
-                <span class="tag">Java/Spring</span>
-                <span class="tag">Kotlin</span>
-                <span class="tag">Python</span>
+                <span class="tag">AWS</span>
+                <span class="tag">EKS</span>
                 <span class="tag">AWS Kinesis</span>
+                <span class="tag">Datadog</span>
                 <span class="tag">Postgres</span>
-                <span class="tag">MongoDB</span>
-                <span class="tag">OpenAI API</span>
               </div>
             </div>
 

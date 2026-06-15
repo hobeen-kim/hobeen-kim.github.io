@@ -37,27 +37,29 @@
 
 <script>
 import Portfolio from './Portfolio.vue'
-import Resume from './Resume.vue'
+import ResumeBackend from './ResumeBackend.vue'
+import ResumeInfra from './ResumeInfra.vue'
 // html2pdf는 SSR 환경에서 'self'를 참조하여 빌드 오류가 발생할 수 있으므로
 // 클라이언트 사이드에서만 동적 로딩합니다.
 
 export default {
   name: 'ResumeCover',
-  components: { Portfolio, Resume },
+  components: { Portfolio, ResumeBackend, ResumeInfra },
   data() {
     return {
       tabs: [
-        { key: 'resume', label: '이력서', component: 'Resume' },
+        { key: 'backend', label: '백엔드 이력서', component: 'ResumeBackend' },
+        { key: 'infra', label: '인프라 이력서', component: 'ResumeInfra' },
         { key: 'portfolio', label: '포트폴리오 (작성중)', component: 'Portfolio' },
       ],
-      currentTab: 'resume',
+      currentTab: 'backend',
       contentScale: 1
     }
   },
   computed: {
     currentTabComponent() {
       const found = this.tabs.find(t => t.key === this.currentTab)
-      return found ? found.component : 'Resume'
+      return found ? found.component : 'ResumeBackend'
     }
   },
   methods: {
@@ -72,7 +74,12 @@ export default {
       }
 
       const element = this.$refs.contentToDownload;
-      const filename = this.currentTab === 'resume' ? '김호빈_백엔드_이력서.pdf' : '김호빈_백엔드_포트폴리오.pdf';
+      const filenameMap = {
+        backend: '김호빈_백엔드_이력서.pdf',
+        infra: '김호빈_인프라_이력서.pdf',
+        portfolio: '김호빈_포트폴리오.pdf',
+      };
+      const filename = filenameMap[this.currentTab] || '김호빈_이력서.pdf';
 
       const opt = {
         margin: 10,                // PDF 문서의 여백을 10 단위로 설정 (기본 단위는 mm)

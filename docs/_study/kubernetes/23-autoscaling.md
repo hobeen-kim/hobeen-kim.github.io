@@ -1,0 +1,232 @@
+---
+title: "오토스케일링"
+description: "부하에 따라 워크로드를 자동으로 늘리고 줄이는 네 가지 축 — HPA(메트릭 기반 수평 확장)와 metrics-server, VPA(수직 확장), Cluster Autoscaler(노드 확장), KEDA(이벤트 기반 확장)를 깊게 파고, 이들을 안전하게 조합하는 전략까지 다룬다."
+date: 2026-06-15
+tags: [Kubernetes, Autoscaling, HPA, VPA, Cluster Autoscaler, KEDA]
+prev: /study/kubernetes/22-resource-qos
+next: /study/kubernetes/24-networking-cni
+---
+
+# 오토스케일링
+
+::: info 학습 목표
+- HPA가 메트릭을 읽어 replica 수를 조정하는 원리와 metrics-server의 역할을 이해한다.
+- VPA가 Pod의 requests/limits를 자동 조정하는 방식과 HPA와의 충돌 지점을 안다.
+- Cluster Autoscaler가 노드 자체를 늘리고 줄이는 메커니즘을 익힌다.
+- KEDA로 이벤트(큐 길이 등) 기반 확장을 하는 법과 여러 스케일러의 조합 전략을 다룬다.
+:::
+
+## 1. 오토스케일링의 세 축
+
+쿠버네티스 오토스케일링은 무엇을 늘리느냐에 따라 축이 나뉜다.
+
+- <strong>HPA(Horizontal Pod Autoscaler)</strong>: Pod <strong>개수</strong>를 늘리고 줄인다(수평).
+- <strong>VPA(Vertical Pod Autoscaler)</strong>: Pod의 <strong>크기</strong>(requests/limits)를 조정한다(수직).
+- <strong>Cluster Autoscaler</strong>: <strong>노드</strong> 자체를 늘리고 줄인다.
+
+여기에 이벤트 기반 확장을 더하는 <strong>KEDA</strong>가 더해진다. 이 네 가지는 서로 다른 계층에서 동작하므로 조합해서 쓴다.
+
+```mermaid
+graph TB
+  A[부하 증가] --> B[HPA: Pod 개수 ↑]
+  B --> C{노드 자리 부족?}
+  C -->|예| D[Cluster Autoscaler: 노드 ↑]
+  C -->|아니오| E[기존 노드에 배치]
+  A --> F[VPA: Pod 크기 조정]
+  A --> G[KEDA: 큐 길이 등<br>이벤트로 Pod ↑]
+```
+
+## 2. HPA와 metrics-server
+
+<strong>HPA</strong>는 컨트롤러로, 주기적으로(기본 15초) 대상 워크로드의 메트릭을 읽어 목표값과 비교하고 replica 수를 조정한다. 가장 흔한 메트릭은 CPU 사용률이다. 계산식의 핵심은 단순하다.
+
+```
+원하는 replica 수 = 현재 replica 수 × (현재 메트릭 평균 / 목표 메트릭)
+```
+
+예를 들어 현재 4개 replica의 평균 CPU가 80%인데 목표가 50%라면, `4 × (80/50) = 6.4` → 올림해서 7개로 늘린다.
+
+HPA가 CPU/메모리 메트릭을 읽으려면 클러스터에 <strong>metrics-server</strong>가 떠 있어야 한다. metrics-server는 각 노드 kubelet에서 자원 사용량을 모아 Metrics API로 제공하는 컴포넌트다. 없으면 `kubectl top`도, CPU 기반 HPA도 동작하지 않는다.
+
+```bash
+# metrics-server 설치 확인과 사용량 조회
+kubectl top nodes
+kubectl top pods
+```
+
+```yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: web-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: web
+  minReplicas: 2
+  maxReplicas: 20
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50      # Pod 평균 CPU 50% 목표
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 70
+  behavior:                         # 스케일 속도 제어
+    scaleDown:
+      stabilizationWindowSeconds: 300   # 축소는 5분 안정화 후
+    scaleUp:
+      stabilizationWindowSeconds: 0
+```
+
+```mermaid
+sequenceDiagram
+  participant K as kubelet
+  participant M as metrics-server
+  participant H as HPA controller
+  participant D as Deployment
+  K->>M: 노드/Pod 사용량 보고
+  H->>M: Metrics API로 CPU 조회
+  H->>H: 원하는 replica 계산
+  H->>D: replicas 업데이트
+  D->>D: ReplicaSet이 Pod 증감
+```
+
+::: tip
+HPA는 CPU·메모리 같은 리소스 메트릭뿐 아니라 <strong>커스텀 메트릭</strong>(초당 요청 수 등)과 <strong>외부 메트릭</strong>(클라우드 큐 길이)도 `type: Pods`, `type: External`로 쓸 수 있다. 단 이를 위해선 Custom/External Metrics API를 제공하는 어댑터(예: Prometheus Adapter)가 필요하다. `averageUtilization`은 requests 대비 비율이므로, requests를 제대로 설정해야 HPA가 의미 있게 동작한다. 자세한 내용은 [Horizontal Pod Autoscaling 문서](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)를 참고한다.
+:::
+
+## 3. VPA
+
+<strong>VPA(Vertical Pod Autoscaler)</strong>는 Pod 개수가 아니라 각 Pod의 requests/limits를 부하에 맞게 자동으로 키우거나 줄인다. requests를 추정하기 어려운 워크로드나, 수평 확장이 어려운 단일 인스턴스 워크로드(일부 DB 등)에 유용하다. VPA는 코어가 아닌 [별도 프로젝트](https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler)로 설치한다.
+
+VPA에는 세 컴포넌트가 있다.
+
+- <strong>Recommender</strong>: 과거 사용량을 보고 적정 requests/limits를 추천한다.
+- <strong>Updater</strong>: 추천과 현재 값이 크게 다른 Pod를 evict해 새 값으로 다시 뜨게 한다.
+- <strong>Admission Controller</strong>: 새로 뜨는 Pod에 추천 값을 주입한다.
+
+```yaml
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: app-vpa
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: app
+  updatePolicy:
+    updateMode: "Auto"     # Off(추천만) | Initial | Auto
+```
+
+::: warning
+전통적인 VPA는 requests를 바꾸려면 Pod를 <strong>재시작</strong>해야 한다(in-place 리사이즈는 별도 기능). 그래서 `updateMode: Auto`는 의도치 않은 재시작을 부를 수 있어, 운영에서는 `Off`로 추천만 받아 사람이 반영하거나, 안정화된 워크로드에만 Auto를 쓰는 경우가 많다. 더 중요한 점은 <strong>같은 메트릭(CPU/메모리)으로 HPA와 VPA를 동시에 쓰면 충돌</strong>한다는 것이다. 하나는 개수를, 하나는 크기를 같은 신호로 바꾸려 들어 서로 진동(oscillation)할 수 있다. 보통 HPA는 CPU로, VPA는 메모리로 역할을 나누거나 둘 중 하나만 쓴다.
+:::
+
+## 4. Cluster Autoscaler
+
+HPA가 Pod를 늘려도 그 Pod가 들어갈 <strong>노드</strong>가 없으면 `Pending`에 머문다. <strong>Cluster Autoscaler(CA)</strong>는 바로 이 상황을 감지해 클라우드 오토스케일링 그룹에 노드 추가를 요청하고, 반대로 노드가 한가하면 Pod를 다른 노드로 옮기고 빈 노드를 삭제한다.
+
+```mermaid
+graph LR
+  A[Pod Pending<br>자리 없음] --> B[Cluster Autoscaler 감지]
+  B --> C[클라우드에 노드 추가 요청]
+  C --> D[새 노드 Join]
+  D --> E[Pending Pod 배치]
+  F[노드 사용률 낮음] --> G[Pod 다른 노드로 이동]
+  G --> H[빈 노드 삭제]
+```
+
+CA의 동작 포인트 몇 가지를 기억하자.
+
+- CA는 <strong>실제 사용량이 아니라 Pending Pod의 requests</strong>를 보고 확장을 결정한다. 따라서 requests가 현실적이어야 한다.
+- 축소(scale-down) 시 PDB를 존중하고, 로컬 스토리지를 쓰거나 특정 어노테이션(`cluster-autoscaler.kubernetes.io/safe-to-evict: "false"`)이 붙은 Pod가 있는 노드는 비우지 않는다.
+- 노드 그룹별 min/max 크기 안에서만 조정한다.
+
+```bash
+# Pending 원인 확인 (CA가 처리할 대상인지)
+kubectl get pods --field-selector=status.phase=Pending
+kubectl describe pod pending-pod | grep -A5 Events
+```
+
+요즘은 더 빠르고 단순한 대안으로 <strong>Karpenter</strong> 같은 노드 프로비저너도 널리 쓰인다. CA가 미리 정의된 노드 그룹 단위로 움직이는 반면, Karpenter는 Pending Pod에 딱 맞는 인스턴스 타입을 즉석에서 골라 띄운다. 개념은 [Cluster Autoscaling 문서](https://kubernetes.io/docs/concepts/cluster-administration/cluster-autoscaling/)에 정리돼 있다.
+
+## 5. KEDA — 이벤트 기반 확장
+
+HPA의 기본 신호는 CPU·메모리다. 하지만 "메시지 큐에 쌓인 메시지 수", "Kafka 컨슈머 랙", "cron 스케줄"처럼 <strong>이벤트</strong>를 기준으로 확장하고 싶을 때가 많다. <strong>KEDA(Kubernetes Event-driven Autoscaling)</strong>가 이를 담당한다.
+
+KEDA의 핵심은 두 가지다. 첫째, 수많은 <strong>scaler</strong>(Kafka, RabbitMQ, AWS SQS, Prometheus, Cron 등)를 제공해 외부 시스템의 메트릭을 읽는다. 둘째, 부하가 0이면 <strong>replica를 0까지</strong> 줄일 수 있다(scale-to-zero). 표준 HPA는 `minReplicas`가 1 이상이라 0으로 못 줄이지만, KEDA는 이벤트가 없으면 Pod를 완전히 끄고 이벤트가 오면 깨운다.
+
+```yaml
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: consumer-scaler
+spec:
+  scaleTargetRef:
+    name: queue-consumer        # 대상 Deployment
+  minReplicaCount: 0            # 이벤트 없으면 0까지 (scale-to-zero)
+  maxReplicaCount: 30
+  triggers:
+  - type: rabbitmq
+    metadata:
+      queueName: orders
+      mode: QueueLength
+      value: "20"              # 메시지 20개당 Pod 1개
+      host: amqp://guest:guest@rabbitmq:5672/
+```
+
+```mermaid
+graph LR
+  Q[RabbitMQ 큐<br>메시지 적재] --> K[KEDA scaler]
+  K --> H[내부적으로 HPA 생성/관리]
+  H --> D[Deployment replica 조정]
+  K -.->|메시지 0| Z[replica 0으로<br>scale-to-zero]
+```
+
+::: tip
+KEDA는 내부적으로 표준 HPA 오브젝트를 만들어 그 위에서 동작한다. 즉 KEDA를 HPA의 대체가 아니라 "HPA에 외부 이벤트 소스를 붙여 주고 scale-to-zero를 더해 주는 확장"으로 이해하면 정확하다. 자세한 내용은 [KEDA 공식 문서](https://keda.sh/docs/)를 참고한다.
+:::
+
+## 6. 스케일링 조합 전략
+
+각 스케일러는 계층이 달라 함께 쓰는 게 정석이다. 다만 충돌 지점을 알고 조합해야 한다.
+
+- <strong>HPA + Cluster Autoscaler</strong>: 가장 흔한 조합. HPA가 Pod를 늘리면 CA가 노드를 늘려 받쳐 준다. requests를 정확히 잡는 게 둘 다의 전제다.
+- <strong>HPA + VPA</strong>: 같은 메트릭으로는 충돌하므로 신호를 분리(HPA=CPU, VPA=메모리)하거나 VPA를 추천 모드로만 쓴다.
+- <strong>KEDA + Cluster Autoscaler</strong>: 이벤트로 Pod를 늘리고, 자리가 없으면 CA가 노드를 확보한다. scale-to-zero로 평소 비용을 아낀다.
+
+```mermaid
+stateDiagram-v2
+  [*] --> 한가함
+  한가함 --> 부하증가: 트래픽·이벤트 ↑
+  부하증가 --> HPA확장: Pod 개수 ↑
+  HPA확장 --> 노드부족: 자리 없음
+  노드부족 --> CA확장: 노드 ↑
+  CA확장 --> 안정
+  안정 --> 한가함: 부하 ↓<br>안정화 후 축소
+```
+
+::: warning
+오토스케일링의 가장 흔한 실패는 <strong>진동(thrashing)</strong>이다. 늘렸다 줄였다를 반복하면 오히려 불안정해진다. HPA의 `behavior.scaleDown.stabilizationWindowSeconds`(축소 안정화 창)를 충분히 길게 잡고, requests를 현실적으로 설정하며, 스케일업은 빠르게·스케일다운은 보수적으로 가는 비대칭 정책이 안전하다.
+:::
+
+::: tip 핵심 정리
+- HPA는 메트릭을 읽어 Pod 개수를 조정하며, CPU/메모리 메트릭에는 metrics-server가 필수다.
+- VPA는 Pod의 requests/limits를 조정하지만 재시작을 유발하고 같은 메트릭의 HPA와 충돌하므로 신호를 분리한다.
+- Cluster Autoscaler는 Pending Pod의 requests를 보고 노드를 늘리며, 축소 시 PDB와 안전 어노테이션을 존중한다.
+- KEDA는 큐 길이 등 이벤트로 확장하고 scale-to-zero를 지원하며, 내부적으로 표준 HPA 위에서 동작한다.
+- 조합 시 HPA+CA는 정석, HPA+VPA는 신호 분리가 필요하며, 진동을 막으려 비대칭 스케일 정책을 쓴다.
+:::
+
+## 다음 챕터
+
+워크로드의 배치와 자원, 동적 확장까지 다뤘다. 다음 챕터 [네트워킹과 CNI](/study/kubernetes/24-networking-cni)에서는 Pod 간 통신의 토대가 되는 클러스터 네트워크 모델과 CNI 플러그인을 다룬다.

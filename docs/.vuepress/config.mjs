@@ -597,6 +597,137 @@ const theme = {
           ],
         },
       ],
+      '/study/kubernetes/': [
+        {
+          text: '컨테이너 기초와 런타임',
+          collapsible: false,
+          children: [
+            { text: '소개', link: '/study/kubernetes/' },
+            { text: 'CH1. 컨테이너란 무엇인가', link: '/study/kubernetes/01-container-basics' },
+            { text: 'CH2. Docker 기초', link: '/study/kubernetes/02-docker-basics' },
+            { text: 'CH3. Dockerfile과 이미지 빌드', link: '/study/kubernetes/03-dockerfile-image' },
+            { text: 'CH4. 컨테이너 네트워크와 볼륨', link: '/study/kubernetes/04-container-network-volume' },
+            { text: 'CH5. 컨테이너 런타임 심화', link: '/study/kubernetes/05-container-runtime' },
+          ],
+        },
+        {
+          text: '쿠버네티스 입문과 아키텍처',
+          collapsible: false,
+          children: [
+            { text: 'CH6. 쿠버네티스란', link: '/study/kubernetes/06-what-is-k8s' },
+            { text: 'CH7. 클러스터 아키텍처', link: '/study/kubernetes/07-cluster-architecture' },
+            { text: 'CH8. API와 오브젝트 모델', link: '/study/kubernetes/08-api-objects' },
+            { text: 'CH9. kubectl과 선언형 관리', link: '/study/kubernetes/09-kubectl-declarative' },
+            { text: 'CH10. 컨트롤러와 reconcile 루프', link: '/study/kubernetes/10-controllers-reconcile' },
+          ],
+        },
+        {
+          text: '클러스터 구축과 운영',
+          collapsible: false,
+          children: [
+            { text: 'CH11. 클러스터 설치 (kubeadm)', link: '/study/kubernetes/11-kubeadm-install' },
+            { text: 'CH12. 업그레이드와 유지보수', link: '/study/kubernetes/12-upgrade-maintenance' },
+            { text: 'CH13. etcd 백업과 복구', link: '/study/kubernetes/13-etcd-backup' },
+            { text: 'CH14. 인증서·PKI·kubeconfig', link: '/study/kubernetes/14-pki-kubeconfig' },
+          ],
+        },
+        {
+          text: '워크로드',
+          collapsible: false,
+          children: [
+            { text: 'CH15. Pod', link: '/study/kubernetes/15-pod' },
+            { text: 'CH16. ReplicaSet과 Deployment', link: '/study/kubernetes/16-deployment' },
+            { text: 'CH17. DaemonSet과 StatefulSet', link: '/study/kubernetes/17-daemonset-statefulset' },
+            { text: 'CH18. Job과 CronJob', link: '/study/kubernetes/18-job-cronjob' },
+            { text: 'CH19. ConfigMap과 Secret', link: '/study/kubernetes/19-configmap-secret' },
+          ],
+        },
+        {
+          text: '스케줄링과 리소스 관리',
+          collapsible: false,
+          children: [
+            { text: 'CH20. 스케줄러와 배치', link: '/study/kubernetes/20-scheduler' },
+            { text: 'CH21. 고급 스케줄링', link: '/study/kubernetes/21-advanced-scheduling' },
+            { text: 'CH22. 리소스 관리와 QoS', link: '/study/kubernetes/22-resource-qos' },
+            { text: 'CH23. 오토스케일링', link: '/study/kubernetes/23-autoscaling' },
+          ],
+        },
+        {
+          text: '네트워킹',
+          collapsible: false,
+          children: [
+            { text: 'CH24. 네트워킹 모델과 CNI', link: '/study/kubernetes/24-networking-cni' },
+            { text: 'CH25. Service', link: '/study/kubernetes/25-service' },
+            { text: 'CH26. kube-proxy와 데이터플레인', link: '/study/kubernetes/26-kube-proxy' },
+            { text: 'CH27. Ingress와 Gateway API', link: '/study/kubernetes/27-ingress-gateway' },
+            { text: 'CH28. DNS와 서비스 디스커버리', link: '/study/kubernetes/28-dns-discovery' },
+            { text: 'CH29. NetworkPolicy', link: '/study/kubernetes/29-network-policy' },
+          ],
+        },
+        {
+          text: '스토리지',
+          collapsible: false,
+          children: [
+            { text: 'CH30. Volume과 PV/PVC', link: '/study/kubernetes/30-volume-pv-pvc' },
+            { text: 'CH31. CSI와 동적 프로비저닝', link: '/study/kubernetes/31-csi-snapshot' },
+            { text: 'CH32. StatefulSet 스토리지 패턴', link: '/study/kubernetes/32-statefulset-storage' },
+          ],
+        },
+        {
+          text: '보안',
+          collapsible: false,
+          children: [
+            { text: 'CH33. 인증과 인가 (RBAC)', link: '/study/kubernetes/33-authn-authz-rbac' },
+            { text: 'CH34. Admission Control', link: '/study/kubernetes/34-admission-control' },
+            { text: 'CH35. Pod 보안과 seccomp', link: '/study/kubernetes/35-pod-security' },
+            { text: 'CH36. 공급망·런타임 보안', link: '/study/kubernetes/36-supplychain-runtime-security' },
+          ],
+        },
+        {
+          text: '확장',
+          collapsible: false,
+          children: [
+            { text: 'CH37. CRD와 커스텀 리소스', link: '/study/kubernetes/37-crd' },
+            { text: 'CH38. Operator 패턴', link: '/study/kubernetes/38-operator' },
+            { text: 'CH39. API Aggregation과 Webhook', link: '/study/kubernetes/39-api-extension' },
+          ],
+        },
+        {
+          text: '관측성과 운영',
+          collapsible: false,
+          children: [
+            { text: 'CH40. 메트릭과 모니터링', link: '/study/kubernetes/40-metrics-monitoring' },
+            { text: 'CH41. 로깅과 트레이싱', link: '/study/kubernetes/41-logging-tracing' },
+            { text: 'CH42. 트러블슈팅', link: '/study/kubernetes/42-troubleshooting' },
+          ],
+        },
+        {
+          text: '배포와 생태계',
+          collapsible: false,
+          children: [
+            { text: 'CH43. Helm', link: '/study/kubernetes/43-helm' },
+            { text: 'CH44. Kustomize와 GitOps', link: '/study/kubernetes/44-kustomize-gitops' },
+            { text: 'CH45. 서비스 메시', link: '/study/kubernetes/45-service-mesh' },
+            { text: 'CH46. 멀티테넌시와 멀티클러스터', link: '/study/kubernetes/46-multi-tenancy-cluster' },
+          ],
+        },
+        {
+          text: '종합 실습',
+          collapsible: false,
+          children: [
+            { text: 'CH47. 종합 실습', link: '/study/kubernetes/47-practice' },
+          ],
+        },
+        {
+          text: '부록',
+          collapsible: false,
+          children: [
+            { text: 'kubectl 치트시트', link: '/study/kubernetes/appendix-kubectl-cheatsheet' },
+            { text: '용어집', link: '/study/kubernetes/appendix-glossary' },
+            { text: '참고 자료', link: '/study/kubernetes/appendix-references' },
+          ],
+        },
+      ],
     },
     lastUpdated: false,
     contributors: false,

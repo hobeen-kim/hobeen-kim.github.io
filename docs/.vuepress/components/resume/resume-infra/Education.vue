@@ -7,14 +7,14 @@
         <div class="certification-list">
           <div class="certification-item">
             <div class="cert-name-group">
-              <div class="cert-logo-box"><img class="cert-logo" src="/images/cert/hrdk.svg" alt="한국산업인력공단" /></div>
+              <div class="cert-logo-box"><img class="cert-logo cert-logo-sm" src="/images/cert/hrdk.svg" alt="한국산업인력공단" /></div>
               <div class="certification-name">정보처리기사</div>
             </div>
             <div class="certification-date">2026.06.12</div>
           </div>
           <div class="certification-item">
             <div class="cert-name-group">
-              <div class="cert-logo-box"><img class="cert-logo" src="/images/cert/sqld.png" alt="데이터자격검정" /></div>
+              <div class="cert-logo-box"><img class="cert-logo cert-logo-sm" src="/images/cert/sqld.png" alt="데이터자격검정" /></div>
               <div class="certification-name">SQL Developer</div>
             </div>
             <div class="certification-date">2025.12.12</div>
@@ -108,7 +108,7 @@ export default {
   height: 26px;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   flex-shrink: 0;
 }
 
@@ -117,6 +117,11 @@ export default {
   max-width: 84px;
   width: auto;
   object-fit: contain;
+}
+
+.cert-logo-sm {
+  max-height: 16px;
+  max-width: 58px;
 }
 
 .certification-name {

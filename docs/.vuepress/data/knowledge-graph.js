@@ -14,6 +14,7 @@ export const nodes = [
   { id: 'fmis', label: 'FMIS', size: 20, status: 'planned', link: null, x: 0.18, y: 0.70 },
   { id: 'crop-analysis', label: '작물 분석', size: 20, status: 'planned', link: null, x: 0.30, y: 0.70 },
   { id: 'agri-iot', label: '농업 IoT', size: 24, status: 'planned', link: null, x: 0.10, y: 0.22 },
+  { id: 'ardupilot', label: 'ArduPilot\n(UAV 임베디드)', size: 26, status: 'active', link: '/study/ardupilot/', x: 0.13, y: 0.84 },
   { id: 'telematics', label: '텔레매틱스', size: 20, status: 'planned', link: null, x: 0.03, y: 0.30 },
   { id: 'autonomous', label: '자율주행\n농기계', size: 22, status: 'planned', link: null, x: 0.32, y: 0.30 },
 
@@ -71,6 +72,8 @@ export const edges = [
   { source: 'agri-iot', target: 'telematics' },
   { source: 'autonomous', target: 'rtk-gps' },
   { source: 'isoxml', target: 'fmis' },
+  { source: 'embedded', target: 'ardupilot' },
+  { source: 'autonomous', target: 'ardupilot' },
 
   // === 소프트웨어 ===
   { source: 'software', target: 'database' },

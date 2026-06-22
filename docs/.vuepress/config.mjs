@@ -729,6 +729,105 @@ const theme = {
           ],
         },
       ],
+      '/study/ardupilot/': [
+        {
+          text: 'UAV와 임베디드 기초',
+          collapsible: false,
+          children: [
+            { text: '소개', link: '/study/ardupilot/' },
+            { text: 'CH1. UAV란 무엇인가', link: '/study/ardupilot/01-what-is-uav' },
+            { text: 'CH2. 임베디드 시스템 기초', link: '/study/ardupilot/02-embedded-basics' },
+            { text: 'CH3. ArduPilot 프로젝트 개관', link: '/study/ardupilot/03-ardupilot-overview' },
+          ],
+        },
+        {
+          text: '하드웨어 추상화 (HAL)',
+          collapsible: false,
+          children: [
+            { text: 'CH4. HAL이란', link: '/study/ardupilot/04-hal' },
+            { text: 'CH5. 보드와 RTOS', link: '/study/ardupilot/05-board-rtos' },
+            { text: 'CH6. 통신 버스 (UART/I2C/SPI)', link: '/study/ardupilot/06-comm-bus' },
+          ],
+        },
+        {
+          text: '실시간 스케줄링',
+          collapsible: false,
+          children: [
+            { text: 'CH7. 메인 루프와 스케줄러', link: '/study/ardupilot/07-scheduler' },
+            { text: 'CH8. 협조적 스케줄링과 실시간성', link: '/study/ardupilot/08-realtime-scheduling' },
+          ],
+        },
+        {
+          text: '센서와 신호처리',
+          collapsible: false,
+          children: [
+            { text: 'CH9. 센서 드라이버 아키텍처', link: '/study/ardupilot/09-sensor-architecture' },
+            { text: 'CH10. IMU 기초', link: '/study/ardupilot/10-imu' },
+            { text: 'CH11. 진동과 필터링', link: '/study/ardupilot/11-vibration-filtering' },
+            { text: 'CH12. GPS', link: '/study/ardupilot/12-gps' },
+            { text: 'CH13. 기압계·나침반·거리센서', link: '/study/ardupilot/13-baro-compass-rangefinder' },
+          ],
+        },
+        {
+          text: '상태 추정 (센서 퓨전)',
+          collapsible: false,
+          children: [
+            { text: 'CH14. 센서 퓨전 입문', link: '/study/ardupilot/14-sensor-fusion-intro' },
+            { text: 'CH15. 칼만 필터 직관', link: '/study/ardupilot/15-kalman-filter' },
+            { text: 'CH16. AHRS와 DCM', link: '/study/ardupilot/16-ahrs-dcm' },
+            { text: 'CH17. EKF3 구조', link: '/study/ardupilot/17-ekf3-structure' },
+            { text: 'CH18. EKF3 운영', link: '/study/ardupilot/18-ekf3-operation' },
+          ],
+        },
+        {
+          text: '제어',
+          collapsible: false,
+          children: [
+            { text: 'CH19. PID 제어', link: '/study/ardupilot/19-pid' },
+            { text: 'CH20. 캐스케이드 제어 구조', link: '/study/ardupilot/20-cascade-control' },
+            { text: 'CH21. 자세 제어', link: '/study/ardupilot/21-attitude-control' },
+            { text: 'CH22. 위치·경로 제어', link: '/study/ardupilot/22-position-nav' },
+            { text: 'CH23. 모터 믹싱', link: '/study/ardupilot/23-motor-mixing' },
+          ],
+        },
+        {
+          text: '입력과 비행 모드',
+          collapsible: false,
+          children: [
+            { text: 'CH24. RC 입력과 텔레메트리', link: '/study/ardupilot/24-rc-telemetry' },
+            { text: 'CH25. 비행 모드 구조', link: '/study/ardupilot/25-flight-modes' },
+            { text: 'CH26. 자동 비행과 미션', link: '/study/ardupilot/26-auto-mission' },
+          ],
+        },
+        {
+          text: '통신·안전',
+          collapsible: false,
+          children: [
+            { text: 'CH27. MAVLink', link: '/study/ardupilot/27-mavlink' },
+            { text: 'CH28. DroneCAN', link: '/study/ardupilot/28-dronecan' },
+            { text: 'CH29. 파라미터 시스템', link: '/study/ardupilot/29-parameters' },
+            { text: 'CH30. Arming과 Failsafe', link: '/study/ardupilot/30-arming-failsafe' },
+            { text: 'CH31. 로깅', link: '/study/ardupilot/31-logging' },
+          ],
+        },
+        {
+          text: '실전·통합·확장',
+          collapsible: false,
+          children: [
+            { text: 'CH32. SITL 시뮬레이션', link: '/study/ardupilot/32-sitl' },
+            { text: 'CH33. Lua 스크립팅', link: '/study/ardupilot/33-scripting' },
+            { text: 'CH34. 전체 비행 흐름 통합', link: '/study/ardupilot/34-integration' },
+          ],
+        },
+        {
+          text: '부록',
+          collapsible: false,
+          children: [
+            { text: '용어집', link: '/study/ardupilot/appendix-glossary' },
+            { text: '참고 자료', link: '/study/ardupilot/appendix-references' },
+          ],
+        },
+      ],
     },
     lastUpdated: false,
     contributors: false,

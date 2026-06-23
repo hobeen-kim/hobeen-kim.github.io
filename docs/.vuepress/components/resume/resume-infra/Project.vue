@@ -39,13 +39,34 @@
             <div class="responsibility-detail"> • Terraform 모듈화 + global/security 모듈(SSM 세션 로깅) 구성, dev/prod 환경 분리 관리</div>
             <div class="responsibility-detail"> • 자율주행 모니터링 인프라(ECS/MSK/task-definition) Terraform 모듈로 코드화 및 의존성 관리</div>
             <div class="responsibility-detail"> • IAM Identity Center 로 Role 기반 접근 점진 전환, Aurora 접근 로깅 + DB 유저 분리(RBAC) 적용</div>
-            <div class="responsibility-detail"> • KMS 기반 위치정보 암호화 인프라 구축, 네트워크/IAM/Secrets/EKS/TLS 보안 점검 수행</div>
+            <div class="responsibility-detail"> • 네트워크/IAM/Secrets/EKS/TLS 보안 점검 수행</div>
             <div class="responsibility-skills">
               <div class="tech-stack">
                 <span class="tag">Terraform</span>
                 <span class="tag">IAM Identity Center</span>
                 <span class="tag">KMS</span>
                 <span class="tag">Aurora</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="responsibility-item">
+          <div class="responsibility-header">
+            <div class="responsibility-title">위치정보사업자 인증 (보안 컴플라이언스)</div>
+            <div class="period">2025.02 ~ 현재</div>
+          </div>
+          <div class="responsibility-description">
+            <div class="responsibility-detail-main"><span> • 위치정보사업자 인증 평가를 주도해 인증 2건 획득, 관련 인프라 보안 요건 설계·이행</span></div>
+            <div class="responsibility-detail"> • KMS 기반 위치정보 저장·전송 구간 암호화 인프라 구축</div>
+            <div class="responsibility-detail"> • IAM·RBAC 최소권한·DB 유저 분리 및 위치정보 접근 로그 법정 기간 보관·감사 추적 구성</div>
+            <div class="responsibility-detail"> • 망 분리·보안그룹·TLS·Secrets 관리 등 인프라 보안 점검·개선</div>
+            <div class="responsibility-detail"> • 기술적·관리적 보호조치 명세·증빙 자료 준비 및 인증 평가 대응</div>
+            <div class="responsibility-skills">
+              <div class="tech-stack">
+                <span class="tag">KMS</span>
+                <span class="tag">IAM/RBAC</span>
+                <span class="tag">위치정보보호</span>
+                <span class="tag">보안감사</span>
               </div>
             </div>
           </div>

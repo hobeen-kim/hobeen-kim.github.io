@@ -58,14 +58,34 @@
           <div class="responsibility-description">
             <div class="responsibility-detail-main"><span> • 디바이스 통신과 서비스 간 이벤트 메시징 인프라 설계·구축</span></div>
             <div class="responsibility-detail"> • AWS IoT Core 토픽/정책/인증서 설계, 디바이스 Shadow 상태 SQS/IoT Rule 적재 구성</div>
-            <div class="responsibility-detail"> • feature_status_notification·Keycloak user events SNS → SQS fanout 파이프라인 구축</div>
-            <div class="responsibility-detail"> • MQTT 중복 접속(DUPLICATE_CLIENTID) 대응, Keycloak 인증 서버 인프라 dev → prod 구축</div>
+            <div class="responsibility-detail"> • feature_status_notification SNS → SQS fanout 파이프라인 구축</div>
+            <div class="responsibility-detail"> • MQTT 중복 접속(DUPLICATE_CLIENTID) 대응</div>
             <div class="responsibility-skills">
               <div class="tech-stack">
                 <span class="tag">AWS IoT</span>
                 <span class="tag">SQS</span>
                 <span class="tag">SNS</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="responsibility-item">
+          <div class="responsibility-header">
+            <div class="responsibility-title">인증·인가 체계 (Keycloak RBAC)</div>
+            <div class="period">2025.02 ~ 현재</div>
+          </div>
+          <div class="responsibility-description">
+            <div class="responsibility-detail-main"><span> • Keycloak 기반 RBAC 인증·인가 체계를 전사 표준으로 설계·구축</span></div>
+            <div class="responsibility-detail"> • Realm·Client/Realm Role·Group 권한 상속 모델 설계로 서비스 전반 RBAC 표준화</div>
+            <div class="responsibility-detail"> • 다수 서비스에 OIDC/OAuth2 SSO 연동 및 토큰 기반 인가(Client·Service 계정) 적용</div>
+            <div class="responsibility-detail"> • Keycloak 인증 서버 인프라 dev → prod 구축 (Aurora 백엔드·환경 분리 운영)</div>
+            <div class="responsibility-detail"> • Keycloak user events SNS → SQS fanout 파이프라인으로 계정 변경 이벤트 외부 시스템 동기화</div>
+            <div class="responsibility-skills">
+              <div class="tech-stack">
                 <span class="tag">Keycloak</span>
+                <span class="tag">OIDC</span>
+                <span class="tag">RBAC</span>
+                <span class="tag">SNS/SQS</span>
               </div>
             </div>
           </div>

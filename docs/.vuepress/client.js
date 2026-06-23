@@ -9,6 +9,7 @@ import Footer from "./theme/Footer.vue";
 import Header from "./theme/Header.vue";
 import Home from "./components/home/Home.vue";
 import ResumeCover from "./components/resume/ResumeCover.vue";
+import TobeCover from "./components/resume/TobeCover.vue";
 
 export default defineClientConfig({
     enhance({ app, router }) {
@@ -21,6 +22,7 @@ export default defineClientConfig({
         app.component('Footer', Footer)
         app.component('Header', Header)
         app.component('ResumeCover', ResumeCover)
+        app.component('TobeCover', TobeCover)
 
         if (typeof window !== 'undefined') {
             const loadMermaid = () => {

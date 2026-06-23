@@ -40,12 +40,14 @@
             <div class="responsibility-detail"> • 자율주행 모니터링 인프라(ECS/MSK/task-definition) Terraform 모듈로 코드화 및 의존성 관리</div>
             <div class="responsibility-detail"> • IAM Identity Center 로 Role 기반 접근 점진 전환, Aurora 접근 로깅 + DB 유저 분리(RBAC) 적용</div>
             <div class="responsibility-detail"> • 네트워크/IAM/Secrets/EKS/TLS 보안 점검 수행</div>
+            <div class="responsibility-detail"> • Airflow + Prowler 기반 ISMS-P 기준 클라우드 보안 점검 매주 자동 시행, AI 에이전트로 점검 결과 분석·조치 우선순위 도출</div>
             <div class="responsibility-skills">
               <div class="tech-stack">
                 <span class="tag">Terraform</span>
                 <span class="tag">IAM Identity Center</span>
                 <span class="tag">KMS</span>
                 <span class="tag">Aurora</span>
+                <span class="tag">Prowler</span>
               </div>
             </div>
           </div>

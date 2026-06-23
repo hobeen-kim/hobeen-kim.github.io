@@ -98,7 +98,7 @@
           <div class="responsibility-description">
             <div class="responsibility-detail-main"><span> • 관측성 스택 통합 및 AI 툴 기반 모니터링·배포 자동화</span></div>
             <div class="responsibility-detail"> • Grafana·Prometheus·Loki·Tempo·Pyroscope 로 메트릭/로그/트레이스/프로파일 통합 관측성 구축</div>
-            <div class="responsibility-detail"> • AI 툴 기반 모니터링 자동화 — Grafana Dashboard-as-Code 와 Slack(Hermes) 알림을 통합해 대시보드·알림 구성을 코드로 자동 생성</div>
+            <div class="responsibility-detail"> • AI 에이전트 기반 알림 분석·온콜 보조 — Grafana Alertmanager·에러 알림을 Slack 으로 수집하고, AI 에이전트가 Grafana 로그·메트릭을 분석해 원인 진단·조치 제안 후 관련자에게 메일 자동 발송</div>
             <div class="responsibility-detail"> • 자율주행 서비스(log-server·stream·batch·monitor) GitHub Actions CI/CD 및 aws-serverless Lambda SAM 배포 파이프라인 구축</div>
             <div class="responsibility-detail"> • Claude Code 기반 사내 AI 개발 워크플로우 구축 — 공용 에이전트·스킬·MCP 서버로 이슈 생성·문서화·배포 자동화</div>
             <div class="responsibility-detail"> • ADS 문서 사이트 S3/CloudFront/Route53 정적 호스팅, ECR lifecycle policy 환경별 분리</div>

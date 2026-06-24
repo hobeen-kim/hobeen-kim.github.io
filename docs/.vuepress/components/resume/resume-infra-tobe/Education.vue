@@ -77,7 +77,7 @@
             </div>
             <div class="education-description">
               <div class="education-detail"> • 국제관계학과</div>
-              <div class="education-detail"> • 5년 군복무 ( ~ 23.04, 육군 보병)</div>
+              <div class="education-detail"> • 5년 군복무 ( ~ 23.04, 육군 보병 대위)</div>
             </div>
           </div>
         </div>

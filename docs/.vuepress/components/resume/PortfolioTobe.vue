@@ -38,6 +38,70 @@
       </div>
     </div>
 
+    <!-- 01-B 침해 대응 -->
+    <div class="project-item">
+      <div class="project-header">
+        <h3>프로덕션 EKS 크립토재킹(XMRig) 침해 사후분석 및 재발방지</h3>
+        <span class="period">아그모 | GuardDuty · EventBridge · SNS · securityContext · NetworkPolicy</span>
+      </div>
+      <div class="project-overview">
+        <p><strong>배경:</strong> 프로덕션 EKS 클러스터가 약 2개월간 XMRig(모네로) 크립토마이너에 침해됐음. GuardDuty가 탐지했으나 알림 체계가 없어 인지하지 못하다가, Prowler 보안 점검에서 GuardDuty 고위험 235건으로 뒤늦게 발견했음.</p>
+      </div>
+      <div class="project-details">
+        <h4>침투 경로 분석</h4>
+        <ul>
+          <li>인터넷에 노출된 <code>sdm-front</code>(Next.js 15.2.2, CVE-2025-29927 영향권) 프레임워크 계층으로 RCE 인입</li>
+          <li>컨테이너가 root(euid=0)로 실행 중 → node 프로세스가 셸 spawn → <code>whoami</code> 정찰 후 <code>wget</code>으로 XMRig 마이너 다운로드·실행</li>
+          <li>근본 원인 — ① 컨테이너 root 실행 ② 1년 묵은 취약 의존성 방치 ③ GuardDuty 탐지-알림 단절 ④ ALB/WAF 액세스 로깅 부재로 사후 추적 제약</li>
+          <li>앱 코드 전수 감사(child_process/eval/SSRF 0건)로 진입점을 프레임워크 계층으로 좁히고, 노드 포렌식으로 활성 위협 없음을 확인</li>
+        </ul>
+        <h4>위협 → 대응</h4>
+        <table class="threat-table">
+          <thead>
+            <tr><th>문제 (근본 원인)</th><th>대응</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>탐지는 됐으나 알림 부재 (2개월 방치)</td>
+              <td>GuardDuty(sev≥7) → EventBridge → SNS → Lambda → Slack/Google Chat 자동 알림 (멀티리전 커버)</td>
+            </tr>
+            <tr>
+              <td>컨테이너 root 실행 → RCE 시 권한 무제한</td>
+              <td>USER non-root, runAsNonRoot·allowPrivilegeEscalation=false·read-only rootfs·capabilities drop</td>
+            </tr>
+            <tr>
+              <td>마이너 페이로드 외부 다운로드</td>
+              <td>NetworkPolicy로 파드 egress 제한 → 마이너 풀·외부 wget 차단</td>
+            </tr>
+            <tr>
+              <td>1년 묵은 취약 의존성 방치</td>
+              <td>ECR enhanced scanning 활성화, Dependabot/Renovate + CI SCA 게이트</td>
+            </tr>
+            <tr>
+              <td>ALB/WAF 로깅 부재로 사후 분석 차단</td>
+              <td>ALB 액세스 로그·WAF 로깅 활성화(S3) → 인입 요청·페이로드 추적 가능</td>
+            </tr>
+          </tbody>
+        </table>
+        <h4>성과</h4>
+        <ul>
+          <li>활성 위협 제거 확인, Next.js 패치(15.5.14)로 해당 CVE 차단</li>
+          <li>"탐지-대응 단절"이 본질이라 보고 GuardDuty→Slack 자동 알림 파이프라인을 최우선 구축</li>
+          <li>root 실행·egress·로깅 부재 등 근본 결함을 코드(Terraform·securityContext)로 영구 차단</li>
+        </ul>
+        <h4>사용 기술</h4>
+        <div class="tech-tags">
+          <span class="tech-tag">GuardDuty</span>
+          <span class="tech-tag">EventBridge</span>
+          <span class="tech-tag">SNS</span>
+          <span class="tech-tag">securityContext</span>
+          <span class="tech-tag">NetworkPolicy</span>
+          <span class="tech-tag">ECR Scanning</span>
+          <span class="tech-tag">WAF/ALB 로깅</span>
+        </div>
+      </div>
+    </div>
+
     <!-- 02 비용 -->
     <div class="project-item">
       <div class="project-header">
@@ -458,5 +522,41 @@ li {
   border-radius: 4px;
   font-size: 0.85rem;
   font-weight: 500;
+}
+
+.threat-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  margin-bottom: 1rem;
+}
+
+.threat-table th,
+.threat-table td {
+  border: 1px solid var(--vp-c-border);
+  padding: 0.5rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.threat-table th {
+  background-color: var(--vp-c-bg-alt);
+  font-weight: 700;
+  color: var(--vp-c-text-1);
+}
+
+.threat-table td {
+  color: var(--vp-c-text-1);
+}
+
+.threat-table td:first-child {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .threat-table td:first-child {
+    white-space: normal;
+  }
 }
 </style>

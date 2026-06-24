@@ -31,23 +31,63 @@
         </div>
         <div class="responsibility-item">
           <div class="responsibility-header">
-            <div class="responsibility-title">Terraform IaC &amp; 보안</div>
+            <div class="responsibility-title">Terraform IaC</div>
             <div class="period">2025.02 ~ 현재</div>
           </div>
           <div class="responsibility-description">
-            <div class="responsibility-detail-main"><span> • 인프라를 Terraform 으로 코드화하고 보안을 설계 기본 축으로 관리</span></div>
-            <div class="responsibility-detail"> • Terraform 모듈화 + global/security 모듈(SSM 세션 로깅) 구성, dev/prod 환경 분리 관리</div>
+            <div class="responsibility-detail-main"><span> • 인프라를 Terraform 으로 코드화하고 dev/prod 환경을 분리 관리</span></div>
+            <div class="responsibility-detail"> • Terraform 모듈화 + global/security 모듈(SSM 세션 로깅) 구성</div>
             <div class="responsibility-detail"> • 자율주행 모니터링 인프라(ECS/MSK/task-definition) Terraform 모듈로 코드화 및 의존성 관리</div>
-            <div class="responsibility-detail"> • IAM Identity Center 로 Role 기반 접근 점진 전환, Aurora 접근 로깅 + DB 유저 분리(RBAC) 적용</div>
-            <div class="responsibility-detail"> • 네트워크/IAM/Secrets/EKS/TLS 보안 점검 수행</div>
-            <div class="responsibility-detail"> • Airflow + Prowler 기반 ISMS-P 기준 클라우드 보안 점검 매주 자동 시행, AI 에이전트로 점검 결과 분석·조치 우선순위 도출</div>
             <div class="responsibility-skills">
               <div class="tech-stack">
                 <span class="tag">Terraform</span>
-                <span class="tag">IAM Identity Center</span>
+                <span class="tag">SSM</span>
                 <span class="tag">KMS</span>
-                <span class="tag">Aurora</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="responsibility-item">
+          <div class="responsibility-header">
+            <div class="responsibility-title">클라우드 보안 진단 &amp; 취약점 조치</div>
+            <div class="period">2025.02 ~ 현재</div>
+          </div>
+          <div class="responsibility-description">
+            <div class="responsibility-detail-main"><span> • Prowler + ISMS-P 기준 클라우드 보안 취약점을 정기 진단하고 Critical/High 항목 조치</span></div>
+            <div class="responsibility-detail"> • Airflow + Prowler 로 ISMS-P 보안 점검 매주 자동 시행, AI 에이전트로 결과 분석·조치 우선순위 도출</div>
+            <div class="responsibility-detail"> • 시크릿 외부화 — Lambda/ECS env 평문 시크릿 → Secrets Manager + External Secrets Operator 이관, gitleaks CI 게이트</div>
+            <div class="responsibility-detail"> • IAM 최소권한 재설계, 서비스 역할 혼동 대리(confused deputy) 방지 조건 적용, 루트 MFA 강제</div>
+            <div class="responsibility-detail"> • S3 퍼블릭 접근 차단, IMDSv2 강제, 보안그룹 정비 등 인프라 보호 조치, 네트워크/EKS/TLS 보안 점검</div>
+            <div class="responsibility-detail"> • Prowler 정기 스캔 CI/스케줄 자동화 + suppression 근거 문서화</div>
+            <div class="responsibility-skills">
+              <div class="tech-stack">
                 <span class="tag">Prowler</span>
+                <span class="tag">ISMS-P</span>
+                <span class="tag">External Secrets Operator</span>
+                <span class="tag">IAM</span>
+                <span class="tag">gitleaks</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="responsibility-item">
+          <div class="responsibility-header">
+            <div class="responsibility-title">보안 침해 사후분석 &amp; 재발방지</div>
+            <div class="period">2025.02 ~ 현재</div>
+          </div>
+          <div class="responsibility-description">
+            <div class="responsibility-detail-main"><span> • 프로덕션 EKS 크립토재킹(XMRig) 침해를 사후분석하고 근본 결함을 코드로 차단</span></div>
+            <div class="responsibility-detail"> • 침투 경로 분석 — 취약 버전(Next.js CVE) 프레임워크 RCE → root 컨테이너 셸 spawn → 마이너 다운로드·실행, 앱 코드 전수 감사·노드 포렌식으로 진입점 특정 및 활성 위협 제거 확인</div>
+            <div class="responsibility-detail"> • 탐지-알림 단절 해소 — GuardDuty(고위험) → EventBridge → SNS → Lambda → Slack/Google Chat 자동 알림 파이프라인 구축</div>
+            <div class="responsibility-detail"> • 컨테이너 non-root 전환(runAsNonRoot·privilege escalation 차단·read-only rootfs), egress NetworkPolicy로 마이너 풀 차단</div>
+            <div class="responsibility-detail"> • ECR enhanced scanning·의존성 정기 업데이트(SCA 게이트), ALB/WAF 액세스 로깅 활성화로 사후 추적성 확보</div>
+            <div class="responsibility-skills">
+              <div class="tech-stack">
+                <span class="tag">GuardDuty</span>
+                <span class="tag">EventBridge</span>
+                <span class="tag">securityContext</span>
+                <span class="tag">NetworkPolicy</span>
+                <span class="tag">ECR Scanning</span>
               </div>
             </div>
           </div>

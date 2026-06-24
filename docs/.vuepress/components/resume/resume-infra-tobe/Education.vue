@@ -7,21 +7,21 @@
         <div class="certification-list">
           <div class="certification-item">
             <div class="cert-name-group">
-              <div class="cert-logo-box"><img class="cert-logo cert-logo-sm" src="/images/cert/hrdk.svg" alt="한국산업인력공단" /></div>
+              <div class="cert-logo-box"><img class="cert-logo" src="/images/cert/kait.webp" alt="KAIT 리눅스마스터" /></div>
               <div class="certification-name">리눅스마스터 1급</div>
             </div>
             <div class="certification-date">2027.01</div>
           </div>
           <div class="certification-item">
             <div class="cert-name-group">
-              <div class="cert-logo-box"></div>
+              <div class="cert-logo-box"><img class="cert-logo" src="/images/cert/cka.svg" alt="CKA" /></div>
               <div class="certification-name">CKA (Certified Kubernetes Administrator)</div>
             </div>
             <div class="certification-date">2026.12</div>
           </div>
           <div class="certification-item">
             <div class="cert-name-group">
-              <div class="cert-logo-box"></div>
+              <div class="cert-logo-box"><img class="cert-logo" src="/images/cert/opic.png" alt="OPIc" /></div>
               <div class="certification-name">OPIc AL (Advanced Low)</div>
             </div>
             <div class="certification-date">2026.12</div>
@@ -77,7 +77,7 @@
             </div>
             <div class="education-description">
               <div class="education-detail"> • 국제관계학과</div>
-              <div class="education-detail"> • 5년 군복무 ( ~ 23.04)</div>
+              <div class="education-detail"> • 5년 군복무 ( ~ 23.04, 육군 보병)</div>
             </div>
           </div>
         </div>

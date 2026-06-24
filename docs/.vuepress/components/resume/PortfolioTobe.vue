@@ -281,7 +281,44 @@
       </div>
     </div>
 
-    <!-- 09 온프렘 GPU -->
+    <!-- 09 OTA -->
+    <div class="project-item">
+      <div class="project-header">
+        <h3>IoT 디바이스 OTA 업데이트 파이프라인 (BSP·데비안 패키지·보안 패치)</h3>
+        <span class="period">아그모 | AWS IoT Core Jobs · S3 · SQS · Redis</span>
+      </div>
+      <div class="project-overview">
+        <p><strong>배경:</strong> SeamOS 기반 IoT 디바이스(농기계)의 BSP·데비안 패키지·보안 패치를 현장 방문 없이 원격으로 배포할 수단이 없었음. 펌웨어가 커 다운로드 안정성과 버전 관리가 동시에 필요했음.</p>
+      </div>
+      <div class="project-details">
+        <h4>의사결정 · 구현</h4>
+        <ul>
+          <li>AWS IoT Core Jobs 기반 OTA 파이프라인 설계 — Job document로 디바이스 SDM 에이전트에 업데이트를 지시하고 실행 결과를 회수</li>
+          <li>아티팩트 3종 지원 — defined(패키지), ftp(파일 배포: 인증서·BSP), execute(스크립트: 보안 패치 sh)</li>
+          <li>캠페인 단위 배포 + BSP·Core 버전 범위 타겟팅, 중간 캠페인을 건너뛴 디바이스에도 보안 패치가 누락되지 않도록 후속 캠페인에 자동 포함</li>
+          <li>S3 presigned URL로 펌웨어 전송, 대용량 다운로드가 만료로 실패하지 않도록 유효시간을 5분 → 60분으로 조정</li>
+          <li>Job Report를 SQS로 수신하고 진행 상태를 Redis로 추적(TTL·cleanup), 실패 시 재시도·완료 판정 처리</li>
+          <li>디바이스당 Thing 2개(NVX / SDM) 중 SDM 에이전트만 타겟하도록 Thing 네이밍 정리</li>
+        </ul>
+        <h4>성과</h4>
+        <ul>
+          <li>현장 수동 작업 → 원격 무선(OTA) 배포로 전환</li>
+          <li>버전 범위 기반 자동 보정으로 보안 패치 누락 방지</li>
+          <li>대용량 펌웨어 다운로드 만료 실패 해소</li>
+        </ul>
+        <h4>사용 기술</h4>
+        <div class="tech-tags">
+          <span class="tech-tag">AWS IoT Core Jobs</span>
+          <span class="tech-tag">S3 presigned URL</span>
+          <span class="tech-tag">SQS</span>
+          <span class="tech-tag">Redis</span>
+          <span class="tech-tag">Debian package</span>
+          <span class="tech-tag">BSP</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 10 온프렘 GPU -->
     <div class="project-item">
       <div class="project-header">
         <h3>온프렘 GPU 서버 구축 — SeamOS 개발 AI Agent</h3>

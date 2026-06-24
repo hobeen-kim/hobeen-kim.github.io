@@ -14,6 +14,7 @@
             <div class="experience-description"> • <span>보안 자동화</span> : Prowler 기반 ISMS-P 클라우드 보안 점검 자동화·취약점 조치, 시크릿 ESO 이관, 위치정보사업자 인증 대응 </div>
             <div class="experience-description"> • <span>EKS·GitOps</span> : Terraform IaC 운영, GitHub OIDC 기반 Terraform CI 구축, ArgoCD·Argo Rollouts 배포, ECS→EKS 마이그레이션 </div>
             <div class="experience-description"> • <span>비용·관측성</span> : Karpenter·Graviton·Spot 기반 비용 최적화, LGTM 관측성 스택 구축·SLO 정의·AI 온콜 보조 </div>
+            <div class="experience-description"> • <span>IoT·OTA</span> : AWS IoT Core 메시징, IoT Jobs 기반 OTA 파이프라인(BSP·데비안 패키지·보안 패치 무선 배포) </div>
             <div class="experience-description"> • <span>그 외</span> : Keycloak 공통 인증(HA) 운영, 멀티리전 페일오버 구성, 온프렘 GPU AI 인프라 구축, NISHIBE 택시 인프라 신규 구축 </div>
             <div class="experience-skills">
               <div class="tech-stack">

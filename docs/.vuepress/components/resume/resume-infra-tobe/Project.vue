@@ -94,6 +94,27 @@
         </div>
         <div class="responsibility-item">
           <div class="responsibility-header">
+            <div class="responsibility-title">OTA 업데이트 파이프라인</div>
+            <div class="period">2025.02 ~ 현재</div>
+          </div>
+          <div class="responsibility-description">
+            <div class="responsibility-detail-main"><span> • IoT 디바이스의 BSP·데비안 패키지·보안 패치를 무선(OTA)으로 배포하는 파이프라인 설계·구축</span></div>
+            <div class="responsibility-detail"> • AWS IoT Core Jobs 기반으로 Job document를 통해 디바이스 SDM 에이전트에 업데이트 지시·결과 회수</div>
+            <div class="responsibility-detail"> • 아티팩트 3종(defined/ftp/execute) 지원, 캠페인·BSP/Core 버전 범위 타겟팅으로 보안 패치 누락 방지</div>
+            <div class="responsibility-detail"> • S3 presigned URL로 펌웨어 전송(만료 5분→60분), Job Report SQS 수신·Redis 진행 추적·재시도 처리</div>
+            <div class="responsibility-skills">
+              <div class="tech-stack">
+                <span class="tag">AWS IoT Core Jobs</span>
+                <span class="tag">S3</span>
+                <span class="tag">SQS</span>
+                <span class="tag">Redis</span>
+                <span class="tag">Debian/BSP</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="responsibility-item">
+          <div class="responsibility-header">
             <div class="responsibility-title">인증·인가 체계 (Keycloak RBAC)</div>
             <div class="period">2025.02 ~ 현재</div>
           </div>

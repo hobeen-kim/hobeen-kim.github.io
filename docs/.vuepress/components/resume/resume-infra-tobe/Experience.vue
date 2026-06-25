@@ -14,7 +14,8 @@
             <div class="experience-description"> • dev/prod EKS 클러스터 구성·운영 및 GitOps 배포 파이프라인 구축 (Terraform, ArgoCD, Argo Rollouts, GitHub OIDC CI), 레거시 ECS → EKS 무중단 마이그레이션 </div>
             <div class="experience-description"> • 클라우드 보안 점검 자동화 및 취약점 조치 (Prowler 기반 ISMS-P, 시크릿 External Secrets Operator 이관, IAM 최소권한 설계), 위치정보사업자 인증 대응 </div>
             <div class="experience-description"> • 프로덕션 EKS 크립토재킹 침해 사후분석 및 재발방지 (GuardDuty→Slack 자동 알림, 컨테이너 non-root, egress NetworkPolicy, ECR 스캐닝) </div>
-            <div class="experience-description"> • 컴퓨팅 비용 최적화 및 관측성 스택 구축 (Karpenter·Graviton·Spot, Grafana·Prometheus·Loki·Tempo·Pyroscope), SLO 정의 및 AI 온콜 보조 운영 </div>
+            <div class="experience-description"> • 컴퓨팅 비용 최적화 및 관측성 스택 구축 (Karpenter·Graviton·Spot, Grafana·Prometheus·Loki·Tempo·Pyroscope), SLO·RED 기반 모니터링과 AI 온콜 보조 운영 </div>
+            <div class="experience-description"> • DORA 4지표(리드타임·배포빈도·변경실패율·MTTR) 계측·대시보드화로 배포 성과 가시화 및 개선 추적 </div>
             <div class="experience-description"> • IoT 메시징 인프라 및 OTA 업데이트 파이프라인 구축 (AWS IoT Core·SNS/SQS, IoT Jobs 기반 BSP·데비안 패키지·보안 패치 배포) </div>
             <div class="experience-description"> • Keycloak 공통 인증 인프라(HA) 및 멀티리전 Active-Standby 페일오버 구성, 온프렘 GPU 추론 서버 구축 </div>
             <div class="experience-description"> • 일본 택시 운행관리 서비스(NISHIBE) 클라우드 인프라 신규 설계·구축 (EKS+Aurora+Redis+ArgoCD, Terraform CI) </div>

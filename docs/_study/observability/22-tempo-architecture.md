@@ -1,0 +1,177 @@
+---
+title: "Tempo 아키텍처"
+description: "검색 인덱스를 두지 않고 오브젝트 스토리지만으로 동작하는 Tempo의 설계 철학과, distributor→ingester→블록으로 이어지는 쓰기 경로, trace ID 조회·TraceQL 검색의 읽기 경로, 블록 포맷과 metrics-generator까지 Tempo 아키텍처를 다룬다."
+date: 2026-07-02
+tags: [Tempo, Tracing, Architecture]
+prev: /study/observability/21-opentelemetry
+next: /study/observability/23-traceql-spanmetrics
+---
+
+# Tempo 아키텍처
+
+::: info 학습 목표
+- Tempo가 왜 검색 인덱스 없이 오브젝트 스토리지만으로 동작하도록 설계됐는지 이해한다.
+- distributor→ingester→블록으로 이어지는 쓰기 경로를 안다.
+- trace ID 조회와 TraceQL 검색이라는 두 가지 읽기 경로의 차이를 파악한다.
+- 블록 포맷(parquet, bloom filter)과 metrics-generator, 배포·스케일링 모델을 익힌다.
+:::
+
+## 1. Tempo 설계 — 오브젝트 스토리지만 사용하는 트레이드오프
+
+로그 스터디에서 다룬 Loki가 "라벨만 인덱싱하고 본문은 청크로 저장"하는 선택을 했듯, <strong>Tempo</strong>는 트레이스 데이터에서 한 단계 더 나아간 선택을 한다. <strong>trace ID를 제외한 어떤 전용 검색 인덱스도 두지 않고</strong>, 모든 trace 데이터를 오브젝트 스토리지(S3/GCS/Azure Blob)에 블록으로만 저장한다.
+
+이 선택의 근거는 트레이스 데이터의 접근 패턴에 있다. 트레이스는 보통 "이미 trace ID를 알고 있는 상태"(로그나 메트릭의 exemplar에서 trace ID를 얻어 그 trace 하나를 열어보는 것)로 조회되는 경우가 압도적으로 많다. trace ID로 찾을 때는 별도 인덱스 없이도 해시 기반으로 어느 블록에 있을지 좁혀나갈 수 있다. 반면 속성 기반 전문 검색(TraceQL)은 상대적으로 드물게 쓰이며, 필요할 때는 블록을 스캔하는 비용을 감수한다.
+
+```mermaid
+flowchart TB
+    subgraph Traditional["전통적 트레이싱 백엔드"]
+        T1["Trace 데이터"] --> IDX["전용 검색 인덱스\n(Elasticsearch 등)"]
+        IDX --> Q1["쿼리"]
+    end
+    subgraph TempoDesign["Tempo"]
+        T2["Trace 데이터"] --> BLK["블록 (오브젝트 스토리지)"]
+        BLK --> BF["블록별 Bloom filter\n(trace ID 존재 여부만 확인)"]
+        BF --> Q2["trace ID 조회"]
+        BLK --> Q3["TraceQL 검색\n(블록 스캔)"]
+    end
+```
+
+이 설계는 Loki와 같은 철학적 뿌리를 공유한다. 인덱스를 최소화해 운영 복잡도와 인덱스 비대화(카디널리티) 문제를 원천적으로 피하고, 저장 비용이 저렴한 오브젝트 스토리지에 무제한에 가깝게 데이터를 쌓는다. 대신 검색은 인덱스 기반 시스템보다 느릴 수 있다는 트레이드오프를 받아들인다. 자세한 설계 배경은 [Tempo 공식 문서](https://grafana.com/docs/tempo/latest/)를 참고한다.
+
+## 2. 쓰기 경로 — distributor → ingester → blocks
+
+Tempo로 들어오는 span은 <strong>distributor</strong>가 첫 번째로 받는다. distributor는 OTLP, Jaeger, Zipkin 등 여러 프로토콜을 동시에 수신할 수 있고, 각 span을 `trace_id` 기준 consistent hashing으로 특정 <strong>ingester</strong> 집합에 라우팅한다. 같은 trace에 속한 span은 항상 같은 ingester로 향하도록 보장된다 — 이래야 하나의 trace를 여러 ingester에 흩어놓지 않고 온전히 조립할 수 있다.
+
+```mermaid
+flowchart LR
+    APP["애플리케이션 / Collector\n(OTLP)"]
+    DIST["Distributor\ntrace_id 기준 해싱"]
+    ING1["Ingester 1"]
+    ING2["Ingester 2"]
+    ING3["Ingester 3"]
+    WAL["WAL (로컬 디스크)"]
+    HEAD["Head Block (메모리)"]
+    COMPLETE["Complete Block"]
+    OBJ["오브젝트 스토리지\n(S3 / GCS / Azure)"]
+
+    APP --> DIST
+    DIST --> ING1
+    DIST --> ING2
+    DIST --> ING3
+    ING2 --> WAL
+    ING2 --> HEAD
+    HEAD -->|"cut 주기 도래"| COMPLETE
+    COMPLETE -->|flush| OBJ
+```
+
+ingester는 도착한 span을 먼저 로컬 <strong>WAL(Write-Ahead Log)</strong>에 기록해 프로세스 재시작에도 유실되지 않도록 한 뒤, 메모리의 <strong>head block</strong>에 쌓는다. 설정된 주기(`max_block_duration`, 기본값 근방 수 분)나 크기 임계값에 도달하면 head block을 <strong>complete block</strong>으로 잘라내고(cut), 이를 오브젝트 스토리지에 업로드한다. 업로드가 끝나면 로컬 사본은 정리된다.
+
+이 구조 때문에 아주 최근에 들어온 trace는 아직 오브젝트 스토리지에 없고 ingester 메모리에만 있을 수 있다. 읽기 경로가 ingester와 오브젝트 스토리지 양쪽을 함께 조회하는 이유가 여기에 있다.
+
+## 3. 읽기 경로 — trace by ID, TraceQL 검색
+
+Tempo의 읽기는 두 가지 질의 패턴으로 나뉜다.
+
+<strong>trace by ID 조회</strong>는 가장 단순하고 빠른 경로다. querier가 trace_id를 받으면, 아직 flush되지 않은 최근 데이터를 위해 ingester들에 직접 질의하는 동시에, 오브젝트 스토리지의 블록들에 대해서는 <strong>bloom filter</strong>로 "이 블록에 해당 trace_id가 있는가"를 먼저 걸러낸 뒤, 걸린 블록만 다운로드해 실제 데이터를 읽는다.
+
+```mermaid
+sequenceDiagram
+    participant G as Grafana
+    participant QF as Query Frontend
+    participant Q as Querier
+    participant ING as Ingester
+    participant OBJ as 오브젝트 스토리지
+
+    G->>QF: trace_id 조회
+    QF->>Q: 조회 위임
+    Q->>ING: 최근 데이터 질의 (메모리)
+    Q->>OBJ: 블록별 bloom filter 확인
+    Note over Q,OBJ: bloom filter가 존재 가능성을<br>가리키는 블록만 다운로드
+    OBJ-->>Q: 해당 블록 parquet 데이터
+    ING-->>Q: 최근 span
+    Q-->>QF: trace 조립 결과 병합
+    QF-->>G: 완성된 trace
+```
+
+<strong>TraceQL 검색</strong>은 trace_id를 모르는 상태에서 속성 조건으로 trace를 찾는 경로다. 예를 들어 "지난 1시간 동안 `http.status_code >= 500`이었던 trace를 모두 찾아라" 같은 질의는 해당 시간 범위의 모든 블록을 스캔해야 한다. <strong>query-frontend</strong>가 시간 범위와 블록 단위로 질의를 여러 조각(shard)으로 쪼개 다수의 querier에 병렬로 분산시키고, 각 querier가 담당 블록을 스캔한 결과를 모아 반환한다. TraceQL 문법 자체는 다음 챕터에서 자세히 다룬다.
+
+## 4. 블록 포맷·저장 — parquet, bloom filter
+
+Tempo의 블록은 <strong>Parquet</strong> 컬럼형 포맷(vParquet 계열 인코딩)으로 저장된다. 컬럼형 저장은 "이 속성 값만 훑어서 필터링"하는 TraceQL 검색에 유리하다 — row 전체를 읽지 않고 필요한 컬럼(속성)만 스캔할 수 있기 때문이다. 블록 하나는 대략 다음 요소로 구성된다.
+
+| 파일 | 역할 |
+|---|---|
+| `meta.json` | 블록 메타데이터(테넌트, 블록 ID, 시간 범위, 크기, 인코딩 버전) |
+| 데이터 파일 (parquet) | 실제 span·속성 데이터, 컬럼형으로 저장 |
+| bloom filter | 이 블록에 특정 trace_id가 있을 가능성을 빠르게 판별하는 확률적 자료구조 |
+| index (선택) | trace_id → 블록 내 오프셋 매핑 보조 정보 |
+
+<strong>bloom filter</strong>는 "이 블록에 trace_id X가 없다"는 것은 확실히 걸러내지만 "있다"는 답은 확률적으로만 맞는(false positive 가능) 자료구조다. false negative가 없다는 성질 덕분에, 실제로 trace가 없는 블록은 다운로드 자체를 건너뛸 수 있어 trace ID 조회를 크게 빠르게 만든다. 블록이 커질수록 bloom filter도 여러 조각(shard)으로 나눠 저장해, 필터 하나를 통째로 읽지 않고도 필요한 조각만 확인하게 최적화한다.
+
+작은 블록이 계속 쌓이면 오브젝트 스토리지 요청 수가 늘어나 검색 비용이 커진다. <strong>compactor</strong> 컴포넌트가 주기적으로 작은 블록들을 더 큰 블록으로 병합하고, 보존 기간(retention)이 지난 블록을 삭제한다.
+
+## 5. metrics-generator — span metrics, service graph
+
+Tempo는 트레이스 저장소이면서 동시에 <strong>metrics-generator</strong> 컴포넌트를 통해 trace 데이터로부터 메트릭을 실시간으로 파생시킬 수 있다. 저장은 안 하지만 ingester가 받는 span 스트림을 관찰해 두 종류의 메트릭을 생성하고, Prometheus 호환 remote_write로 Mimir/Prometheus에 내보낸다.
+
+- <strong>span metrics</strong>: span의 이름·서비스·status를 라벨로 하는 RED 메트릭(Rate, Errors, Duration)을 자동 생성한다. 예를 들어 `traces_spanmetrics_calls_total`(호출 수), `traces_spanmetrics_latency`(지연 히스토그램)가 나온다.
+- <strong>service graph metrics</strong>: span의 kind(`CLIENT`/`SERVER`)와 parent/child 관계를 분석해 서비스 간 호출 관계를 `traces_service_graph_request_total` 같은 메트릭으로 만든다. 이 메트릭으로 Grafana가 서비스 의존 관계 그래프를 자동으로 그릴 수 있다.
+
+```mermaid
+flowchart LR
+    ING["Ingester\n(span 스트림)"]
+    MG["metrics-generator"]
+    SM["span metrics\ntraces_spanmetrics_*"]
+    SG["service graph metrics\ntraces_service_graph_*"]
+    MIMIR["Mimir / Prometheus\n(remote_write)"]
+
+    ING --> MG
+    MG --> SM
+    MG --> SG
+    SM --> MIMIR
+    SG --> MIMIR
+```
+
+계측 없이도(별도 Prometheus exporter를 붙이지 않아도) 트레이스만 계측되어 있으면 RED 메트릭과 서비스 그래프를 얻을 수 있다는 점이 metrics-generator의 실질적 가치다. 이 메트릭을 다루는 구체적인 쿼리와 exemplar 연계는 [TraceQL과 span metrics](/study/observability/23-traceql-spanmetrics) 챕터에서 이어진다.
+
+## 6. 배포·스케일링
+
+Tempo는 Loki·Mimir와 마찬가지로 두 가지 배포 모드를 지원한다.
+
+- <strong>모놀리식 모드(monolithic mode)</strong>: 단일 바이너리/프로세스가 distributor·ingester·querier·compactor 역할을 모두 수행한다. 소규모 트래픽이나 개발 환경에 적합하다.
+- <strong>마이크로서비스 모드(microservices mode)</strong>: distributor, ingester, querier, query-frontend, compactor, metrics-generator를 각각 독립된 워크로드로 분리 배포한다. 컴포넌트별로 트래픽 특성에 맞춰 수평 확장할 수 있다.
+
+```mermaid
+flowchart TB
+    subgraph Stateless["Stateless (수평 확장 쉬움)"]
+        DIST["Distributor"]
+        QF["Query Frontend"]
+        Q["Querier"]
+    end
+    subgraph Stateful["Stateful (샤딩·리텐션 관리 필요)"]
+        ING["Ingester"]
+        COMP["Compactor"]
+    end
+    RING["Hash Ring\n(memberlist gossip)"]
+
+    DIST -.->|"링 조회"| RING
+    ING -.->|"링 등록"| RING
+    DIST --> ING
+    QF --> Q
+    Q --> ING
+```
+
+distributor와 querier는 상태가 없어 트래픽에 따라 자유롭게 늘리고 줄일 수 있다. 반면 ingester는 최근 데이터를 메모리·로컬 디스크에 들고 있는 상태 저장 컴포넌트라, 스케일 조정 시 데이터 이관을 고려해야 한다. 컴포넌트 간 멤버십과 해시 링 정보는 memberlist gossip 프로토콜로 공유하며, 이는 Mimir·Loki와 동일한 방식이다. 쿠버네티스 위에서의 구체적인 배포는 이 스터디의 운영 심화 파트(Kubernetes 배포 챕터)에서 Loki·Mimir와 함께 다룬다.
+
+::: tip 핵심 정리
+- Tempo는 전용 검색 인덱스 없이 오브젝트 스토리지의 블록만으로 동작하며, trace ID 조회를 최우선 접근 패턴으로 최적화한다.
+- 쓰기 경로는 distributor(trace_id 해싱) → ingester(WAL + head block) → 오브젝트 스토리지 업로드 순서로 진행된다.
+- trace ID 조회는 bloom filter로 블록을 좁혀 빠르게 처리하고, TraceQL 검색은 query-frontend가 블록 단위로 질의를 쪼개 병렬 스캔한다.
+- 블록은 Parquet 컬럼형 포맷으로 저장되고, bloom filter가 false negative 없는 확률적 필터로 불필요한 블록 다운로드를 막는다.
+- metrics-generator는 trace 데이터에서 span metrics(RED)와 service graph metrics를 실시간 파생시켜 별도 계측 없이 메트릭을 확보하게 해준다.
+- 모놀리식/마이크로서비스 배포 모드를 지원하며, ingester는 상태 저장 컴포넌트로 스케일링 시 별도 고려가 필요하다.
+:::
+
+## 다음 챕터
+
+[TraceQL과 span metrics](/study/observability/23-traceql-spanmetrics)에서는 앞서 미리 본 TraceQL 문법과 metrics-generator가 만들어내는 span metrics·service graph metrics를 구체적인 쿼리와 함께 다룬다. 메트릭에서 트레이스로 점프하는 exemplar 연계까지 이어진다.

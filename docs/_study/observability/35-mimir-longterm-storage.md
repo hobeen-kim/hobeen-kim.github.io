@@ -1,0 +1,161 @@
+---
+title: "장기 저장 — Mimir"
+description: "단일 노드 Prometheus TSDB의 수평 확장 한계와 Cortex 계보에서 출발한 Mimir의 등장 배경을 짚고, distributor·ingester·store-gateway·querier·compactor로 구성된 마이크로서비스 아키텍처, remote_write 수신 경로, 블록 스토리지·compactor 동작, query-frontend 기반 쿼리 경로와 스케일링 전략을 Thanos와 비교하며 다룬다."
+date: 2026-07-02
+tags: [Observability, Mimir, LongTermStorage, SRE]
+prev: /study/observability/34-cardinality-cost
+next: /study/observability/36-ha-multitenancy-federation
+---
+
+# 장기 저장 — Mimir
+
+::: info 학습 목표
+- Prometheus 로컬 TSDB가 수평 확장할 수 없는 구조적 이유와, Cortex에서 Mimir로 이어지는 계보를 이해한다.
+- distributor·ingester·querier·store-gateway·compactor로 구성된 Mimir 마이크로서비스 아키텍처의 역할 분담을 안다.
+- remote_write가 distributor에서 ingester까지 도달하는 경로와 복제(replication factor) 동작을 익힌다.
+- 블록 스토리지 구조와 compactor의 병합·중복 제거 역할, Mimir가 다운샘플링을 다루는 방식을 이해한다.
+- query-frontend의 쿼리 분할(split-and-shard)과 캐시가 쿼리 성능에 기여하는 원리를 파악한다.
+- 컴포넌트별 독립 스케일링 전략과 Thanos 대비 아키텍처 차이를 비교해서 설명할 수 있다.
+:::
+
+## 1. 왜 Mimir인가
+
+단일 Prometheus 서버의 로컬 TSDB는 근본적으로 <strong>단일 노드</strong> 설계다. 스크레이프·저장·질의가 한 프로세스 안에서 일어나므로, 카디널리티나 스크레이프 대상이 늘면 CPU·메모리를 수직으로만 늘릴 수 있고 어느 순간 한 서버의 물리적 한계에 부딪힌다. 로컬 디스크에 의존하므로 보존 기간을 늘릴수록 디스크 비용과 압축(compaction) 부담이 커지고, 서버가 죽으면 그 기간의 데이터를 통째로 잃는 가용성 문제도 있다. [TSDB와 remote_write](/study/observability/12-tsdb-remote-write)에서 다룬 것처럼, 이 한계를 넘는 표준 해법이 `remote_write`로 원격 장기 저장 시스템에 데이터를 흘려보내는 구조다.
+
+<strong>Mimir</strong>는 Grafana Labs가 2022년 공개한 오픈소스 장기 저장 시스템으로, [Cortex](https://cortexmetrics.io/) 프로젝트에서 갈라져 나왔다. Cortex는 Weaveworks가 만든 최초의 수평 확장형 Prometheus 저장소로, distributor/ingester 기반 아키텍처의 원형을 세웠다. Mimir는 이 아키텍처를 계승하면서 성능(더 빠른 쿼리, TSDB 블록 포맷 채택)과 운영 단순성(단일 바이너리에서 마이크로서비스까지 유연한 배포 모드)을 크게 개선했다. 비슷한 목표를 가진 또 다른 프로젝트로 [Thanos](https://thanos.io/)가 있으며, 아키텍처 차이는 6절에서 비교한다.
+
+## 2. 아키텍처
+
+Mimir는 역할이 분리된 여러 마이크로서비스로 구성되고, 각각 독립적으로 스케일링할 수 있다.
+
+- <strong>distributor</strong> — Prometheus의 `remote_write` 요청을 받는 진입점. 유효성 검증, 테넌트별 limit 적용, 시계열을 해시 링을 통해 담당 ingester로 라우팅한다.
+- <strong>ingester</strong> — 최근 시계열을 메모리(및 WAL)에 유지하며 TSDB 블록으로 빌드한다. 일정 주기마다 완성된 블록을 오브젝트 스토리지로 flush한다.
+- <strong>querier</strong> — PromQL 쿼리를 받아 ingester(최근 데이터)와 store-gateway(과거 데이터)에서 데이터를 모아 계산한다.
+- <strong>query-frontend</strong> — 쿼리를 받아 캐싱·분할 후 querier로 분배하는 앞단. 5절에서 자세히 다룬다.
+- <strong>store-gateway</strong> — 오브젝트 스토리지에 저장된 블록의 인덱스를 메모리에 캐시해, 과거 블록에 대한 쿼리를 서빙한다.
+- <strong>compactor</strong> — ingester가 올린 소블록들을 병합·중복 제거해 더 크고 효율적인 블록으로 재작성한다. 4절에서 다룬다.
+- <strong>ruler</strong> — recording rule·alerting rule을 테넌트별로 평가한다.
+- <strong>alertmanager</strong> — 멀티테넌트 Alertmanager. 테넌트별로 격리된 알림 라우팅을 제공한다.
+
+```mermaid
+flowchart TB
+    PROM["Prometheus\n(remote_write)"]
+
+    subgraph Write["쓰기 경로"]
+        DIST["distributor\n(검증·limit·라우팅)"]
+        ING["ingester\n(메모리 + WAL)"]
+    end
+
+    subgraph Storage["오브젝트 스토리지"]
+        OBJ["S3 / GCS / Azure Blob\n(TSDB 블록)"]
+    end
+
+    subgraph Compact["압축"]
+        COMP["compactor\n(병합·dedup)"]
+    end
+
+    subgraph Read["읽기 경로"]
+        QF["query-frontend\n(분할·캐시)"]
+        Q["querier"]
+        SG["store-gateway\n(블록 인덱스 캐시)"]
+    end
+
+    GRAFANA["Grafana"]
+
+    PROM -->|remote_write| DIST
+    DIST -->|"복제 (RF=3)"| ING
+    ING -->|"블록 flush"| OBJ
+    COMP -->|"병합·재작성"| OBJ
+    OBJ --> COMP
+
+    GRAFANA -->|PromQL| QF
+    QF --> Q
+    Q -->|"최근 데이터"| ING
+    Q -->|"과거 데이터"| SG
+    SG --> OBJ
+```
+
+## 3. remote_write 수신
+
+Prometheus의 `remote_write` 요청은 항상 <strong>distributor</strong>가 먼저 받는다. [TSDB와 remote_write](/study/observability/12-tsdb-remote-write)에서 다룬 Remote Write 프로토콜(protobuf + snappy 압축) 그대로 전달되며, distributor는 다음을 순서대로 처리한다.
+
+1. 요청 헤더의 `X-Scope-OrgID`로 테넌트를 식별한다(멀티테넌시는 [HA·멀티테넌시·페더레이션](/study/observability/36-ha-multitenancy-federation)에서 자세히 다룬다).
+2. 샘플·시계열이 테넌트별 limit(초당 샘플 수, 활성 시계열 수 등)을 넘는지 검증한다.
+3. 각 시계열을 해시 링(consistent hashing)에 매핑해 담당 ingester 집합을 결정한다.
+4. <strong>replication factor</strong>(기본값 3)만큼 복제해 여러 ingester에 동시에 쓰고, 과반(quorum) 응답을 받으면 성공으로 처리한다.
+
+```yaml
+# Prometheus 쪽 remote_write 설정 예시
+remote_write:
+- url: https://mimir.example.com/api/v1/push
+  headers:
+    X-Scope-OrgID: team-checkout
+  queue_config:
+    max_samples_per_send: 5000
+    max_shards: 30
+```
+
+쿼럼 기반 복제 덕분에 ingester 하나가 죽어도 쓰기가 실패하지 않고, 재시작 후 WAL(write-ahead log)로 메모리 상태를 복구한다.
+
+## 4. 블록 스토리지와 compactor
+
+ingester는 Prometheus 로컬 TSDB와 동일한 블록 포맷을 사용한다. 일정 시간(기본 2시간) 단위로 헤드 데이터를 블록으로 굳혀 오브젝트 스토리지에 업로드하고, 로컬 상태는 정리한다. 문제는 replication factor 때문에 동일한 시계열이 여러 ingester에서 각각 블록으로 flush된다는 점이다 — 그대로 두면 같은 데이터가 중복 저장된다.
+
+<strong>compactor</strong>가 이 문제를 해결한다. 여러 ingester가 올린 소블록들을 주기적으로 읽어 다음을 수행한다.
+
+- <strong>중복 제거(dedup)</strong> — 동일 시계열의 복제본 블록을 병합하면서 중복 샘플을 제거한다.
+- <strong>병합(compaction)</strong> — 작은 블록 여러 개를 큰 블록 하나로 재작성해 인덱스 오버헤드를 줄이고 쿼리 시 열어야 하는 블록 수를 줄인다.
+- <strong>retention 적용</strong> — `-compactor.blocks-retention-period` 설정 기준을 넘은 블록을 오브젝트 스토리지에서 삭제한다.
+
+여기서 Thanos와의 핵심 차이가 드러난다. Thanos compactor는 압축 과정에서 5m/1h 해상도의 <strong>다운샘플링 블록</strong>을 추가로 생성해 장기 범위 쿼리 비용을 낮춘다. Mimir compactor는 기본적으로 다운샘플링 블록을 만들지 않는다 — 대신 원본 해상도를 유지하면서 query-frontend의 분할·캐시 최적화(5절)와 빠른 store-gateway 인덱스 조회로 장기 쿼리 성능을 확보하는 전략을 택했다. 그만큼 장기 저장 원본 데이터의 스토리지 비용은 Thanos보다 높을 수 있으므로, [카디널리티 관리와 비용](/study/observability/34-cardinality-cost)에서 다룬 retention 세분화·recording rule 기반 저해상도 사전 집계를 함께 설계해야 한다.
+
+## 5. 쿼리 경로
+
+읽기 경로의 앞단은 <strong>query-frontend</strong>다. Grafana나 사용자가 보낸 PromQL 쿼리를 querier로 바로 보내지 않고, 다음 최적화를 거친다.
+
+- <strong>split-and-shard</strong> — 긴 시간 범위 쿼리를 일 단위(또는 그보다 작은 단위)로 쪼개 여러 querier에 병렬로 분배한다. 90일치 쿼리 하나가 querier 하나를 독점하는 대신, 90개의 작은 쿼리로 나뉘어 동시에 처리된다.
+- <strong>results cache</strong> — 분할된 쿼리 결과를 memcached 같은 캐시에 저장해, 동일하거나 겹치는 시간 범위 쿼리가 다시 오면 캐시를 재사용한다. 특히 대시보드 자동 새로고침처럼 반복 쿼리가 많은 워크로드에서 효과가 크다.
+- <strong>큐잉·우선순위</strong> — 동시 쿼리 수를 제한해 querier가 과부하로 죽는 것을 막고, 테넌트별 공정성을 보장한다.
+
+querier는 분배받은 쿼리를 실행할 때 시간 범위에 따라 최근 데이터는 ingester에, 과거 데이터는 store-gateway에 요청한다. store-gateway는 블록의 인덱스 헤더(index-header)만 메모리에 캐시해두고, 실제 청크 데이터는 필요한 부분만 오브젝트 스토리지에서 읽어와(lazy loading) 메모리 사용량을 억제한다.
+
+```mermaid
+sequenceDiagram
+    participant G as Grafana
+    participant QF as query-frontend
+    participant Q as querier
+    participant ING as ingester
+    participant SG as store-gateway
+    participant OBJ as 오브젝트 스토리지
+
+    G->>QF: PromQL 쿼리 (최근 30일)
+    QF->>QF: 일 단위로 분할, 캐시 확인
+    QF->>Q: 캐시 미스 구간만 병렬 전달
+    Q->>ING: 최근 데이터 조회
+    Q->>SG: 과거 데이터 조회
+    SG->>OBJ: 필요한 청크만 lazy load
+    OBJ-->>SG: 청크 반환
+    SG-->>Q: 결과 반환
+    ING-->>Q: 결과 반환
+    Q-->>QF: 병합된 결과
+    QF-->>G: 최종 결과 (캐시에 저장)
+```
+
+## 6. 스케일링·운영
+
+Mimir의 마이크로서비스 분리는 컴포넌트별로 독립적인 스케일링을 가능하게 한다. 쓰기 트래픽이 몰리면 distributor·ingester만 늘리고, 대시보드 조회가 몰리는 시간대에는 querier·query-frontend·store-gateway만 늘리는 식으로 리소스를 정확히 배분할 수 있다. 운영 편의를 위해 배포 모드도 유연하다 — 단일 바이너리로 전 컴포넌트를 실행하는 <strong>monolithic mode</strong>(소규모 환경), 컴포넌트별로 완전히 분리 배포하는 <strong>microservices mode</strong>(대규모 운영), 그리고 읽기/쓰기 경로만 나누는 <strong>read-write mode</strong>(중간 규모, 운영 복잡도와 확장성의 절충)를 상황에 맞게 선택한다.
+
+<strong>Thanos와 비교</strong>하면 두 시스템 모두 Prometheus 블록 포맷과 오브젝트 스토리지를 기반으로 하지만 데이터 유입 경로가 다르다. Thanos는 전통적으로 Prometheus 옆에 sidecar를 붙여 로컬 블록을 그대로 업로드하거나(sidecar 모드), Mimir처럼 push 기반으로 받는 receive 모드도 지원한다. Mimir는 처음부터 distributor/ingester 기반 push 아키텍처로 설계되어 원격 수집에 최적화돼 있고, 앞서 언급한 대로 다운샘플링 대신 쿼리 분할·캐시로 장기 쿼리 성능을 확보한다는 점이 가장 큰 설계 철학 차이다. 두 시스템 다 CNCF 생태계에서 활발히 쓰이며, 선택은 기존 운영 경험·기존 Prometheus sidecar 배포 여부·다운샘플링 필요성에 따라 갈린다.
+
+::: tip 핵심 정리
+- 단일 Prometheus는 로컬 TSDB 기반 단일 노드 구조라 수평 확장이 불가능하고, Mimir는 Cortex 계보를 이어 이를 해결한 수평 확장형 장기 저장소다.
+- distributor(수신·라우팅)·ingester(메모리+WAL)·querier·query-frontend·store-gateway·compactor로 역할이 분리돼 있고 각각 독립 스케일링이 가능하다.
+- remote_write는 distributor가 받아 검증·해시 라우팅 후 replication factor만큼 ingester에 복제하고 쿼럼 응답으로 쓰기를 확정한다.
+- compactor는 ingester가 올린 복제 블록을 dedup·병합하며, Thanos와 달리 Mimir는 기본적으로 다운샘플링 블록을 만들지 않는다.
+- query-frontend의 split-and-shard와 results cache가 장기 범위 쿼리 성능의 핵심이며, store-gateway는 인덱스 헤더만 캐시해 메모리 사용을 억제한다.
+- 배포 모드(monolithic/microservices/read-write)를 운영 규모에 맞게 선택할 수 있고, Thanos는 다운샘플링 내장이라는 점에서 설계 철학이 갈린다.
+:::
+
+## 다음 챕터
+
+Mimir로 장기 저장 문제를 해결했다면, 다음 과제는 Prometheus 자체의 가용성과 여러 테넌트·클러스터를 아우르는 운영 구조다. 다음 챕터 [HA·멀티테넌시·페더레이션](/study/observability/36-ha-multitenancy-federation)에서는 Prometheus HA 페어 구성과 중복 제거, federation 엔드포인트, `X-Scope-OrgID` 기반 멀티테넌시, 테넌트 limit·격리, 그리고 멀티클러스터 글로벌 뷰 구성을 다룬다.

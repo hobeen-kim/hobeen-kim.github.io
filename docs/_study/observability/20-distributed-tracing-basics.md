@@ -1,0 +1,160 @@
+---
+title: "분산 트레이싱 기초"
+description: "단일 요청이 여러 마이크로서비스를 가로지를 때 발생하는 인과관계를 span과 trace로 재구성하는 원리를 다룬다. trace tree 구조, W3C Trace Context 기반 컨텍스트 전파, span의 구성 요소, 샘플링 개념과 트레이싱 표준의 역사까지 분산 트레이싱의 기초를 정리한다."
+date: 2026-07-02
+tags: [Tracing, Distributed, Spans]
+prev: /study/observability/19-log-pipeline-storage
+next: /study/observability/21-opentelemetry
+---
+
+# 분산 트레이싱 기초
+
+::: info 학습 목표
+- 마이크로서비스 환경에서 메트릭·로그만으로는 파악하기 어려운 요청 인과관계 문제를 이해한다.
+- span과 trace의 관계, parent/child 구조로 이뤄지는 trace tree를 그릴 수 있다.
+- W3C Trace Context(traceparent/tracestate)와 baggage로 컨텍스트가 서비스 경계를 넘어 전파되는 원리를 안다.
+- span을 구성하는 attributes·events·status·links의 역할과 샘플링 개념의 큰 그림을 파악한다.
+:::
+
+## 1. 왜 트레이싱인가 — 마이크로서비스의 인과관계 문제
+
+메트릭은 "무엇이 얼마나"를, 로그는 "무슨 일이 있었는가"를 알려준다. 하지만 하나의 사용자 요청이 API 게이트웨이 → 주문 서비스 → 결제 서비스 → 재고 서비스 → DB로 이어지는 마이크로서비스 환경에서는 둘 다 답하지 못하는 질문이 생긴다. "이 요청이 느렸던 건 어느 서비스 구간 때문인가?", "이 에러는 호출 체인의 어느 단계에서 시작됐는가?"
+
+각 서비스가 독립적으로 로그를 남기면 요청 하나의 전체 경로를 재구성하기 어렵다. 서비스마다 로그 포맷이 다르고, 타임스탬프만으로는 같은 요청인지 구분할 수 없으며, 병렬로 처리되는 하위 호출까지 있으면 순서를 추적하는 것 자체가 불가능에 가깝다. <strong>분산 트레이싱(Distributed Tracing)</strong>은 요청이 시스템을 가로지르는 전체 경로에 하나의 식별자를 부여하고, 각 서비스가 처리한 구간을 시간 순서와 부모-자식 관계로 남겨 인과관계를 재구성하는 관측성 신호다.
+
+```mermaid
+flowchart LR
+    subgraph Without["트레이싱 없이"]
+        L1["Gateway 로그"]
+        L2["Order 로그"]
+        L3["Payment 로그"]
+        L4["Inventory 로그"]
+        L1 -.->|"같은 요청인지\n추론 불가"| L2
+        L2 -.-> L3
+        L2 -.-> L4
+    end
+    subgraph With["트레이싱으로"]
+        T1["Gateway span\ntrace_id=X"]
+        T2["Order span\ntrace_id=X"]
+        T3["Payment span\ntrace_id=X"]
+        T4["Inventory span\ntrace_id=X"]
+        T1 --> T2 --> T3
+        T2 --> T4
+    end
+```
+
+쿠버네티스 환경에서 서비스가 Pod 단위로 흩어져 있고 사이드카·인그레스까지 거치는 구조라면 이 문제는 더 심각해진다. 클러스터 로깅 아키텍처는 [쿠버네티스 로깅과 트레이싱](/study/kubernetes/41-logging-tracing) 챕터에서 다룬 바 있는데, 이번 스터디에서는 트레이싱 신호 자체를 Tempo와 OpenTelemetry 기준으로 깊게 파고든다.
+
+## 2. span과 trace — parent/child, trace tree
+
+<strong>span</strong>은 하나의 작업 단위(예: HTTP 요청 처리, DB 쿼리, 함수 호출)를 나타내는 트레이싱의 최소 단위다. span은 시작·종료 시각을 가지며, 자신이 속한 trace를 가리키는 `trace_id`와 자기 자신의 `span_id`, 그리고 자신을 호출한 상위 span을 가리키는 `parent_span_id`를 가진다.
+
+<strong>trace</strong>는 같은 `trace_id`를 공유하는 span들의 집합이다. 최상위 요청을 처리하는 span을 <strong>root span</strong>이라 부르고, 그 아래로 호출된 span들이 parent/child 관계로 연결되면서 트리 구조를 이룬다. 이 구조를 <strong>trace tree</strong>라 한다.
+
+```mermaid
+flowchart TB
+    A["root span: API Gateway\ntrace_id=abc123, span_id=a1"]
+    B["span: Order Service\nparent_span_id=a1, span_id=b2"]
+    C["span: Payment Service\nparent_span_id=b2, span_id=c3"]
+    D["span: Inventory Service\nparent_span_id=b2, span_id=d4"]
+    E["span: DB Query (SELECT)\nparent_span_id=c3, span_id=e5"]
+    A --> B
+    B --> C
+    B --> D
+    C --> E
+```
+
+trace tree에서 각 span의 시작·종료 시각을 시간축에 나열하면 <strong>Gantt 형태의 waterfall 뷰</strong>가 만들어진다. Grafana에서 Tempo trace를 열었을 때 보이는 그 화면이다. child span의 구간이 parent span의 구간을 벗어나면 계측이 잘못됐거나 시계가 어긋난 것이므로, 이 포함 관계 자체가 유효성 검증의 기준이 되기도 한다.
+
+같은 서비스 안에서도 여러 span이 생길 수 있다. 예를 들어 결제 서비스 하나가 "요청 수신", "카드사 API 호출", "DB 기록" 세 구간을 각각 별도 span으로 남기면, 서비스 내부 병목까지 trace 하나로 드러난다.
+
+## 3. context propagation — W3C traceparent와 baggage
+
+trace가 서비스 경계를 넘어 이어지려면 호출하는 쪽이 `trace_id`와 현재 span의 `span_id`를 다음 서비스로 전달해야 한다. 이 전달 규격을 표준화한 것이 <strong>W3C Trace Context</strong>다. HTTP 요청이라면 `traceparent` 헤더로 전달된다.
+
+```
+traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01
+```
+
+포맷은 `버전-trace_id(32자리 hex)-parent_id(16자리 hex)-trace_flags(2자리 hex)` 네 부분이다. `trace_flags`의 `01`은 이 trace가 샘플링(수집) 대상임을 뜻한다. 수신 서비스는 이 헤더를 파싱해 같은 `trace_id`를 유지한 채 자신의 새 `span_id`를 생성하고, `parent_id`에는 방금 받은 `parent_id` 값을 넣는다.
+
+```mermaid
+sequenceDiagram
+    participant GW as API Gateway
+    participant ORD as Order Service
+    participant PAY as Payment Service
+    GW->>ORD: POST /orders (traceparent 헤더 전파)
+    Note over ORD: 같은 trace_id 유지,<br>새 span_id 생성
+    ORD->>PAY: POST /charge (traceparent 헤더 전파)
+    Note over PAY: 같은 trace_id 유지,<br>parent_id는 Order Service의 span_id
+    PAY-->>ORD: 200 OK
+    ORD-->>GW: 200 OK
+```
+
+벤더별 부가 정보는 `tracestate` 헤더에 실린다. 예를 들어 여러 벤더의 트레이싱 시스템이 공존하는 환경에서 각자의 샘플링 결정이나 우선순위 힌트를 `tracestate: vendorA=t61rcWkgMzE`처럼 key-value로 덧붙일 수 있다.
+
+trace context와는 별개로 <strong>baggage</strong>(W3C Baggage 스펙)는 애플리케이션 레벨의 임의 키-값을 요청 전체 경로에 전파하는 용도다.
+
+```
+baggage: userId=alice,plan=premium,ab-test-group=B
+```
+
+trace context가 "이 span이 어느 trace에 속하는가"를 위한 것이라면, baggage는 "이 요청을 처리하는 모든 서비스가 알아야 할 비즈니스 컨텍스트"를 위한 것이다. baggage는 모든 다운스트림 서비스로 전파되므로 민감 정보나 카디널리티가 큰 값을 넣으면 안 된다 — 헤더 크기 증가와 정보 유출 위험이 함께 따라온다.
+
+## 4. span 구성 — attributes, events, status, links
+
+span 하나는 시작/종료 시각 외에도 다음 네 가지 요소로 구조화된다.
+
+| 요소 | 설명 | 예시 |
+|---|---|---|
+| attributes | span에 대한 키-값 메타데이터. 검색·필터링의 기반 | `http.method=POST`, `http.status_code=500`, `db.system=postgresql` |
+| events | span 진행 중 특정 시점에 발생한 사건(타임스탬프 있는 로그) | `retry attempt #2`, `cache miss` |
+| status | span의 처리 결과. `Unset` / `Ok` / `Error` 세 값 | `Error` + `description: connection timeout` |
+| links | 다른 trace의 span과 인과관계를 맺을 때 사용 | 배치 작업이 여러 trace의 메시지를 한 번에 처리하는 경우 |
+
+attributes는 span kind(`SERVER`, `CLIENT`, `PRODUCER`, `CONSUMER`, `INTERNAL`)와 함께 span의 성격을 규정한다. kind가 `SERVER`인 span은 요청을 받는 쪽, `CLIENT`는 요청을 보내는 쪽을 뜻하며, 이 구분이 나중에 [Tempo의 service graph metrics](/study/observability/22-tempo-architecture)를 만드는 데 그대로 쓰인다.
+
+events는 span을 종료하지 않고도 중간 사건을 남길 수 있어, 재시도·캐시 미스·큐 대기 같은 span 내부 타임라인을 세밀하게 기록할 때 유용하다. status가 `Error`인 span은 trace 전체를 실패로 간주하는 판단 기준이 되며, TraceQL에서 `{ status = error }` 같은 조건으로 바로 검색할 수 있다.
+
+links는 root span 하나로 표현되지 않는 관계, 예를 들어 메시지 큐에서 여러 producer의 메시지를 batch로 묶어 하나의 consumer span이 처리하는 상황에서 각 producer trace로의 연결 고리를 남긴다.
+
+## 5. 샘플링 개요 — head-based와 tail-based 미리보기
+
+모든 요청의 모든 span을 저장하면 스토리지 비용이 감당하기 어렵다. <strong>샘플링(Sampling)</strong>은 어떤 trace를 실제로 수집·저장할지 결정하는 과정이다. 크게 두 방식이 있다.
+
+- <strong>head-based 샘플링</strong>: trace의 첫 span이 생성되는 시점에 즉시 결정한다. 구현이 단순하고 오버헤드가 적지만, 이 시점엔 이 trace가 에러를 포함할지 느릴지 알 수 없어 "확률적으로 X%만 수집" 같은 방식에 그친다.
+- <strong>tail-based 샘플링</strong>: trace의 모든 span이 도착할 때까지 기다렸다가, 에러가 있었는지·지연이 임계값을 넘었는지를 보고 수집 여부를 결정한다. 희귀하지만 중요한 실패 케이스를 놓치지 않지만, span을 버퍼링해야 하므로 별도 컴포넌트(Collector)가 필요하고 메모리·지연 비용이 커진다.
+
+이 트레이드오프와 실제 구현 방식은 다음 챕터 [OpenTelemetry](/study/observability/21-opentelemetry)에서 Collector의 tail sampling processor를 중심으로 자세히 다룬다.
+
+## 6. 트레이싱 표준의 역사 — OpenTracing/OpenCensus에서 OpenTelemetry로
+
+분산 트레이싱의 개념적 뿌리는 2010년 Google이 공개한 Dapper 논문이다. 이후 Zipkin(Twitter), Jaeger(Uber) 같은 오픈소스 트레이싱 시스템이 등장했지만, 계측 라이브러리가 벤더마다 제각각이라 애플리케이션 코드가 특정 트레이싱 백엔드에 종속되는 문제가 있었다.
+
+```mermaid
+timeline
+    title 분산 트레이싱 표준의 역사
+    2010 : Google Dapper 논문 발표
+    2012 : Zipkin 오픈소스 공개 (Twitter)
+    2016 : OpenTracing 프로젝트 시작 (CNCF, API 표준화)
+    2017 : OpenCensus 발표 (Google, API + SDK)
+    2019 : OpenTracing과 OpenCensus 통합 발표
+    2021 : OpenTelemetry Traces 1.0 GA
+```
+
+<strong>OpenTracing</strong>은 계측 API만 표준화해 "코드는 OpenTracing API로 계측하고, 백엔드는 Zipkin이든 Jaeger든 자유롭게 선택"할 수 있게 했다. 반면 <strong>OpenCensus</strong>는 Google 주도로 API와 SDK(실제 수집·내보내기 구현)를 함께 제공했다. 문제는 두 프로젝트가 경쟁하면서 계측 라이브러리 생태계가 다시 두 쪽으로 갈라졌다는 점이다.
+
+2019년 두 프로젝트가 <strong>OpenTelemetry</strong>로 통합을 발표하면서 이 분절이 해소됐다. OpenTelemetry는 트레이스뿐 아니라 메트릭·로그까지 아우르는 교차 신호 표준으로 확장됐고, 현재는 CNCF의 두 번째로 활발한 프로젝트(Kubernetes 다음)로 자리 잡았다. 다음 챕터에서 이 OpenTelemetry의 구성 요소와 계측 방식을 구체적으로 다룬다.
+
+::: tip 핵심 정리
+- 분산 트레이싱은 마이크로서비스를 가로지르는 요청의 인과관계를, 메트릭·로그가 답하지 못하는 "어디서 느려졌고 어디서 실패했는가"로 재구성한다.
+- span은 작업 단위, trace는 같은 trace_id를 공유하는 span들의 parent/child 트리다.
+- W3C traceparent 헤더가 trace_id·parent span_id·샘플링 플래그를 서비스 경계 너머로 전파하고, baggage는 비즈니스 컨텍스트를 전파한다.
+- span은 attributes(검색 기반)·events(타임라인 내 사건)·status(성공/실패)·links(다른 trace와의 관계)로 구조화된다.
+- head-based 샘플링은 가볍지만 확률적이고, tail-based 샘플링은 정확하지만 버퍼링 비용이 든다 — 실제 구현은 다음 챕터에서 다룬다.
+- OpenTracing과 OpenCensus의 분절을 해소하며 2019년 OpenTelemetry로 통합됐다.
+:::
+
+## 다음 챕터
+
+[OpenTelemetry](/study/observability/21-opentelemetry)에서는 트레이스·메트릭·로그를 아우르는 교차 신호 표준으로서의 OpenTelemetry를 다룬다. API/SDK/Collector 구조, 자동·수동 계측, 시맨틱 컨벤션, 그리고 앞서 미리 본 head-based/tail-based 샘플링의 실제 구현 트레이드오프까지 살펴본다.

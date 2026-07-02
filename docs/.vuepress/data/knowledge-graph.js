@@ -41,6 +41,7 @@ export const nodes = [
   { id: 'network', label: '네트워크', size: 22, status: 'planned', link: null, x: 0.70, y: 0.22 },
   { id: 'os', label: '운영체제', size: 22, status: 'planned', link: null, x: 0.92, y: 0.22 },
   { id: 'data-engineering', label: '데이터\n엔지니어링', size: 24, status: 'planned', link: null, x: 0.60, y: 0.40 },
+  { id: 'observability', label: '관측성\n(Grafana 스택)', size: 26, status: 'active', link: '/study/observability/', x: 0.90, y: 0.80 },
 
   // === AI — 하단 중앙 ===
   { id: 'ai', label: 'AI', size: 36, status: 'active', link: null, x: 0.50, y: 0.30 },
@@ -92,6 +93,8 @@ export const edges = [
   { source: 'infra', target: 'aws' },
   { source: 'infra', target: 'kubernetes' },
   { source: 'infra', target: 'cicd' },
+  { source: 'infra', target: 'observability' },
+  { source: 'kubernetes', target: 'observability' },
   { source: 'software', target: 'auth' },
   { source: 'auth', target: 'oauth' },
   { source: 'oauth', target: 'keycloak' },

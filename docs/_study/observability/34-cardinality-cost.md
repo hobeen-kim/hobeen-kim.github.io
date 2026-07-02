@@ -1,0 +1,183 @@
+---
+title: "카디널리티 관리와 비용"
+description: "카디널리티가 Prometheus·Mimir 운영 비용을 지배하는 이유를 메모리·저장·쿼리 관점에서 분석하고, TSDB status page와 Mimir cardinality API로 원인 라벨을 찾아 metric_relabel_configs와 native histogram으로 통제하는 실전 기법, Loki/Tempo의 카디널리티 대응과 전체 스택 비용 최적화 전략을 다룬다."
+date: 2026-07-02
+tags: [Observability, Cardinality, Cost, SRE]
+prev: /study/observability/33-dashboard-as-code
+next: /study/observability/35-mimir-longterm-storage
+---
+
+# 카디널리티 관리와 비용
+
+::: info 학습 목표
+- 카디널리티가 어떻게 메모리·저장·쿼리 성능에 동시에 영향을 미치는지, 그리고 왜 관측성 스택 비용의 지배 변수인지 이해한다.
+- Prometheus TSDB status page와 `promtool tsdb analyze`로 카디널리티 폭발을 탐지하는 방법을 익힌다.
+- topk 기반 PromQL과 Mimir cardinality API로 원인 라벨·메트릭을 특정하는 절차를 익힌다.
+- `metric_relabel_configs`의 drop/labeldrop과 native histogram으로 카디널리티를 통제하는 실전 기법을 다룬다.
+- Loki·Tempo가 카디널리티 문제에 접근하는 방식이 Prometheus와 어떻게 다른지 구분한다.
+- 샘플링·retention·downsampling·오브젝트 스토리지 계층화로 전체 스택 비용을 최적화하는 전략을 안다.
+:::
+
+## 1. 카디널리티가 비용을 지배한다
+
+<strong>카디널리티(cardinality)</strong>는 메트릭 이름과 라벨 조합이 만들어내는 고유 시계열(unique time series)의 수다. `http_requests_total{method="GET", status="200", path="/api/users"}`처럼 라벨 값 조합 하나가 시계열 하나를 만들고, 라벨 하나가 늘 때마다 카디널리티는 곱셈으로 늘어난다. `method`(4) × `status`(10) × `path`(50)면 2,000개 시계열이지만, 여기에 카디널리티가 사실상 무한한 `user_id`나 `pod_uid`가 라벨로 섞이면 시계열 수는 순식간에 수백만으로 폭발한다. [Pull/Push와 카디널리티](/study/observability/04-pull-push-cardinality)에서 다룬 구조적 문제가 여기서 실제 운영 비용으로 드러난다.
+
+카디널리티는 세 축을 동시에 압박한다.
+
+<strong>메모리.</strong> Prometheus는 활성 시계열마다 헤드(head) 블록에 청크 헤더·인덱스 엔트리·라벨 세트를 메모리에 들고 있다. 시계열 하나당 소비량은 라벨 수·문자열 길이에 따라 다르지만, 활성 시계열이 수백만 단위로 늘면 헤드 메모리만으로 수십 GB를 차지해 OOM으로 이어진다. 게다가 짧은 수명의 라벨 값(예: Pod가 재배포될 때마다 바뀌는 `pod_uid`)은 <strong>churn</strong>(시계열이 죽고 새로 태어나는 것)을 유발해, 죽은 시계열도 압축 전까지 헤드에 남아 메모리를 추가로 잡아먹는다.
+
+<strong>저장.</strong> 블록으로 압축(compaction)될 때 시계열 수가 많을수록 인덱스(라벨→시계열 포스팅 리스트) 크기가 커진다. 실제 샘플 데이터보다 인덱스가 스토리지를 더 많이 차지하는 경우도 흔하다. Mimir 같은 장기 저장 백엔드에서는 이게 곧 오브젝트 스토리지 비용과 압축(compactor) CPU 비용으로 직결된다.
+
+<strong>쿼리.</strong> PromQL 쿼리는 매처(matcher)에 해당하는 시계열을 전부 메모리로 읽어 들인 뒤 연산한다. `sum(rate(http_requests_total[5m]))`처럼 집계 없이 넓은 범위를 스캔하면, 카디널리티가 높을수록 쿼리 시간이 선형에 가깝게 늘고 쿼리 하나가 querier를 OOM 시킬 수 있다. 카디널리티가 낮아도 쿼리는 최적화할 수 있지만, 카디널리티가 높으면 쿼리 최적화만으로는 한계가 있다.
+
+```mermaid
+flowchart LR
+    LABEL["라벨 조합 증가\n(user_id, pod_uid, trace_id...)"]
+    CARD["카디널리티 폭발"]
+    MEM["메모리\n(head 블록, OOM 위험)"]
+    STORE["저장\n(인덱스 크기, 압축 비용)"]
+    QUERY["쿼리\n(스캔 시계열 수 ↑, 지연 ↑)"]
+    COST["운영 비용"]
+    LABEL --> CARD
+    CARD --> MEM --> COST
+    CARD --> STORE --> COST
+    CARD --> QUERY --> COST
+```
+
+## 2. 카디널리티 탐지
+
+카디널리티는 사고가 터지기 전에 정기적으로 관측해야 하는 지표다. Prometheus는 자체 진단 도구를 여럿 제공한다.
+
+<strong>TSDB status page.</strong> Prometheus 웹 UI의 `/tsdb-status` 페이지(또는 API `/api/v1/status/tsdb`)는 현재 헤드 블록 기준 상위 카디널리티 항목을 바로 보여준다.
+
+```bash
+curl -s http://localhost:9090/api/v1/status/tsdb | jq '.data'
+# 응답 구조
+# - headStats: numSeries, numLabelPairs, chunkCount 등
+# - seriesCountByMetricName: 메트릭 이름별 시계열 수 상위 목록
+# - labelValueCountByLabelName: 라벨 이름별 고유 값 개수 상위 목록
+# - memoryInBytesByLabelName: 라벨 이름별 메모리 사용량 상위 목록
+# - seriesCountByLabelValuePair: 라벨=값 쌍별 시계열 수 상위 목록
+```
+
+<strong>promtool tsdb analyze.</strong> 로컬 TSDB 블록을 직접 분석해 카디널리티 상위 메트릭·라벨을 리포트한다. 온콜 중 특정 블록의 카디널리티 원인을 오프라인으로 파고들 때 유용하다.
+
+```bash
+promtool tsdb analyze /prometheus/data --limit=20
+# Highest cardinality metric names
+# Highest cardinality labels
+# Label pairs most involved in series churn
+```
+
+<strong>PromQL 자체 질의.</strong> 살아있는 서버에서 즉시 확인하려면 메타 메트릭을 직접 쿼리한다.
+
+```promql
+# 전체 활성 시계열 수 (헤드 기준)
+prometheus_tsdb_head_series
+
+# 메트릭 이름별 시계열 수 상위 10개
+topk(10, count by (__name__)({__name__=~".+"}))
+
+# job별 스크레이프당 샘플 수 (급증하면 카디널리티 증가 신호)
+topk(10, scrape_samples_scraped)
+```
+
+`prometheus_tsdb_head_series`를 시계열 그래프로 그려두면 배포 이후 카디널리티가 계단식으로 튀는 시점을 바로 잡아낼 수 있다.
+
+```mermaid
+flowchart TD
+    A["prometheus_tsdb_head_series\n급증 알림"] --> B{"TSDB status page\n확인"}
+    B --> C["seriesCountByMetricName\n상위 메트릭 확인"]
+    C --> D{"오프라인 블록\n분석 필요?"}
+    D -->|예| E["promtool tsdb analyze"]
+    D -->|아니오| F["topk(count by (__name__))\nPromQL로 실시간 확인"]
+    E --> G["원인 라벨 특정"]
+    F --> G
+    G --> H["metric_relabel_configs로 통제"]
+```
+
+## 3. 원인 라벨 찾기
+
+카디널리티가 높다는 걸 알았다면 다음은 "어느 라벨이 범인인가"를 특정하는 단계다.
+
+```promql
+# 특정 메트릭에서 라벨별 고유 값 개수 근사 — count(count by (label)(metric))
+count(count by (pod_uid) (kube_pod_info))
+
+# 메트릭 하나가 만들어내는 시계열 수
+count({__name__="http_request_duration_seconds_bucket"})
+
+# 라벨 조합별 시계열 수 상위 — 어느 path가 카디널리티를 키우는지
+topk(10, count by (path) (http_requests_total))
+```
+
+Mimir를 장기 저장소로 쓴다면 [Mimir cardinality API](https://grafana.com/docs/mimir/latest/references/http-api/#cardinality)가 훨씬 강력하다. 테넌트 단위로 실시간 카디널리티를 조회할 수 있다.
+
+```bash
+# 라벨 이름별 고유 값 개수 상위 목록
+curl -H "X-Scope-OrgID: tenant-a" \
+  "http://mimir/api/v1/cardinality/label_names?limit=20"
+
+# 특정 라벨의 값 분포
+curl -H "X-Scope-OrgID: tenant-a" \
+  "http://mimir/api/v1/cardinality/label_values?label_names[]=path&limit=20"
+
+# 셀렉터에 매칭되는 활성 시계열 수와 라벨 통계
+curl -H "X-Scope-OrgID: tenant-a" \
+  "http://mimir/api/v1/cardinality/active_series?selector=%7Bjob%3D%22checkout%22%7D"
+```
+
+이 API는 Grafana Cloud의 Cardinality Management 대시보드가 내부적으로 사용하는 것과 동일한 엔드포인트로, 테넌트별 비용 원인을 정기적으로 리뷰하는 운영 루틴을 만들 때 기반이 된다.
+
+## 4. 통제 기법
+
+원인 라벨을 찾았다면 스크레이프 시점에서 잘라내는 게 가장 저렴하다. 일단 TSDB에 들어간 시계열은 삭제해도 인덱스 재구성 전까지 비용을 계속 발생시킨다.
+
+```yaml
+scrape_configs:
+- job_name: 'checkout'
+  metric_relabel_configs:
+  # 불필요한 메트릭 자체를 드롭
+  - source_labels: [__name__]
+    regex: 'go_gc_duration_seconds.*'
+    action: drop
+  # 카디널리티 폭탄 라벨을 이름 무관하게 제거
+  - regex: 'pod_uid|container_id|instance_uuid'
+    action: labeldrop
+  # 특정 메트릭에서만 라벨 제거하고 싶다면 labelkeep으로 화이트리스트 방식도 가능
+```
+
+`action: drop`은 시계열 전체를, `labeldrop`/`labelkeep`은 특정 라벨만 제거·유지한다. 애플리케이션 계측 코드 레벨에서 원천적으로 고카디널리티 라벨(사용자 ID, 요청 ID, 원시 URL 경로 등)을 메트릭에 붙이지 않는 게 근본 대책이고, relabel은 계측을 못 고칠 때의 방어선이다.
+
+히스토그램은 카디널리티의 대표적인 함정이다. 클래식 히스토그램은 버킷마다(`le="0.1"`, `le="0.5"` ...) 별도 시계열을 만들어 버킷 수만큼 카디널리티를 곱한다. [데이터 모델과 시계열](/study/observability/06-data-model)에서 다룬 <strong>native histogram</strong>은 버킷 경계를 시계열이 아니라 단일 샘플 안의 압축된 sparse 구조로 인코딩해, 버킷 수와 무관하게 시계열 하나만 소비한다. Prometheus 2.40+에서 `--enable-feature=native-histograms` 플래그로 활성화하고, 클라이언트 라이브러리에서 `NativeHistogram`으로 계측하면 지연 시간 분포처럼 원래 고카디널리티였던 히스토그램의 비용을 크게 줄일 수 있다.
+
+## 5. Loki/Tempo 카디널리티
+
+Loki는 Prometheus와 카디널리티 철학이 근본적으로 다르다. [Loki 아키텍처](/study/observability/16-loki-architecture)에서 다루듯 Loki는 로그 본문을 인덱싱하지 않고 <strong>라벨만 인덱싱</strong>한다. 그런데 이 라벨을 Prometheus 습관대로 `user_id`나 `request_id`처럼 고카디널리티 값으로 설계하면, 인덱스가 폭발해 스트림(라벨 조합 하나)이 수백만 개로 늘고 ingester 메모리와 청크 수가 감당 불가능해진다. Loki의 원칙은 "라벨은 낮은 카디널리티로 스트림을 나누는 용도, 세부 필드는 LogQL 파서로 로그 본문에서 추출"이다. 고카디널리티지만 검색은 필요한 필드(요청 ID, 트레이스 ID 등)는 라벨 대신 <strong>structured metadata</strong>(Loki 2.9+)로 청크 안에 함께 저장해, 인덱스 비용 없이 필터링할 수 있게 한다.
+
+Tempo는 스팬 자체를 라벨 인덱스로 다루지 않으므로 Prometheus·Loki식 카디널리티 폭발과는 결이 다르다. 다만 TraceQL 검색 성능을 위해 특정 스팬 속성을 인덱싱하도록 설정하면 그 속성의 카디널리티가 검색 인덱스 크기에 직접 반영되고, span metrics(트레이스에서 파생한 RED 메트릭)를 생성할 때 스팬 속성을 메트릭 라벨로 그대로 매핑하면 Prometheus/Mimir 쪽에서 동일한 카디널리티 폭발이 재현될 수 있다. span metrics의 dimension 목록은 반드시 낮은 카디널리티 속성(서비스 이름, HTTP 메서드, status_code)으로 제한해야 한다.
+
+## 6. 비용 최적화
+
+카디널리티를 통제한 다음에는 전체 스택의 비용 구조를 최적화한다.
+
+<strong>샘플링.</strong> 트레이스는 전수 저장하면 스토리지 비용이 트래픽에 선형 비례한다. Tempo 앞단에서 head-based 샘플링(수집 시점에 일정 비율만 채택) 또는 tail-based 샘플링(에러·느린 요청 등 의미 있는 트레이스를 완료 후 선별)을 적용해 저장량을 줄인다.
+
+<strong>retention.</strong> 신호마다 보존 기간을 다르게 가져간다. 원시 메트릭은 며칠~몇 주, 집계된 recording rule 결과는 수개월~수년처럼 세분화하면, 고해상도 원본 데이터의 저장 비용을 줄이면서도 장기 추세 분석은 유지할 수 있다.
+
+<strong>downsampling.</strong> 오래된 데이터는 해상도를 낮춰 저장한다. Thanos는 컴팩터가 5m/1h 해상도 블록을 자동 생성하지만, Mimir는 기본적으로 다운샘플링 대신 recording rule로 미리 집계된 저해상도 시계열을 별도로 저장하는 방식을 권장한다. 이 차이는 [장기 저장 — Mimir](/study/observability/35-mimir-longterm-storage)에서 더 자세히 다룬다.
+
+<strong>오브젝트 스토리지 계층화.</strong> S3/GCS의 라이프사이클 정책으로 오래된 블록을 Standard-IA나 Glacier 같은 저비용 티어로 자동 이동시키면, 조회 빈도가 낮은 과거 데이터의 저장 비용을 크게 줄일 수 있다. 단, 콜드 티어는 조회 지연이 커지므로 SLA와 맞바꿔야 하는 트레이드오프다.
+
+::: tip 핵심 정리
+- 카디널리티는 메모리(헤드 블록)·저장(인덱스)·쿼리(스캔 시계열 수)를 동시에 압박하는 관측성 비용의 지배 변수다.
+- TSDB status page, `promtool tsdb analyze`, `topk(count by (__name__)(...))`로 카디널리티 폭발을 정기적으로 탐지한다.
+- Mimir cardinality API(`/api/v1/cardinality/*`)로 테넌트 단위 원인 라벨을 실시간으로 특정할 수 있다.
+- `metric_relabel_configs`의 drop/labeldrop으로 스크레이프 시점에 차단하는 게 가장 저렴하고, native histogram은 히스토그램 버킷 카디널리티 문제를 구조적으로 해결한다.
+- Loki는 라벨을 낮은 카디널리티로 유지하고 고카디널리티 필드는 structured metadata로 분리해야 하며, Tempo의 span metrics도 낮은 카디널리티 dimension만 사용해야 한다.
+- 샘플링·retention 세분화·downsampling·오브젝트 스토리지 계층화를 조합하면 카디널리티를 통제한 이후에도 스토리지 비용을 추가로 줄일 수 있다.
+:::
+
+## 다음 챕터
+
+카디널리티를 통제해도 데이터 자체는 계속 쌓이고, 단일 Prometheus의 로컬 TSDB로는 장기 보관과 수평 확장에 한계가 있다. 다음 챕터 [장기 저장 — Mimir](/study/observability/35-mimir-longterm-storage)에서는 Prometheus의 확장 한계를 Mimir가 어떻게 극복하는지, distributor·ingester·store-gateway·compactor로 구성된 마이크로서비스 아키텍처와 블록 스토리지 구조를 다룬다.

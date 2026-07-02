@@ -828,6 +828,110 @@ const theme = {
           ],
         },
       ],
+      '/study/observability/': [
+        {
+          text: '관측성 기초',
+          collapsible: false,
+          children: [
+            { text: '소개', link: '/study/observability/' },
+            { text: 'CH1. 모니터링에서 관측성으로', link: '/study/observability/01-monitoring-to-observability' },
+            { text: 'CH2. 관측성의 4대 신호', link: '/study/observability/02-four-signals' },
+            { text: 'CH3. Grafana 관측성 스택 개요', link: '/study/observability/03-stack-overview' },
+            { text: 'CH4. Pull/Push와 카디널리티', link: '/study/observability/04-pull-push-cardinality' },
+          ],
+        },
+        {
+          text: '메트릭 — Prometheus',
+          collapsible: false,
+          children: [
+            { text: 'CH5. Prometheus 아키텍처', link: '/study/observability/05-prometheus-architecture' },
+            { text: 'CH6. 데이터 모델과 시계열', link: '/study/observability/06-data-model' },
+            { text: 'CH7. 스크레이핑과 서비스 디스커버리', link: '/study/observability/07-scraping-service-discovery' },
+            { text: 'CH8. Exporter와 애플리케이션 계측', link: '/study/observability/08-exporters-instrumentation' },
+            { text: 'CH9. PromQL 기초', link: '/study/observability/09-promql-basics' },
+            { text: 'CH10. PromQL 심화', link: '/study/observability/10-promql-advanced' },
+            { text: 'CH11. Recording·Alerting Rule', link: '/study/observability/11-recording-alerting-rules' },
+            { text: 'CH12. TSDB와 remote_write', link: '/study/observability/12-tsdb-remote-write' },
+          ],
+        },
+        {
+          text: '알림 — Alertmanager',
+          collapsible: false,
+          children: [
+            { text: 'CH13. Alertmanager 아키텍처', link: '/study/observability/13-alertmanager-architecture' },
+            { text: 'CH14. 라우팅·그룹핑·억제', link: '/study/observability/14-routing-grouping-silence' },
+            { text: 'CH15. SLO/SLI와 알림 설계', link: '/study/observability/15-slo-sli-alerting' },
+          ],
+        },
+        {
+          text: '로그 — Loki',
+          collapsible: false,
+          children: [
+            { text: 'CH16. Loki 아키텍처와 라벨 철학', link: '/study/observability/16-loki-architecture' },
+            { text: 'CH17. 읽기/쓰기 경로와 구성요소', link: '/study/observability/17-loki-read-write-path' },
+            { text: 'CH18. LogQL', link: '/study/observability/18-logql' },
+            { text: 'CH19. 로그 파이프라인과 스토리지', link: '/study/observability/19-log-pipeline-storage' },
+          ],
+        },
+        {
+          text: '트레이스 — Tempo & OpenTelemetry',
+          collapsible: false,
+          children: [
+            { text: 'CH20. 분산 트레이싱 기초', link: '/study/observability/20-distributed-tracing-basics' },
+            { text: 'CH21. OpenTelemetry', link: '/study/observability/21-opentelemetry' },
+            { text: 'CH22. Tempo 아키텍처', link: '/study/observability/22-tempo-architecture' },
+            { text: 'CH23. TraceQL과 span metrics', link: '/study/observability/23-traceql-spanmetrics' },
+          ],
+        },
+        {
+          text: '프로파일 — Pyroscope',
+          collapsible: false,
+          children: [
+            { text: 'CH24. 연속 프로파일링 기초', link: '/study/observability/24-continuous-profiling-basics' },
+            { text: 'CH25. Pyroscope 아키텍처', link: '/study/observability/25-pyroscope-architecture' },
+            { text: 'CH26. 프로파일 타입과 eBPF', link: '/study/observability/26-profile-types-ebpf' },
+            { text: 'CH27. 플레임그래프와 트레이스 연계', link: '/study/observability/27-flamegraph-trace-integration' },
+          ],
+        },
+        {
+          text: '수집 파이프라인 — Alloy',
+          collapsible: false,
+          children: [
+            { text: 'CH28. Alloy 개요와 컴포넌트 모델', link: '/study/observability/28-alloy-overview' },
+            { text: 'CH29. Alloy 파이프라인 구성', link: '/study/observability/29-alloy-pipelines' },
+            { text: 'CH30. Collector vs Alloy', link: '/study/observability/30-collector-vs-alloy' },
+          ],
+        },
+        {
+          text: '통합·상관관계 — Grafana',
+          collapsible: false,
+          children: [
+            { text: 'CH31. 데이터소스와 대시보드', link: '/study/observability/31-grafana-datasources-dashboards' },
+            { text: 'CH32. 시그널 상관관계', link: '/study/observability/32-signal-correlation' },
+            { text: 'CH33. 대시보드 as-code', link: '/study/observability/33-dashboard-as-code' },
+          ],
+        },
+        {
+          text: '운영 심화 (SRE)',
+          collapsible: false,
+          children: [
+            { text: 'CH34. 카디널리티 관리와 비용', link: '/study/observability/34-cardinality-cost' },
+            { text: 'CH35. 장기 저장 — Mimir', link: '/study/observability/35-mimir-longterm-storage' },
+            { text: 'CH36. HA·멀티테넌시·페더레이션', link: '/study/observability/36-ha-multitenancy-federation' },
+            { text: 'CH37. Kubernetes 배포', link: '/study/observability/37-kubernetes-deployment' },
+            { text: 'CH38. 프로덕션 운영과 트러블슈팅', link: '/study/observability/38-production-troubleshooting' },
+          ],
+        },
+        {
+          text: '부록',
+          collapsible: false,
+          children: [
+            { text: '용어집', link: '/study/observability/appendix-glossary' },
+            { text: 'PromQL/LogQL/TraceQL 치트시트', link: '/study/observability/appendix-cheatsheet' },
+            { text: '참고 자료', link: '/study/observability/appendix-references' },
+          ],
+        },
+      ],
     },
     lastUpdated: false,
     contributors: false,

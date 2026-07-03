@@ -30,14 +30,7 @@ Prometheus의 로컬 TSDB는 최근 데이터를 메모리 중심으로, 오래�
 
 <strong>Block</strong>은 head block이 일정 시간(기본 2시간) 범위를 다 채우면 디스크에 flush되어 만들어지는 <strong>불변(immutable)</strong> 디렉터리다. 블록 안에는 chunk 파일들과, 시계열을 라벨로 빠르게 찾기 위한 <strong>index</strong> 파일(라벨 → 시계열 ID 역인덱스), 메타데이터가 함께 들어간다.
 
-```mermaid
-flowchart TB
-    S["스크레이프 샘플"] --> WAL["WAL\n(디스크, append-only)"]
-    S --> HEAD["Head Block\n(메모리, 쓰기 가능,\n최근 ~2h)"]
-    HEAD -->|"chunk가 차면"| MMAP["mmap chunk\n(디스크 매핑,\nOS 페이지 캐시 활용)"]
-    HEAD -->|"2h 범위 완료 시 flush"| BLOCK["불변 Block\n(chunks + index + meta)"]
-    WAL -->|"재시작 시 replay"| HEAD
-```
+![스크레이프 샘플이 WAL과 head block에 append되고, head block이 mmap chunk와 불변 block으로 이어지며 WAL replay로 복구되는 로컬 TSDB 쓰기 경로](/images/study-observability/12-tsdb-write-path.png)
 
 ## 2. 압축과 블록 — compaction, 2시간 블록, index
 
@@ -45,12 +38,7 @@ flowchart TB
 
 <strong>Index</strong>는 각 블록 안에서 라벨 매처를 시계열 ID 목록으로 빠르게 바꾸기 위한 역인덱스(inverted index)다. `{job="api", status_code="500"}` 같은 쿼리가 들어오면, Prometheus는 인덱스에서 `job=api`를 만족하는 시계열 ID 집합과 `status_code=500`을 만족하는 시계열 ID 집합을 각각 찾아 교집합을 구한 뒤, 그 ID들에 해당하는 chunk만 읽는다. 라벨 카디널리티가 높을수록 인덱스 자체의 크기와 조회 비용이 커지는 것이 카디널리티 문제의 근본 원인 중 하나다.
 
-```mermaid
-flowchart LR
-    Q["PromQL 쿼리\n{job=\"api\", status_code=\"500\"}"] --> IDX["Index\n(라벨 -> 시계열 ID)"]
-    IDX -->|"교집합"| IDS["매칭된\n시계열 ID 목록"]
-    IDS --> CHUNKS["해당 ID의\nChunk만 읽기"]
-```
+![PromQL 쿼리가 index 역인덱스에서 라벨별 시계열 ID 집합의 교집합을 구해 해당 ID의 chunk만 읽는 조회 경로](/images/study-observability/12-query-index.png)
 
 ## 3. Retention과 로컬 저장의 한계
 
@@ -69,28 +57,7 @@ Prometheus는 `--storage.tsdb.retention.time`(기본 15일)과 `--storage.tsdb.r
 
 `remote_write`는 Prometheus가 로컬에 쓰는 것과 별도로, 같은 샘플을 원격 저장소로 지속적으로 전송하는 기능이다. 핵심은 <strong>전송 소스가 head block이 아니라 WAL이라는 점</strong>이다. Prometheus는 WAL을 실시간으로 tail하는 "WAL watcher"를 두고, 새 샘플이 WAL에 append되는 즉시 이를 읽어 전송 파이프라인에 넣는다. 이 방식 덕분에 프로세스가 재시작돼도 WAL에 남아있는 미전송 샘플을 다시 읽어 전송을 이어갈 수 있다 — 전송 상태(어디까지 보냈는지)는 WAL 세그먼트 오프셋 기반으로 추적된다.
 
-```mermaid
-sequenceDiagram
-    participant WAL as WAL
-    participant W as WAL Watcher
-    participant Q as Shard Queue(s)
-    participant R as Remote Storage(Mimir 등)
-
-    WAL->>W: 새 샘플 append 감지 (tail)
-    W->>Q: 샘플을 샤드에 분배
-    loop 배치가 차거나 타임아웃
-        Q->>R: HTTP POST (Protobuf, snappy 압축)
-        alt 성공 (2xx)
-            R-->>Q: ACK
-        else 재시도 가능 오류 (5xx, 429)
-            R-->>Q: 오류
-            Q->>Q: 지수 백오프 후 재시도
-        else 재시도 불가 오류 (4xx, 429 제외)
-            R-->>Q: 오류
-            Q->>Q: 샘플 drop + 카운터 증가
-        end
-    end
-```
+![WAL watcher가 WAL을 tail해 샤드 큐에 분배하고, 큐가 배치 단위로 원격 저장소에 HTTP POST하며 성공 ACK·재시도·drop으로 분기하는 remote_write 전송 파이프라인 시퀀스](/images/study-observability/12-remote-write-seq.png)
 
 전송은 여러 <strong>샤드(shard)</strong>로 병렬화된다. 각 샤드는 독립적인 큐를 갖고 배치 단위(`max_samples_per_send`)나 타임아웃(`batch_send_deadline`) 중 먼저 도달하는 조건에 맞춰 원격 엔드포인트로 HTTP 요청을 보낸다. 요청 본문은 Protobuf로 직렬화되고 snappy로 압축된다. 원격 저장소가 처리 속도를 못 따라가면 큐가 쌓이기 시작하고, Prometheus는 <strong>샤드 수를 동적으로 늘려(`max_shards` 한도까지)</strong> 처리량을 확보하려 한다.
 
@@ -140,15 +107,7 @@ remote_read:
 
 튜닝의 실무 신호는 `prometheus_remote_storage_queue_highest_sent_timestamp_seconds`와 `prometheus_remote_storage_samples_pending`이다. pending이 계속 쌓이거나 전송 타임스탬프가 현재 시각보다 뒤처지기 시작하면 샤드가 부족하거나 원격 저장소 자체가 병목이라는 신호다. 이때는 `max_shards`를 올리기 전에 원격 저장소(Mimir) 쪽의 ingester 처리량부터 확인하는 것이 순서다.
 
-```mermaid
-flowchart LR
-    P1["Prometheus #1"] -->|remote_write| MIMIR["Mimir\ndistributor -> ingester"]
-    P2["Prometheus #2"] -->|remote_write| MIMIR
-    P3["Prometheus #N"] -->|remote_write| MIMIR
-    MIMIR --> OBJ["오브젝트 스토리지\n(장기 블록 저장)"]
-    MIMIR --> QF["Query Frontend\n(전역 쿼리)"]
-    QF --> GRAFANA["Grafana"]
-```
+![여러 Prometheus 인스턴스가 하나의 Mimir로 remote_write하고, Mimir가 오브젝트 스토리지에 장기 블록을 저장하며 Query Frontend를 통해 Grafana에 전역 쿼리를 제공하는 구조](/images/study-observability/12-mimir-fanout.png)
 
 여러 Prometheus 인스턴스가 하나의 Mimir로 `remote_write`하면, Mimir가 수평 확장 가능한 저장·질의 계층을 제공해 로컬 TSDB의 단일 노드·짧은 retention 한계를 넘어선다. Mimir의 내부 아키텍처(distributor, ingester, compactor, 블록 스토리지 구조)는 [장기 저장 — Mimir](/study/observability/35-mimir-longterm-storage)에서 자세히 다룬다.
 

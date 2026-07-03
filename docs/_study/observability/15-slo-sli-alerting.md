@@ -25,15 +25,7 @@ next: /study/observability/16-loki-architecture
 - <strong>SLO(Service Level Objective)</strong>: SLI가 만족해야 하는 목표 수준이다. "30일 롤링 윈도 기준 가용성 99.9% 이상" 같은 형태다. SLO는 조직 내부의 목표이며, 이를 어겨도 즉시 계약 위반은 아니다.
 - <strong>SLA(Service Level Agreement)</strong>: 고객과 맺은 계약이며, 위반 시 환불·페널티 같은 비즈니스적 결과가 따른다. SLA는 보통 SLO보다 느슨하게 잡는다. 내부 SLO(99.9%)를 어겼다고 바로 SLA(99.5%) 위반이 되지 않도록 여유를 둔다.
 
-```mermaid
-flowchart LR
-    SLI["SLI\n측정값\n(성공 요청 비율)"] --> SLO["SLO\n내부 목표\n(30일 99.9%)"]
-    SLO --> SLA["SLA\n고객 계약\n(99.5%, 위반 시 페널티)"]
-
-    style SLI fill:#e8f4fd
-    style SLO fill:#fdf6e3
-    style SLA fill:#fde8e8
-```
+![SLI(측정값)에서 SLO(내부 목표)를 거쳐 SLA(고객 계약)로 이어지는 세 층위와 각 층의 정의·여유 관계](/images/study-observability/15-sli-slo-sla.png)
 
 SLI를 PromQL로 표현하면 대부분 "좋은 이벤트 수 / 전체 이벤트 수" 형태의 비율이다.
 
@@ -122,22 +114,7 @@ groups:
       summary: "checkout 서비스 에러 버짓 3배 소진 속도 (24h/2h 동시 초과)"
 ```
 
-```mermaid
-flowchart TD
-    LONG["긴 윈도 조건\n(예: rate[1h] > threshold)"]
-    SHORT["짧은 윈도 조건\n(예: rate[5m] > threshold)"]
-    AND{"두 조건\nAND"}
-    FIRE["알림 발화"]
-    NOFIRE["발화 안 함"]
-
-    LONG --> AND
-    SHORT --> AND
-    AND -->|둘 다 참| FIRE
-    AND -->|하나라도 거짓| NOFIRE
-
-    FIRE -.->|"긴 윈도만 봤다면:\n반응 지연"| NOTE1["긴 윈도 단독의 문제"]
-    FIRE -.->|"짧은 윈도만 봤다면:\n스파이크에 오탐"| NOTE2["짧은 윈도 단독의 문제"]
-```
+![긴 윈도 조건과 짧은 윈도 조건을 AND로 묶어 둘 다 참일 때만 알림을 발화하는 로직과, 단일 윈도만 감시할 때의 반응 지연·오탐 문제](/images/study-observability/15-burn-rate-and.png)
 
 긴 윈도는 "이게 일시적 튐이 아니라 진짜 추세"임을 보장하고, 짧은 윈도는 "그 추세가 지금도 계속되고 있다"는 것, 즉 이미 상황이 종료됐는데 뒤늦게 알림이 울리는 것을 막는다. `severity=critical`은 PagerDuty로, `severity=warning`은 Slack으로 라우팅하는 식으로 [라우팅 설계](/study/observability/14-routing-grouping-silence)와 자연스럽게 연결된다.
 

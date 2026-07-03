@@ -30,19 +30,7 @@ next: /study/observability/35-mimir-longterm-storage
 
 <strong>쿼리.</strong> PromQL 쿼리는 매처(matcher)에 해당하는 시계열을 전부 메모리로 읽어 들인 뒤 연산한다. `sum(rate(http_requests_total[5m]))`처럼 집계 없이 넓은 범위를 스캔하면, 카디널리티가 높을수록 쿼리 시간이 선형에 가깝게 늘고 쿼리 하나가 querier를 OOM 시킬 수 있다. 카디널리티가 낮아도 쿼리는 최적화할 수 있지만, 카디널리티가 높으면 쿼리 최적화만으로는 한계가 있다.
 
-```mermaid
-flowchart LR
-    LABEL["라벨 조합 증가\n(user_id, pod_uid, trace_id...)"]
-    CARD["카디널리티 폭발"]
-    MEM["메모리\n(head 블록, OOM 위험)"]
-    STORE["저장\n(인덱스 크기, 압축 비용)"]
-    QUERY["쿼리\n(스캔 시계열 수 ↑, 지연 ↑)"]
-    COST["운영 비용"]
-    LABEL --> CARD
-    CARD --> MEM --> COST
-    CARD --> STORE --> COST
-    CARD --> QUERY --> COST
-```
+![라벨 조합 증가(user_id·pod_uid·trace_id 등)가 카디널리티 폭발을 일으키고, 이것이 메모리(head 블록·OOM 위험)·저장(인덱스 크기·압축 비용)·쿼리(스캔 시계열 수·지연 증가) 세 축을 동시에 압박해 운영 비용으로 수렴하는 다이어그램](/images/study-observability/34-cardinality-cost.png)
 
 ## 2. 카디널리티 탐지
 
@@ -84,17 +72,7 @@ topk(10, scrape_samples_scraped)
 
 `prometheus_tsdb_head_series`를 시계열 그래프로 그려두면 배포 이후 카디널리티가 계단식으로 튀는 시점을 바로 잡아낼 수 있다.
 
-```mermaid
-flowchart TD
-    A["prometheus_tsdb_head_series\n급증 알림"] --> B{"TSDB status page\n확인"}
-    B --> C["seriesCountByMetricName\n상위 메트릭 확인"]
-    C --> D{"오프라인 블록\n분석 필요?"}
-    D -->|예| E["promtool tsdb analyze"]
-    D -->|아니오| F["topk(count by (__name__))\nPromQL로 실시간 확인"]
-    E --> G["원인 라벨 특정"]
-    F --> G
-    G --> H["metric_relabel_configs로 통제"]
-```
+![prometheus_tsdb_head_series 급증 알림에서 시작해 TSDB status page를 확인하고 seriesCountByMetricName으로 상위 메트릭을 확인한 뒤, 오프라인 블록 분석이 필요하면 promtool tsdb analyze로, 아니면 topk(count by (__name__)) PromQL로 실시간 확인해 원인 라벨을 특정하고 metric_relabel_configs로 통제하는 카디널리티 탐지 워크플로우 다이어그램](/images/study-observability/34-detection-workflow.png)
 
 ## 3. 원인 라벨 찾기
 

@@ -21,25 +21,7 @@ next: /study/observability/09-promql-basics
 
 Prometheus는 pull 기반이라 타깃이 `/metrics`를 노출해야 한다. 그런데 세상의 모든 시스템이 Prometheus 포맷으로 메트릭을 직접 뱉어주진 않는다. 리눅스 커널, MySQL, 레거시 애플리케이션, 서드파티 하드웨어가 대표적이다. <strong>Exporter</strong>는 이런 대상과 Prometheus 사이의 <strong>브릿지(bridge)</strong>다 — 대상 시스템의 상태를 대신 읽어(파일, API, 프로토콜 등) Prometheus 노출 형식으로 번역해주는 별도 프로세스다.
 
-```mermaid
-flowchart LR
-    subgraph Targets["계측 불가능한 대상"]
-        OS["OS / 커널\n(/proc, /sys)"]
-        DB["MySQL"]
-        EP["HTTP 엔드포인트\n(외부 서비스)"]
-    end
-    subgraph Exporters["Exporter (브릿지)"]
-        NE["node-exporter"]
-        ME["mysqld_exporter"]
-        BE["blackbox_exporter"]
-    end
-    OS --> NE
-    DB -->|SQL 질의| ME
-    EP -->|HTTP/TCP/ICMP probe| BE
-    NE -->|"/metrics"| PROM["Prometheus"]
-    ME -->|"/metrics"| PROM
-    BE -->|"/probe?target=..."| PROM
-```
+![계측 불가능한 대상(OS·MySQL·HTTP 엔드포인트)을 node-exporter·mysqld_exporter·blackbox_exporter가 대신 읽어 /metrics로 번역하고 Prometheus가 스크레이프하는 브릿지 구조](/images/study-observability/08-exporter-pattern.png)
 
 - <strong>node-exporter</strong>는 리눅스/유닉스 호스트의 하드웨어·OS 지표(`/proc`, `/sys` 파싱)를 노출한다. CPU, 메모리, 디스크, 네트워크, 파일시스템 사용량이 대표 메트릭이다. 거의 모든 Prometheus 배포에 DaemonSet 형태로 함께 깔린다.
 - <strong>blackbox_exporter</strong>는 조금 다른 패턴이다. 자체 메트릭을 노출하는 게 아니라, `/probe?target=https://example.com`처럼 <strong>요청 시점에 지정된 대상</strong>을 HTTP/TCP/ICMP/DNS로 프로빙해서 그 결과(성공 여부, 응답 시간, TLS 만료일 등)를 메트릭으로 변환한다. 외부에서 보이는 가용성(블랙박스 관점)을 측정할 때 쓴다.
@@ -149,13 +131,7 @@ def handler(request):
 
 <strong>RED</strong>는 Weaveworks의 Tom Wilkie가 제안한, <strong>요청 기반(request-driven)</strong> 서비스를 위한 계측 프레임워크다. 마이크로서비스처럼 "요청을 받아 응답하는" 컴포넌트에 적용한다.
 
-```mermaid
-flowchart LR
-    REQ["들어오는 요청"] --> SVC["서비스"]
-    SVC --> R["Rate\n초당 요청 수"]
-    SVC --> E["Errors\n초당 실패 요청 수"]
-    SVC --> D["Duration\n요청 처리 시간 분포"]
-```
+![RED 방법론 — 들어오는 요청을 받는 서비스를 Rate(초당 요청 수)·Errors(초당 실패 요청 수)·Duration(요청 처리 시간 분포) 세 지표로 요약](/images/study-observability/08-red-method.png)
 
 - <strong>Rate</strong> — 초당 처리하는 요청 수. `rate(http_requests_total[5m])`
 - <strong>Errors</strong> — 초당 실패한 요청 수(비율로 보는 것이 더 유용할 때가 많다). `rate(http_requests_total{status=~"5.."}[5m])`
@@ -167,12 +143,7 @@ flowchart LR
 
 <strong>USE</strong>는 Netflix의 Brendan Gregg가 제안한, <strong>리소스 기반(resource-driven)</strong> 계측 프레임워크다. CPU, 메모리, 디스크, 네트워크 인터페이스, 커넥션 풀처럼 <strong>유한한 용량을 가진 자원</strong>에 적용한다.
 
-```mermaid
-flowchart LR
-    RES["리소스\n(CPU/메모리/디스크/커넥션풀)"] --> U["Utilization\n사용 중인 비율"]
-    RES --> S["Saturation\n대기 큐 깊이"]
-    RES --> E2["Errors\n자원 관련 에러 수"]
-```
+![USE 방법론 — 리소스(CPU·메모리·디스크·커넥션 풀)를 Utilization(사용 중 비율)·Saturation(대기 큐 깊이)·Errors(자원 관련 에러) 세 지표로 관측](/images/study-observability/08-use-method.png)
 
 - <strong>Utilization</strong> — 자원이 바쁜 시간의 비율. `rate(node_cpu_seconds_total{mode!="idle"}[5m])`
 - <strong>Saturation</strong> — 자원이 처리하지 못해 쌓인 초과 작업량(큐 깊이, 대기 스레드 수). `node_load1`이나 커넥션 풀의 대기 중 요청 수가 대표적이다.

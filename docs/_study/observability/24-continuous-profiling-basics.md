@@ -22,19 +22,7 @@ next: /study/observability/25-pyroscope-architecture
 
 프로파일링에는 크게 두 접근이 있다. <strong>계측 기반(instrumentation-based)</strong> 프로파일링은 모든 함수의 진입·종료 지점에 코드를 삽입해 정확한 호출 횟수와 소요 시간을 기록한다. 정확하지만 오버헤드가 커서(수 배~수십 배 느려짐) 프로덕션에서 상시 켜두기 어렵다. <strong>샘플링 기반(sampling-based)</strong> 프로파일링은 타이머로 실행을 주기적으로 인터럽트해(예: 100Hz, 10ms마다) 그 순간의 콜 스택만 캡처한다. 특정 함수가 리소스를 많이 소비할수록 더 많은 샘플에 등장하므로, 충분히 많은 샘플을 모으면 통계적으로 실제 소비 비중에 수렴한다. 오버헤드가 낮아 프로덕션에 상시 적용 가능한 방식이 바로 이 샘플링 기반이다.
 
-```mermaid
-sequenceDiagram
-    participant Timer as 샘플링 타이머 (예: 100Hz)
-    participant Runtime as 애플리케이션 런타임
-    participant Profiler as 프로파일러
-
-    loop 10ms 마다
-        Timer->>Runtime: 인터럽트 발생
-        Runtime-->>Profiler: 현재 콜 스택 캡처
-        Profiler->>Profiler: 동일 스택 카운트 누적
-    end
-    Profiler->>Profiler: 스택별 빈도를 집계해 프로파일 생성
-```
+![샘플링 타이머가 10ms마다 애플리케이션 런타임에 인터럽트를 걸어 콜 스택을 캡처하고 프로파일러가 동일 스택 빈도를 누적해 통계적 프로파일을 생성하는 시퀀스](/images/study-observability/24-sampling-sequence.png)
 
 동일한 콜 스택이 여러 샘플에서 반복해서 잡히면 하나로 병합되고 빈도만 누적된다. 이 "스택 + 빈도" 집계 결과가 플레임그래프의 원재료가 된다(자세한 해석은 [27장](/study/observability/27-flamegraph-trace-integration)). 또한 샘플링 시점에 따라 <strong>on-CPU 프로파일링</strong>(실제로 CPU를 점유 중인 순간만 샘플링)과 <strong>off-CPU/wall-clock 프로파일링</strong>(I/O 대기·락 대기로 블록된 시간까지 포함)으로 나뉘는데, 이 구분은 [26장](/study/observability/26-profile-types-ebpf)에서 프로파일 타입별로 다룬다.
 
@@ -44,18 +32,7 @@ sequenceDiagram
 
 <strong>연속 프로파일링</strong>은 낮은 오버헤드의 샘플링 에이전트를 프로덕션에 상시 구동해, 메트릭을 스크레이핑하듯 프로파일 데이터를 계속 수집·저장한다. 그 결과 장애가 발생한 뒤에도 "그 시각의 프로파일"을 그대로 조회할 수 있는 <strong>사후 분석(post-hoc analysis)</strong>이 가능해진다. 이는 미리 질문을 준비하지 않아도 되는 관측성의 핵심 가치와 정확히 같은 구조다.
 
-```mermaid
-flowchart LR
-    subgraph OnDemand["온디맨드 프로파일링"]
-        I1["장애 발생"] --> I2["원인 의심 후\n수동으로 프로파일러 트리거"]
-        I2 --> I3["이미 상황 종료\n원인 재현 불가"]
-    end
-    subgraph Continuous["연속 프로파일링"]
-        C1["24/7 상시 샘플링"] --> C2["타임스탬프와 함께\n지속 저장"]
-        C2 --> C3["장애 발생"]
-        C3 --> C4["과거 시점 프로파일 조회\n(사후 분석)"]
-    end
-```
+![온디맨드 프로파일링은 장애 발생 후 수동 트리거 시점엔 이미 상황이 종료돼 재현이 불가한 반면, 연속 프로파일링은 24/7 상시 샘플링을 타임스탬프와 함께 저장해 장애 이후에도 과거 시점 프로파일을 사후 조회할 수 있음을 대비한 다이어그램](/images/study-observability/24-ondemand-vs-continuous.png)
 
 ## 3. 프로파일이 답하는 질문
 
@@ -109,15 +86,7 @@ go tool pprof http://localhost:6060/debug/pprof/profile?seconds=30
 
 관측성을 흔히 메트릭·로그·트레이스 "세 개의 기둥"으로 설명하지만, 프로파일은 최근 <strong>4번째 신호</strong>로 자리 잡았다. 코드 라인 단위까지 파고드는 리소스 소비 정보는 다른 세 신호가 채울 수 없는 공백을 메운다. 4대 신호 전체의 역할과 관계는 [2장 관측성의 4대 신호](/study/observability/02-four-signals)에서 다룬다.
 
-```mermaid
-flowchart TB
-    O["관측성 4대 신호"]
-    O --> M["메트릭\n(무엇이 얼마나)"]
-    O --> L["로그\n(무슨 일이 있었나)"]
-    O --> T["트레이스\n(서비스·스팬 단위로\n어디서 시간을 썼나)"]
-    O --> P["프로파일\n(함수·라인 단위로\n어디서 시간을 썼나)"]
-    T -.->|"span profiles"| P
-```
+![관측성 4대 신호인 메트릭·로그·트레이스·프로파일의 역할을 나누고, 프로파일이 함수·라인 단위 해상도로 4번째 신호 자리를 차지하며 트레이스와 span profiles로 연결되는 구조](/images/study-observability/24-four-signals.png)
 
 메트릭 스파이크가 알림을 울리고, 트레이스가 어느 스팬이 느려졌는지 좁혀주면, 마지막으로 프로파일이 그 스팬 안에서 정확히 어느 함수가 원인인지 짚어준다. 이 상관관계 흐름은 [27장](/study/observability/27-flamegraph-trace-integration)에서 span profiles로, [32장](/study/observability/32-signal-correlation)에서 신호 전체의 상관관계로 확장해서 다룬다.
 

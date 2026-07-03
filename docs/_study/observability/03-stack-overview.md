@@ -27,28 +27,7 @@ next: /study/observability/04-pull-push-cardinality
 
 신호마다 전담 백엔드가 있고, Grafana가 이들을 하나의 화면에서 묶는다. Prometheus는 스크레이핑과 룰 평가를 담당하는 "액티브" 컴포넌트이고, 나머지 저장 백엔드는 대부분 수신·저장·질의에 집중하는 "패시브" 컴포넌트라는 차이가 있다.
 
-```mermaid
-flowchart LR
-    subgraph Signals["신호"]
-        MET["메트릭"]
-        LOG["로그"]
-        TRC["트레이스"]
-        PRF["프로파일"]
-    end
-    subgraph Backends["백엔드"]
-        PROM["Prometheus\n(스크레이프 + 룰 평가)"]
-        MIMIR["Mimir\n(장기 저장, 수평 확장)"]
-        LOKI["Loki"]
-        TEMPO["Tempo"]
-        PYRO["Pyroscope"]
-    end
-    GRAFANA["Grafana\n(질의 + 시각화 + 상관관계)"]
-
-    MET --> PROM -->|remote_write| MIMIR --> GRAFANA
-    LOG --> LOKI --> GRAFANA
-    TRC --> TEMPO --> GRAFANA
-    PRF --> PYRO --> GRAFANA
-```
+![신호별 전담 백엔드 매핑: 메트릭은 Prometheus(스크레이프·룰)에서 remote_write로 Mimir(장기 저장)로, 로그는 Loki, 트레이스는 Tempo, 프로파일은 Pyroscope로 수집되고, 이들이 모두 Grafana의 질의·시각화·상관관계로 통합되는 LGTM+ 스택 구조](/images/study-observability/03-signals-to-backends.png)
 
 Prometheus와 Mimir가 분리돼 있다는 점이 자주 헷갈리는 부분이다. Prometheus는 여전히 로컬 TSDB에 단기 데이터를 갖고 있으면서 `remote_write`로 Mimir에 흘려보내는 2단 구조가 일반적이다 — Prometheus를 걷어내고 Mimir만 쓰는 게 아니라, 스크레이핑은 Prometheus(또는 Alloy)가, 장기 저장·수평 확장은 Mimir가 나눠 맡는다.
 
@@ -68,16 +47,7 @@ Prometheus와 Mimir가 분리돼 있다는 점이 자주 헷갈리는 부분이�
 | OpenTelemetry Collector | Push (OTLP 수신) | 벤더 중립, 표준 프로토콜 | 멀티 벤더 환경, 락인 회피가 우선 |
 | Alloy | Pull + Push 혼합 | Grafana 스택 4대 신호 통합 수집 | Grafana LGTM+ 스택을 메인으로 쓸 때 |
 
-```mermaid
-flowchart TD
-    START{"수집 대상은?"} -->|"서드파티/레거시\n계측 불가"| EXP["Exporter\n(node-exporter, mysqld-exporter 등)"]
-    START -->|"직접 계측 가능한\n애플리케이션"| VENDOR{"벤더 중립성이\n최우선인가?"}
-    VENDOR -->|"예 (멀티 벤더 전환 대비)"| OTEL["OpenTelemetry Collector"]
-    VENDOR -->|"아니오 (Grafana 스택 고정)"| ALLOY["Alloy\n(4대 신호 통합 수집)"]
-    EXP --> PROM["Prometheus가 스크레이프"]
-    OTEL --> BACKENDS["여러 벤더 백엔드로 라우팅"]
-    ALLOY --> LGTM["Mimir/Loki/Tempo/Pyroscope로 라우팅"]
-```
+![수집 전략 결정 트리: 수집 대상이 서드파티·레거시라 계측 불가면 Exporter(Prometheus 스크레이프), 직접 계측 가능한 애플리케이션이면 벤더 중립성 여부로 분기해 OpenTelemetry Collector(여러 벤더 백엔드 라우팅) 또는 Alloy(Mimir·Loki·Tempo·Pyroscope 통합 수집)를 선택](/images/study-observability/03-collection-decision.png)
 
 세 전략은 배타적이지 않다. 실무 클러스터에서는 node-exporter 같은 exporter를 Alloy나 Prometheus가 그대로 스크레이프하면서, 동시에 애플리케이션은 OTLP로 Alloy에 push하는 <strong>혼합 구성</strong>이 흔하다. Alloy가 OTLP 리시버 컴포넌트를 내장하고 있어 OpenTelemetry Collector 역할까지 대신할 수 있기 때문이다. Alloy의 컴포넌트 모델과 파이프라인 작성법은 [28장](/study/observability/28-alloy-overview)~[29장](/study/observability/29-alloy-pipelines)에서, Collector와의 세부 비교는 [30장](/study/observability/30-collector-vs-alloy)에서 다룬다.
 

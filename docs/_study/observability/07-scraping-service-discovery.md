@@ -21,22 +21,7 @@ next: /study/observability/08-exporters-instrumentation
 
 각 타깃은 `scrape_interval`마다 독립적으로 스크레이프된다. <strong>전역적으로 동시에</strong> 당기는 것이 아니라, Prometheus는 타깃별로 해시 기반 오프셋을 계산해 스크레이프 시점을 고르게 분산시킨다. 수천 개 타깃이 한 프로세스에서 스크레이프 부하를 만들 때, 이 분산이 없으면 매 인터벌마다 CPU·네트워크 스파이크가 생긴다.
 
-```mermaid
-sequenceDiagram
-    participant P as Prometheus
-    participant T as 타깃
-
-    Note over P: scrape_interval=15s, scrape_timeout=10s
-    P->>T: GET /metrics (t=0s)
-    T-->>P: 200 OK (본문)
-    Note over P: 다음 스크레이프까지 대기
-    P->>T: GET /metrics (t=15s)
-    T--xP: 타임아웃 (10s 초과, 응답 없음)
-    Note over P: up{instance=...} = 0 기록
-    P->>T: GET /metrics (t=30s)
-    T-->>P: 200 OK (복구)
-    Note over P: up{instance=...} = 1
-```
+![스크레이프 동작과 up 메트릭 시퀀스 — scrape_interval 15초·scrape_timeout 10초 설정에서 t=0s 스크레이프 성공 시 up=1, t=15s 타임아웃(응답 없음)으로 up=0 기록, t=30s 복구로 다시 up=1이 되는 흐름](/images/study-observability/07-scrape-behavior.png)
 
 - `scrape_timeout`은 반드시 `scrape_interval` 이하여야 한다. 타임아웃이 인터벌을 넘으면 스크레이프가 겹쳐 큐가 밀린다.
 - 기본 스크레이프 경로는 `/metrics`이지만 `metrics_path`로 바꿀 수 있다.
@@ -77,20 +62,7 @@ scrape_configs:
 
 컨테이너·VM이 끊임없이 뜨고 사라지는 환경에서 타깃 목록을 손으로 관리하는 것은 불가능하다. Prometheus는 다양한 SD 메커니즘을 지원해 이 목록을 자동으로 갱신한다.
 
-```mermaid
-flowchart TB
-    subgraph SDs["서비스 디스커버리 소스"]
-        K8S["kubernetes_sd_configs\n(apiserver watch)"]
-        EC2["ec2_sd_configs\n(AWS API)"]
-        CONSUL["consul_sd_configs\n(Consul 카탈로그)"]
-        FILE["file_sd_configs\n(JSON/YAML 파일)"]
-    end
-    K8S -->|"Pod/Service/Endpoint\n+ __meta_kubernetes_* 라벨"| DISC["Discovery Manager"]
-    EC2 -->|"인스턴스 목록\n+ __meta_ec2_* 라벨"| DISC
-    CONSUL -->|"서비스 카탈로그\n+ __meta_consul_* 라벨"| DISC
-    FILE -->|"수동/외부 생성 목록\n(GitOps 친화적)"| DISC
-    DISC -->|relabel 적용| RET["Retrieval"]
-```
+![서비스 디스커버리 구조 — kubernetes_sd_configs(apiserver watch·__meta_kubernetes_*), ec2_sd_configs(AWS API·__meta_ec2_*), consul_sd_configs(Consul 카탈로그·__meta_consul_*), file_sd_configs(JSON/YAML 파일·GitOps) 네 SD 소스가 각각 타깃과 메타 라벨을 만들어 Discovery Manager로 공급하고, relabel 적용 후 Retrieval로 넘기는 흐름](/images/study-observability/07-service-discovery.png)
 
 - <strong>kubernetes_sd_configs</strong>는 apiserver를 watch해서 `role: node | pod | service | endpoints | endpointslice | ingress` 단위로 타깃을 만든다. 클러스터 안에서 가장 널리 쓰이는 SD다. role마다 붙는 메타 라벨 집합이 다르다(예: `role: pod`는 `__meta_kubernetes_pod_*`, `role: endpoints`는 컨테이너 포트까지 포함).
 - <strong>ec2_sd_configs</strong>는 AWS API로 리전 내 EC2 인스턴스 목록을 가져온다. 태그가 `__meta_ec2_tag_*` 메타 라벨로 노출돼 relabel의 원재료가 된다.
@@ -108,14 +80,7 @@ kubernetes_sd_configs:
 
 <strong>relabel_configs</strong>는 SD가 만들어낸 타깃 목록에 대해, 실제 스크레이프가 일어나기 <strong>전</strong>에 라벨을 필터링·재작성하는 파이프라인이다. Prometheus 운영에서 가장 강력하면서도 가장 헷갈리는 부분이다.
 
-```mermaid
-flowchart LR
-    RAW["SD가 만든 타깃\n+ __meta_* 라벨"] --> R1["relabel_config #1\nsource_labels → regex → action"]
-    R1 --> R2["relabel_config #2"]
-    R2 --> R3["relabel_config #N"]
-    R3 --> FINAL["최종 타깃\n(라벨 + __address__ 확정)"]
-    FINAL -->|drop된 타깃은 여기서 제외| SCRAPE["스크레이프 실행"]
-```
+![Relabeling 파이프라인 — SD가 만든 타깃(+__meta_* 라벨)이 relabel_config #1·#2·#N을 순차로 거쳐(source_labels → separator → regex → action) 최종 타깃(라벨+__address__ 확정)이 되고, drop된 타깃은 제외된 채 keep된 타깃만 스크레이프 실행되며, keep/drop·replace·labelmap·labeldrop/labelkeep·hashmod 액션과 __로 시작하는 라벨의 target_label 승격 원리를 함께 보여주는 그림](/images/study-observability/07-relabeling.png)
 
 동작 순서는 항상 `source_labels`로 값을 뽑고 → `separator`로 이어붙이고 → `regex`로 매치하고 → `action`으로 keep/drop/replace 등을 실행한다. 자주 쓰는 action은 다음과 같다.
 

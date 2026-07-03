@@ -24,15 +24,7 @@ Grafana UI에서 패널을 드래그해 대시보드를 만드는 방식은 빠�
 
 as-code 접근은 대시보드·데이터소스 정의를 텍스트(JSON/jsonnet/HCL)로 리포지토리에 두고, CI/CD가 이를 Grafana에 반영하게 한다. 이렇게 하면 대시보드도 애플리케이션 코드와 동일한 신뢰 수준(리뷰, diff, 롤백)을 갖는다.
 
-```mermaid
-flowchart LR
-    subgraph UI["UI 전용 관리"]
-        U1["클릭으로 패널 수정"] --> U2["변경 이력 없음"] --> U3["재현 불가"]
-    end
-    subgraph Code["as-code 관리"]
-        C1["jsonnet/JSON 수정"] --> C2["Git PR 리뷰"] --> C3["CI가 Grafana에 반영"] --> C4["롤백 = git revert"]
-    end
-```
+![UI 전용 관리(클릭으로 패널 수정→변경 이력 없음→재현 불가)와 as-code 관리(jsonnet/JSON 수정→Git PR 리뷰→CI가 Grafana에 반영→롤백은 git revert)를 비교한 다이어그램](/images/study-observability/33-ui-vs-ascode.png)
 
 ## 2. provisioning — 파일 기반 데이터소스/대시보드
 
@@ -130,27 +122,7 @@ grafonnet이든 Operator든 Terraform이든, 최종적으로 Grafana가 받아�
 
 쿠버네티스 클러스터에서 가장 널리 쓰이는 패턴은 <strong>ConfigMap + 사이드카</strong> 조합이다. kube-prometheus-stack이 기본 채택하는 방식으로, 대시보드 JSON을 담은 ConfigMap에 `grafana_dashboard: "1"` 같은 라벨을 붙이면 Grafana Pod 옆의 사이드카 컨테이너(`kiwigrid/k8s-sidecar`)가 이를 감시해 provisioning 디렉터리로 자동 동기화한다.
 
-```mermaid
-flowchart LR
-    subgraph Git["Git 리포지토리"]
-        JSONNET["jsonnet 대시보드 정의"]
-    end
-    subgraph CI["CI 파이프라인"]
-        BUILD["jsonnet 컴파일 → JSON"]
-        CM["ConfigMap 매니페스트 생성"]
-    end
-    subgraph CD["GitOps 컨트롤러 (ArgoCD/Flux)"]
-        SYNC["클러스터에 동기화"]
-    end
-    subgraph Cluster["쿠버네티스 클러스터"]
-        CONFIGMAP["ConfigMap\n(label: grafana_dashboard=1)"]
-        SIDECAR["k8s-sidecar"]
-        GRAFANA["Grafana"]
-        CONFIGMAP -->|"watch"| SIDECAR
-        SIDECAR -->|"파일 동기화"| GRAFANA
-    end
-    JSONNET --> BUILD --> CM --> SYNC --> CONFIGMAP
-```
+![Git 리포지토리의 jsonnet 대시보드 정의가 CI 파이프라인에서 JSON으로 컴파일되고 ConfigMap 매니페스트로 생성된 뒤, GitOps 컨트롤러(ArgoCD/Flux)가 클러스터에 동기화하고, 쿠버네티스 클러스터 안에서 grafana_dashboard=1 라벨이 붙은 ConfigMap을 k8s-sidecar가 watch해 파일을 Grafana로 동기화하는 GitOps 배포 파이프라인 다이어그램](/images/study-observability/33-gitops-pipeline.png)
 
 이 파이프라인은 [44장 쿠버네티스 스터디의 Kustomize/GitOps](/study/kubernetes/44-kustomize-gitops)에서 다룬 선언적 배포 원칙을 그대로 관측성 스택에 적용한 것이다. jsonnet 컴파일 결과를 Kustomize overlay로 관리하면 환경별(스테이징/운영) 대시보드 변형(예: 알림 임계치 차이)도 base + patch 구조로 깔끔하게 표현할 수 있다.
 

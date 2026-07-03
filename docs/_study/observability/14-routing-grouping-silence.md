@@ -47,21 +47,7 @@ route:
 - <strong>continue</strong>: 기본값은 `false`다. 매칭된 하위 route에서 처리를 마치면 형제 route는 더 이상 평가하지 않는다. `continue: true`로 설정하면 매칭 후에도 다음 형제 route를 계속 평가해, 하나의 알림이 여러 receiver로 동시에 전달되게 할 수 있다.
 - <strong>상속</strong>: 하위 route에 `group_by`/`group_wait`/`receiver` 등을 명시하지 않으면 부모 route의 값을 그대로 물려받는다. 이 덕분에 루트에 공통 기본값을 두고, 하위 route는 달라지는 부분만 오버라이드하면 된다.
 
-```mermaid
-flowchart TD
-    ROOT["Root route\nreceiver: default-slack\ngroup_by: [alertname, cluster]"]
-    C1{"severity=critical ?"}
-    C2{"team=payments ?"}
-    C3{"severity=warning ?\n(payments 하위)"}
-
-    ROOT --> C1
-    C1 -->|Yes, continue=false| PD["pagerduty-oncall"]
-    C1 -->|No| C2
-    C2 -->|Yes| C3
-    C2 -->|No| DEFAULT["default-slack\n(루트 receiver)"]
-    C3 -->|Yes| SPW["slack-payments-warning"]
-    C3 -->|No| SP["slack-payments\n(부모 receiver 상속)"]
-```
+![Root route에서 severity=critical이면 pagerduty-oncall로, 아니면 team=payments 여부와 severity=warning 여부를 순차 판정해 receiver를 결정하고 명시하지 않은 설정은 부모에서 상속하는 route 트리](/images/study-observability/14-route-tree.png)
 
 가장 중요한 원칙은 <strong>가장 구체적인 route가 마지막에 이긴다</strong>는 것이다. 트리를 설계할 때는 넓은 조건을 앞에, 좁은 조건을 뒤에 두는 흔한 실수를 피해야 한다. Alertmanager는 형제 route를 순서대로 평가하므로, 먼저 매칭되는 route가 우선한다.
 
@@ -76,22 +62,7 @@ flowchart TD
 | `group_interval` | 같은 그룹에 새 알림이 추가됐을 때 다음 발송까지 최소 간격 | `5m` |
 | `repeat_interval` | 그룹 상태가 그대로(firing 유지)여도 재알림을 보내는 주기 | `4h` |
 
-```mermaid
-sequenceDiagram
-    participant A as 알림 발화
-    participant G as 그룹(alertname=DiskFull)
-    participant N as 알림 전송
-
-    A->>G: t=0s 첫 알림 도착 (그룹 생성)
-    Note over G: group_wait=30s 대기
-    A->>G: t=10s 같은 그룹 알림 2개 추가 도착
-    G->>N: t=30s 3개 알림 묶어서 1차 발송
-    A->>G: t=45s 같은 그룹 알림 1개 추가 도착
-    Note over G: group_interval=5m 대기 중이라 즉시 발송 안 함
-    G->>N: t=5m30s 추가분 포함 2차 발송
-    Note over G: 이후 상태 변화 없어도
-    G->>N: t=4h30s repeat_interval 도달, 재알림
-```
+![첫 알림 도착 후 group_wait 동안 대기해 묶어서 1차 발송하고, group_interval이 지난 뒤 추가분을 2차 발송하며 상태가 유지되면 repeat_interval 주기로 재알림하는 grouping 발송 타이밍](/images/study-observability/14-grouping-timing.png)
 
 `group_wait`을 너무 짧게 두면 동시다발 알림이 그룹핑되지 못하고 낱개로 나간다. 너무 길게 두면 정말 급한 첫 알림이 지연된다. `repeat_interval`은 `resolve`되지 않은 장애를 잊지 않도록 주기적으로 리마인드하는 용도이며, 너무 짧으면 피로도를 높이고 너무 길면 대응 담당자가 이미 조치 중인 알림을 놓쳤다고 착각할 수 있다.
 
@@ -116,13 +87,7 @@ inhibit_rules:
 
 첫 번째 규칙은 같은 `cluster`·`alertname`에서 `critical` 알림이 firing 중이면 동일 조건의 `warning` 알림을 억제한다. 두 번째 규칙은 클러스터 전체가 죽었을 때(`ClusterDown`) 그 여파로 발생하는 개별 Pod/Node/Service 다운 알림을 억제해, 온콜 담당자가 근본 원인 하나에만 집중하게 한다.
 
-```mermaid
-flowchart LR
-    CD["ClusterDown\n(firing)"] -->|source| INHIBIT{"inhibit_rule\nequal: cluster"}
-    PD["PodDown x40\n(같은 cluster)"] -->|target| INHIBIT
-    INHIBIT -->|억제됨, 통지 안 됨| SUPPRESSED["표시는 되지만\n알림 발송 안 됨"]
-    CD -->|통지됨| NOTIFY["Slack/PagerDuty"]
-```
+![ClusterDown(source)가 firing이면 equal:cluster가 같은 PodDown(target) 알림을 inhibit_rule이 억제해 발송을 막고, ClusterDown 자체는 Slack/PagerDuty로 통지되는 inhibition 구조](/images/study-observability/14-inhibition.png)
 
 억제된 알림은 사라지는 게 아니라 Alertmanager UI/API 상에서는 여전히 `firing`으로 보이지만, notification pipeline에서 실제 발송만 막힌다는 점이 중요하다.
 
@@ -193,25 +158,7 @@ receivers:
 
 실무에서 가장 널리 쓰는 패턴은 <strong>severity로 채널 긴급도를 정하고, team으로 수신 대상을 정하는</strong> 2축 구조다.
 
-```mermaid
-flowchart TD
-    ROOT["Root\ndefault: slack-platform-general"]
-    SEV{"severity"}
-    TEAM_C{"team (critical)"}
-    TEAM_W{"team (warning)"}
-
-    ROOT --> SEV
-    SEV -->|critical| TEAM_C
-    SEV -->|warning| TEAM_W
-    SEV -->|info| SLACK_INFO["slack-info-log\n(채널만, 조용히 기록)"]
-
-    TEAM_C -->|payments| PD_PAY["pagerduty-payments"]
-    TEAM_C -->|infra| PD_INFRA["pagerduty-infra"]
-    TEAM_C -->|기타/미지정| PD_DEFAULT["pagerduty-platform-oncall"]
-
-    TEAM_W -->|payments| SLACK_PAY["slack-payments"]
-    TEAM_W -->|infra| SLACK_INFRA["slack-infra"]
-```
+![severity로 critical·warning·info를 나누고 각 아래에서 team으로 갈라, critical은 pagerduty-payments·infra·platform-oncall(fallback)로, warning은 slack-payments·infra로, info는 slack-info-log로 보내는 severity×team 2축 라우팅 트리](/images/study-observability/14-severity-team-routing.png)
 
 ```yaml
 route:

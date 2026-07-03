@@ -26,16 +26,7 @@ next: /study/observability/02-four-signals
 
 임계치 알림도 같은 한계를 공유한다. 정적 임계치(`cpu > 90%`)는 트래픽 패턴이 계절적이거나 서비스마다 정상 범위가 다르면 오탐과 미탐을 동시에 만든다. 결국 알림 피로(alert fatigue)로 이어지고, 팀은 알림을 무시하는 방향으로 적응한다.
 
-```mermaid
-flowchart LR
-    subgraph Mon["전통적 모니터링"]
-        KU["known-unknowns\n(미리 정의한 실패 모드)"]
-        DASH["고정 대시보드"]
-        THRESH["정적 임계치 알림"]
-        KU --> DASH --> THRESH
-    end
-    THRESH -->|"처음 보는 장애?"| GAP["대응 불가 영역\n(unknown-unknowns)"]
-```
+![전통적 모니터링의 known-unknowns 흐름(정의된 실패 모드→고정 대시보드→정적 임계치 알림)과 처음 보는 장애를 다루지 못하는 unknown-unknowns 대응 불가 영역](/images/study-observability/01-traditional-monitoring.png)
 
 ## 2. 관측성이란 무엇인가
 
@@ -62,21 +53,7 @@ flowchart LR
 
 Grafana 생태계가 강조하는 것도 이 지점이다. exemplar로 메트릭에서 트레이스로, trace ID로 트레이스에서 로그로, span에서 프로파일로 넘어가는 <strong>상관관계(correlation)</strong>가 있어야 신호의 합이 관측성이 된다. 이 스터디에서도 신호 자체는 [2장](/study/observability/02-four-signals)에서 다루지만, 진짜 힘은 신호를 엮는 방법([32장 시그널 상관관계](/study/observability/32-signal-correlation))에서 나온다는 점을 미리 짚어둔다. 최근에는 프로파일(profiles)을 네 번째 신호로 꼽는 관점도 자리 잡았다 — 코드 라인 단위 리소스 소비까지 상관관계에 끌어들일 수 있기 때문이다.
 
-```mermaid
-flowchart TB
-    subgraph Myth["세 개의 기둥 (오해)"]
-        M1["메트릭"]
-        L1["로그"]
-        T1["트레이스"]
-    end
-    subgraph Reality["실제 관측성"]
-        M2["메트릭"] <-->|"exemplar"| T2["트레이스"]
-        T2 <-->|"trace ID"| L2["로그"]
-        T2 <-->|"span"| P2["프로파일"]
-    end
-    Myth -.->|"각자 고립"| Isolated["원인 추적에 수동 작업 필요"]
-    Reality -.->|"상관관계"| Fast["클릭 한 번으로 근본 원인 추적"]
-```
+![세 개의 기둥 신화에서는 메트릭·로그·트레이스가 각자 고립돼 원인 추적에 수동 작업이 필요한 반면, 실제 관측성에서는 exemplar·trace ID·span으로 신호가 상호 연결돼 클릭 한 번으로 근본 원인을 추적하는 비교](/images/study-observability/01-three-pillars-vs-observability.png)
 
 ## 5. 관측성이 필요해진 이유
 
@@ -88,17 +65,7 @@ flowchart TB
 
 조직이 관측성을 도입하는 과정은 대체로 비슷한 단계를 거친다. 이를 성숙도 모델로 정리하면 도입 우선순위를 잡는 데 도움이 된다.
 
-```mermaid
-stateDiagram-v2
-    [*] --> Reactive
-    Reactive --> Diagnostic: 신호 통합 시작
-    Diagnostic --> Proactive: SLO·상관관계 정착
-    Proactive --> [*]
-
-    Reactive: Reactive<br>장애 발생 후 로그 grep,<br>수동 대시보드 확인
-    Diagnostic: Diagnostic<br>메트릭·로그·트레이스 연결,<br>근본 원인 추적 단축
-    Proactive: Proactive<br>SLO 기반 알림,<br>이상 징후 사전 포착
-```
+![관측성 성숙도 3단계: Reactive(장애 후 로그 grep·수동 대시보드)에서 신호 통합으로 Diagnostic(메트릭·로그·트레이스 연결, MTTR 단축), SLO·상관관계 정착으로 Proactive(SLO 기반 알림, 이상 징후 사전 포착)로 진행](/images/study-observability/01-maturity.png)
 
 <strong>Reactive</strong> 단계는 장애가 터진 뒤에야 흩어진 로그를 grep하고 대시보드를 뒤진다. <strong>Diagnostic</strong> 단계는 신호가 서로 연결돼 있어 근본 원인 추적 시간(MTTR)이 눈에 띄게 줄어든다. <strong>Proactive</strong> 단계는 SLO/에러 버짓 기반 알림([15장](/study/observability/15-slo-sli-alerting))으로 사용자가 체감하기 전에 이상 징후를 잡아낸다. 대부분의 조직은 Reactive에서 출발해 도구를 갖추며 Diagnostic으로, 문화와 프로세스가 정착돼야 비로소 Proactive로 넘어간다 — 즉 관측성은 도구 도입만으로 완성되지 않고 조직 관행의 문제이기도 하다.
 

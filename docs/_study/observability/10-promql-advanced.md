@@ -52,11 +52,7 @@ kube_deployment_status_replicas_available
   sum(rate(container_cpu_usage_seconds_total[5m])) by (deployment)
 ```
 
-```mermaid
-flowchart LR
-    L["왼쪽 벡터\n(one 쪽)"] -->|"on(label) group_left(extra)"| OUT["결과 벡터\n왼쪽 값 기준\n+ extra 라벨은 many쪽에서"]
-    R["오른쪽 벡터\n(many 쪽)"] --> OUT
-```
+![벡터 매칭 — on/group_left로 왼쪽(one) 벡터의 값을 기준으로, 오른쪽(many) 벡터의 extra 라벨을 결과 벡터에 끌어와 덧붙이는 조인 구조](/images/study-observability/10-vector-matching.png)
 
 가장 흔한 실무 패턴은 `kube_pod_info`, `kube_pod_labels`처럼 <strong>정보성(info) 메트릭</strong>을 `group_left`로 끌어와 사용량 메트릭에 라벨을 덧붙이는 것이다. info 메트릭은 값 자체는 항상 `1`이고 라벨에만 의미가 있다.
 
@@ -165,16 +161,7 @@ rate(http_requests_total[5m] @ end())
 
 <strong>넓은 range의 즉석 집계 반복.</strong> `histogram_quantile`이나 `topk` 같은 무거운 연산을 긴 range·짧은 step으로 대시보드에서 반복 실행하면 매 새로고침마다 Prometheus에 부하가 걸린다. 자주 조회되는 무거운 쿼리는 Recording Rule로 미리 계산해두는 것이 정석이다.
 
-```mermaid
-flowchart TD
-    Q["느린/비싼 쿼리"] --> C1{"고카디널리티\n라벨 매칭?"}
-    C1 -->|Yes| A1["계측 단계에서\n라벨 설계 재검토"]
-    C1 -->|No| C2{"rate 전에\n집계했는가?"}
-    C2 -->|Yes| A2["rate를 안쪽으로,\n집계를 바깥으로 재배치"]
-    C2 -->|No| C3{"대시보드에서\n반복 조회되는 무거운\n집계/quantile인가?"}
-    C3 -->|Yes| A3["Recording Rule로\n사전 계산"]
-    C3 -->|No| A4["쿼리 자체보다\n스크레이프 간격·\n타임아웃 점검"]
-```
+![느린·비싼 쿼리 진단 결정 트리 — 고카디널리티 라벨 매칭이면 라벨 설계 재검토, rate 전 집계면 순서 재배치, 반복 조회되는 무거운 집계면 Recording Rule 사전 계산, 아니면 스크레이프 간격·타임아웃 점검](/images/study-observability/10-antipattern-decision.png)
 
 ::: tip 핵심 정리
 - 벡터 매칭은 기본적으로 라벨 전체 일치이며, `on`/`ignoring`으로 매칭 기준을, `group_left`/`group_right`로 many 쪽 방향을 명시한다.

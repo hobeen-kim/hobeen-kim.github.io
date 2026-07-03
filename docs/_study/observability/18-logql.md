@@ -63,13 +63,7 @@ next: /study/observability/19-log-pipeline-storage
 
 라인 필터로 좁힌 뒤에는 파서로 로그 라인을 구조화된 필드(라벨처럼 다룰 수 있는 추출 값)로 분해한다.
 
-```mermaid
-flowchart LR
-    S["Stream Selector\n{app=\"checkout\"}"]
-    LF["Line Filter\n|= \"error\""]
-    P["Parser\n| json"]
-    S --> LF --> P --> OUT["추출된 필드\n(status, path, duration ...)"]
-```
+![LogQL 파이프라인 흐름 — 스트림 셀렉터로 대상을 좁히고 라인 필터로 텍스트를 거른 뒤 파서(json 등)로 status·path·duration 같은 구조화된 필드를 추출](/images/study-observability/18-parser-pipeline.png)
 
 - <strong>logfmt</strong>: `key=value key2="value 2"` 형식 로그를 파싱한다. `| logfmt`만 쓰면 전체 필드를 추출하고, `| logfmt status, path`처럼 필드를 지정할 수도 있다.
 - <strong>json</strong>: JSON 로그 라인을 파싱한다. 중첩 필드는 `| json request_method="request.method"`처럼 JMESPath 유사 표기로 평탄화해 뽑는다.
@@ -153,13 +147,7 @@ topk(5,
 
 LogQL 성능은 파이프라인 앞단에서 데이터를 얼마나 줄이느냐에 좌우된다. 각 단계의 비용이 크게 다르기 때문이다.
 
-```mermaid
-flowchart LR
-    A["1. Stream Selector\n(인덱스 조회, 매우 저렴)"] --> B["2. Line Filter |=, !=\n(바이트 비교, 저렴)"]
-    B --> C["3. Line Filter |~, !~\n(정규식, 중간)"]
-    C --> D["4. Parser json/logfmt/pattern/regexp\n(전체 라인 파싱, 비쌈)"]
-    D --> E["5. Label Filter / 집계\n(파싱 결과 위 연산)"]
-```
+![LogQL 성능 단계별 비용 — 스트림 셀렉터(매우 저렴) → 라인 필터 |= !=(저렴) → 라인 필터 |~ !~(중간) → 파서(비쌈) → 라벨 필터·집계 순으로 갈수록 비용이 커지므로 저렴한 단계로 먼저 후보를 줄인다](/images/study-observability/18-performance-stages.png)
 
 원칙은 단순하다.
 

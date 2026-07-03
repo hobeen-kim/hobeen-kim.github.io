@@ -24,32 +24,13 @@ next: /study/observability/29-alloy-pipelines
 
 Alloy를 이해하는 데 가장 중요한 사실은 두 가지가 합쳐진 결과물이라는 점이다. 하나는 <strong>OpenTelemetry Collector의 배포판(distribution)</strong>이라는 정체성이다. Alloy는 OTel Collector 코드베이스를 그대로 임베드하고, 그 리시버·프로세서·익스포터를 `otelcol.*`라는 이름의 컴포넌트로 노출한다. 다른 하나는 Grafana Agent 시절부터 이어온 <strong>구성 구문(Alloy 구문, 구 River)</strong>이다. YAML 대신 HCL에 가까운 선언형 구문으로 수집 파이프라인을 컴포넌트 그래프로 표현한다. 즉 "OTel Collector 엔진 + Grafana 자체 구문 + Prometheus/Loki/Pyroscope 네이티브 컴포넌트"를 한 프로세스에 묶은 것이 Alloy다.
 
-```mermaid
-timeline
-    title Grafana 수집 에이전트의 계보
-    2020 : Prometheus Agent mode 등장
-    2021 : Grafana Agent 출시 (Prometheus + Promtail 통합)
-    2023 : Grafana Agent Flow (컴포넌트 그래프 도입)
-    2024 : Alloy 출시, River를 Alloy 구문으로 개명
-    2025 : Grafana Agent EOL, Alloy로 완전 이관
-```
+![Grafana 수집 에이전트의 계보 타임라인 — 2020 Prometheus Agent mode, 2021 Grafana Agent 출시, 2023 Grafana Agent Flow, 2024 Alloy 출시와 River를 Alloy 구문으로 개명, 2025 Grafana Agent EOL과 Alloy로 완전 이관](/images/study-observability/28-agent-lineage.png)
 
 ## 2. 컴포넌트 모델 — 그래프(DAG)로 파이프라인을 표현한다
 
 Alloy 설정의 핵심 단위는 <strong>컴포넌트(component)</strong>다. 각 컴포넌트는 인자(arguments)를 받아 동작하고, 결과를 <strong>export</strong>로 노출한다. 다른 컴포넌트는 이 export를 참조(reference)해서 자신의 인자로 사용한다. 이 참조 관계가 자동으로 <strong>방향성 비순환 그래프(DAG)</strong>를 만들고, Alloy 런타임은 이 그래프를 따라 데이터를 흘려보낸다. 노드 하나가 죽거나 설정이 바뀌면 그 노드에 의존하는 하위 그래프만 재평가되므로, 대형 파이프라인도 전체 재시작 없이 부분 갱신이 가능하다.
 
-```mermaid
-flowchart LR
-    DK["discovery.kubernetes.pods\n(Pod 목록 export)"]
-    DR["discovery.relabel.filter\n(relabel 후 output export)"]
-    PS["prometheus.scrape.app\n(scrape 후 targets 소비)"]
-    PRW["prometheus.remote_write.mimir\n(receiver export)"]
-
-    DK -->|"targets"| DR
-    DR -->|"output"| PS
-    PS -->|"forward_to"| PRW
-    PRW -->|"remote_write"| MIMIR["Mimir"]
-```
+![컴포넌트 그래프(DAG) — discovery.kubernetes.pods가 targets를 discovery.relabel.filter로, output을 prometheus.scrape.app로, forward_to로 prometheus.remote_write.mimir로, 마지막에 remote_write로 Mimir에 전달하며 각 컴포넌트가 앞 컴포넌트의 export를 직접 참조](/images/study-observability/28-component-dag.png)
 
 이 그래프 구조는 YAML 기반의 OTel Collector 설정과 결이 다르다. Collector YAML은 `receivers`/`processors`/`exporters`를 각각 선언하고 `service.pipelines`에서 이름으로 묶는 간접 참조 방식인 반면, Alloy는 컴포넌트가 서로를 직접 가리키므로 데이터가 어디서 와서 어디로 가는지 설정 파일만 보고 즉시 추적할 수 있다.
 
@@ -101,22 +82,7 @@ Alloy 컴포넌트는 이름의 접두사로 소속 생태계를 알 수 있다.
 
 `otelcol.*` 컴포넌트는 새로 구현된 게 아니라 <strong>OpenTelemetry Collector 코드베이스를 그대로 감싼(wrap) 것</strong>이다. `otelcol.receiver.otlp`는 OTel Collector의 OTLP 리시버를, `otelcol.processor.batch`는 배치 프로세서를 Alloy 구문으로 노출할 뿐 내부 구현은 동일하다. 이 때문에 Alloy 공식 문서는 스스로를 "OpenTelemetry Collector distribution(배포판)"이라고 명시한다. 즉 Alloy는 Collector를 대체하는 완전히 다른 제품이 아니라, <strong>Collector 위에 Prometheus/Loki/Pyroscope 네이티브 지원과 통합 구성 구문을 얹은 상위 계층</strong>이다.
 
-```mermaid
-flowchart TB
-    subgraph Alloy["Alloy 프로세스"]
-        SYNTAX["Alloy 구문\n(구 River, 컴포넌트 그래프)"]
-        subgraph Core["실행 엔진"]
-            OTELCORE["OpenTelemetry Collector\n코드베이스 (otelcol.*)"]
-            PROMCORE["Prometheus 클라이언트\n(prometheus.*)"]
-            LOKICORE["Loki 클라이언트\n(loki.*)"]
-            PYROCORE["Pyroscope 클라이언트\n(pyroscope.*)"]
-        end
-        SYNTAX --> OTELCORE
-        SYNTAX --> PROMCORE
-        SYNTAX --> LOKICORE
-        SYNTAX --> PYROCORE
-    end
-```
+![Alloy 프로세스 내부 구조 — Alloy 구문(구 River, 컴포넌트 그래프)이 실행 엔진의 OpenTelemetry Collector 코드베이스(otelcol.*)·Prometheus 클라이언트(prometheus.*)·Loki 클라이언트(loki.*)·Pyroscope 클라이언트(pyroscope.*)를 한 프로세스에 묶은 구성](/images/study-observability/28-alloy-process.png)
 
 실무적으로는 "OTLP를 받아서 처리하는 표준 파이프라인이 필요하다"면 `otelcol.*`를, "Prometheus 생태계와의 호환성(relabel_configs, ServiceMonitor 스타일 스크레이핑)이 중요하다"면 `prometheus.*`를 고르는 식으로 두 계열을 섞어 쓴다. 이 선택 기준은 [Collector vs Alloy 4장](/study/observability/30-collector-vs-alloy)에서 더 구체적으로 다룬다.
 
@@ -126,19 +92,7 @@ Alloy는 역할에 따라 배포 형태가 갈린다. 노드 로컬 데이터(�
 
 문제는 스크레이프 대상을 여러 레플리카가 나눠 맡아야 할 때다. Alloy는 <strong>clustering</strong> 기능으로 이를 해결한다. 여러 Alloy 인스턴스가 gossip 프로토콜로 서로를 발견하고, 컨시스턴트 해싱으로 스크레이프 타깃을 자동 분배한다. 특정 인스턴스가 죽으면 나머지가 그 타깃을 흡수해 재조정한다.
 
-```mermaid
-flowchart TB
-    subgraph Cluster["Alloy Cluster (StatefulSet, 3 replica)"]
-        A1["alloy-0"]
-        A2["alloy-1"]
-        A3["alloy-2"]
-        A1 <-->|"gossip"| A2
-        A2 <-->|"gossip"| A3
-        A1 <-->|"gossip"| A3
-    end
-    TARGETS["discovery.kubernetes\n타깃 N개"] -->|"컨시스턴트 해싱으로 분배"| Cluster
-    Cluster --> MIMIR["Mimir / Loki / Tempo"]
-```
+![Alloy Cluster 구조 — discovery.kubernetes가 발견한 타깃 N개를 컨시스턴트 해싱으로 3개 레플리카(alloy-0/1/2)에 분배하고, 레플리카들은 gossip 프로토콜로 서로 발견하며 각자 자기 몫만 Mimir/Loki/Tempo로 내보내는 StatefulSet 배치](/images/study-observability/28-clustering.png)
 
 ```alloy
 alloy {

@@ -22,26 +22,7 @@ next: /study/observability/21-opentelemetry
 
 각 서비스가 독립적으로 로그를 남기면 요청 하나의 전체 경로를 재구성하기 어렵다. 서비스마다 로그 포맷이 다르고, 타임스탬프만으로는 같은 요청인지 구분할 수 없으며, 병렬로 처리되는 하위 호출까지 있으면 순서를 추적하는 것 자체가 불가능에 가깝다. <strong>분산 트레이싱(Distributed Tracing)</strong>은 요청이 시스템을 가로지르는 전체 경로에 하나의 식별자를 부여하고, 각 서비스가 처리한 구간을 시간 순서와 부모-자식 관계로 남겨 인과관계를 재구성하는 관측성 신호다.
 
-```mermaid
-flowchart LR
-    subgraph Without["트레이싱 없이"]
-        L1["Gateway 로그"]
-        L2["Order 로그"]
-        L3["Payment 로그"]
-        L4["Inventory 로그"]
-        L1 -.->|"같은 요청인지\n추론 불가"| L2
-        L2 -.-> L3
-        L2 -.-> L4
-    end
-    subgraph With["트레이싱으로"]
-        T1["Gateway span\ntrace_id=X"]
-        T2["Order span\ntrace_id=X"]
-        T3["Payment span\ntrace_id=X"]
-        T4["Inventory span\ntrace_id=X"]
-        T1 --> T2 --> T3
-        T2 --> T4
-    end
-```
+![트레이싱 없이는 서비스별 독립 로그로 같은 요청을 연결할 수 없지만, 트레이싱은 공통 trace_id로 parent/child 경로를 복원함을 비교한 다이어그램](/images/study-observability/20-tracing-vs-nothing.png)
 
 쿠버네티스 환경에서 서비스가 Pod 단위로 흩어져 있고 사이드카·인그레스까지 거치는 구조라면 이 문제는 더 심각해진다. 클러스터 로깅 아키텍처는 [쿠버네티스 로깅과 트레이싱](/study/kubernetes/41-logging-tracing) 챕터에서 다룬 바 있는데, 이번 스터디에서는 트레이싱 신호 자체를 Tempo와 OpenTelemetry 기준으로 깊게 파고든다.
 
@@ -51,18 +32,7 @@ flowchart LR
 
 <strong>trace</strong>는 같은 `trace_id`를 공유하는 span들의 집합이다. 최상위 요청을 처리하는 span을 <strong>root span</strong>이라 부르고, 그 아래로 호출된 span들이 parent/child 관계로 연결되면서 트리 구조를 이룬다. 이 구조를 <strong>trace tree</strong>라 한다.
 
-```mermaid
-flowchart TB
-    A["root span: API Gateway\ntrace_id=abc123, span_id=a1"]
-    B["span: Order Service\nparent_span_id=a1, span_id=b2"]
-    C["span: Payment Service\nparent_span_id=b2, span_id=c3"]
-    D["span: Inventory Service\nparent_span_id=b2, span_id=d4"]
-    E["span: DB Query (SELECT)\nparent_span_id=c3, span_id=e5"]
-    A --> B
-    B --> C
-    B --> D
-    C --> E
-```
+![root span인 API Gateway 아래로 Order·Payment·Inventory·DB Query span이 parent_span_id로 연결되어 trace tree를 이루는 구조](/images/study-observability/20-trace-tree.png)
 
 trace tree에서 각 span의 시작·종료 시각을 시간축에 나열하면 <strong>Gantt 형태의 waterfall 뷰</strong>가 만들어진다. Grafana에서 Tempo trace를 열었을 때 보이는 그 화면이다. child span의 구간이 parent span의 구간을 벗어나면 계측이 잘못됐거나 시계가 어긋난 것이므로, 이 포함 관계 자체가 유효성 검증의 기준이 되기도 한다.
 
@@ -78,18 +48,7 @@ traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01
 
 포맷은 `버전-trace_id(32자리 hex)-parent_id(16자리 hex)-trace_flags(2자리 hex)` 네 부분이다. `trace_flags`의 `01`은 이 trace가 샘플링(수집) 대상임을 뜻한다. 수신 서비스는 이 헤더를 파싱해 같은 `trace_id`를 유지한 채 자신의 새 `span_id`를 생성하고, `parent_id`에는 방금 받은 `parent_id` 값을 넣는다.
 
-```mermaid
-sequenceDiagram
-    participant GW as API Gateway
-    participant ORD as Order Service
-    participant PAY as Payment Service
-    GW->>ORD: POST /orders (traceparent 헤더 전파)
-    Note over ORD: 같은 trace_id 유지,<br>새 span_id 생성
-    ORD->>PAY: POST /charge (traceparent 헤더 전파)
-    Note over PAY: 같은 trace_id 유지,<br>parent_id는 Order Service의 span_id
-    PAY-->>ORD: 200 OK
-    ORD-->>GW: 200 OK
-```
+![API Gateway→Order Service→Payment Service로 traceparent 헤더가 전파되며 trace_id는 유지되고 홉마다 새 span_id가 생성되는 시퀀스](/images/study-observability/20-context-propagation.png)
 
 벤더별 부가 정보는 `tracestate` 헤더에 실린다. 예를 들어 여러 벤더의 트레이싱 시스템이 공존하는 환경에서 각자의 샘플링 결정이나 우선순위 힌트를 `tracestate: vendorA=t61rcWkgMzE`처럼 key-value로 덧붙일 수 있다.
 
@@ -131,16 +90,7 @@ links는 root span 하나로 표현되지 않는 관계, 예를 들어 메시지
 
 분산 트레이싱의 개념적 뿌리는 2010년 Google이 공개한 Dapper 논문이다. 이후 Zipkin(Twitter), Jaeger(Uber) 같은 오픈소스 트레이싱 시스템이 등장했지만, 계측 라이브러리가 벤더마다 제각각이라 애플리케이션 코드가 특정 트레이싱 백엔드에 종속되는 문제가 있었다.
 
-```mermaid
-timeline
-    title 분산 트레이싱 표준의 역사
-    2010 : Google Dapper 논문 발표
-    2012 : Zipkin 오픈소스 공개 (Twitter)
-    2016 : OpenTracing 프로젝트 시작 (CNCF, API 표준화)
-    2017 : OpenCensus 발표 (Google, API + SDK)
-    2019 : OpenTracing과 OpenCensus 통합 발표
-    2021 : OpenTelemetry Traces 1.0 GA
-```
+![2010 Google Dapper부터 2012 Zipkin, 2016 OpenTracing, 2017 OpenCensus, 2019 통합 발표, 2021 OpenTelemetry Traces 1.0 GA까지 이어지는 분산 트레이싱 표준의 역사 타임라인](/images/study-observability/20-tracing-history.png)
 
 <strong>OpenTracing</strong>은 계측 API만 표준화해 "코드는 OpenTracing API로 계측하고, 백엔드는 Zipkin이든 Jaeger든 자유롭게 선택"할 수 있게 했다. 반면 <strong>OpenCensus</strong>는 Google 주도로 API와 SDK(실제 수집·내보내기 구현)를 함께 제공했다. 문제는 두 프로젝트가 경쟁하면서 계측 라이브러리 생태계가 다시 두 쪽으로 갈라졌다는 점이다.
 

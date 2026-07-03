@@ -22,28 +22,7 @@ next: /study/observability/22-tempo-architecture
 
 OpenTelemetry의 핵심 가치는 <strong>교차 신호(Cross-Signal)</strong>다. traces·metrics·logs 세 신호(profiles는 아직 실험 단계)를 하나의 계측 라이브러리, 하나의 리소스 모델, 하나의 전송 프로토콜(OTLP)로 다룬다. 이 스터디에서 지금까지 다룬 Prometheus(메트릭)와 Loki(로그)도 OTLP를 직접 수신할 수 있고, Alloy 같은 수집기는 세 신호를 하나의 파이프라인에서 함께 처리한다.
 
-```mermaid
-flowchart LR
-    subgraph App["애플리케이션 (OTel SDK)"]
-        T["Traces"]
-        M["Metrics"]
-        L["Logs"]
-    end
-    subgraph OTLP["OTLP (단일 프로토콜)"]
-        P["gRPC / HTTP"]
-    end
-    subgraph Backends["백엔드 (신호별 전용 저장소)"]
-        TEMPO["Tempo"]
-        PROM["Prometheus / Mimir"]
-        LOKI["Loki"]
-    end
-    T --> P
-    M --> P
-    L --> P
-    P --> TEMPO
-    P --> PROM
-    P --> LOKI
-```
+![OTel SDK의 Traces·Metrics·Logs 세 신호가 단일 프로토콜 OTLP(gRPC/HTTP)를 거쳐 Tempo·Prometheus/Mimir·Loki 신호별 백엔드로 전달되는 교차 신호 구조](/images/study-observability/21-cross-signal-otlp.png)
 
 벤더 중립성이 갖는 실질적 이점은 계측 코드를 한 번 작성하면 백엔드를 Tempo에서 다른 트레이싱 시스템으로, 또는 온프레미스에서 SaaS로 바꿔도 애플리케이션 코드를 건드리지 않아도 된다는 점이다. 자세한 개요는 [OpenTelemetry 공식 문서](https://opentelemetry.io/docs/)를 참고한다.
 
@@ -169,30 +148,7 @@ resource:
 
 <strong>OpenTelemetry Collector</strong>는 세 단계 파이프라인으로 동작한다. receiver가 데이터를 받아들이고, processor가 가공하며, exporter가 백엔드로 내보낸다.
 
-```mermaid
-flowchart LR
-    subgraph Receivers["Receivers"]
-        R1["otlp\n(gRPC :4317 / HTTP :4318)"]
-        R2["prometheus\n(스크레이프)"]
-        R3["filelog\n(파일 tail)"]
-    end
-    subgraph Processors["Processors"]
-        P1["batch\n(배치 전송)"]
-        P2["memory_limiter\n(OOM 방지)"]
-        P3["tail_sampling\n(trace 단위 샘플링)"]
-        P4["attributes\n(속성 가공)"]
-    end
-    subgraph Exporters["Exporters"]
-        E1["otlp\n(Tempo)"]
-        E2["prometheusremotewrite\n(Mimir)"]
-        E3["loki"]
-    end
-    R1 --> P2 --> P4 --> P3 --> P1 --> E1
-    R2 --> P2
-    R3 --> P2
-    P1 --> E2
-    P1 --> E3
-```
+![Collector가 otlp·prometheus·filelog receiver로 받아 memory_limiter→attributes→tail_sampling→batch processor 체인으로 가공한 뒤 otlp/Tempo·prometheusremotewrite/Mimir·loki exporter로 내보내는 파이프라인](/images/study-observability/21-collector-pipeline.png)
 
 파이프라인은 신호별(traces/metrics/logs)로 따로 구성하며, 하나의 receiver를 여러 파이프라인이 공유할 수도 있다.
 

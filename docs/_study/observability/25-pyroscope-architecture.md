@@ -22,12 +22,7 @@ next: /study/observability/26-profile-types-ebpf
 
 2023년, Grafana Labs는 Pyroscope 팀과 합류해 두 프로젝트를 하나로 통합했다. 결과물은 <strong>Pyroscope라는 이름</strong>을 유지하되(사용자 친화적인 SDK·UX 자산을 계승), <strong>내부 저장 엔진은 Phlare의 확장 가능한 아키텍처</strong>를 물려받은 형태다. 그래서 지금의 [Grafana Pyroscope](https://grafana.com/docs/pyroscope/latest/)는 Mimir/Loki/Tempo와 같은 계열의 컴포넌트 구성(distributor, ingester, querier, store-gateway, compactor)을 갖는다 — LGTM+ 스택 안에서 아키텍처적으로 가장 뒤늦게 정착했지만 가장 일관된 설계를 갖춘 컴포넌트인 셈이다.
 
-```mermaid
-flowchart LR
-    P1["Pyroscope\n(오픈소스, SDK·UX)"] --> M["병합 (2023)"]
-    P2["Grafana Phlare\n(오브젝트 스토리지 아키텍처)"] --> M
-    M --> G["Grafana Pyroscope\nPyroscope 이름 + Phlare 아키텍처"]
-```
+![오픈소스 Pyroscope의 SDK·UX와 Grafana Phlare의 오브젝트 스토리지 아키텍처가 2023년 병합돼 Pyroscope 이름에 Phlare 아키텍처를 물려받은 Grafana Pyroscope가 된 역사](/images/study-observability/25-phlare-merge.png)
 
 ## 2. 수집 — push vs pull, SDK, Alloy
 
@@ -35,17 +30,7 @@ Pyroscope의 기본 수집 모델은 <strong>push</strong>다. 애플리케이�
 
 동시에 <strong>Alloy</strong>는 pull(스크레이핑) 경로도 지원한다. `pyroscope.scrape` 컴포넌트는 Go의 `net/http/pprof` 같은 표준 pprof 엔드포인트를 Prometheus 스크레이핑처럼 주기적으로 긁어와 Pyroscope로 전달할 수 있다. 즉 애플리케이션이 이미 pprof 엔드포인트를 노출하고 있다면 SDK 없이도 Alloy만으로 수집 파이프라인을 구성할 수 있다.
 
-```mermaid
-flowchart LR
-    subgraph Push["push 경로"]
-        SDK["언어별 SDK\n(Go/Java/Python/...)"] -->|"주기적 HTTP push"| DIST["Pyroscope\ndistributor"]
-    end
-    subgraph Pull["pull 경로"]
-        APP["/debug/pprof\n엔드포인트"] -->|"pyroscope.scrape"| ALLOY["Alloy"]
-        ALLOY -->|"pyroscope.write"| DIST
-    end
-    EBPF["eBPF\n(pyroscope.ebpf)"] -->|"무계측 수집"| ALLOY
-```
+![Pyroscope의 세 수집 경로: 언어별 SDK가 주기적 HTTP push로 distributor에 직접 보내는 push 경로, /debug/pprof 엔드포인트를 pyroscope.scrape로 긁어 Alloy가 pyroscope.write로 전달하는 pull 경로, eBPF 무계측 수집이 Alloy를 경유하는 경로](/images/study-observability/25-push-pull-collection.png)
 
 eBPF 기반 무계측 수집(`pyroscope.ebpf`)도 Alloy를 경유하는 세 번째 경로인데, 이는 언어 SDK 계측 없이 시스템 전체 프로세스를 프로파일링하는 방식으로 [26장](/study/observability/26-profile-types-ebpf)에서 자세히 다룬다. Alloy의 컴포넌트 그래프 개념 자체는 [28장](/study/observability/28-alloy-overview)에서 다룬다.
 
@@ -55,16 +40,7 @@ Phlare 병합 이후 Pyroscope의 저장 구조는 다른 Grafana 백엔드와 �
 
 프로파일 고유의 저장 컴포넌트로 <strong>심볼 DB(symbol database)</strong>가 있다. 특히 eBPF 기반 프로파일처럼 바이너리 주소만 캡처되고 함수 이름이 즉시 붙지 않는 경우, 주소를 함수 이름·소스 라인으로 변환하는 심볼라이제이션 정보(ELF 심볼 테이블, 디버그 정보)를 별도로 캐싱해둔다. 이렇게 하면 매 질의마다 원본 바이너리를 다시 읽어 심볼을 재해석할 필요가 없어 질의 지연을 크게 줄인다.
 
-```mermaid
-flowchart TB
-    DIST["distributor"] --> ING["ingester\n(메모리 버퍼)"]
-    ING -->|"블록 플러시"| OBJ["오브젝트 스토리지\n(S3/GCS/Azure Blob)"]
-    ING -.->|"심볼 정보"| SYM["심볼 DB\n(주소 → 함수명 캐시)"]
-    OBJ --> COMP["compactor\n(블록 병합·보존정책 적용)"]
-    OBJ --> SG["store-gateway"]
-    SG --> Q["querier"]
-    SYM --> Q
-```
+![distributor에서 ingester(메모리 버퍼)로 유입된 프로파일이 블록으로 오브젝트 스토리지에 플러시되고 compactor가 병합·정리하며, store-gateway를 거쳐 querier가 질의하고 ingester가 심볼 DB에 심볼 정보를 저장해 querier 질의 시 주소를 함수명으로 변환하는 저장 구조](/images/study-observability/25-storage-architecture.png)
 
 ## 4. 질의 — 프로파일 병합, 시간 범위
 
@@ -83,19 +59,7 @@ Pyroscope는 Mimir·Loki와 마찬가지로 두 가지 배포 모드를 제공�
 
 monolithic 모드는 운영 부담이 적어 시작하기 쉽지만, 특정 컴포넌트(예: ingester)만 부하가 몰려도 전체 프로세스를 함께 스케일해야 하는 비효율이 있다. microservices 모드는 컴포넌트를 독립적으로 수평 확장할 수 있어 대규모 환경에 적합하지만, 운영 복잡도(컴포넌트 간 네트워킹, 각각의 리소스 튜닝)가 늘어난다. Kubernetes 환경에서는 보통 monolithic으로 시작해 트래픽이 늘어나면 microservices로 전환하는 경로를 택한다.
 
-```mermaid
-flowchart LR
-    subgraph Mono["monolithic 모드"]
-        M1["단일 프로세스\n(모든 컴포넌트 포함)"]
-    end
-    subgraph Micro["microservices 모드"]
-        D2["distributor\n(N개 복제)"]
-        I2["ingester\n(N개 복제)"]
-        Q2["querier\n(N개 복제)"]
-        C2["compactor\n(N개 복제)"]
-    end
-    Mono -->|"트래픽 증가 시 전환"| Micro
-```
+![monolithic 모드는 모든 컴포넌트를 단일 프로세스로 실행하고, 트래픽이 늘면 distributor·ingester·querier·compactor를 각각 N개로 복제해 독립 스케일하는 microservices 모드로 전환하는 두 배포 모드 대비](/images/study-observability/25-deployment-modes.png)
 
 ## 6. 카디널리티·비용 관리
 

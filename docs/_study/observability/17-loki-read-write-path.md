@@ -20,22 +20,7 @@ next: /study/observability/18-logql
 
 로그 라인이 Loki에 도착하는 첫 관문은 <strong>distributor</strong>다. 클라이언트(Alloy, Promtail, Fluent Bit 등)가 gRPC 또는 HTTP(`/loki/api/v1/push`)로 로그 배치를 보내면, distributor가 검증·정규화한 뒤 라벨 집합을 해싱해 담당 <strong>ingester</strong>로 라우팅한다. ingester는 해당 스트림의 로그를 메모리 청크에 쌓다가, 일정 크기·시간 조건이 되면 청크를 압축해 오브젝트 스토리지로 flush한다.
 
-```mermaid
-sequenceDiagram
-    participant C as 클라이언트 (Alloy/Promtail)
-    participant D as Distributor
-    participant I as Ingester
-    participant O as 오브젝트 스토리지
-    C->>D: POST /loki/api/v1/push (로그 배치)
-    D->>D: 검증 + rate limit 체크
-    D->>D: 라벨 해싱 → 담당 ingester 결정
-    D->>I: 스트림 라우팅 (복제 factor만큼)
-    I->>I: WAL에 기록
-    I->>I: 메모리 청크에 append
-    Note over I: 청크가 가득 차거나\n유휴 시간 초과 시
-    I->>O: 압축된 청크 flush
-    I->>O: 인덱스 항목 업로드
-```
+![Loki 쓰기 경로 시퀀스 — 클라이언트가 distributor로 push하면 검증·라벨 해싱 후 ingester로 라우팅하고, ingester가 WAL 기록·메모리 청크 append 뒤 조건 충족 시 오브젝트 스토리지로 청크·인덱스를 flush](/images/study-observability/17-write-path.png)
 
 ## 2. Distributor — 해싱, 검증, rate limit
 
@@ -87,22 +72,7 @@ ingester는 최근 미flush 데이터를 들고 있는 상태 저장 컴포넌�
 
 두 결과를 시간순으로 병합해 최종 결과를 만든다. 이 이중 조회 덕분에 방금 들어온 로그도 flush를 기다리지 않고 즉시 쿼리에 잡힌다.
 
-```mermaid
-flowchart TB
-    U["사용자 / Grafana"]
-    QF["Query-Frontend\n(쿼리 분할 + 캐싱)"]
-    Q["Querier"]
-    ING["Ingester\n(미flush 최신 데이터)"]
-    IDX["Index (TSDB)"]
-    OBJ["오브젝트 스토리지\n(flush된 청크)"]
-    U --> QF --> Q
-    Q -->|"최신 데이터"| ING
-    Q -->|"청크 위치 조회"| IDX
-    Q -->|"과거 청크 fetch"| OBJ
-    ING --> MERGE["시간순 병합"]
-    OBJ --> MERGE
-    MERGE --> U
-```
+![Loki 읽기 경로 — query-frontend가 쿼리를 분할·캐싱해 querier로 넘기고, querier가 ingester(미flush 최신)와 index·오브젝트 스토리지(과거 청크)를 동시 조회해 시간순 병합 후 사용자에게 반환](/images/study-observability/17-read-path.png)
 
 ## 5. Query-Frontend — 쿼리 분할, 캐싱, 병렬
 

@@ -46,20 +46,7 @@ sum(rate(http_requests_total{status=~"5.."}[5m]))
 
 트레이스의 본질은 <strong>분산 인과관계</strong>를 보존한다는 점이다. 메트릭은 "결제 서비스의 p99가 느리다"까지만 말하지만, 트레이스는 "이 특정 요청에서 결제 서비스가 느린 이유는 하위의 재고 서비스 호출이 300ms 걸렸기 때문"이라는 인과 사슬을 보여준다. 대신 트레이스도 요청량에 비례해 볼륨이 커지므로, 실무에서는 전수 수집 대신 <strong>샘플링</strong>(head-based/tail-based)으로 비용을 통제한다. 분산 트레이싱의 원리와 context propagation은 [20장](/study/observability/20-distributed-tracing-basics)에서 다룬다.
 
-```mermaid
-sequenceDiagram
-    participant C as Client
-    participant GW as API Gateway
-    participant PAY as Payment Service
-    participant INV as Inventory Service
-    C->>GW: POST /checkout (trace_id=abc123)
-    GW->>PAY: charge() [span]
-    PAY->>INV: reserve_stock() [span]
-    INV-->>PAY: 300ms 소요
-    PAY-->>GW: 결제 완료
-    GW-->>C: 200 OK
-    Note over C,INV: 하나의 trace_id로 4개 span이 인과관계로 연결됨
-```
+![Client가 API Gateway에 POST /checkout(trace_id=abc123)을 보내면 charge()·reserve_stock() span이 Payment·Inventory 서비스로 이어지고, 재고 호출이 300ms 걸린 인과 사슬이 하나의 trace_id로 묶인 4개 span 시퀀스](/images/study-observability/02-trace-sequence.png)
 
 ## 4. 프로파일 — 코드 레벨 리소스 소비
 
@@ -84,12 +71,7 @@ sequenceDiagram
 
 네 신호를 아무리 잘 골라도, 서로 다른 시스템에 서로 다른 ID로 흩어져 있으면 장애 대응자는 여전히 수동으로 신호를 오간다. 이 문제를 푸는 핵심 메커니즘이 <strong>exemplar</strong>다. Prometheus 히스토그램 메트릭에 trace ID를 exemplar로 붙여두면, Grafana 대시보드에서 레이턴시 스파이크 지점을 클릭해 바로 그 요청의 트레이스로 이동할 수 있다. 트레이스에서는 span에 붙은 로그 라벨(예: `trace_id`, `span_id`)로 Loki의 관련 로그를 곧바로 조회하고, span의 서비스·시간 범위로 Pyroscope 프로파일까지 이어갈 수 있다.
 
-```mermaid
-flowchart LR
-    M["메트릭\n레이턴시 스파이크 감지"] -->|exemplar| T["트레이스\n느린 span 특정"]
-    T -->|trace_id 라벨| L["로그\n에러 상세 확인"]
-    T -->|span 시간·서비스| P["프로파일\n코드 레벨 병목 확인"]
-```
+![메트릭에서 레이턴시 스파이크를 감지하면 exemplar로 트레이스의 느린 span을 특정하고, trace_id 라벨로 로그의 에러 상세를, span 시간·서비스로 프로파일의 코드 레벨 병목을 확인하는 상관관계 흐름](/images/study-observability/02-signal-correlation.png)
 
 이 상관관계 흐름을 실제로 Grafana에서 구성하는 방법(derived field, exemplar 설정, TraceQL 연동)은 [32장 시그널 상관관계](/study/observability/32-signal-correlation)에서 설정 예제와 함께 다룬다. 지금 단계에서 기억할 것은 하나다 — <strong>신호 수집 자체는 관측성의 절반일 뿐이고, 나머지 절반은 신호를 잇는 배선</strong>이라는 점이다.
 

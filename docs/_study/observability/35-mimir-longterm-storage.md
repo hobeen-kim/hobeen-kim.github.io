@@ -37,43 +37,7 @@ Mimir는 역할이 분리된 여러 마이크로서비스로 구성되고, 각�
 - <strong>ruler</strong> — recording rule·alerting rule을 테넌트별로 평가한다.
 - <strong>alertmanager</strong> — 멀티테넌트 Alertmanager. 테넌트별로 격리된 알림 라우팅을 제공한다.
 
-```mermaid
-flowchart TB
-    PROM["Prometheus\n(remote_write)"]
-
-    subgraph Write["쓰기 경로"]
-        DIST["distributor\n(검증·limit·라우팅)"]
-        ING["ingester\n(메모리 + WAL)"]
-    end
-
-    subgraph Storage["오브젝트 스토리지"]
-        OBJ["S3 / GCS / Azure Blob\n(TSDB 블록)"]
-    end
-
-    subgraph Compact["압축"]
-        COMP["compactor\n(병합·dedup)"]
-    end
-
-    subgraph Read["읽기 경로"]
-        QF["query-frontend\n(분할·캐시)"]
-        Q["querier"]
-        SG["store-gateway\n(블록 인덱스 캐시)"]
-    end
-
-    GRAFANA["Grafana"]
-
-    PROM -->|remote_write| DIST
-    DIST -->|"복제 (RF=3)"| ING
-    ING -->|"블록 flush"| OBJ
-    COMP -->|"병합·재작성"| OBJ
-    OBJ --> COMP
-
-    GRAFANA -->|PromQL| QF
-    QF --> Q
-    Q -->|"최근 데이터"| ING
-    Q -->|"과거 데이터"| SG
-    SG --> OBJ
-```
+![Prometheus의 remote_write가 쓰기 경로의 distributor(검증·limit·라우팅)를 거쳐 RF=3으로 ingester(메모리+WAL)에 복제되고, ingester가 블록을 오브젝트 스토리지(S3/GCS/Azure Blob)로 flush하며, compactor가 블록을 병합·dedup해 재작성한다. 읽기 경로에서는 Grafana의 PromQL을 query-frontend(분할·캐시)가 받아 querier로 넘기고, querier가 최근 데이터는 ingester에서 과거 데이터는 store-gateway(블록 인덱스 캐시)에서 조회하는 Mimir 마이크로서비스 아키텍처 다이어그램](/images/study-observability/35-mimir-architecture.png)
 
 ## 3. remote_write 수신
 
@@ -119,27 +83,7 @@ ingester는 Prometheus 로컬 TSDB와 동일한 블록 포맷을 사용한다. �
 
 querier는 분배받은 쿼리를 실행할 때 시간 범위에 따라 최근 데이터는 ingester에, 과거 데이터는 store-gateway에 요청한다. store-gateway는 블록의 인덱스 헤더(index-header)만 메모리에 캐시해두고, 실제 청크 데이터는 필요한 부분만 오브젝트 스토리지에서 읽어와(lazy loading) 메모리 사용량을 억제한다.
 
-```mermaid
-sequenceDiagram
-    participant G as Grafana
-    participant QF as query-frontend
-    participant Q as querier
-    participant ING as ingester
-    participant SG as store-gateway
-    participant OBJ as 오브젝트 스토리지
-
-    G->>QF: PromQL 쿼리 (최근 30일)
-    QF->>QF: 일 단위로 분할, 캐시 확인
-    QF->>Q: 캐시 미스 구간만 병렬 전달
-    Q->>ING: 최근 데이터 조회
-    Q->>SG: 과거 데이터 조회
-    SG->>OBJ: 필요한 청크만 lazy load
-    OBJ-->>SG: 청크 반환
-    SG-->>Q: 결과 반환
-    ING-->>Q: 결과 반환
-    Q-->>QF: 병합된 결과
-    QF-->>G: 최종 결과 (캐시에 저장)
-```
+![Grafana가 query-frontend로 최근 30일 PromQL 쿼리를 보내면 query-frontend가 일 단위로 분할하고 캐시를 확인해 캐시 미스 구간만 querier에 병렬 전달하고, querier가 최근 데이터는 ingester에 과거 데이터는 store-gateway에 조회하며 store-gateway는 필요한 청크만 오브젝트 스토리지에서 lazy load해 결과를 반환하고, querier가 병합한 결과를 query-frontend가 최종 반환하며 results cache에 저장하는 Mimir 쿼리 경로 순서 다이어그램](/images/study-observability/35-query-path.png)
 
 ## 6. 스케일링·운영
 

@@ -828,6 +828,61 @@ const theme = {
           ],
         },
       ],
+      '/study/supervised-learning/': [
+        {
+          text: '기초',
+          collapsible: false,
+          children: [
+            { text: '소개', link: '/study/supervised-learning/' },
+            { text: 'CH1. 지도 학습이란', link: '/study/supervised-learning/01-what-is-supervised-learning' },
+            { text: 'CH2. 일반화와 과적합', link: '/study/supervised-learning/02-generalization-overfitting' },
+            { text: 'CH3. 모델 평가 지표', link: '/study/supervised-learning/03-evaluation-metrics' },
+            { text: 'CH4. 교차 검증과 하이퍼파라미터 튜닝', link: '/study/supervised-learning/04-cross-validation-tuning' },
+          ],
+        },
+        {
+          text: '거리·선형 모델',
+          collapsible: false,
+          children: [
+            { text: 'CH5. kNN', link: '/study/supervised-learning/05-knn' },
+            { text: 'CH6. 선형 회귀와 정규화', link: '/study/supervised-learning/06-linear-regression' },
+            { text: 'CH7. 로지스틱 회귀', link: '/study/supervised-learning/07-logistic-regression' },
+            { text: 'CH8. SVM', link: '/study/supervised-learning/08-svm' },
+            { text: 'CH9. 나이브 베이즈', link: '/study/supervised-learning/09-naive-bayes' },
+          ],
+        },
+        {
+          text: '트리와 앙상블',
+          collapsible: false,
+          children: [
+            { text: 'CH10. 결정 트리', link: '/study/supervised-learning/10-decision-tree' },
+            { text: 'CH11. 앙상블 기초', link: '/study/supervised-learning/11-ensemble-basics' },
+            { text: 'CH12. 랜덤 포레스트', link: '/study/supervised-learning/12-random-forest' },
+            { text: 'CH13. 그래디언트 부스팅 원리', link: '/study/supervised-learning/13-gradient-boosting' },
+            { text: 'CH14. XGBoost·LightGBM·CatBoost', link: '/study/supervised-learning/14-xgboost-lightgbm-catboost' },
+            { text: 'CH15. GBDT 실전 튜닝', link: '/study/supervised-learning/15-gbdt-tuning' },
+          ],
+        },
+        {
+          text: '실전',
+          collapsible: false,
+          children: [
+            { text: 'CH16. 피처 엔지니어링과 파이프라인', link: '/study/supervised-learning/16-feature-engineering-pipeline' },
+            { text: 'CH17. 불균형 데이터와 캘리브레이션', link: '/study/supervised-learning/17-imbalanced-calibration' },
+            { text: 'CH18. 모델 해석', link: '/study/supervised-learning/18-model-interpretation' },
+            { text: 'CH19. 모델 선택 실전 가이드', link: '/study/supervised-learning/19-model-selection-guide' },
+          ],
+        },
+        {
+          text: '부록',
+          collapsible: false,
+          children: [
+            { text: '용어집', link: '/study/supervised-learning/appendix-glossary' },
+            { text: 'scikit-learn 치트시트', link: '/study/supervised-learning/appendix-cheatsheet' },
+            { text: '참고 자료', link: '/study/supervised-learning/appendix-references' },
+          ],
+        },
+      ],
       '/study/observability/': [
         {
           text: '관측성 기초',

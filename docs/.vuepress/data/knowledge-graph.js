@@ -47,6 +47,7 @@ export const nodes = [
   { id: 'ai', label: 'AI', size: 36, status: 'active', link: null, x: 0.50, y: 0.30 },
   { id: 'ai-agent-workflow', label: 'AI Agent\n워크플로우', size: 26, status: 'active', link: '/study/ai-agent-workflow/', x: 0.42, y: 0.44 },
   { id: 'machine-learning', label: '머신러닝', size: 28, status: 'planned', link: null, x: 0.42, y: 0.60 },
+  { id: 'supervised-learning', label: '지도 학습\n(kNN·GBDT)', size: 26, status: 'active', link: '/study/supervised-learning/', x: 0.44, y: 0.87 },
   { id: 'deep-learning', label: '딥러닝', size: 24, status: 'planned', link: null, x: 0.36, y: 0.75 },
   { id: 'computer-vision', label: '컴퓨터 비전', size: 24, status: 'planned', link: null, x: 0.52, y: 0.56 },
   { id: 'time-series', label: '시계열 예측', size: 22, status: 'planned', link: null, x: 0.50, y: 0.72 },
@@ -109,6 +110,7 @@ export const edges = [
   { source: 'ai', target: 'time-series' },
   { source: 'ai', target: 'mlops' },
   { source: 'machine-learning', target: 'deep-learning' },
+  { source: 'machine-learning', target: 'supervised-learning' },
   // 교차 엣지
   { source: 'crop-analysis', target: 'computer-vision' },
   { source: 'crop-analysis', target: 'time-series' },

@@ -26,7 +26,8 @@ Prometheus는 <strong>pull</strong> 모델을 채택한다. 메트릭을 생성�
 
 단점은 방향이 반대로 흘러야 하는 상황에서 드러난다. 네트워크 경계 너머(NAT 뒤, 방화벽 안쪽) 타깃은 Prometheus가 직접 접근할 수 없고, 배치 작업처럼 스크레이프 시점에 이미 종료된 프로세스는 pull로 잡아낼 수 없다.
 
-![Pull 모델 흐름: Prometheus가 서비스 디스커버리에 타깃 목록을 질의해 주소를 받고, scrape_interval마다 타깃의 /metrics를 GET해 정상 응답이면 up=1, 타임아웃·거부면 up=0으로 타깃 다운을 표시하는 시퀀스](/images/study-observability/04-pull-model.png)
+![Pull 모델 흐름: Prometheus가 서비스 디스커버리에 타깃 목록을 질의해 주소를 받고, scrape_interval마다 타깃의 /metrics를 GET해 정상 응답이면 up=1, 타임아웃·거부면 up=0으로 타깃 다운을 표시하는 시퀀스](/images/study-observability/04-pull-model-light.png)
+![Pull 모델 흐름: Prometheus가 서비스 디스커버리에 타깃 목록을 질의해 주소를 받고, scrape_interval마다 타깃의 /metrics를 GET해 정상 응답이면 up=1, 타임아웃·거부면 up=0으로 타깃 다운을 표시하는 시퀀스](/images/study-observability/04-pull-model-dark.png)
 
 ## 2. Push 모델 — OTLP, Pushgateway
 
@@ -36,7 +37,8 @@ Prometheus는 <strong>pull</strong> 모델을 채택한다. 메트릭을 생성�
 
 둘째는 <strong>네트워크 경계</strong>다. 수집기가 각 서비스에 직접 접근할 수 없는 구조(에이전트가 아웃바운드만 가능한 환경, 멀티 클라우드)에서는 서비스가 중앙 Collector로 push하는 편이 훨씬 단순하다.
 
-![Push 모델 두 경로: 단명 배치 Cron Job은 종료 직전 Pushgateway에 push하고 Pushgateway가 Prometheus의 pull에 계속 응답하며, 장기 실행 애플리케이션(OTel SDK)은 OTLP로 Alloy·OTel Collector에 push해 Mimir로 저장하는 구조](/images/study-observability/04-push-model.png)
+![Push 모델 두 경로: 단명 배치 Cron Job은 종료 직전 Pushgateway에 push하고 Pushgateway가 Prometheus의 pull에 계속 응답하며, 장기 실행 애플리케이션(OTel SDK)은 OTLP로 Alloy·OTel Collector에 push해 Mimir로 저장하는 구조](/images/study-observability/04-push-model-light.png)
+![Push 모델 두 경로: 단명 배치 Cron Job은 종료 직전 Pushgateway에 push하고 Pushgateway가 Prometheus의 pull에 계속 응답하며, 장기 실행 애플리케이션(OTel SDK)은 OTLP로 Alloy·OTel Collector에 push해 Mimir로 저장하는 구조](/images/study-observability/04-push-model-dark.png)
 
 ## 3. Pull vs Push 실전 선택 기준
 
@@ -74,7 +76,8 @@ http_requests_total{method="GET", status="200", user_id="552391"}
 
 이게 왜 치명적인가 하면, Prometheus TSDB는 <strong>활성 시계열마다 메모리에 인덱스와 청크 헤더를 유지</strong>하기 때문이다. 시계열이 수백만 개로 늘면 `remote_write` 대역폭, 쿼리 지연, 메모리 사용량이 동시에 악화되고 최악의 경우 Prometheus/Mimir 프로세스가 OOM으로 죽는다. Mimir 같은 멀티테넌시 백엔드에서는 카디널리티 폭발이 한 테넌트의 실수로 전체 클러스터 성능에 영향을 주는 <strong>noisy neighbor</strong> 문제로도 번진다. 이 비용 구조는 [34장 카디널리티 관리와 비용](/study/observability/34-cardinality-cost)에서 실제 완화 기법과 함께 다룬다.
 
-![카디널리티 폭발 비교: 유한 라벨(method×status=시계열 6개)은 정상 범위지만, user_id 같은 무한 라벨을 곱하면 시계열이 사실상 무한이 돼 메모리 폭증·OOM 위험으로 이어지고 remote_write 대역폭 증가·쿼리 지연·멀티테넌시 noisy neighbor로 연쇄](/images/study-observability/04-cardinality-explosion.png)
+![카디널리티 폭발 비교: 유한 라벨(method×status=시계열 6개)은 정상 범위지만, user_id 같은 무한 라벨을 곱하면 시계열이 사실상 무한이 돼 메모리 폭증·OOM 위험으로 이어지고 remote_write 대역폭 증가·쿼리 지연·멀티테넌시 noisy neighbor로 연쇄](/images/study-observability/04-cardinality-explosion-light.png)
+![카디널리티 폭발 비교: 유한 라벨(method×status=시계열 6개)은 정상 범위지만, user_id 같은 무한 라벨을 곱하면 시계열이 사실상 무한이 돼 메모리 폭증·OOM 위험으로 이어지고 remote_write 대역폭 증가·쿼리 지연·멀티테넌시 noisy neighbor로 연쇄](/images/study-observability/04-cardinality-explosion-dark.png)
 
 高카디널리티 정보(어떤 사용자가 요청했는가)가 필요 없다는 뜻이 아니다 — 그 질문에는 메트릭이 아니라 <strong>로그·트레이스</strong>가 답해야 한다는 뜻이다. `user_id`는 로그 필드나 트레이스 span 속성으로는 자유롭게 넣어도 된다. 이 신호별 역할 분담은 [2장](/study/observability/02-four-signals)에서 다룬 내용과 그대로 이어진다.
 

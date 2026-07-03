@@ -35,7 +35,8 @@ next: /study/observability/40-faro-frontend-observability
 
 Beyla는 사용자 공간 데몬이 커널에 eBPF 프로그램을 심고, 커널이 포착한 이벤트를 ring buffer로 받아 프로토콜 수준의 요청/응답으로 조립하는 구조다.
 
-![Beyla eBPF 자동 계측 구조 — 무수정 애플리케이션, 커널 eBPF probe, Beyla 사용자 공간 데몬, LGTM 백엔드로 이어지는 흐름](/images/study-observability/39-beyla-architecture.png)
+![Beyla eBPF 자동 계측 구조 — 무수정 애플리케이션, 커널 eBPF probe, Beyla 사용자 공간 데몬, LGTM 백엔드로 이어지는 흐름](/images/study-observability/39-beyla-architecture-light.png)
+![Beyla eBPF 자동 계측 구조 — 무수정 애플리케이션, 커널 eBPF probe, Beyla 사용자 공간 데몬, LGTM 백엔드로 이어지는 흐름](/images/study-observability/39-beyla-architecture-dark.png)
 
 커널 쪽에서 쓰는 hook은 세 종류다.
 

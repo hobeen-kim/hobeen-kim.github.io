@@ -36,7 +36,8 @@ http_requests_total{job="api"}[5m]
 rate(http_requests_total{job="api"}[5m])
 ```
 
-![메트릭 이름은 바로 Instant Vector가 되고, Range Selector [5m]를 붙이면 Range Vector가 되며 rate·increase 같은 함수를 거쳐야 다시 Instant Vector로 변환된다](/images/study-observability/09-vector-types.png)
+![메트릭 이름은 바로 Instant Vector가 되고, Range Selector [5m]를 붙이면 Range Vector가 되며 rate·increase 같은 함수를 거쳐야 다시 Instant Vector로 변환된다](/images/study-observability/09-vector-types-light.png)
+![메트릭 이름은 바로 Instant Vector가 되고, Range Selector [5m]를 붙이면 Range Vector가 되며 rate·increase 같은 함수를 거쳐야 다시 Instant Vector로 변환된다](/images/study-observability/09-vector-types-dark.png)
 
 range selector의 길이는 스크레이프 간격의 최소 2~4배로 잡는 게 안전하다. 스크레이프 주기가 15초인데 `[15s]`로 잡으면 스크레이프가 한 번이라도 밀리는 순간 구간 안에 샘플이 0~1개만 남아 `rate()`가 결측(gap)을 뱉는다.
 
@@ -86,7 +87,8 @@ increase(http_requests_total[5m])
 
 <strong>`increase(v[t])`</strong>는 `rate(v[t]) * t`와 사실상 동일하다. "5분간 몇 건 늘었나"처럼 절대량이 궁금할 때 쓴다.
 
-![Counter 원시값을 rate(구간 평균 초당 증가율·리셋 보정)·irate(마지막 2개 샘플 순간 변화율)·increase(구간 총 증가량)로 변환해 각각 대시보드·순간 스파이크 관찰·절대 증가량 확인에 쓰는 흐름](/images/study-observability/09-counter-functions.png)
+![Counter 원시값을 rate(구간 평균 초당 증가율·리셋 보정)·irate(마지막 2개 샘플 순간 변화율)·increase(구간 총 증가량)로 변환해 각각 대시보드·순간 스파이크 관찰·절대 증가량 확인에 쓰는 흐름](/images/study-observability/09-counter-functions-light.png)
+![Counter 원시값을 rate(구간 평균 초당 증가율·리셋 보정)·irate(마지막 2개 샘플 순간 변화율)·increase(구간 총 증가량)로 변환해 각각 대시보드·순간 스파이크 관찰·절대 증가량 확인에 쓰는 흐름](/images/study-observability/09-counter-functions-dark.png)
 
 ::: warning rate의 흔한 함정
 - **range가 너무 짧으면 결측이 생긴다.** 스크레이프 간격 15초에 `rate(v[15s])`를 쓰면 구간에 샘플이 1개뿐일 때가 있어 `rate`가 값을 못 낸다. 최소 스크레이프 간격의 4배(`[1m]` 이상) 권장.

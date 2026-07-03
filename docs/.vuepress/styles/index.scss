@@ -2,6 +2,16 @@ html, body {
   scroll-behavior: smooth;
 }
 
+/* 스터디 다이어그램 — 라이트/다크 모드별 이미지 전환
+   md에 -light.png / -dark.png 두 장을 나란히 넣으면 현재 테마의 것만 보인다 */
+html.dark img[src*="/images/study-"][src$="-light.png"] {
+  display: none;
+}
+
+html:not(.dark) img[src*="/images/study-"][src$="-dark.png"] {
+  display: none;
+}
+
 
 /* 선택적: transform을 사용하면 더 부드러운 애니메이션 가능 */
 header.vp-navbar {

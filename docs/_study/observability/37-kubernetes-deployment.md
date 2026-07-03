@@ -78,7 +78,8 @@ helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheu
 
 Operator는 이 CRD들을 조합해 Prometheus가 실제로 읽는 설정 파일(`prometheus.yaml`)과 룰 파일을 생성하고, Secret으로 만들어 Prometheus Pod에 마운트한다. 사용자는 `scrape_configs`의 relabel 문법을 직접 다루지 않고, CR을 만들고 지우는 것만으로 스크레이프 대상과 알림 규칙을 관리한다.
 
-![Prometheus Operator가 사용자 선언 CRD(Prometheus·ServiceMonitor·PodMonitor·PrometheusRule)를 watch·reconcile해 Secret·ConfigMap·StatefulSet을 생성하고 Prometheus Pod에 마운트하는 구조](/images/study-observability/37-operator-crd.png)
+![Prometheus Operator가 사용자 선언 CRD(Prometheus·ServiceMonitor·PodMonitor·PrometheusRule)를 watch·reconcile해 Secret·ConfigMap·StatefulSet을 생성하고 Prometheus Pod에 마운트하는 구조](/images/study-observability/37-operator-crd-light.png)
+![Prometheus Operator가 사용자 선언 CRD(Prometheus·ServiceMonitor·PodMonitor·PrometheusRule)를 watch·reconcile해 Secret·ConfigMap·StatefulSet을 생성하고 Prometheus Pod에 마운트하는 구조](/images/study-observability/37-operator-crd-dark.png)
 
 CR 사이의 매칭은 라벨 selector로 이뤄진다는 점이 핵심이다. `Prometheus` CR의 `serviceMonitorSelector`가 특정 라벨을 요구하면, 그 라벨이 없는 ServiceMonitor는 아무리 클러스터에 존재해도 무시된다. 멀티테넌시 환경에서 Prometheus 인스턴스를 여러 개 운영할 때(예: 팀별 분리), 이 selector가 곧 "어느 Prometheus가 어느 팀의 타깃을 스크레이프할지"를 가르는 경계선이 된다. HA·멀티테넌시 전략 자체는 [HA·멀티테넌시·페더레이션](/study/observability/36-ha-multitenancy-federation)에서 다룬 내용과 이어진다.
 
@@ -177,7 +178,8 @@ rbac:
   create: true   # discovery.kubernetes가 apiserver를 조회하려면 필요
 ```
 
-![모든 노드에 DaemonSet으로 배치된 Alloy가 각 노드의 애플리케이션 Pod에서 stdout/stderr 로그와 eBPF 프로파일을 수집해 Loki(loki.write)와 Pyroscope(pyroscope.write)로 push하는 구조](/images/study-observability/37-alloy-daemonset.png)
+![모든 노드에 DaemonSet으로 배치된 Alloy가 각 노드의 애플리케이션 Pod에서 stdout/stderr 로그와 eBPF 프로파일을 수집해 Loki(loki.write)와 Pyroscope(pyroscope.write)로 push하는 구조](/images/study-observability/37-alloy-daemonset-light.png)
+![모든 노드에 DaemonSet으로 배치된 Alloy가 각 노드의 애플리케이션 Pod에서 stdout/stderr 로그와 eBPF 프로파일을 수집해 Loki(loki.write)와 Pyroscope(pyroscope.write)로 push하는 구조](/images/study-observability/37-alloy-daemonset-dark.png)
 
 `pyroscope.ebpf`는 애플리케이션 코드 계측 없이 커널 레벨에서 CPU 프로파일을 샘플링하므로, 언어·런타임에 무관하게 클러스터 전역 프로파일 커버리지를 확보할 수 있다는 장점이 있다. 다만 eBPF는 커널 버전·권한(`privileged` 또는 특정 capability) 제약이 있어, DaemonSet에 `securityContext`로 필요한 권한을 명시적으로 부여해야 한다. Alloy 컴포넌트 문법과 파이프라인 설계 일반론은 별도 챕터에서 더 깊게 다룬다.
 

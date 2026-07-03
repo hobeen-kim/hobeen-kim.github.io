@@ -57,7 +57,8 @@ datasources:
 
 <strong>Prometheus</strong>는 `httpMethod: POST`로 긴 PromQL을 GET URL 길이 제한 없이 보내는 것이 권장이다. <strong>Mimir</strong>는 API가 Prometheus와 호환되므로 데이터소스 타입은 그대로 `prometheus`를 쓰지만, 멀티테넌시 환경이면 `X-Scope-OrgID` 헤더로 테넌트를 지정해야 한다([Mimir 문서](https://grafana.com/docs/mimir/latest/)). <strong>Loki</strong>는 `maxLines`로 로그 패널이 한 번에 끌어오는 라인 수를 제한해 브라우저 부하를 막는다. <strong>Tempo</strong>·<strong>Pyroscope</strong> 연결과 이들 사이의 점프 설정(trace-to-logs, trace-to-profiles)은 [32장 시그널 상관관계](/study/observability/32-signal-correlation)에서 깊게 다룬다.
 
-![Grafana 데이터소스 연결 구조 — Prometheus·Mimir(Prometheus 호환 API)·Loki·Tempo·Pyroscope 5개 데이터소스가 모두 Grafana의 Query Editor로 모여 패널 렌더링으로 이어지며, 프로토콜은 백엔드마다 다르지만 동일한 패널·변수 시스템을 공유](/images/study-observability/31-datasources.png)
+![Grafana 데이터소스 연결 구조 — Prometheus·Mimir(Prometheus 호환 API)·Loki·Tempo·Pyroscope 5개 데이터소스가 모두 Grafana의 Query Editor로 모여 패널 렌더링으로 이어지며, 프로토콜은 백엔드마다 다르지만 동일한 패널·변수 시스템을 공유](/images/study-observability/31-datasources-light.png)
+![Grafana 데이터소스 연결 구조 — Prometheus·Mimir(Prometheus 호환 API)·Loki·Tempo·Pyroscope 5개 데이터소스가 모두 Grafana의 Query Editor로 모여 패널 렌더링으로 이어지며, 프로토콜은 백엔드마다 다르지만 동일한 패널·변수 시스템을 공유](/images/study-observability/31-datasources-dark.png)
 
 ## 2. 패널·시각화 타입
 
@@ -95,7 +96,8 @@ sum(rate(http_requests_total{namespace=~"$namespace", pod=~"$pod"}[$__rate_inter
 
 `$__rate_interval`은 Grafana가 자동 계산하는 특수 변수로, `rate()`/`increase()`에 넣을 구간을 하드코딩된 `[5m]` 대신 지정할 때 쓴다. 계산식은 대략 `max($__interval + scrape_interval, 4 * scrape_interval)`이며, 패널이 확대·축소되며 `$__interval`(포인트당 시간 간격)이 바뀌어도 항상 최소 4개 스크레이프 샘플을 포함하도록 보장한다. 하드코딩된 `[5m]`을 쓰면 스크레이프 주기가 1분인 타깃에서는 샘플 수가 부족해 `rate()`가 끊기거나 부정확해질 수 있다.
 
-![변수 체이닝과 rate_interval — query variable인 $namespace가 namespace로 필터링된 체이닝 변수 $pod를 좁히고, 두 변수와 자동 계산되는 $__rate_interval이 함께 PromQL 패널 쿼리(namespace=~, pod=~, [$__rate_interval])를 구성](/images/study-observability/31-variable-chaining.png)
+![변수 체이닝과 rate_interval — query variable인 $namespace가 namespace로 필터링된 체이닝 변수 $pod를 좁히고, 두 변수와 자동 계산되는 $__rate_interval이 함께 PromQL 패널 쿼리(namespace=~, pod=~, [$__rate_interval])를 구성](/images/study-observability/31-variable-chaining-light.png)
+![변수 체이닝과 rate_interval — query variable인 $namespace가 namespace로 필터링된 체이닝 변수 $pod를 좁히고, 두 변수와 자동 계산되는 $__rate_interval이 함께 PromQL 패널 쿼리(namespace=~, pod=~, [$__rate_interval])를 구성](/images/study-observability/31-variable-chaining-dark.png)
 
 ::: warning 정규식 변수의 카디널리티 함정
 `pod=~"$pod"`처럼 정규식 매칭을 남발하면, Include All 선택 시 수백 개 값이 하나의 정규식으로 합쳐져 쿼리 비용이 급증한다. 카디널리티가 큰 라벨은 변수 대신 `topk()`나 별도 필터링 패널로 좁히는 편이 안전하다.
@@ -125,7 +127,8 @@ avg(rate(node_cpu_seconds_total{mode!="idle"}[$__rate_interval])) by (instance)
 node_load1 / count(node_cpu_seconds_total{mode="idle"}) by (instance)
 ```
 
-![RED/USE 대시보드 drill-down 구조 — RED 대시보드(서비스)의 Rate(요청/초)·Errors(에러율)·Duration(p50/p95/p99)와 USE 대시보드(리소스)의 Utilization(사용률)·Saturation(대기열/큐)·Errors(리소스 에러)가, 에러율 급증·포화도 급증 시 원인 조사로 모이고 다시 트레이스·프로파일로 drill-down](/images/study-observability/31-red-use-dashboard.png)
+![RED/USE 대시보드 drill-down 구조 — RED 대시보드(서비스)의 Rate(요청/초)·Errors(에러율)·Duration(p50/p95/p99)와 USE 대시보드(리소스)의 Utilization(사용률)·Saturation(대기열/큐)·Errors(리소스 에러)가, 에러율 급증·포화도 급증 시 원인 조사로 모이고 다시 트레이스·프로파일로 drill-down](/images/study-observability/31-red-use-dashboard-light.png)
+![RED/USE 대시보드 drill-down 구조 — RED 대시보드(서비스)의 Rate(요청/초)·Errors(에러율)·Duration(p50/p95/p99)와 USE 대시보드(리소스)의 Utilization(사용률)·Saturation(대기열/큐)·Errors(리소스 에러)가, 에러율 급증·포화도 급증 시 원인 조사로 모이고 다시 트레이스·프로파일로 drill-down](/images/study-observability/31-red-use-dashboard-dark.png)
 
 서비스 대시보드는 RED 패널을 상단에, 해당 서비스가 의존하는 인프라(노드, DB 커넥션 풀)의 USE 패널을 하단에 배치하는 구성이 일반적이다. 이렇게 하면 "요청이 느려졌다(RED 이상)"에서 "왜(USE 이상)"로 한 화면 안에서 시선만 옮겨 좁혀갈 수 있다.
 

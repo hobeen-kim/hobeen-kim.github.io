@@ -26,7 +26,8 @@ next: /study/observability/14-routing-grouping-silence
 
 셋째, <strong>알림 자체의 생명주기 관리</strong>(재시도, 억제, 임시 음소거)가 룰 평가 주기와 독립적으로 동작해야 한다. Prometheus가 15초마다 룰을 재평가하는 동안, Alertmanager는 `repeat_interval` 같은 자신만의 시간 축으로 알림을 관리한다.
 
-![Prometheus가 alerting rule을 평가해 firing 알림을 HTTP POST로 Alertmanager에 전송하고, Alertmanager가 수신·파이프라인·Notifier를 거쳐 Slack·PagerDuty·Webhook으로 전달하는 역할 분리 구조](/images/study-observability/13-role-split.png)
+![Prometheus가 alerting rule을 평가해 firing 알림을 HTTP POST로 Alertmanager에 전송하고, Alertmanager가 수신·파이프라인·Notifier를 거쳐 Slack·PagerDuty·Webhook으로 전달하는 역할 분리 구조](/images/study-observability/13-role-split-light.png)
+![Prometheus가 alerting rule을 평가해 firing 알림을 HTTP POST로 Alertmanager에 전송하고, Alertmanager가 수신·파이프라인·Notifier를 거쳐 Slack·PagerDuty·Webhook으로 전달하는 역할 분리 구조](/images/study-observability/13-role-split-dark.png)
 
 이 구조에서 Prometheus는 상태를 `pending`(조건은 참이지만 `for` 기간 미충족)과 `firing`(조건이 `for` 기간 동안 지속)으로만 관리하고, `firing` 상태가 된 알림만 Alertmanager로 전송한다.
 
@@ -34,7 +35,8 @@ next: /study/observability/14-routing-grouping-silence
 
 Alertmanager에 도착한 알림은 여러 단계를 순차적으로 통과한 뒤에야 실제 채널로 나간다. 각 단계는 서로 다른 목적을 가진 필터라고 이해하면 된다.
 
-![알림이 수신 후 Deduplicate·Group(중복 제거·묶음), Inhibit·Silence(억제·차단), Route·Notify(라우팅·전송)를 순차 통과하는 Alertmanager 알림 파이프라인](/images/study-observability/13-pipeline.png)
+![알림이 수신 후 Deduplicate·Group(중복 제거·묶음), Inhibit·Silence(억제·차단), Route·Notify(라우팅·전송)를 순차 통과하는 Alertmanager 알림 파이프라인](/images/study-observability/13-pipeline-light.png)
+![알림이 수신 후 Deduplicate·Group(중복 제거·묶음), Inhibit·Silence(억제·차단), Route·Notify(라우팅·전송)를 순차 통과하는 Alertmanager 알림 파이프라인](/images/study-observability/13-pipeline-dark.png)
 
 - <strong>Deduplicate</strong>: 알림의 라벨 집합에서 계산한 fingerprint가 같으면 동일 알림으로 취급한다. Prometheus가 재평가 때마다 같은 알림을 다시 보내도 중복 처리하지 않는다.
 - <strong>Group</strong>: `route`의 `group_by`에 지정한 라벨이 같은 알림끼리 하나의 알림 그룹으로 묶는다. 노드 100대에서 동시에 디스크 부족 알림이 뜨면 알림 100개가 아니라 그룹 알림 1개로 전달된다.
@@ -51,7 +53,8 @@ Alertmanager를 단일 인스턴스로 운영하면 그 인스턴스가 죽는 �
 
 Alertmanager는 이 문제를 <strong>gossip 기반 클러스터링</strong>으로 해결한다. [HashiCorp memberlist](https://github.com/hashicorp/memberlist) 라이브러리를 사용해 인스턴스끼리 실리케이션(silence)·알림 통지 상태를 P2P로 전파한다. 별도의 외부 저장소(etcd, Consul 등) 없이 메모리 상태만으로 동기화한다.
 
-![Prometheus가 세 Alertmanager 인스턴스 모두에 알림을 전송하고, 인스턴스끼리 notification log를 gossip으로 전파해 A2·A3는 통지를 생략하고 A1만 Slack에 1회 전송하는 HA 클러스터링 시퀀스](/images/study-observability/13-gossip-ha.png)
+![Prometheus가 세 Alertmanager 인스턴스 모두에 알림을 전송하고, 인스턴스끼리 notification log를 gossip으로 전파해 A2·A3는 통지를 생략하고 A1만 Slack에 1회 전송하는 HA 클러스터링 시퀀스](/images/study-observability/13-gossip-ha-light.png)
+![Prometheus가 세 Alertmanager 인스턴스 모두에 알림을 전송하고, 인스턴스끼리 notification log를 gossip으로 전파해 A2·A3는 통지를 생략하고 A1만 Slack에 1회 전송하는 HA 클러스터링 시퀀스](/images/study-observability/13-gossip-ha-dark.png)
 
 각 인스턴스는 `--cluster.peer` 플래그로 다른 피어의 주소(기본 gossip 포트 `9094`)를 알려주면 클러스터를 구성한다. Prometheus 쪽도 `alerting.alertmanagers`에 모든 Alertmanager 인스턴스를 등록해 동일 알림을 전체 인스턴스에 중복 전송하도록 설정한다. 중복 억제는 Alertmanager 클러스터 내부의 gossip으로 처리하는 구조다.
 

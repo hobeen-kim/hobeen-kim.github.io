@@ -37,7 +37,8 @@ process_resident_memory_bytes{job="prometheus"}
 
 즉각 조치는 문제 라벨을 `metricRelabelings`의 `action: drop` 또는 `labeldrop`으로 스크레이프 단계에서 잘라내는 것이다. 근본 조치는 애플리케이션 계측 코드에서 고유값 라벨 자체를 없애는 것이다 — Prometheus 쪽 완화는 항상 임시방편이라는 점을 인지해야 한다. 카디널리티 폭발의 근본 원인·탐지·차단 전략은 [카디널리티 관리와 비용](/study/observability/34-cardinality-cost)에서 이미 다뤘으므로, 여기서는 "이미 터진 상황"을 빠르게 수습하는 순서에 집중한다.
 
-![Prometheus OOM Kill 진단 흐름 — head_series 추세 확인 후 급증이면 topk로 원인을 좁혀 즉각 조치(metricRelabelings drop)·재시작 후 근본 조치(계측 코드 라벨 제거)·재발 방지(sample_limit/label_limit), 완만하면 단순 리소스 증설](/images/study-observability/38-oom-flow.png)
+![Prometheus OOM Kill 진단 흐름 — head_series 추세 확인 후 급증이면 topk로 원인을 좁혀 즉각 조치(metricRelabelings drop)·재시작 후 근본 조치(계측 코드 라벨 제거)·재발 방지(sample_limit/label_limit), 완만하면 단순 리소스 증설](/images/study-observability/38-oom-flow-light.png)
+![Prometheus OOM Kill 진단 흐름 — head_series 추세 확인 후 급증이면 topk로 원인을 좁혀 즉각 조치(metricRelabelings drop)·재시작 후 근본 조치(계측 코드 라벨 제거)·재발 방지(sample_limit/label_limit), 완만하면 단순 리소스 증설](/images/study-observability/38-oom-flow-dark.png)
 
 `sample_limit`(스크레이프당 최대 샘플 수)과 `label_limit`(메트릭당 최대 라벨 수)을 ServiceMonitor/PodMonitor에 미리 걸어두면, 특정 타깃 하나의 폭주가 Prometheus 전체를 끌고 내려가는 사고를 막을 수 있다.
 
@@ -70,7 +71,8 @@ scrape_duration_seconds > 5
 scrape_samples_scraped > 0 and prometheus_target_scrapes_exceeded_sample_limit_total > 0
 ```
 
-![up==0 스크레이프 실패 디버깅 경로 — Grafana Targets에서 타깃이 목록에 보이는지부터 나눠, 목록에 없으면 ServiceMonitor selector 라벨 매칭을 확인하고, 에러 메시지가 있으면 유형(connection refused·context deadline exceeded·x509·403/401)별로 조치한 뒤 다음 scrape_interval 대기](/images/study-observability/38-scrape-debug.png)
+![up==0 스크레이프 실패 디버깅 경로 — Grafana Targets에서 타깃이 목록에 보이는지부터 나눠, 목록에 없으면 ServiceMonitor selector 라벨 매칭을 확인하고, 에러 메시지가 있으면 유형(connection refused·context deadline exceeded·x509·403/401)별로 조치한 뒤 다음 scrape_interval 대기](/images/study-observability/38-scrape-debug-light.png)
+![up==0 스크레이프 실패 디버깅 경로 — Grafana Targets에서 타깃이 목록에 보이는지부터 나눠, 목록에 없으면 ServiceMonitor selector 라벨 매칭을 확인하고, 에러 메시지가 있으면 유형(connection refused·context deadline exceeded·x509·403/401)별로 조치한 뒤 다음 scrape_interval 대기](/images/study-observability/38-scrape-debug-dark.png)
 
 흔히 놓치는 지점은 ServiceMonitor의 `selector.matchLabels`가 실제 Service 라벨과 미묘하게 다른 경우다(오타, 대소문자, 릴리스 라벨 누락). Prometheus UI의 Status → Targets가 아니라 Status → Service Discovery 화면에서 "Discovered Labels"까지 내려가면, relabel 단계에서 어떤 라벨 매칭이 실패해 타깃이 아예 drop됐는지 확인할 수 있다. `up == 0`인데 타깃이 Targets 화면에 보이는 경우와, 애초에 타깃 목록에 없는 경우는 원인이 완전히 다르므로 이 둘을 먼저 구분해야 한다.
 
@@ -78,7 +80,8 @@ scrape_samples_scraped > 0 and prometheus_target_scrapes_exceeded_sample_limit_t
 
 `remote_write`는 로컬 head block에서 샘플을 읽어 원격 저장소(Mimir 등)로 비동기 전송하는 큐 기반 파이프라인이다. 원격 저장소가 느려지거나 네트워크가 불안정해지면 큐가 쌓이고, 결국 로컬 메모리 압박(전송 대기 샘플이 메모리에 머무름)으로 번진다.
 
-![remote_write 큐 기반 비동기 전송 시퀀스 — WAL이 큐에 샘플을 append하고 샤드가 원격 저장소로 배치 전송하다가, 원격 저장소 지연으로 5xx/timeout이 나면 지수 백오프 재시도로 큐가 적체(samples_pending 증가)되고 결국 WAL 삭제 지연·디스크 압박으로 전파](/images/study-observability/38-remote-write.png)
+![remote_write 큐 기반 비동기 전송 시퀀스 — WAL이 큐에 샘플을 append하고 샤드가 원격 저장소로 배치 전송하다가, 원격 저장소 지연으로 5xx/timeout이 나면 지수 백오프 재시도로 큐가 적체(samples_pending 증가)되고 결국 WAL 삭제 지연·디스크 압박으로 전파](/images/study-observability/38-remote-write-light.png)
+![remote_write 큐 기반 비동기 전송 시퀀스 — WAL이 큐에 샘플을 append하고 샤드가 원격 저장소로 배치 전송하다가, 원격 저장소 지연으로 5xx/timeout이 나면 지수 백오프 재시도로 큐가 적체(samples_pending 증가)되고 결국 WAL 삭제 지연·디스크 압박으로 전파](/images/study-observability/38-remote-write-dark.png)
 
 핵심 지표는 세 가지다.
 
@@ -139,7 +142,8 @@ sum by (reason) (rate(loki_discarded_samples_total[5m]))
 
 Tempo도 동일한 축을 가진다. `overrides`의 `ingestion_rate_limit_bytes`/`ingestion_burst_size_bytes`로 테넌트별 수집 한도를 걸고, `tempo_discarded_spans_total`로 거부된 스팬을 추적한다. ingester 포화는 `tempo_ingester_live_traces`(현재 메모리에 들고 있는 트레이스 수)가 계속 우상향하는 패턴으로 먼저 나타난다.
 
-![Loki/Tempo 수집 병목 구조 — 클라이언트 쓰기를 Distributor가 받아 한도 이내면 Ingester 메모리 버퍼로 라우팅하고 주기적으로 오브젝트 스토리지에 flush, 한도 초과면 429 응답과 discarded 카운터 증가, flush보다 유입이 빠르면 ingester 메모리가 포화돼 OOM 위험](/images/study-observability/38-loki-tempo-bottleneck.png)
+![Loki/Tempo 수집 병목 구조 — 클라이언트 쓰기를 Distributor가 받아 한도 이내면 Ingester 메모리 버퍼로 라우팅하고 주기적으로 오브젝트 스토리지에 flush, 한도 초과면 429 응답과 discarded 카운터 증가, flush보다 유입이 빠르면 ingester 메모리가 포화돼 OOM 위험](/images/study-observability/38-loki-tempo-bottleneck-light.png)
+![Loki/Tempo 수집 병목 구조 — 클라이언트 쓰기를 Distributor가 받아 한도 이내면 Ingester 메모리 버퍼로 라우팅하고 주기적으로 오브젝트 스토리지에 flush, 한도 초과면 429 응답과 discarded 카운터 증가, flush보다 유입이 빠르면 ingester 메모리가 포화돼 OOM 위험](/images/study-observability/38-loki-tempo-bottleneck-dark.png)
 
 ## 5. 쿼리 성능·타임아웃 튜닝
 

@@ -1,58 +1,46 @@
-"""CH31 Grafana 데이터소스 연결 — 5개 백엔드 → Query Editor → 패널 (matplotlib → PNG)."""
-from _common import (new_fig, make_helpers, save,
-                     C_BG, C_EDGE, C_TEXT, C_DIM, C_ACCENT,
-                     C_BLUE, C_GREEN, C_BROWN, C_GRAY, C_ORANGE, C_PURPLE)
+"""CH31 Grafana 데이터소스 연결 — 5개 백엔드 → 패널 시스템 (light/dark PNG)."""
+from _common import diagram
 
-fig, ax = new_fig(w=14, h=8.6, ymax=56)
-box, text, arrow = make_helpers(ax)
 
-# ---- Title ----
-text(50, 53.0, "Grafana 데이터소스 연결 — 5개 백엔드가 하나의 패널 시스템 공유", size=17.5, weight="bold")
-text(50, 50.0, "프로토콜은 백엔드마다 다르지만 Grafana 안에서는 동일한 패널·변수 시스템으로 수렴",
-     size=11, color=C_DIM)
+def draw(d):
+    P = d.P
 
-# left group: datasources
-box(4, 8, 34, 38, C_GRAY)
-text(21, 43.4, "Grafana 데이터소스", size=12.5, weight="bold", color=C_ACCENT)
+    # 왼쪽: 데이터소스 그룹
+    d.box(3, 4, 30, 37, P["gray"])
+    d.text(18, 38.4, "Grafana 데이터소스", size=10.5, weight="bold", color=P["accent"])
 
-ds = [
-    ("Prometheus", "type: prometheus", C_BLUE),
-    ("Mimir", "Prometheus 호환 API · 테넌트 헤더", C_BLUE),
-    ("Loki", "type: loki · maxLines", C_GREEN),
-    ("Tempo", "type: tempo", C_BROWN),
-    ("Pyroscope", "grafana-pyroscope-datasource", C_PURPLE),
-]
-for i, (t, d, col) in enumerate(ds):
-    yy = 39.0 - i * 6.3
-    box(6, yy - 2.5, 30, 5.0, col)
-    text(21, yy + 0.5, t, size=10.5, weight="bold")
-    text(21, yy - 1.5, d, size=8, color=C_DIM)
+    ds = [
+        ("Prometheus", "type: prometheus", P["blue"]),
+        ("Mimir", "Prometheus 호환 · 테넌트 헤더", P["blue"]),
+        ("Loki", "type: loki · maxLines", P["green"]),
+        ("Tempo", "type: tempo", P["brown"]),
+        ("Pyroscope", "grafana-pyroscope-ds", P["purple"]),
+    ]
+    ys = []
+    for i, (t, sub, col) in enumerate(ds):
+        yc = 33 - i * 6.2
+        ys.append(yc)
+        d.box(5, yc - 2.6, 26, 5.2, col)
+        d.text(18, yc + 0.5, t, size=9.5, weight="bold")
+        d.text(18, yc - 1.5, sub, size=7.3, color=P["dim"])
 
-# center group: Grafana
-box(52, 18, 26, 20, C_GREEN, ec=C_ACCENT, lw=2.0)
-text(65, 35.4, "Grafana", size=13, weight="bold", color=C_ACCENT)
-box(54, 26.5, 22, 5.5, "#1d2b24")
-text(65, 29.2, "Query Editor", size=11, weight="bold")
-box(54, 19.5, 22, 5.5, "#1d2b24")
-text(65, 22.2, "패널 렌더링", size=11, weight="bold")
-arrow(65, 26.5, 65, 25.0, color=C_ACCENT, lw=2.0)
+    # 중앙: Grafana
+    d.box(47, 13, 25, 17, P["green"], ec=P["accent"], lw=2.0)
+    d.text(59.5, 26.8, "Grafana", size=12, weight="bold", color=P["accent"])
+    d.box(49, 19.5, 21, 5, P["chip"])
+    d.text(59.5, 22, "Query Editor", size=10, weight="bold")
+    d.box(49, 14, 21, 5, P["chip"])
+    d.text(59.5, 16.5, "패널 렌더링", size=10, weight="bold")
+    d.arrow(59.5, 19.5, 59.5, 19, color=P["accent"], lw=1.8)
 
-# datasources -> query editor
-for i in range(len(ds)):
-    yy = 39.0 - i * 6.3
-    arrow(38, yy, 54, 29.2, color=C_ACCENT, lw=1.5, rad=0.02)
+    for yc in ys:
+        d.arrow(33, yc, 49, 22, color=P["accent"], lw=1.3, rad=0.03)
 
-# right note
-box(84, 22, 13, 12, C_BLUE)
-text(90.5, 30.0, "동일 UI", size=10.5, weight="bold")
-text(90.5, 27.0, "패널 · 변수", size=8.5, color=C_DIM)
-text(90.5, 24.6, "시스템 공유", size=8.5, color=C_DIM)
-arrow(78, 28, 84, 28, color=C_ACCENT, lw=2.0)
+    # 오른쪽: 공유 시스템
+    d.box(80, 16, 16, 10, P["blue"])
+    d.text(88, 22.4, "동일 패널·변수", size=9, weight="bold")
+    d.text(88, 19.4, "시스템 공유", size=8.3, color=P["dim"])
+    d.arrow(72, 21, 80, 21, color=P["accent"], lw=1.8)
 
-# bottom
-text(50, 4.5, "운영 환경에서는 UI 대신 provisioning YAML로 데이터소스를 파일 기반 관리하는 것이 표준",
-     size=10, color=C_ACCENT, weight="bold")
 
-import matplotlib.pyplot as plt
-plt.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01)
-save(fig, "31-datasources.png")
+diagram("31-datasources", draw, w=13, h=6.2, ymax=43)

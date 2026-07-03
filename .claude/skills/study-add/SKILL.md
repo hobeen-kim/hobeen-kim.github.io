@@ -77,7 +77,7 @@ date: YYYY-MM-DD
 tags: [태그1, 태그2]
 ---
 ```
-- Mermaid flowchart로 학습 로드맵 포함
+- 학습 로드맵 다이어그램 포함 (matplotlib PNG, 아래 다이어그램 규칙 참고)
 - 전체 목차 (챕터별 링크)
 
 ### 3단계: 콘텐츠 작성
@@ -100,7 +100,7 @@ tags: [관련태그]
 - 목표2
 
 ## 절1 제목
-설명 + Mermaid 다이어그램 + 코드 예제
+설명 + 다이어그램(matplotlib PNG) + 코드 예제
 
 ## 절2 제목
 ...
@@ -134,10 +134,17 @@ tags: [관련태그]
   - `:::tabs` + `@tab` — 멀티 언어 코드 예제 (C/Python 등)
 - GitHub 스타일 callout(`> [!TIP]`, `> [!INFO]`) 사용 금지 — VuePress에서 렌더링되지 않음
 
-#### Mermaid 다이어그램 규칙
-- 각 챕터에 최소 2개 이상의 Mermaid 다이어그램 포함
-- 활용 가능한 유형: flowchart, sequenceDiagram, packet-beta, stateDiagram-v2, timeline(`<br>` 미지원, 쉼표로 구분), xychart-beta, pie, mindmap, gantt, quadrantChart(한글/특수문자 라벨 미지원, 영문만 사용)
-- `stateDiagram-v2`에서 줄바꿈은 `\n` 대신 `<br>` 사용
+#### 다이어그램 규칙 (matplotlib → 라이트/다크 PNG 2벌, Mermaid 금지)
+- 각 챕터에 최소 2개 이상의 다이어그램 포함 — **Mermaid 대신 matplotlib PNG** 사용
+- 스타일: **가벼운 보조 그림** — 노드 이름(+괄호 1줄)·그룹 라벨·화살표 라벨 등 구조만. 대제목·부제·하단 요약·본문 중복 서브텍스트 금지 (설명은 본문 몫)
+- 스크립트: `docs/_study/{slug}/_diagrams/{챕터번호}-{이름}.py` 로 커밋. `_common.py`의 `diagram()` 헬퍼 사용 (observability 스터디의 `_diagrams/_common.py`를 복사) — 라이트/다크 팔레트로 `{이름}-light.png`/`{이름}-dark.png` 두 장을 `docs/.vuepress/public/images/study-{slug}/`에 자동 저장
+- 색은 팔레트 키(`P["blue"]`, `P["accent"]` 등)로만 지정 — hex 하드코딩 금지
+- 마크다운 참조는 같은 alt 텍스트로 연속 두 줄 (테마 전환은 `styles/index.scss` 규칙이 처리, 경로는 `/images/study-` 프리픽스 필수):
+  ```md
+  ![설명](/images/study-{slug}/{이름}-light.png)
+  ![설명](/images/study-{slug}/{이름}-dark.png)
+  ```
+- 렌더링 후 두 PNG를 열어 겹침·잘림·저대비를 시각 검증
 - `<br/>` 사용 금지 — Vue 컴파일 에러 발생. `<br>` 사용
 - `**bold**한글` 패턴 금지 — CommonMark에서 닫는 `**` 뒤에 한글이 바로 오면 bold가 적용되지 않음. `<strong>bold</strong>한글` 사용
 

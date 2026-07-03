@@ -1,55 +1,43 @@
-"""CH31 RED/USE 대시보드 구성 — drill-down 구조 (matplotlib → PNG)."""
-from _common import (new_fig, make_helpers, save,
-                     C_BG, C_EDGE, C_TEXT, C_DIM, C_ACCENT,
-                     C_BLUE, C_GREEN, C_BROWN, C_GRAY, C_ORANGE, C_PURPLE)
+"""CH31 RED / USE 대시보드 — drill-down 구조 (light/dark PNG)."""
+from _common import diagram
 
-fig, ax = new_fig(w=14, h=8.6, ymax=56)
-box, text, arrow = make_helpers(ax)
 
-# ---- Title ----
-text(50, 53.0, "RED / USE 대시보드 — drill-down 구조", size=19, weight="bold")
-text(50, 50.0, "서비스(RED)와 리소스(USE)를 한 화면에 배치해 이상 → 원인으로 시선만 옮겨 좁혀감",
-     size=11, color=C_DIM)
+def draw(d):
+    P = d.P
 
-# RED group (left)
-box(4, 26, 40, 18, C_BLUE)
-text(24, 41.4, "RED 대시보드 (서비스)", size=12, weight="bold", color=C_ACCENT)
-red = [("Rate", "요청/초"), ("Errors", "에러율"), ("Duration", "p50 / p95 / p99")]
-for i, (t, d) in enumerate(red):
-    xx = 8.5 + i * 12
-    box(xx, 28.5, 10.5, 8.5, "#1d2733")
-    text(xx + 5.25, 34.4, t, size=9.8, weight="bold")
-    text(xx + 5.25, 31.4, d, size=7.6, color=C_DIM)
+    # RED 그룹 (좌)
+    d.box(4, 24, 40, 15, P["blue"])
+    d.text(24, 36.2, "RED 대시보드 (서비스)", size=10.5, weight="bold", color=P["accent"])
+    for i, (t, sub) in enumerate([("Rate", "요청/초"), ("Errors", "에러율"),
+                                  ("Duration", "p50/p95/p99")]):
+        x = 6.5 + i * 12.3
+        d.box(x, 26, 11, 8, P["chip"])
+        d.text(x + 5.5, 31, t, size=9, weight="bold")
+        d.text(x + 5.5, 28, sub, size=7.2, color=P["dim"])
 
-# USE group (right)
-box(56, 26, 40, 18, C_GREEN)
-text(76, 41.4, "USE 대시보드 (리소스)", size=12, weight="bold", color=C_ACCENT)
-use = [("Utilization", "사용률"), ("Saturation", "대기열 / 큐"), ("Errors", "리소스 에러")]
-for i, (t, d) in enumerate(use):
-    xx = 60.5 + i * 12
-    box(xx, 28.5, 10.5, 8.5, "#1d2b24")
-    text(xx + 5.25, 34.4, t, size=9.5, weight="bold")
-    text(xx + 5.25, 31.4, d, size=7.6, color=C_DIM)
+    # USE 그룹 (우)
+    d.box(56, 24, 40, 15, P["green"])
+    d.text(76, 36.2, "USE 대시보드 (리소스)", size=10.5, weight="bold", color=P["accent"])
+    for i, (t, sub) in enumerate([("Utilization", "사용률"), ("Saturation", "대기열/큐"),
+                                  ("Errors", "리소스 에러")]):
+        x = 58.5 + i * 12.3
+        d.box(x, 26, 11, 8, P["chip"])
+        d.text(x + 5.5, 31, t, size=8.6, weight="bold")
+        d.text(x + 5.5, 28, sub, size=7.2, color=P["dim"])
 
-# DRILL box (center-lower)
-box(35, 12, 30, 7.5, C_BROWN, ec=C_ORANGE, lw=1.8)
-text(50, 15.7, "원인 조사", size=12, weight="bold")
+    # 원인 조사
+    d.box(35, 12, 30, 6.5, P["brown"], ec=P["orange"], lw=1.6)
+    d.text(50, 15.25, "원인 조사", size=11, weight="bold")
 
-# TRACE box (bottom)
-box(35, 2.5, 30, 6.5, C_PURPLE, ec=C_ACCENT, lw=1.6)
-text(50, 5.75, "트레이스·프로파일로 drill-down", size=10.5, weight="bold")
+    # 트레이스/프로파일
+    d.box(35, 3, 30, 6, P["purple"], ec=P["accent"], lw=1.5)
+    d.text(50, 6, "트레이스·프로파일로 drill-down", size=9.5, weight="bold")
 
-# arrows
-arrow(24, 26, 40, 19.5, color=C_ACCENT, lw=2.0)
-text(28, 22.6, "에러율 급증", size=8.5, color=C_ORANGE, weight="bold")
-arrow(76, 26, 60, 19.5, color=C_ACCENT, lw=2.0)
-text(72, 22.6, "포화도 급증", size=8.5, color=C_ORANGE, weight="bold")
-arrow(50, 12, 50, 9.0, color=C_ACCENT, lw=2.2)
+    d.arrow(22, 24, 40, 18.5, color=P["accent"], lw=1.9)
+    d.text(26, 21.4, "에러율 급증", size=8, color=P["orange"], weight="bold")
+    d.arrow(78, 24, 60, 18.5, color=P["accent"], lw=1.9)
+    d.text(74, 21.4, "포화도 급증", size=8, color=P["orange"], weight="bold")
+    d.arrow(50, 12, 50, 9, color=P["accent"], lw=2.1)
 
-# side note
-text(50, 47.0, "상단 RED(요청이 느려졌다) → 하단 USE(왜) → 트레이스/프로파일(어디서)",
-     size=9.5, color=C_DIM, style="italic")
 
-import matplotlib.pyplot as plt
-plt.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01)
-save(fig, "31-red-use-dashboard.png")
+diagram("31-red-use-dashboard", draw, w=13, h=6.2, ymax=42)

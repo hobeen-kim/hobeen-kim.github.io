@@ -91,7 +91,8 @@ SDK 방식은 애플리케이션마다 코드를 붙이고 재배포해야 한�
 
 Alloy의 `pyroscope.ebpf` 컴포넌트는 이 방식을 노드 단위 DaemonSet으로 배포해, 호스트에서 실행되는 모든 컨테이너의 프로파일을 한 번에 수집한다.
 
-![쿠버네티스 노드에서 Go·Java·Python 서비스와 소스 없는 서드파티 바이너리의 콜 스택을 커널 공간의 eBPF 프로그램(perf_event 샘플러)이 직접 캡처하고, Alloy DaemonSet이 eBPF 이벤트를 받아 Pyroscope로 push하는 노드 단위 무계측 수집 구조](/images/study-observability/26-ebpf-node.png)
+![쿠버네티스 노드에서 Go·Java·Python 서비스와 소스 없는 서드파티 바이너리의 콜 스택을 커널 공간의 eBPF 프로그램(perf_event 샘플러)이 직접 캡처하고, Alloy DaemonSet이 eBPF 이벤트를 받아 Pyroscope로 push하는 노드 단위 무계측 수집 구조](/images/study-observability/26-ebpf-node-light.png)
+![쿠버네티스 노드에서 Go·Java·Python 서비스와 소스 없는 서드파티 바이너리의 콜 스택을 커널 공간의 eBPF 프로그램(perf_event 샘플러)이 직접 캡처하고, Alloy DaemonSet이 eBPF 이벤트를 받아 Pyroscope로 push하는 노드 단위 무계측 수집 구조](/images/study-observability/26-ebpf-node-dark.png)
 
 ## 4. eBPF 원리와 한계 — 심볼라이제이션, 커널 요구
 
@@ -114,7 +115,8 @@ eBPF 수집이 만능은 아니다. 두 가지 구조적 제약이 있다.
 
 실무에서는 두 방식을 배타적으로 고르기보다 <strong>계층적으로 조합</strong>하는 경우가 많다. eBPF를 클러스터 전역 DaemonSet으로 깔아 모든 워크로드에 대한 기본 CPU 가시성을 확보하고, 메모리 누수·락 경합처럼 eBPF가 다루기 약한 프로파일 타입이나 요청 단위 세밀한 태깅이 필요한 핵심 서비스에는 SDK를 추가로 붙이는 전략이다.
 
-![SDK와 eBPF 선택 결정 트리: 모든 워크로드에 기본 CPU 가시성이 필요하면 eBPF DaemonSet으로 전역 커버리지를 확보하고, 그 위에 메모리/lock 프로파일이나 요청 단위 태깅이 필요한 서비스에는 언어별 SDK를 추가해 eBPF + SDK 조합으로, 아니면 eBPF만으로 충분한 계층적 조합 판단](/images/study-observability/26-sdk-vs-ebpf-decision.png)
+![SDK와 eBPF 선택 결정 트리: 모든 워크로드에 기본 CPU 가시성이 필요하면 eBPF DaemonSet으로 전역 커버리지를 확보하고, 그 위에 메모리/lock 프로파일이나 요청 단위 태깅이 필요한 서비스에는 언어별 SDK를 추가해 eBPF + SDK 조합으로, 아니면 eBPF만으로 충분한 계층적 조합 판단](/images/study-observability/26-sdk-vs-ebpf-decision-light.png)
+![SDK와 eBPF 선택 결정 트리: 모든 워크로드에 기본 CPU 가시성이 필요하면 eBPF DaemonSet으로 전역 커버리지를 확보하고, 그 위에 메모리/lock 프로파일이나 요청 단위 태깅이 필요한 서비스에는 언어별 SDK를 추가해 eBPF + SDK 조합으로, 아니면 eBPF만으로 충분한 계층적 조합 판단](/images/study-observability/26-sdk-vs-ebpf-decision-dark.png)
 
 ## 6. 라벨과 태깅
 

@@ -71,7 +71,8 @@ TraceQL의 강력함은 서로 다른 span 사이의 <strong>구조적 관계</s
 { resource.service.name = "order-service" } > { resource.service.name = "payment-service" }
 ```
 
-![gateway span 아래 order-service span, 그 자식으로 payment·inventory span, payment 아래 DB Query span이 있는 트리에서 gateway와 DB Query span이 매치 대상으로 강조되어 descendant(>>)는 매치, child(>)는 불일치임을 보여주는 예시](/images/study-observability/23-structural-filter.png)
+![gateway span 아래 order-service span, 그 자식으로 payment·inventory span, payment 아래 DB Query span이 있는 트리에서 gateway와 DB Query span이 매치 대상으로 강조되어 descendant(>>)는 매치, child(>)는 불일치임을 보여주는 예시](/images/study-observability/23-structural-filter-light.png)
+![gateway span 아래 order-service span, 그 자식으로 payment·inventory span, payment 아래 DB Query span이 있는 트리에서 gateway와 DB Query span이 매치 대상으로 강조되어 descendant(>>)는 매치, child(>)는 불일치임을 보여주는 예시](/images/study-observability/23-structural-filter-dark.png)
 
 위 트리에서 `{ resource.service.name = "gateway" } >> { span.db.system = "postgresql" }`는 A와 E가 같은 trace 안에서 descendant 관계이므로 매치된다. 반면 `{ resource.service.name = "gateway" } > { span.db.system = "postgresql" }`(직계 자식 연산자)는 A와 E 사이에 B, C가 끼어 있으므로 매치되지 않는다.
 
@@ -135,7 +136,8 @@ histogram_quantile(0.99,
 
 span-metrics가 서비스 개별 지표를 만든다면, <strong>service graph</strong> processor는 span의 `CLIENT`/`SERVER` kind와 parent/child 관계를 분석해 서비스 <strong>간</strong> 호출 관계를 메트릭으로 만든다.
 
-![Ingester의 span 스트림을 service_graphs processor가 분석해 traces_service_graph_request_total·request_failed_total·request_server_seconds_bucket 메트릭을 만들어 Mimir로 보내고 Grafana Node Graph 패널로 시각화하는 흐름](/images/study-observability/23-service-graph.png)
+![Ingester의 span 스트림을 service_graphs processor가 분석해 traces_service_graph_request_total·request_failed_total·request_server_seconds_bucket 메트릭을 만들어 Mimir로 보내고 Grafana Node Graph 패널로 시각화하는 흐름](/images/study-observability/23-service-graph-light.png)
+![Ingester의 span 스트림을 service_graphs processor가 분석해 traces_service_graph_request_total·request_failed_total·request_server_seconds_bucket 메트릭을 만들어 Mimir로 보내고 Grafana Node Graph 패널로 시각화하는 흐름](/images/study-observability/23-service-graph-dark.png)
 
 생성되는 메트릭은 `client`, `server` 라벨로 호출 방향(엣지)을 표현한다.
 

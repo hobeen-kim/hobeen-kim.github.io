@@ -47,7 +47,8 @@ route:
 - <strong>continue</strong>: 기본값은 `false`다. 매칭된 하위 route에서 처리를 마치면 형제 route는 더 이상 평가하지 않는다. `continue: true`로 설정하면 매칭 후에도 다음 형제 route를 계속 평가해, 하나의 알림이 여러 receiver로 동시에 전달되게 할 수 있다.
 - <strong>상속</strong>: 하위 route에 `group_by`/`group_wait`/`receiver` 등을 명시하지 않으면 부모 route의 값을 그대로 물려받는다. 이 덕분에 루트에 공통 기본값을 두고, 하위 route는 달라지는 부분만 오버라이드하면 된다.
 
-![Root route에서 severity=critical이면 pagerduty-oncall로, 아니면 team=payments 여부와 severity=warning 여부를 순차 판정해 receiver를 결정하고 명시하지 않은 설정은 부모에서 상속하는 route 트리](/images/study-observability/14-route-tree.png)
+![Root route에서 severity=critical이면 pagerduty-oncall로, 아니면 team=payments 여부와 severity=warning 여부를 순차 판정해 receiver를 결정하고 명시하지 않은 설정은 부모에서 상속하는 route 트리](/images/study-observability/14-route-tree-light.png)
+![Root route에서 severity=critical이면 pagerduty-oncall로, 아니면 team=payments 여부와 severity=warning 여부를 순차 판정해 receiver를 결정하고 명시하지 않은 설정은 부모에서 상속하는 route 트리](/images/study-observability/14-route-tree-dark.png)
 
 가장 중요한 원칙은 <strong>가장 구체적인 route가 마지막에 이긴다</strong>는 것이다. 트리를 설계할 때는 넓은 조건을 앞에, 좁은 조건을 뒤에 두는 흔한 실수를 피해야 한다. Alertmanager는 형제 route를 순서대로 평가하므로, 먼저 매칭되는 route가 우선한다.
 
@@ -62,7 +63,8 @@ route:
 | `group_interval` | 같은 그룹에 새 알림이 추가됐을 때 다음 발송까지 최소 간격 | `5m` |
 | `repeat_interval` | 그룹 상태가 그대로(firing 유지)여도 재알림을 보내는 주기 | `4h` |
 
-![첫 알림 도착 후 group_wait 동안 대기해 묶어서 1차 발송하고, group_interval이 지난 뒤 추가분을 2차 발송하며 상태가 유지되면 repeat_interval 주기로 재알림하는 grouping 발송 타이밍](/images/study-observability/14-grouping-timing.png)
+![첫 알림 도착 후 group_wait 동안 대기해 묶어서 1차 발송하고, group_interval이 지난 뒤 추가분을 2차 발송하며 상태가 유지되면 repeat_interval 주기로 재알림하는 grouping 발송 타이밍](/images/study-observability/14-grouping-timing-light.png)
+![첫 알림 도착 후 group_wait 동안 대기해 묶어서 1차 발송하고, group_interval이 지난 뒤 추가분을 2차 발송하며 상태가 유지되면 repeat_interval 주기로 재알림하는 grouping 발송 타이밍](/images/study-observability/14-grouping-timing-dark.png)
 
 `group_wait`을 너무 짧게 두면 동시다발 알림이 그룹핑되지 못하고 낱개로 나간다. 너무 길게 두면 정말 급한 첫 알림이 지연된다. `repeat_interval`은 `resolve`되지 않은 장애를 잊지 않도록 주기적으로 리마인드하는 용도이며, 너무 짧으면 피로도를 높이고 너무 길면 대응 담당자가 이미 조치 중인 알림을 놓쳤다고 착각할 수 있다.
 
@@ -87,7 +89,8 @@ inhibit_rules:
 
 첫 번째 규칙은 같은 `cluster`·`alertname`에서 `critical` 알림이 firing 중이면 동일 조건의 `warning` 알림을 억제한다. 두 번째 규칙은 클러스터 전체가 죽었을 때(`ClusterDown`) 그 여파로 발생하는 개별 Pod/Node/Service 다운 알림을 억제해, 온콜 담당자가 근본 원인 하나에만 집중하게 한다.
 
-![ClusterDown(source)가 firing이면 equal:cluster가 같은 PodDown(target) 알림을 inhibit_rule이 억제해 발송을 막고, ClusterDown 자체는 Slack/PagerDuty로 통지되는 inhibition 구조](/images/study-observability/14-inhibition.png)
+![ClusterDown(source)가 firing이면 equal:cluster가 같은 PodDown(target) 알림을 inhibit_rule이 억제해 발송을 막고, ClusterDown 자체는 Slack/PagerDuty로 통지되는 inhibition 구조](/images/study-observability/14-inhibition-light.png)
+![ClusterDown(source)가 firing이면 equal:cluster가 같은 PodDown(target) 알림을 inhibit_rule이 억제해 발송을 막고, ClusterDown 자체는 Slack/PagerDuty로 통지되는 inhibition 구조](/images/study-observability/14-inhibition-dark.png)
 
 억제된 알림은 사라지는 게 아니라 Alertmanager UI/API 상에서는 여전히 `firing`으로 보이지만, notification pipeline에서 실제 발송만 막힌다는 점이 중요하다.
 
@@ -158,7 +161,8 @@ receivers:
 
 실무에서 가장 널리 쓰는 패턴은 <strong>severity로 채널 긴급도를 정하고, team으로 수신 대상을 정하는</strong> 2축 구조다.
 
-![severity로 critical·warning·info를 나누고 각 아래에서 team으로 갈라, critical은 pagerduty-payments·infra·platform-oncall(fallback)로, warning은 slack-payments·infra로, info는 slack-info-log로 보내는 severity×team 2축 라우팅 트리](/images/study-observability/14-severity-team-routing.png)
+![severity로 critical·warning·info를 나누고 각 아래에서 team으로 갈라, critical은 pagerduty-payments·infra·platform-oncall(fallback)로, warning은 slack-payments·infra로, info는 slack-info-log로 보내는 severity×team 2축 라우팅 트리](/images/study-observability/14-severity-team-routing-light.png)
+![severity로 critical·warning·info를 나누고 각 아래에서 team으로 갈라, critical은 pagerduty-payments·infra·platform-oncall(fallback)로, warning은 slack-payments·infra로, info는 slack-info-log로 보내는 severity×team 2축 라우팅 트리](/images/study-observability/14-severity-team-routing-dark.png)
 
 ```yaml
 route:

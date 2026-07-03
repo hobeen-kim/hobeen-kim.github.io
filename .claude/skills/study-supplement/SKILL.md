@@ -61,87 +61,50 @@ triggers:
   - `:::tabs` + `@tab` — 멀티 언어 코드 예제 (C/Python 등)
 - 기존 내용을 삭제하거나 변경하지 않음 — 추가만
 
-### 다이어그램 작성 규칙 (matplotlib → PNG)
+### 다이어그램 작성 규칙 (matplotlib → 라이트/다크 PNG 2벌)
 
 새 다이어그램은 Mermaid가 아니라 **matplotlib으로 그려 PNG로 저장**하고 마크다운에서 이미지로 참조한다.
 
-- 스크립트 위치: `docs/_study/{slug}/_diagrams/{챕터번호}-{이름}.py` — 커밋해서 재생성 가능하게 유지
-- PNG 출력 위치: `docs/.vuepress/public/images/study-{slug}/{챕터번호}-{이름}.png`
-- 마크다운 참조: `![다이어그램 설명](/images/study-{slug}/{챕터번호}-{이름}.png)`
-- 실행: `python3 docs/_study/{slug}/_diagrams/{파일}.py` 후 PNG 생성 확인
-- 스크립트 필수 패턴:
-  - `matplotlib.use("Agg")` — headless 렌더링
-  - 한글 폰트 자동 탐색 (`AppleSDGothicNeo` → `NanumGothic` → …) + `axes.unicode_minus = False`
-  - 다크 팔레트 (배경 `#0f1216`, 텍스트 `#e6e8eb`, 보조 `#9aa2ab`, 액센트 `#4fd1c5`)
-  - `FancyBboxPatch`(둥근 박스) · `FancyArrowPatch`(화살표) · `ax.text` 헬퍼 함수(`box`/`text`/`arrow`)로 구성
-  - `ax.axis("off")`, 좌표계는 `ax.set_xlim/set_ylim`으로 논리 그리드 설정
-  - 제목 + 부제(dim 색), 하단에 핵심 흐름 요약 한 줄, 필요 시 `Line2D` 범례
-  - `fig.savefig(out, dpi=170, facecolor=C_BG)` — dpi 170
-- 템플릿: `_diagrams/` 아래 기존 스크립트를 복사해 시작한다. 없으면 아래 골격 사용
+**스타일 원칙 — 가벼운 보조 그림:**
+- 그림에는 **구조만** 담는다: 노드 이름(+ 괄호 1줄 부가), 그룹 라벨, 화살표+짧은 라벨. 설명은 본문의 몫이다.
+- **금지**: 대제목·부제·하단 요약 문장·본문과 중복되는 박스 안 설명 서브텍스트 (절 제목과 본문이 그 역할을 한다)
+- 범례는 색이 실제 정보를 구분할 때만 최소로
+- figsize는 내용에 맞춰 작게 (기본 12×6, 복잡하면 14×8 정도까지)
 
-:::details matplotlib 다이어그램 스크립트 골격
+**라이트/다크 2벌 필수:**
+- 모든 다이어그램은 `{이름}-light.png` / `{이름}-dark.png` 두 장을 생성한다
+- `docs/_study/{slug}/_diagrams/_common.py`의 `diagram()` 헬퍼가 두 팔레트로 자동 렌더링한다 (observability의 `_common.py`를 다른 스터디에 복사해 사용)
+- 마크다운에는 두 장을 **연속 두 줄**로 참조한다 (같은 alt 텍스트):
+  ```md
+  ![다이어그램 설명](/images/study-{slug}/{이름}-light.png)
+  ![다이어그램 설명](/images/study-{slug}/{이름}-dark.png)
+  ```
+- 테마 전환은 `docs/.vuepress/styles/index.scss`의 규칙이 처리한다 (`html.dark`에서 `-light.png` 숨김, 반대는 `-dark.png` 숨김). 이미지 경로가 `/images/study-`로 시작해야 이 규칙에 걸린다.
+
+**스크립트 작성:**
+- 위치: `docs/_study/{slug}/_diagrams/{챕터번호}-{이름}.py` — 커밋해서 재생성 가능하게 유지
+- 실행: `cd docs/_study/{slug}/_diagrams && python3 {파일}.py`
+- 렌더링 후 **두 PNG를 Read로 열어 시각 검증** (겹침·잘림·저대비 확인)
+- 색은 반드시 팔레트 키(`P["blue"]` 등)로만 지정 — hex 하드코딩 금지 (라이트/다크 양쪽에서 깨진다)
+
+:::details 스크립트 골격 (_common.diagram 사용)
 ```python
-"""{스터디명} — {다이어그램 제목} (matplotlib → PNG)."""
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-import matplotlib.font_manager as fm
-from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
-from matplotlib.lines import Line2D
+"""CH{N} §{절} {다이어그램 이름} (light/dark PNG)."""
+from _common import diagram
 
 
-def set_korean_font():
-    avail = {f.name for f in fm.fontManager.ttflist}
-    for name in ("AppleSDGothicNeo", "Apple SD Gothic Neo", "AppleGothic",
-                 "NanumGothic", "Malgun Gothic", "Noto Sans CJK KR"):
-        if name in avail:
-            plt.rcParams["font.family"] = name
-            break
-    plt.rcParams["axes.unicode_minus"] = False
+def draw(d):
+    P = d.P
+    # 그룹 박스: d.box(x, y, w, h, P["gray"], ec=P["accent"])
+    # 노드:     d.box(...) + d.text(cx, cy, "이름\n(부가 1줄)", size=10)
+    # 칩(외부): P["chip"], 색 박스: P["blue"|"green"|"brown"|"purple"]
+    # 화살표:   d.arrow(x1, y1, x2, y2)  # 기본 accent색
+    #           보조 흐름은 color=P["orange"] / P["violet"]
+    # 라벨:     d.text(x, y, "라벨", size=8, color=P["dim"])
+    ...
 
 
-set_korean_font()
-
-C_BG, C_TEXT, C_DIM, C_ACCENT, C_EDGE = "#0f1216", "#e6e8eb", "#9aa2ab", "#4fd1c5", "#5b6570"
-
-fig, ax = plt.subplots(figsize=(15, 9))
-fig.patch.set_facecolor(C_BG)
-ax.set_facecolor(C_BG)
-ax.set_xlim(0, 100)
-ax.set_ylim(0, 60)
-ax.axis("off")
-
-
-def box(x, y, w, h, fc, ec=C_EDGE, lw=1.4, r=0.03):
-    ax.add_patch(FancyBboxPatch((x, y), w, h,
-        boxstyle=f"round,pad=0.02,rounding_size={r*20}",
-        linewidth=lw, edgecolor=ec, facecolor=fc, mutation_aspect=1))
-
-
-def text(x, y, s, size=11, color=C_TEXT, weight="normal", ha="center", va="center", style="normal"):
-    ax.text(x, y, s, fontsize=size, color=color, fontweight=weight,
-            ha=ha, va=va, style=style, zorder=5)
-
-
-def arrow(x1, y1, x2, y2, color=C_ACCENT, lw=2.0, style="-|>", rad=0.0, ls="-"):
-    ax.add_patch(FancyArrowPatch((x1, y1), (x2, y2), arrowstyle=style,
-        mutation_scale=16, linewidth=lw, color=color,
-        connectionstyle=f"arc3,rad={rad}", linestyle=ls, zorder=4))
-
-
-# ---- 제목 ----
-text(50, 57.5, "{다이어그램 제목}", size=20, weight="bold")
-text(50, 55, "{부제 — 구성 요약}", size=12, color=C_DIM)
-
-# ---- 본문: box/text/arrow 로 구성 ----
-
-# ---- 하단 요약 + 범례 ----
-text(50, 2.5, "{핵심 흐름 한 줄 요약}", size=10, color=C_ACCENT, weight="bold")
-
-plt.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01)
-out = "docs/.vuepress/public/images/study-{slug}/{챕터번호}-{이름}.png"
-fig.savefig(out, dpi=170, facecolor=C_BG)
-print("saved", out)
+diagram("{챕터번호}-{이름}", draw, w=12, h=6, ymax=48)
 ```
 :::
 

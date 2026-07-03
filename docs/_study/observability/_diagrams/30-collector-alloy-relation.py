@@ -1,56 +1,44 @@
-"""CH30 Collector와 Alloy의 관계 — 포함 관계 (matplotlib → PNG)."""
-from _common import (new_fig, make_helpers, save, Line2D,
-                     C_BG, C_EDGE, C_TEXT, C_DIM, C_ACCENT,
-                     C_BLUE, C_GREEN, C_BROWN, C_GRAY, C_ORANGE, C_PURPLE, C_VIOLET)
+"""CH30 Collector와 Alloy — 포함 관계 (light/dark PNG)."""
+from _common import diagram, Line2D
 
-fig, ax = new_fig(w=14, h=8.6, ymax=56)
-box, text, arrow = make_helpers(ax)
 
-# ---- Title ----
-text(50, 53.0, "Collector와 Alloy — 대체가 아니라 포함 관계", size=19, weight="bold")
-text(50, 50.0, "Alloy는 CNCF OTel Collector 코드베이스를 임베드한 Grafana 배포판",
-     size=11, color=C_DIM)
+def draw(d):
+    P = d.P
 
-# OTEL (top center)
-box(30, 38, 40, 8.5, C_BLUE, ec=C_ACCENT, lw=1.8)
-text(50, 43.6, "OpenTelemetry Collector", size=13, weight="bold", color=C_ACCENT)
-text(50, 40.4, "CNCF · 벤더 중립 코드베이스", size=9.5, color=C_DIM)
+    # OTel Collector (상단)
+    d.box(30, 33, 40, 8, P["blue"], ec=P["accent"], lw=1.8)
+    d.text(50, 38.2, "OpenTelemetry Collector", size=12, weight="bold",
+           color=P["accent"])
+    d.text(50, 35.0, "CNCF · 벤더 중립 코드베이스", size=9, color=P["dim"])
 
-# CONTRIB (bottom left)
-box(6, 20, 34, 9.5, C_GRAY)
-text(23, 25.9, "opentelemetry-collector-contrib", size=10.5, weight="bold")
-text(23, 22.6, "커뮤니티 리시버 / 프로세서 / 익스포터", size=8.8, color=C_DIM)
+    # contrib (좌하)
+    d.box(5, 17, 33, 9, P["gray"])
+    d.text(21.5, 22.6, "otel-collector-contrib", size=10, weight="bold")
+    d.text(21.5, 19.4, "커뮤니티 리시버/프로세서/익스포터", size=8, color=P["dim"])
 
-# ALLOY (bottom right)
-box(56, 17.5, 38, 15.5, C_GREEN, ec=C_ACCENT, lw=1.8)
-text(75, 30.0, "Grafana Alloy", size=13, weight="bold", color=C_ACCENT)
-text(75, 26.8, "Collector 임베드 + Alloy 구문", size=9.2, color=C_DIM)
-text(75, 23.8, "+ prometheus.* / loki.* / pyroscope.*", size=9, color=C_TEXT)
-text(75, 20.8, "네이티브 컴포넌트", size=9, color=C_TEXT)
+    # Alloy (우하)
+    d.box(54, 13, 41, 14, P["green"], ec=P["accent"], lw=1.8)
+    d.text(74.5, 24.0, "Grafana Alloy", size=12, weight="bold", color=P["accent"])
+    d.text(74.5, 20.6, "Collector 임베드 + Alloy 구문", size=9, color=P["dim"])
+    d.text(74.5, 17.0, "+ prometheus.* / loki.* / pyroscope.*\n네이티브 컴포넌트",
+           size=8.4)
 
-# AGENT (far bottom)
-box(56, 4.5, 38, 8.0, C_BROWN)
-text(75, 9.9, "Grafana Agent", size=11.5, weight="bold")
-text(75, 6.8, "EOL · Alloy로 이관 완료", size=9, color=C_DIM)
+    # Agent (최하)
+    d.box(54, 3, 41, 6.5, P["brown"])
+    d.text(74.5, 7.6, "Grafana Agent", size=10.5, weight="bold")
+    d.text(74.5, 4.8, "EOL · Alloy로 이관 완료", size=8.3, color=P["dim"])
 
-# edges
-arrow(38, 38, 27, 29.5, color=C_ACCENT, lw=2.0)      # OTEL -> CONTRIB
-arrow(62, 38, 72, 33.0, color=C_ACCENT, lw=2.4)      # OTEL -> ALLOY
-text(70, 36.6, "코드베이스 임베드", size=9, color=C_ORANGE, weight="bold")
-arrow(75, 12.5, 75, 17.5, color=C_PURPLE, lw=2.0, style="-|>", ls=(0, (4, 3)))
-text(83.5, 15.0, "후속", size=9, color=C_VIOLET, weight="bold")
+    # edges
+    d.arrow(38, 34, 24, 26, color=P["accent"], lw=1.9)
+    d.arrow(64, 34, 72, 27, color=P["accent"], lw=2.1)
+    d.text(71, 31, "코드베이스 임베드", size=8.3, color=P["orange"], weight="bold")
+    d.arrow(74.5, 9.5, 74.5, 13, color=P["violet"], lw=1.9, ls=(0, (4, 3)))
+    d.text(82, 11.3, "후속", size=8.3, color=P["violet"], weight="bold")
 
-# bottom summary
-text(50, 1.6, "\"Collector vs Alloy\"는 배타적 선택이 아니라 순수 Collector냐, Collector를 감싼 Grafana 배포판이냐의 문제",
-     size=9.5, color=C_ACCENT, weight="bold")
+    d.legend([
+        Line2D([0], [0], color=P["accent"], lw=2.4, label="파생 · 임베드"),
+        Line2D([0], [0], color=P["violet"], lw=2.4, ls="--", label="후속 이관"),
+    ], loc="upper left", anchor=(0.02, 0.42))
 
-leg = [
-    Line2D([0], [0], color=C_ACCENT, lw=2.5, label="파생 · 임베드"),
-    Line2D([0], [0], color=C_VIOLET, lw=2.5, ls="--", label="후속 이관"),
-]
-ax.legend(handles=leg, loc="upper left", bbox_to_anchor=(0.02, 0.62),
-          fontsize=8.5, framealpha=0.0, labelcolor=C_DIM)
 
-import matplotlib.pyplot as plt
-plt.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01)
-save(fig, "30-collector-alloy-relation.png")
+diagram("30-collector-alloy-relation", draw, w=13, h=6.0, ymax=42)

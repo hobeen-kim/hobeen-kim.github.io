@@ -117,7 +117,8 @@ loki.write "default" {
 
 `stage.json`으로 JSON 로그를 파싱하고, `stage.labels`로 파싱 결과 중 라벨로 승격할 값만 골라낸다. 라벨은 인덱스 비용을 직접 좌우하므로([Loki 아키텍처](/study/observability/16-loki-architecture) 참고), `message`처럼 카디널리티가 높은 필드는 절대 라벨로 승격하지 않고 로그 본문에 그대로 둔다. `stage.drop`처럼 파이프라인 단계에서 노이즈 로그를 걸러내면 Loki에 도달하는 볼륨 자체를 줄여 저장 비용을 낮출 수 있다.
 
-![로그 파이프라인 흐름 — discovery.kubernetes(Pod 로그 소스) → loki.source.kubernetes → loki.process(stage.json → stage.labels → stage.drop) → loki.write → Loki로 이어지는 컴포넌트 체인](/images/study-observability/29-log-pipeline.png)
+![로그 파이프라인 흐름 — discovery.kubernetes(Pod 로그 소스) → loki.source.kubernetes → loki.process(stage.json → stage.labels → stage.drop) → loki.write → Loki로 이어지는 컴포넌트 체인](/images/study-observability/29-log-pipeline-light.png)
+![로그 파이프라인 흐름 — discovery.kubernetes(Pod 로그 소스) → loki.source.kubernetes → loki.process(stage.json → stage.labels → stage.drop) → loki.write → Loki로 이어지는 컴포넌트 체인](/images/study-observability/29-log-pipeline-dark.png)
 
 ## 3. 트레이스 파이프라인 — otelcol.receiver → processor → exporter
 
@@ -255,7 +256,8 @@ alloy {
 }
 ```
 
-![clustering 타깃 분배 시퀀스 — discovery.kubernetes가 타깃 200개를 발견해 Alloy Cluster(3 replica)로 전달하면 컨시스턴트 해싱으로 alloy-0(1~67)·alloy-1(68~134)·alloy-2(135~200)에 소유권을 분배하고 각 레플리카가 자기 몫만 Mimir로 remote_write하며 alloy-1 다운 시 나머지가 재해싱해 흡수](/images/study-observability/29-clustering-sequence.png)
+![clustering 타깃 분배 시퀀스 — discovery.kubernetes가 타깃 200개를 발견해 Alloy Cluster(3 replica)로 전달하면 컨시스턴트 해싱으로 alloy-0(1~67)·alloy-1(68~134)·alloy-2(135~200)에 소유권을 분배하고 각 레플리카가 자기 몫만 Mimir로 remote_write하며 alloy-1 다운 시 나머지가 재해싱해 흡수](/images/study-observability/29-clustering-sequence-light.png)
+![clustering 타깃 분배 시퀀스 — discovery.kubernetes가 타깃 200개를 발견해 Alloy Cluster(3 replica)로 전달하면 컨시스턴트 해싱으로 alloy-0(1~67)·alloy-1(68~134)·alloy-2(135~200)에 소유권을 분배하고 각 레플리카가 자기 몫만 Mimir로 remote_write하며 alloy-1 다운 시 나머지가 재해싱해 흡수](/images/study-observability/29-clustering-sequence-dark.png)
 
 각 레플리카는 전체 타깃 목록을 동일하게 discovery로 받지만, 클러스터 멤버십을 기준으로 컨시스턴트 해싱을 적용해 "이 타깃은 내 몫이 아니다"라고 판단되면 스킵한다. 그 결과 중복 스크레이프 없이 부하가 나뉘고, 레플리카 하나가 사라지면 나머지가 자동으로 그 몫을 흡수한다. 반대로 DaemonSet으로 배치한 노드 로컬 컴포넌트(`loki.source.file`, `pyroscope.ebpf`)는 애초에 "이 노드는 이 인스턴스가 담당"이라는 배치 자체가 분배 역할을 하므로 clustering이 필요 없다.
 

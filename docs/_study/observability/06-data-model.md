@@ -27,7 +27,8 @@ http_requests_total{method="GET", status="200", job="api", instance="10.0.0.5:80
 
 이 한 줄이 하나의 시계열 식별자다. `method`, `status`, `job`, `instance` 라벨 값 중 하나라도 다르면 완전히 별개의 시계열이 된다. 내부적으로는 metric name조차 `__name__`이라는 예약 라벨일 뿐이다. 즉 위 시계열은 실제로는 `{__name__="http_requests_total", method="GET", status="200", job="api", instance="10.0.0.5:8080"}`라는 순수한 라벨 집합으로 취급된다. `{__name__="http_requests_total"}`처럼 라벨 매처만으로 조회하는 것이 가능한 이유가 여기 있다.
 
-![시계열 식별 구조 — metric name(__name__)과 method·status·job·instance 라벨들이 결합해 유일한 시계열 ID(라벨 집합 조합)를 이루고, 그 아래에 (t1,v1)(t2,v2)… 샘플 스트림이 append되는 관계](/images/study-observability/06-timeseries-id.png)
+![시계열 식별 구조 — metric name(__name__)과 method·status·job·instance 라벨들이 결합해 유일한 시계열 ID(라벨 집합 조합)를 이루고, 그 아래에 (t1,v1)(t2,v2)… 샘플 스트림이 append되는 관계](/images/study-observability/06-timeseries-id-light.png)
+![시계열 식별 구조 — metric name(__name__)과 method·status·job·instance 라벨들이 결합해 유일한 시계열 ID(라벨 집합 조합)를 이루고, 그 아래에 (t1,v1)(t2,v2)… 샘플 스트림이 append되는 관계](/images/study-observability/06-timeseries-id-dark.png)
 
 라벨 값을 하나 바꾸는 것은 새 시계열을 만드는 것과 같다. 예컨대 `status="200"`과 `status="404"`는 서로 다른 두 시계열이며, `method`, `status`의 카디널리티(가능한 값의 조합 수)만큼 시계열 개수가 곱셈으로 늘어난다. 이 폭발 메커니즘은 [04장](/study/observability/04-pull-push-cardinality)에서 다룬 카디널리티 문제의 근본 원인이다.
 
@@ -47,7 +48,8 @@ Prometheus는 네 가지 메트릭 타입을 정의한다. 타입 정보는 클�
 
 둘 다 분포와 지연시간류 지표를 다루지만, <strong>어디서 분위수를 계산하는가</strong>가 근본적인 차이를 만든다.
 
-![Histogram vs Summary 비교 — Histogram은 클라이언트가 버킷 카운트만 누적하고 여러 인스턴스 버킷을 sum by (le)로 합산한 뒤 PromQL histogram_quantile()로 쿼리 시점에 분위수를 계산해 집계 가능하지만, Summary는 클라이언트가 분위수를 직접 계산해 노출하므로 인스턴스별 값이 확정되어 여러 인스턴스 quantile을 평균·합산해도 의미 없어 집계 불가](/images/study-observability/06-histogram-vs-summary.png)
+![Histogram vs Summary 비교 — Histogram은 클라이언트가 버킷 카운트만 누적하고 여러 인스턴스 버킷을 sum by (le)로 합산한 뒤 PromQL histogram_quantile()로 쿼리 시점에 분위수를 계산해 집계 가능하지만, Summary는 클라이언트가 분위수를 직접 계산해 노출하므로 인스턴스별 값이 확정되어 여러 인스턴스 quantile을 평균·합산해도 의미 없어 집계 불가](/images/study-observability/06-histogram-vs-summary-light.png)
+![Histogram vs Summary 비교 — Histogram은 클라이언트가 버킷 카운트만 누적하고 여러 인스턴스 버킷을 sum by (le)로 합산한 뒤 PromQL histogram_quantile()로 쿼리 시점에 분위수를 계산해 집계 가능하지만, Summary는 클라이언트가 분위수를 직접 계산해 노출하므로 인스턴스별 값이 확정되어 여러 인스턴스 quantile을 평균·합산해도 의미 없어 집계 불가](/images/study-observability/06-histogram-vs-summary-dark.png)
 
 | 구분 | Histogram | Summary |
 |---|---|---|
@@ -74,7 +76,8 @@ Summary는 이 합산이 원천적으로 불가능하다. 인스턴스 A의 p99�
 
 <strong>Native histogram</strong>(최신 Prometheus 기준 기능)은 이 문제를 근본적으로 다르게 푼다. 버킷 경계를 사용자가 미리 정의하는 대신, <strong>지수적으로 증가하는 버킷 스킴</strong>을 자동 적용하고 그 버킷 카운트 전체를 <strong>하나의 시계열 안에 sparse 표현으로 압축</strong>해 저장한다. 즉 `le`별로 시계열을 쪼개지 않고, 단일 시계열의 값 자체가 "버킷 카운트 벡터"를 담는다.
 
-![Classic vs Native Histogram 카디널리티 비교 — Classic은 le=0.1·0.5·1·+Inf 버킷 경계마다 별도 시계열이 생겨 버킷 수만큼 시계열이 배수로 증가하지만, Native는 값 자체가 sparse 버킷 벡터인 단일 시계열에 지수 스킴 버킷을 담아 버킷 수와 무관하게 시계열 하나로 고해상도를 유지](/images/study-observability/06-native-histogram.png)
+![Classic vs Native Histogram 카디널리티 비교 — Classic은 le=0.1·0.5·1·+Inf 버킷 경계마다 별도 시계열이 생겨 버킷 수만큼 시계열이 배수로 증가하지만, Native는 값 자체가 sparse 버킷 벡터인 단일 시계열에 지수 스킴 버킷을 담아 버킷 수와 무관하게 시계열 하나로 고해상도를 유지](/images/study-observability/06-native-histogram-light.png)
+![Classic vs Native Histogram 카디널리티 비교 — Classic은 le=0.1·0.5·1·+Inf 버킷 경계마다 별도 시계열이 생겨 버킷 수만큼 시계열이 배수로 증가하지만, Native는 값 자체가 sparse 버킷 벡터인 단일 시계열에 지수 스킴 버킷을 담아 버킷 수와 무관하게 시계열 하나로 고해상도를 유지](/images/study-observability/06-native-histogram-dark.png)
 
 이점은 두 가지다. 첫째, <strong>카디널리티가 버킷 개수와 무관</strong>해진다 — 버킷이 몇 개든 시계열은 여전히 하나다. 둘째, <strong>해상도가 훨씬 높다.</strong> 클래식 히스토그램은 배포 전에 정한 소수의 버킷 경계에 갇히지만, native histogram은 지수 스킴 덕분에 사실상 연속에 가까운 해상도로 분포를 표현한다. PromQL 쪽에서는 `histogram_quantile()`을 그대로 쓸 수 있어 마이그레이션 부담이 적다.
 

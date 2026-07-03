@@ -23,7 +23,8 @@ next: /study/observability/42-grafana-alerting-irm
 
 <strong>능동적(active) 관측</strong>, 즉 합성 모니터링(synthetic monitoring)은 반대로 접근한다 — 가짜 트래픽을 직접 만들어 시스템을 두드려보고 그 결과를 기록한다. [blackbox_exporter](/study/observability/08-exporters-instrumentation)에서 이미 이 관점(외부에서 보이는 가용성)을 만났다. 이 챕터는 그 연장선에서 Grafana 생태계의 두 도구를 다룬다 — 부하를 걸어보는 <strong>k6</strong>, 상시 프로브를 돌리는 <strong>Synthetic Monitoring</strong>.
 
-![k6와 Synthetic Monitoring — k6 부하 주입과 글로벌 프로브가 대상 시스템을 두드리고 결과를 LGTM 스택에 적재하는 능동적 관측 구조](/images/study-observability/41-k6-synthetic.png)
+![k6와 Synthetic Monitoring — k6 부하 주입과 글로벌 프로브가 대상 시스템을 두드리고 결과를 LGTM 스택에 적재하는 능동적 관측 구조](/images/study-observability/41-k6-synthetic-light.png)
+![k6와 Synthetic Monitoring — k6 부하 주입과 글로벌 프로브가 대상 시스템을 두드리고 결과를 LGTM 스택에 적재하는 능동적 관측 구조](/images/study-observability/41-k6-synthetic-dark.png)
 
 ## 2. k6 — 부하 테스트를 코드로
 

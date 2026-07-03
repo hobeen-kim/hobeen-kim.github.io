@@ -1,74 +1,49 @@
-"""CH21 Collector 파이프라인 — receiver → processor → exporter (matplotlib → PNG)."""
-from _common import (new_fig, make_helpers, save, Line2D,
-                     C_BG, C_EDGE, C_TEXT, C_DIM, C_ACCENT,
-                     C_BLUE, C_GREEN, C_BROWN, C_GRAY, C_ORANGE, C_VIOLET)
-
-fig, ax = new_fig(ymax=58)
-box, text, arrow = make_helpers(ax)
+"""CH21 Collector 파이프라인 — receiver → processor → exporter (light/dark PNG)."""
+from _common import diagram, Line2D
 
 
-def cbox(cx, cy, bw, bh, fc, **kw):
-    box(cx - bw / 2, cy - bh / 2, bw, bh, fc, **kw)
+def draw(d):
+    P = d.P
+
+    def chip(cx, cy, t, sub, c, bw=22, bh=7):
+        d.box(cx - bw / 2, cy - bh / 2, bw, bh, P[c])
+        d.text(cx, cy + 1.3, t, size=10, weight="bold")
+        d.text(cx, cy - 1.6, sub, size=8, color=P["dim"])
+
+    # 그룹 박스
+    d.box(3, 5, 24, 42, P["gray"])
+    d.text(15, 44, "Receivers", size=12, weight="bold", color=P["accent"])
+    d.box(37, 5, 26, 42, P["gray"])
+    d.text(50, 44, "Processors (순서)", size=12, weight="bold", color=P["orange"])
+    d.box(73, 5, 24, 42, P["gray"])
+    d.text(85, 44, "Exporters", size=12, weight="bold", color=P["violet"])
+
+    recv = [("otlp", ":4317 / :4318", 38), ("prometheus", "스크레이프", 28),
+            ("filelog", "파일 tail", 18)]
+    for t, s, cy in recv:
+        chip(15, cy, t, s, "blue", bw=20)
+
+    proc = [("memory_limiter", "OOM 방지", 39), ("attributes", "속성 가공", 30),
+            ("tail_sampling", "trace 샘플링", 21), ("batch", "배치 전송", 12)]
+    for t, s, cy in proc:
+        chip(50, cy, t, s, "brown", bw=24)
+    for i in range(len(proc) - 1):
+        d.arrow(50, proc[i][2] - 3.5, 50, proc[i + 1][2] + 3.5, color=P["orange"])
+
+    exp = [("otlp", "Tempo", 38), ("prometheusrw", "Mimir", 28), ("loki", "Loki", 18)]
+    for t, s, cy in exp:
+        chip(85, cy, t, s, "green", bw=22)
+
+    for _, _, cy in recv:
+        d.arrow(25, cy, 38, 39, color=P["accent"], rad=-0.12)
+    for _, _, cy in exp:
+        d.arrow(62, 12, 74, cy, color=P["violet"], rad=0.12)
+
+    d.legend([
+        Line2D([0], [0], color=P["accent"], lw=2.2, label="수신"),
+        Line2D([0], [0], color=P["orange"], lw=2.2, label="가공 순서"),
+        Line2D([0], [0], color=P["violet"], lw=2.2, label="내보내기"),
+    ])
 
 
-def chip(cx, cy, t, d, c, bw=22, bh=7):
-    cbox(cx, cy, bw, bh, c)
-    text(cx, cy + 1.3, t, size=10.5, weight="bold")
-    text(cx, cy - 1.6, d, size=8, color=C_DIM)
-
-
-# ---- Title ----
-text(50, 55.4, "OpenTelemetry Collector — receiver → processor → exporter 파이프라인", size=17, weight="bold")
-text(50, 52.4, "신호별로 파이프라인을 구성하고 하나의 receiver를 여러 파이프라인이 공유할 수 있다", size=11, color=C_DIM)
-
-# ===== group boxes =====
-box(3, 6, 24, 43, C_GRAY)
-text(15, 46, "Receivers", size=13, weight="bold", color=C_ACCENT)
-box(37, 6, 26, 43, C_GRAY)
-text(50, 46, "Processors  (적용 순서)", size=13, weight="bold", color=C_ORANGE)
-box(73, 6, 24, 43, C_GRAY)
-text(85, 46, "Exporters", size=13, weight="bold", color=C_GREEN)
-
-# receivers
-recv = [("otlp", "gRPC :4317 / HTTP :4318", 39), ("prometheus", "스크레이프", 29),
-        ("filelog", "파일 tail", 19)]
-for t, d, cy in recv:
-    chip(15, cy, t, d, C_BLUE, bw=20)
-
-# processors (flow order top→bottom)
-proc = [("memory_limiter", "OOM 방지", 40), ("attributes", "속성 가공", 30),
-        ("tail_sampling", "trace 단위 샘플링", 20), ("batch", "배치 전송", 10)]
-for t, d, cy in proc:
-    chip(50, cy, t, d, C_BROWN, bw=24)
-# chain arrows
-for i in range(len(proc) - 1):
-    arrow(50, proc[i][2] - 3.5, 50, proc[i + 1][2] + 3.5, color=C_ORANGE, lw=2.0)
-
-# exporters
-exp = [("otlp", "Tempo", 39), ("prometheusremotewrite", "Mimir", 29), ("loki", "Loki", 19)]
-for t, d, cy in exp:
-    chip(85, cy, t, d, C_GREEN, bw=22)
-
-# receivers -> memory_limiter (entry)
-for _, _, cy in recv:
-    arrow(25, cy, 38, 40, color=C_ACCENT, lw=1.7, rad=-0.12)
-
-# batch -> exporters
-for _, _, cy in exp:
-    arrow(62, 10, 74, cy, color=C_GREEN, lw=1.7, rad=0.12)
-
-# bottom
-text(50, 2.4, "traces 예: otlp → memory_limiter → attributes → tail_sampling → batch → otlp/Tempo",
-     size=9.5, color=C_ACCENT, weight="bold")
-
-leg = [
-    Line2D([0], [0], color=C_ACCENT, lw=2.2, label="수신 (receiver → 파이프라인)"),
-    Line2D([0], [0], color=C_ORANGE, lw=2.2, label="가공 순서 (processor 체인)"),
-    Line2D([0], [0], color=C_GREEN, lw=2.2, label="내보내기 (batch → exporter)"),
-]
-ax.legend(handles=leg, loc="lower center", bbox_to_anchor=(0.5, 0.055),
-          ncol=3, fontsize=8, framealpha=0.0, labelcolor=C_DIM)
-
-import matplotlib.pyplot as plt
-plt.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01)
-save(fig, "21-collector-pipeline.png")
+diagram("21-collector-pipeline", draw, w=12, h=6.2, ymax=50)

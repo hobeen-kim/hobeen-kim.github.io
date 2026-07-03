@@ -59,7 +59,8 @@ Alloy 컴포넌트 모델과 파이프라인 작성법은 [Alloy 파이프라인
 
 수집 에이전트는 로그를 Loki로 보내기 전에 <strong>pipeline stage</strong>로 라벨을 붙이거나 불필요한 라인을 걸러내거나 여러 줄로 나뉜 로그를 하나로 합친다.
 
-![수집 에이전트 pipeline stage 흐름 — tail(파일 읽기) → multiline(여러 줄 병합) → 파싱 → labels/relabel(라벨 부여) → drop(불필요 라인 제거) → structured_metadata(고카디널리티 필드 분리) → Loki push](/images/study-observability/19-pipeline-stages.png)
+![수집 에이전트 pipeline stage 흐름 — tail(파일 읽기) → multiline(여러 줄 병합) → 파싱 → labels/relabel(라벨 부여) → drop(불필요 라인 제거) → structured_metadata(고카디널리티 필드 분리) → Loki push](/images/study-observability/19-pipeline-stages-light.png)
+![수집 에이전트 pipeline stage 흐름 — tail(파일 읽기) → multiline(여러 줄 병합) → 파싱 → labels/relabel(라벨 부여) → drop(불필요 라인 제거) → structured_metadata(고카디널리티 필드 분리) → Loki push](/images/study-observability/19-pipeline-stages-dark.png)
 
 <strong>multiline</strong> stage는 스택 트레이스처럼 여러 줄이 논리적으로 한 로그 이벤트인 경우, 정규식으로 시작 라인을 식별해 다음 시작 라인이 나올 때까지를 하나로 합친다.
 
@@ -100,7 +101,8 @@ pipeline_stages:
 
 Loki는 라벨(인덱스 대상), 로그 본문(비인덱스 콘텐츠)에 더해 <strong>구조화 메타데이터(structured metadata)</strong>라는 세 번째 계층을 지원한다. `trace_id`, `span_id`, `user_id`, `request_id`처럼 값 종류가 무한에 가까운 필드를 라벨로 넣으면 [스트림 폭증](/study/observability/16-loki-architecture)을 부르지만, 그렇다고 로그 본문에만 묻어두면 쿼리 시 매번 파싱해야 한다. 구조화 메타데이터는 이 사이의 절충안이다 — 인덱스에는 들어가지 않아 스트림을 늘리지 않지만, 청크 안에 라인과 별도로 key-value로 저장돼 파서 없이도 필터링할 수 있다.
 
-![Loki 세 저장 계층 — 라벨(인덱스·저카디널리티)이 스트림을 식별하고, 그 아래 구조화 메타데이터(비인덱스·고카디널리티 허용·파서 불필요)와 로그 본문(비인덱스·파서 필요)이 나뉘는 구조](/images/study-observability/19-three-layers.png)
+![Loki 세 저장 계층 — 라벨(인덱스·저카디널리티)이 스트림을 식별하고, 그 아래 구조화 메타데이터(비인덱스·고카디널리티 허용·파서 불필요)와 로그 본문(비인덱스·파서 필요)이 나뉘는 구조](/images/study-observability/19-three-layers-light.png)
+![Loki 세 저장 계층 — 라벨(인덱스·저카디널리티)이 스트림을 식별하고, 그 아래 구조화 메타데이터(비인덱스·고카디널리티 허용·파서 불필요)와 로그 본문(비인덱스·파서 필요)이 나뉘는 구조](/images/study-observability/19-three-layers-dark.png)
 
 수집 단계에서 `structured_metadata` stage로 필드를 지정한다.
 

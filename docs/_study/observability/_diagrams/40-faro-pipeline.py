@@ -1,84 +1,76 @@
-"""CH40 Faro — 프런트엔드 관측성 파이프라인 다이어그램 (matplotlib → PNG)."""
-from _common import (new_fig, make_helpers, save, Line2D,
-                     C_BG, C_EDGE, C_TEXT, C_DIM, C_ACCENT,
-                     C_BLUE, C_GREEN, C_BROWN, C_GRAY, C_ORANGE, C_VIOLET)
+"""CH40 Faro — 프런트엔드 관측성(RUM) 파이프라인 (light/dark PNG)."""
+from _common import diagram, Line2D
 
-fig, ax = new_fig()
-box, text, arrow = make_helpers(ax)
 
-# ---- Title ----
-text(50, 59.4, "Faro — 프런트엔드 관측성(RUM) 파이프라인", size=20, weight="bold")
-text(50, 56.6, "브라우저(Faro Web SDK)  →  Alloy faro.receiver  →  Loki · Tempo  →  Grafana",
-     size=12, color=C_DIM)
+def draw(d):
+    P = d.P
 
-# ================= left: browser =================
-box(2, 14, 26, 38, C_BLUE)
-text(15, 49.6, "사용자 브라우저", size=13, weight="bold")
-text(15, 47.4, "Faro Web SDK (@grafana/faro-web-sdk)", size=9, color=C_DIM)
-for i, (t, d) in enumerate([
-    ("에러 · 예외", "JS error · unhandled rejection · 스택"),
-    ("로그 · 커스텀 이벤트", "console 캡처 · pushEvent()"),
-    ("Web Vitals 측정값", "LCP · CLS · INP · TTFB"),
-    ("세션 · 메타", "session id · 브라우저 · URL · 사용자"),
-    ("트레이스 (OTel)", "fetch/XHR 자동 계측 span"),
-]):
-    yy = 43.5 - i * 5.4
-    box(4, yy - 2.2, 22, 4.4, "#1b232a")
-    text(15, yy + 0.6, t, size=10)
-    text(15, yy - 1.2, d, size=8, color=C_DIM)
+    # 왼쪽: 브라우저 (Faro Web SDK)
+    d.box(2, 11, 20, 33, P["blue"])
+    d.text(12, 41, "사용자 브라우저", size=11, weight="bold")
+    d.text(12, 38.5, "(Faro Web SDK)", size=8.5, color=P["dim"])
+    for i, t in enumerate([
+        "에러 · 예외",
+        "로그 · 커스텀 이벤트",
+        "Web Vitals (LCP·INP)",
+        "트레이스 (fetch/XHR)",
+    ]):
+        yy = 34 - i * 6
+        d.box(4, yy - 2.2, 16, 4.4, P["chip"])
+        d.text(12, yy, t, size=9)
 
-# ================= center: Alloy =================
-box(37, 26, 26, 26, C_GREEN, ec=C_ACCENT, lw=2.0)
-text(50, 49.6, "Alloy", size=13.5, weight="bold", color=C_ACCENT)
-text(50, 47.4, "faro.receiver — 수집 엔드포인트", size=9.5, color=C_DIM)
-for i, (t, d) in enumerate([
-    ("HTTP 수신", "CORS 허용 도메인 · API key 검증"),
-    ("rate limit · 필터", "악성/과다 트래픽 차단"),
-    ("신호 분기", "로그류 → Loki · 트레이스 → Tempo"),
-]):
-    yy = 43 - i * 5.2
-    box(39, yy - 2.1, 22, 4.2, "#1d2b24")
-    text(50, yy + 0.6, t, size=10)
-    text(50, yy - 1.2, d, size=8, color=C_DIM)
+    # 중앙: Alloy faro.receiver
+    d.box(28, 18, 22, 26, P["green"], ec=P["accent"], lw=1.8)
+    d.text(39, 41, "Alloy", size=11.5, weight="bold", color=P["accent"])
+    d.text(39, 38.5, "(faro.receiver)", size=8.5, color=P["dim"])
+    for i, t in enumerate([
+        "HTTP 수신 (CORS·API key)",
+        "rate limit · 필터",
+        "신호 분기",
+    ]):
+        yy = 34 - i * 6
+        d.box(30, yy - 2.3, 18, 4.6, P["chip"])
+        d.text(39, yy, t, size=9)
 
-# browser -> alloy
-arrow(28, 39, 37, 39, color=C_ACCENT, lw=2.2)
-text(32.5, 41.2, "HTTP POST\n(배치 전송)", size=8, color=C_ACCENT, weight="bold")
+    # 백엔드 API (traceparent 이어받음)
+    d.box(28, 4, 22, 11, P["brown"])
+    d.text(39, 11.5, "백엔드 API 서버", size=10.5, weight="bold")
+    d.text(39, 8.5, "(OTel SDK가 trace 이어받음)", size=8.5, color=P["dim"])
 
-# ================= right: backends =================
-box(72, 38, 26, 14, C_GRAY)
-text(85, 49.6, "Loki", size=13, weight="bold")
-text(85, 47.0, "에러 · 로그 · 이벤트 · Web Vitals\n(app 라벨 + JSON 본문)", size=9, color="#d4dae0")
-text(85, 41.5, "LogQL로 에러율·P75 LCP 산출", size=8.5, color=C_ACCENT, style="italic")
+    # 오른쪽: Loki · Tempo · Grafana
+    d.box(54, 31, 20, 12, P["gray"])
+    d.text(64, 39.5, "Loki", size=11, weight="bold")
+    d.text(64, 35.5, "로그·이벤트·Web Vitals", size=8.5, color=P["dim"])
 
-box(72, 22, 26, 12, C_GRAY)
-text(85, 31.6, "Tempo", size=13, weight="bold")
-text(85, 28.8, "프런트엔드 span\n(fetch → 백엔드 API 호출)", size=9, color="#d4dae0")
-text(85, 24.8, "백엔드 span과 같은 trace로 연결", size=8.5, color=C_ACCENT, style="italic")
+    d.box(54, 17, 20, 12, P["gray"])
+    d.text(64, 25.5, "Tempo", size=11, weight="bold")
+    d.text(64, 21.5, "프런트엔드 span", size=8.5, color=P["dim"])
 
-arrow(63, 43, 72, 45, color=C_ORANGE, lw=2.2)
-arrow(63, 32, 72, 29, color=C_VIOLET, lw=2.2)
+    d.box(80, 23, 18, 12, P["purple"])
+    d.text(89, 31, "Grafana", size=11, weight="bold")
+    d.text(89, 27, "Frontend 대시보드", size=8.5, color=P["dim"])
 
-# ================= bottom: backend correlation =================
-box(2, 3.5, 61, 7.5, C_BROWN)
-text(32.5, 8.9, "백엔드 API 서버", size=11, weight="bold")
-text(32.5, 6.2, "브라우저 fetch에 traceparent 헤더 자동 주입 → 백엔드 OTel SDK가 이어받아\n프런트 클릭부터 DB 쿼리까지 하나의 분산 트레이스로 완성", size=9, color="#d4dae0")
-arrow(15, 14, 15, 11, color=C_VIOLET, lw=2.0, ls="--")
-text(20.5, 12.5, "traceparent 전파", size=8.5, color=C_VIOLET)
+    # 흐름 화살표
+    d.arrow(22, 30, 28, 30, color=P["accent"])
+    d.text(25, 32, "HTTP POST", size=8, color=P["accent"])
+    d.arrow(50, 34, 54, 37, color=P["orange"])
+    d.text(52, 38.6, "로그·Vitals", size=8, color=P["orange"])
+    d.arrow(50, 24, 54, 23, color=P["violet"])
+    d.text(52, 20.8, "트레이스", size=8, color=P["violet"])
+    d.arrow(74, 36, 80, 31, color=P["accent"])
+    d.arrow(74, 24, 80, 28, color=P["accent"])
 
-box(72, 3.5, 26, 14.5, C_GRAY)
-text(85, 15.5, "Grafana", size=13, weight="bold")
-text(85, 12.4, "Frontend 대시보드\n에러 ↔ 세션 ↔ 트레이스 상관관계", size=9, color="#d4dae0")
-text(85, 7.0, "메트릭(서버) · RUM(브라우저)\n한 화면에서 조회", size=8.5, color=C_ACCENT, style="italic")
+    # traceparent 전파 (브라우저 → 백엔드 → Tempo)
+    d.arrow(12, 11, 28, 12, color=P["violet"], ls="--")
+    d.text(19, 9.2, "traceparent", size=8, color=P["violet"])
+    d.arrow(50, 11, 56, 17, color=P["violet"], ls="--")
+    d.text(56, 13.5, "백엔드 span", size=8, color=P["violet"])
 
-leg = [
-    Line2D([0], [0], color=C_ACCENT, lw=2.5, label="브라우저 → Alloy 수집"),
-    Line2D([0], [0], color=C_ORANGE, lw=2.5, label="로그·이벤트·측정값 → Loki"),
-    Line2D([0], [0], color=C_VIOLET, lw=2.5, label="트레이스 → Tempo / traceparent 전파"),
-]
-ax.legend(handles=leg, loc="lower left", bbox_to_anchor=(0.33, 0.21),
-          fontsize=8.5, framealpha=0.0, labelcolor=C_DIM)
+    d.legend([
+        Line2D([0], [0], color=P["accent"], lw=2.5, label="수집 · 조회"),
+        Line2D([0], [0], color=P["orange"], lw=2.5, label="로그·이벤트·측정값 → Loki"),
+        Line2D([0], [0], color=P["violet"], lw=2.5, label="트레이스 → Tempo · traceparent 전파"),
+    ], anchor=(0.005, 0.9))
 
-import matplotlib.pyplot as plt
-plt.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01)
-save(fig, "40-faro-pipeline.png")
+
+diagram("40-faro-pipeline", draw, w=14, h=6.6, ymax=48)

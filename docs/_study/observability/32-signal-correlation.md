@@ -24,7 +24,8 @@ next: /study/observability/33-dashboard-as-code
 
 <strong>상관관계(correlation)</strong>는 이 수작업을 클릭 한 번으로 줄이는 메커니즘이다. Grafana는 이를 위해 신호 간 <strong>공통 식별자</strong>(trace ID, span ID, 시간 구간, 라벨)를 데이터소스 설정에 명시적으로 등록해두고, 패널에서 값을 클릭하면 그 식별자로 다른 데이터소스에 새 쿼리를 던지는 방식으로 점프를 구현한다.
 
-![신호가 고립된 경우(메트릭→로그→트레이스를 수동으로 잇는 흐름)와 상관관계가 연결된 경우(메트릭에서 exemplar 클릭으로 트레이스, 다시 trace-to-logs·trace-to-profiles로 로그·플레임그래프로 점프하는 흐름)를 비교한 다이어그램](/images/study-observability/32-isolated-vs-correlated.png)
+![신호가 고립된 경우(메트릭→로그→트레이스를 수동으로 잇는 흐름)와 상관관계가 연결된 경우(메트릭에서 exemplar 클릭으로 트레이스, 다시 trace-to-logs·trace-to-profiles로 로그·플레임그래프로 점프하는 흐름)를 비교한 다이어그램](/images/study-observability/32-isolated-vs-correlated-light.png)
+![신호가 고립된 경우(메트릭→로그→트레이스를 수동으로 잇는 흐름)와 상관관계가 연결된 경우(메트릭에서 exemplar 클릭으로 트레이스, 다시 trace-to-logs·trace-to-profiles로 로그·플레임그래프로 점프하는 흐름)를 비교한 다이어그램](/images/study-observability/32-isolated-vs-correlated-dark.png)
 
 ## 2. exemplar — 메트릭에서 트레이스로
 
@@ -49,7 +50,8 @@ jsonData:
 
 이렇게 연결하면 Time series 패널에서 exemplar는 그래프 위에 작은 점으로 표시되고, 점을 클릭하면 해당 trace ID로 Tempo 데이터소스에 바로 쿼리가 나간다. 즉 "이 레이턴시 스파이크를 만든 실제 요청 하나"를 히스토그램 집계값에서 원시 트레이스로 곧장 파고들 수 있다.
 
-![애플리케이션이 히스토그램 관측값에 exemplar(trace_id)를 붙여 Prometheus로 보내 exemplar-storage에 별도 보관하고, Grafana가 PromQL 쿼리로 시계열과 exemplar 포인트를 받아 그래프 위 점으로 렌더링한 뒤, 사용자가 점을 클릭하면 trace_id로 Tempo에서 트레이스를 조회해 반환하는 순서 다이어그램](/images/study-observability/32-exemplar-flow.png)
+![애플리케이션이 히스토그램 관측값에 exemplar(trace_id)를 붙여 Prometheus로 보내 exemplar-storage에 별도 보관하고, Grafana가 PromQL 쿼리로 시계열과 exemplar 포인트를 받아 그래프 위 점으로 렌더링한 뒤, 사용자가 점을 클릭하면 trace_id로 Tempo에서 트레이스를 조회해 반환하는 순서 다이어그램](/images/study-observability/32-exemplar-flow-light.png)
+![애플리케이션이 히스토그램 관측값에 exemplar(trace_id)를 붙여 Prometheus로 보내 exemplar-storage에 별도 보관하고, Grafana가 PromQL 쿼리로 시계열과 exemplar 포인트를 받아 그래프 위 점으로 렌더링한 뒤, 사용자가 점을 클릭하면 trace_id로 Tempo에서 트레이스를 조회해 반환하는 순서 다이어그램](/images/study-observability/32-exemplar-flow-dark.png)
 
 ::: warning exemplar는 표본이지 전수가 아니다
 Prometheus는 스크레이프당 히스토그램 버킷별로 최대 1개의 exemplar만 보관한다. 즉 exemplar는 "느린 요청의 대표 사례"이지 모든 느린 요청을 담지 못한다. 특정 요청을 반드시 추적해야 한다면 로그나 트레이스 자체의 검색 기능([18장 LogQL](/study/observability/18-logql), [23장 TraceQL](/study/observability/23-traceql-spanmetrics))에 의존해야 한다.
@@ -122,7 +124,8 @@ jsonData:
 
 지금까지 다룬 네 가지 연결(exemplar, trace-to-logs, trace-to-metrics, trace-to-profiles)을 모두 설정해두면, 장애 대응자는 대시보드를 벗어나지 않고 원인을 좁혀갈 수 있다.
 
-![SRE가 RED 대시보드에서 p99 레이턴시 스파이크와 exemplar 점을 확인하고, exemplar 클릭으로 Tempo에서 느린 span(특정 DB 호출)을 찾은 뒤, Logs for this span으로 Loki에서 에러 로그 없음을 확인하고, Profiles for this span으로 Pyroscope 플레임그래프에서 GC 시간 비중 급증을 발견해 근본 원인이 GC 압박임을 결론 내리는 drill-down 순서 다이어그램](/images/study-observability/32-drilldown-workflow.png)
+![SRE가 RED 대시보드에서 p99 레이턴시 스파이크와 exemplar 점을 확인하고, exemplar 클릭으로 Tempo에서 느린 span(특정 DB 호출)을 찾은 뒤, Logs for this span으로 Loki에서 에러 로그 없음을 확인하고, Profiles for this span으로 Pyroscope 플레임그래프에서 GC 시간 비중 급증을 발견해 근본 원인이 GC 압박임을 결론 내리는 drill-down 순서 다이어그램](/images/study-observability/32-drilldown-workflow-light.png)
+![SRE가 RED 대시보드에서 p99 레이턴시 스파이크와 exemplar 점을 확인하고, exemplar 클릭으로 Tempo에서 느린 span(특정 DB 호출)을 찾은 뒤, Logs for this span으로 Loki에서 에러 로그 없음을 확인하고, Profiles for this span으로 Pyroscope 플레임그래프에서 GC 시간 비중 급증을 발견해 근본 원인이 GC 압박임을 결론 내리는 drill-down 순서 다이어그램](/images/study-observability/32-drilldown-workflow-dark.png)
 
 이 흐름에서 SRE는 별도 도구를 열지도, ID를 손으로 복사하지도 않았다. 대시보드 → 트레이스 → 로그 → 프로파일로 이어지는 각 단계가 이전 단계의 컨텍스트(시간창, 서비스, span)를 그대로 물려받아 다음 쿼리를 자동 구성했기 때문이다. 이것이 "세 개의 기둥"이 아니라 진짜 관측성이 작동하는 방식이다 — 신호 각각의 존재가 아니라, 신호 사이를 잇는 배선이 가치를 만든다.
 

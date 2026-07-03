@@ -23,7 +23,8 @@ next: /study/observability/appendix-glossary
 
 혼동을 줄이는 열쇠는 이것이 <strong>Alertmanager의 경쟁자가 아니라 임베드</strong>라는 점이다. Grafana Alerting의 라우팅 계층은 Prometheus Alertmanager 코드를 내장한 것으로, [14장](/study/observability/14-routing-grouping-silence)에서 배운 라우팅·그룹핑·억제 개념이 이름만 바꿔 그대로 등장한다. 차이는 <strong>룰을 어디서 평가하고, 무엇을 질의할 수 있는가</strong>에 있다.
 
-![Grafana Alerting 통합 알림 파이프라인 — Grafana-managed/datasource-managed 룰 평가에서 내장 Alertmanager, contact point, IRM 에스컬레이션으로 이어지는 구조](/images/study-observability/42-grafana-alerting.png)
+![Grafana Alerting 통합 알림 파이프라인 — Grafana-managed/datasource-managed 룰 평가에서 내장 Alertmanager, contact point, IRM 에스컬레이션으로 이어지는 구조](/images/study-observability/42-grafana-alerting-light.png)
+![Grafana Alerting 통합 알림 파이프라인 — Grafana-managed/datasource-managed 룰 평가에서 내장 Alertmanager, contact point, IRM 에스컬레이션으로 이어지는 구조](/images/study-observability/42-grafana-alerting-dark.png)
 
 ## 2. 룰 평가 — Grafana-managed vs datasource-managed
 

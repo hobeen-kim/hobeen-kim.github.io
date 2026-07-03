@@ -30,13 +30,15 @@ tags: [Observability, Prometheus, Grafana, Loki, Tempo, Pyroscope, OpenTelemetry
 
 애플리케이션과 인프라에서 발생한 4대 신호가 각각의 전용 백엔드로 흘러가고, Grafana가 이를 하나의 화면에서 상관관계로 엮는다. 메트릭은 Prometheus가 1차로 스크레이핑한 뒤 `remote_write`로 Mimir에 장기 저장하는 2단 구조를 취한다.
 
-![관측성 전체 아키텍처 — 수집 계층(node-exporter·kube-state-metrics·cAdvisor·애플리케이션·Alloy)이 4대 신호를 저장 백엔드(Prometheus·Mimir·Loki·Tempo·Pyroscope)로 보내고, Prometheus는 remote_write로 Mimir에 장기 저장하며 rule 평가로 Alertmanager에 알림을 넘기고, 모든 백엔드가 Grafana 데이터소스로 연결돼 상관관계를 제공](/images/study-observability/readme-overview.png)
+![관측성 전체 아키텍처 — 수집 계층(node-exporter·kube-state-metrics·cAdvisor·애플리케이션·Alloy)이 4대 신호를 저장 백엔드(Prometheus·Mimir·Loki·Tempo·Pyroscope)로 보내고, Prometheus는 remote_write로 Mimir에 장기 저장하며 rule 평가로 Alertmanager에 알림을 넘기고, 모든 백엔드가 Grafana 데이터소스로 연결돼 상관관계를 제공](/images/study-observability/readme-overview-light.png)
+![관측성 전체 아키텍처 — 수집 계층(node-exporter·kube-state-metrics·cAdvisor·애플리케이션·Alloy)이 4대 신호를 저장 백엔드(Prometheus·Mimir·Loki·Tempo·Pyroscope)로 보내고, Prometheus는 remote_write로 Mimir에 장기 저장하며 rule 평가로 Alertmanager에 알림을 넘기고, 모든 백엔드가 Grafana 데이터소스로 연결돼 상관관계를 제공](/images/study-observability/readme-overview-dark.png)
 
 ### Kubernetes 배포 토폴로지
 
 클러스터 안에서는 Prometheus Operator가 ServiceMonitor/PodMonitor 같은 커스텀 리소스를 감시해 Prometheus 설정을 자동 생성하는 구조(kube-prometheus-stack)가 사실상 표준이다. 수집 에이전트는 모든 노드에 DaemonSet으로 배치된다.
 
-![Kubernetes 배포 토폴로지 — monitoring 네임스페이스의 kube-prometheus-stack(Operator·Prometheus·Alertmanager·Grafana)에서 Operator가 커스텀 리소스(ServiceMonitor·PodMonitor)를 watch해 Prometheus 설정을 자동 생성하고, 모든 노드의 DaemonSet(node-exporter·Alloy)과 kube-state-metrics가 메트릭을 Prometheus로 보내는 구조](/images/study-observability/readme-k8s-topology.png)
+![Kubernetes 배포 토폴로지 — monitoring 네임스페이스의 kube-prometheus-stack(Operator·Prometheus·Alertmanager·Grafana)에서 Operator가 커스텀 리소스(ServiceMonitor·PodMonitor)를 watch해 Prometheus 설정을 자동 생성하고, 모든 노드의 DaemonSet(node-exporter·Alloy)과 kube-state-metrics가 메트릭을 Prometheus로 보내는 구조](/images/study-observability/readme-k8s-topology-light.png)
+![Kubernetes 배포 토폴로지 — monitoring 네임스페이스의 kube-prometheus-stack(Operator·Prometheus·Alertmanager·Grafana)에서 Operator가 커스텀 리소스(ServiceMonitor·PodMonitor)를 watch해 Prometheus 설정을 자동 생성하고, 모든 노드의 DaemonSet(node-exporter·Alloy)과 kube-state-metrics가 메트릭을 Prometheus로 보내는 구조](/images/study-observability/readme-k8s-topology-dark.png)
 
 ### 컴포넌트 역할
 
@@ -58,7 +60,8 @@ tags: [Observability, Prometheus, Grafana, Loki, Tempo, Pyroscope, OpenTelemetry
 
 ## 학습 로드맵
 
-![학습 로드맵 — S1 관측성 기초(01~04) → S2 메트릭 Prometheus(05~12) → S3 알림 Alertmanager(13~15) → S4 로그 Loki(16~19) → S5 트레이스 Tempo·OTel(20~23) → S6 프로파일 Pyroscope(24~27) → S7 수집 파이프라인 Alloy(28~30) → S8 통합 Grafana(31~33) → S9 운영 심화 SRE(34~38) → S10 생태계 확장 Beyla·Faro·k6·Grafana Alerting(39~42) 순서로 각 단계의 세부 챕터를 잇는 체인](/images/study-observability/readme-roadmap.png)
+![학습 로드맵 — S1 관측성 기초(01~04) → S2 메트릭 Prometheus(05~12) → S3 알림 Alertmanager(13~15) → S4 로그 Loki(16~19) → S5 트레이스 Tempo·OTel(20~23) → S6 프로파일 Pyroscope(24~27) → S7 수집 파이프라인 Alloy(28~30) → S8 통합 Grafana(31~33) → S9 운영 심화 SRE(34~38) → S10 생태계 확장 Beyla·Faro·k6·Grafana Alerting(39~42) 순서로 각 단계의 세부 챕터를 잇는 체인](/images/study-observability/readme-roadmap-light.png)
+![학습 로드맵 — S1 관측성 기초(01~04) → S2 메트릭 Prometheus(05~12) → S3 알림 Alertmanager(13~15) → S4 로그 Loki(16~19) → S5 트레이스 Tempo·OTel(20~23) → S6 프로파일 Pyroscope(24~27) → S7 수집 파이프라인 Alloy(28~30) → S8 통합 Grafana(31~33) → S9 운영 심화 SRE(34~38) → S10 생태계 확장 Beyla·Faro·k6·Grafana Alerting(39~42) 순서로 각 단계의 세부 챕터를 잇는 체인](/images/study-observability/readme-roadmap-dark.png)
 
 ## 전체 목차
 

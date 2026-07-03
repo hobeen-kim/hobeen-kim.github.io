@@ -24,7 +24,8 @@ next: /study/observability/31-grafana-datasources-dashboards
 
 역사적으로는 Prometheus Agent 모드와 Promtail을 통합한 Grafana Agent가 먼저 있었고, 이후 Grafana Agent Flow가 컴포넌트 그래프 모델을 도입했으며, 이 Flow 모델이 OTel Collector 엔진과 결합해 Alloy로 재탄생했다. 따라서 "Collector vs Alloy"는 상호 배타적인 두 제품을 고르는 문제가 아니라, <strong>순수 Collector를 쓸지, Collector를 감싼 Grafana 배포판을 쓸지</strong>를 고르는 문제에 가깝다.
 
-![Collector와 Alloy의 포함 관계 — CNCF 벤더 중립 코드베이스인 OpenTelemetry Collector가 opentelemetry-collector-contrib(커뮤니티 리시버/프로세서/익스포터)로 파생되고 코드베이스 임베드로 Grafana Alloy(Collector 임베드 + Alloy 구문 + prometheus.*/loki.*/pyroscope.* 네이티브 컴포넌트)를 이루며, EOL된 Grafana Agent가 Alloy로 후속 이관](/images/study-observability/30-collector-alloy-relation.png)
+![Collector와 Alloy의 포함 관계 — CNCF 벤더 중립 코드베이스인 OpenTelemetry Collector가 opentelemetry-collector-contrib(커뮤니티 리시버/프로세서/익스포터)로 파생되고 코드베이스 임베드로 Grafana Alloy(Collector 임베드 + Alloy 구문 + prometheus.*/loki.*/pyroscope.* 네이티브 컴포넌트)를 이루며, EOL된 Grafana Agent가 Alloy로 후속 이관](/images/study-observability/30-collector-alloy-relation-light.png)
+![Collector와 Alloy의 포함 관계 — CNCF 벤더 중립 코드베이스인 OpenTelemetry Collector가 opentelemetry-collector-contrib(커뮤니티 리시버/프로세서/익스포터)로 파생되고 코드베이스 임베드로 Grafana Alloy(Collector 임베드 + Alloy 구문 + prometheus.*/loki.*/pyroscope.* 네이티브 컴포넌트)를 이루며, EOL된 Grafana Agent가 Alloy로 후속 이관](/images/study-observability/30-collector-alloy-relation-dark.png)
 
 ## 2. 기능 비교
 
@@ -122,7 +123,8 @@ Alloy도 OTLP 익스포터를 통해 임의의 OTel 호환 백엔드로 데이�
 - <strong>스크레이프 타깃이 매우 많아 수평 확장·자동 분배가 필요한가</strong> — Alloy clustering이 없으면 Collector에서는 Target Allocator나 별도 샤딩 전략을 직접 구성해야 한다.
 - <strong>팀이 이미 OTel Collector YAML에 익숙하고 다른 신호는 별도 도구(Fluent Bit, Prometheus)로 운영 중인가</strong> — 굳이 전면 전환할 필요 없이 Collector를 트레이스 전용으로 유지하고 나머지는 기존 도구를 쓰는 혼합 구성도 합리적이다.
 
-![수집 계층 선택 의사결정 트리 — '백엔드가 Grafana LGTM+ 스택?'에서 No면 순수 벤더 중립 OTel Collector, Yes면 '벤더 락인 회피가 최우선 정책?'으로 가서 Yes면 OTel Collector + Grafana OTLP 익스포터, No면 'clustering·프로파일 네이티브 지원 필요?'로 가서 Yes면 Alloy, No면 둘 다 가능하니 팀 숙련도로 결정](/images/study-observability/30-selection-tree.png)
+![수집 계층 선택 의사결정 트리 — '백엔드가 Grafana LGTM+ 스택?'에서 No면 순수 벤더 중립 OTel Collector, Yes면 '벤더 락인 회피가 최우선 정책?'으로 가서 Yes면 OTel Collector + Grafana OTLP 익스포터, No면 'clustering·프로파일 네이티브 지원 필요?'로 가서 Yes면 Alloy, No면 둘 다 가능하니 팀 숙련도로 결정](/images/study-observability/30-selection-tree-light.png)
+![수집 계층 선택 의사결정 트리 — '백엔드가 Grafana LGTM+ 스택?'에서 No면 순수 벤더 중립 OTel Collector, Yes면 '벤더 락인 회피가 최우선 정책?'으로 가서 Yes면 OTel Collector + Grafana OTLP 익스포터, No면 'clustering·프로파일 네이티브 지원 필요?'로 가서 Yes면 Alloy, No면 둘 다 가능하니 팀 숙련도로 결정](/images/study-observability/30-selection-tree-dark.png)
 
 ## 6. 마이그레이션
 

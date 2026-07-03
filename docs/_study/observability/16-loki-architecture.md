@@ -22,7 +22,8 @@ next: /study/observability/17-loki-read-write-path
 
 이 결정은 Loki 팀이 명시적으로 밝힌 목표에서 나온다. 풀텍스트 인덱스를 만드는 대신, 쿼리 시점에 라벨로 대상 스트림을 좁힌 뒤 해당 청크만 훑어(grep) 라인 필터를 적용한다. 즉 "인덱스로 찾고 스캔으로 거른다"가 아니라 "라벨로 좁히고 그 다음은 다 스캔한다"에 가깝다.
 
-![Prometheus 모델은 숫자 값 자체를 인덱싱하고, Loki 모델은 labels만 인덱싱하며 log line은 압축 청크로 비인덱싱 저장하는 두 모델의 인덱싱 대상 비교](/images/study-observability/16-prom-vs-loki.png)
+![Prometheus 모델은 숫자 값 자체를 인덱싱하고, Loki 모델은 labels만 인덱싱하며 log line은 압축 청크로 비인덱싱 저장하는 두 모델의 인덱싱 대상 비교](/images/study-observability/16-prom-vs-loki-light.png)
+![Prometheus 모델은 숫자 값 자체를 인덱싱하고, Loki 모델은 labels만 인덱싱하며 log line은 압축 청크로 비인덱싱 저장하는 두 모델의 인덱싱 대상 비교](/images/study-observability/16-prom-vs-loki-dark.png)
 
 ## 2. 왜 전문 검색 인덱스를 만들지 않는가
 
@@ -50,7 +51,8 @@ Loki 저장 구조는 두 계층으로 나뉜다.
 
 쿼리가 들어오면 먼저 라벨 매처로 인덱스를 조회해 대상 청크 목록을 얻고, 그 청크들만 오브젝트 스토리지에서 가져와 압축 해제한 뒤 라인 필터·파서를 적용한다. 라벨로 좁혀지지 않는 쿼리(예: 라벨 없이 전체 스트림 대상 검색)는 훑어야 할 청크 수가 폭증해 매우 느려진다 — Loki 운영에서 가장 흔한 성능 함정이다.
 
-![LogQL 쿼리가 인덱스에서 라벨 매처로 청크 참조를 얻고, 대상 청크만 오브젝트 스토리지에서 로드해 라인 필터·파서를 적용하는 쿼리 흐름](/images/study-observability/16-query-index-chunk.png)
+![LogQL 쿼리가 인덱스에서 라벨 매처로 청크 참조를 얻고, 대상 청크만 오브젝트 스토리지에서 로드해 라인 필터·파서를 적용하는 쿼리 흐름](/images/study-observability/16-query-index-chunk-light.png)
+![LogQL 쿼리가 인덱스에서 라벨 매처로 청크 참조를 얻고, 대상 청크만 오브젝트 스토리지에서 로드해 라인 필터·파서를 적용하는 쿼리 흐름](/images/study-observability/16-query-index-chunk-dark.png)
 
 ## 4. 스트림 개념 — label set = stream
 
@@ -58,7 +60,8 @@ Loki에서 <strong>스트림(stream)</strong>은 고유한 라벨 집합 하나�
 
 여기서 카디널리티 문제가 생긴다. 라벨 값의 조합 수가 곧 스트림 수이므로, 카디널리티가 높은 값(요청 ID, 사용자 ID, 세션 ID, 트레이스 ID 등)을 라벨로 넣으면 스트림이 기하급수적으로 늘어난다. 스트림이 많아지면 인덱스가 커지고, ingester가 관리해야 할 메모리 상태(청크 버퍼)가 늘고, 압축 효율도 떨어진다(스트림당 로그량이 적으면 청크가 작고 파편화된다). Loki의 인덱스가 작다는 장점 자체가 무너지는 셈이다.
 
-![안전한 라벨 설계(app·env·namespace·level, 값 개수 적음 → 스트림 수백~수천)와 위험한 라벨 설계(request_id·user_id·trace_id, 값 무한대 → 스트림 무한 증가) 비교](/images/study-observability/16-cardinality.png)
+![안전한 라벨 설계(app·env·namespace·level, 값 개수 적음 → 스트림 수백~수천)와 위험한 라벨 설계(request_id·user_id·trace_id, 값 무한대 → 스트림 무한 증가) 비교](/images/study-observability/16-cardinality-light.png)
+![안전한 라벨 설계(app·env·namespace·level, 값 개수 적음 → 스트림 수백~수천)와 위험한 라벨 설계(request_id·user_id·trace_id, 값 무한대 → 스트림 무한 증가) 비교](/images/study-observability/16-cardinality-dark.png)
 
 고카디널리티 값은 라벨이 아니라 로그 라인 본문(JSON 필드 등)에 남기고, 필요하면 <strong>구조화 메타데이터(structured metadata)</strong>로 붙이는 방식이 정석이다. 이 부분은 [로그 파이프라인과 스토리지](/study/observability/19-log-pipeline-storage)에서 라벨 설계 원칙과 함께 더 자세히 다룬다.
 
@@ -70,7 +73,8 @@ Loki는 하나의 바이너리 안에 모든 컴포넌트(distributor, ingester,
 - <strong>Simple scalable</strong>: 컴포넌트를 read 경로와 write 경로 두 타깃으로 분리한다(`-target=read`, `-target=write`, 그리고 backend 타깃으로 compactor·ruler 등을 분리). 대부분의 프로덕션 환경에 권장되는 기본 모드로, 운영 복잡도와 확장성 사이의 균형점이다.
 - <strong>Microservices</strong>: distributor, ingester, querier, query-frontend, compactor, index-gateway 등 모든 컴포넌트를 각각 독립 배포로 분리한다. 컴포넌트별로 독립적인 오토스케일링이 가능해 초대형 멀티테넌시 환경에 적합하지만, 운영 부담이 가장 크다.
 
-![Loki 세 배포 모드 비교 — monolithic(단일 프로세스), simple scalable(read·write·backend 타깃 분리), microservices(distributor·ingester·querier·query-frontend·compactor·index-gateway 개별 배포)](/images/study-observability/16-deployment-modes.png)
+![Loki 세 배포 모드 비교 — monolithic(단일 프로세스), simple scalable(read·write·backend 타깃 분리), microservices(distributor·ingester·querier·query-frontend·compactor·index-gateway 개별 배포)](/images/study-observability/16-deployment-modes-light.png)
+![Loki 세 배포 모드 비교 — monolithic(단일 프로세스), simple scalable(read·write·backend 타깃 분리), microservices(distributor·ingester·querier·query-frontend·compactor·index-gateway 개별 배포)](/images/study-observability/16-deployment-modes-dark.png)
 
 컴포넌트 각각의 역할은 [읽기/쓰기 경로와 구성요소](/study/observability/17-loki-read-write-path)에서 자세히 다룬다.
 

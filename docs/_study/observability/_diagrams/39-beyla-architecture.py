@@ -1,106 +1,69 @@
-"""CH39 Beyla — eBPF 자동 계측 구조 다이어그램 (matplotlib → PNG)."""
-from _common import (new_fig, make_helpers, save, Line2D,
-                     C_BG, C_EDGE, C_TEXT, C_DIM, C_ACCENT,
-                     C_BLUE, C_GREEN, C_BROWN, C_GRAY, C_ORANGE, C_VIOLET)
+"""CH39 Beyla — eBPF 자동 계측 구조 (light/dark PNG)."""
+from _common import diagram, Line2D
 
-fig, ax = new_fig()
-box, text, arrow = make_helpers(ax)
 
-# ---- Title ----
-text(50, 59.4, "Beyla — eBPF 제로코드 자동 계측", size=20, weight="bold")
-text(50, 56.6, "애플리케이션(무수정)  →  커널 eBPF probe  →  Beyla 사용자 공간  →  LGTM 백엔드",
-     size=12, color=C_DIM)
+def draw(d):
+    P = d.P
 
-# ================= left: application + kernel =================
-box(2, 30, 26, 22, C_GRAY)
-text(15, 49.6, "애플리케이션 프로세스", size=13, weight="bold")
-text(15, 47.4, "코드 수정 · SDK · 재배포 없음", size=9.5, color=C_ACCENT, style="italic")
-for i, (t, d) in enumerate([
-    ("HTTP/gRPC 서버", "Go · Java · Python · Node · Rust …"),
-    ("TLS 암호화 트래픽", "OpenSSL · Go crypto/tls"),
-    ("DB·메시징 클라이언트", "SQL · Redis · Kafka"),
-]):
-    yy = 43 - i * 4.6
-    box(4, yy - 1.9, 22, 3.8, "#1b232a")
-    text(15, yy + 0.6, t, size=10)
-    text(15, yy - 1.0, d, size=8, color=C_DIM)
+    # 왼쪽: 애플리케이션(무수정) + 커널 eBPF
+    d.box(2, 27, 22, 17, P["gray"])
+    d.text(13, 41, "애플리케이션 프로세스", size=11, weight="bold")
+    d.text(13, 38.5, "(Go·Java·Python·Node — 무수정)", size=8.5, color=P["dim"])
+    d.box(4, 29.5, 18, 6.5, P["chip"])
+    d.text(13, 33.3, "HTTP / gRPC 서버", size=9.5)
+    d.text(13, 31.2, "TLS 암호화 트래픽", size=9.5)
 
-box(2, 6.9, 26, 19.1, C_BROWN)
-text(15, 23.6, "커널 공간 (eBPF)", size=13, weight="bold")
-text(15, 21.4, "커널 4.18+ · BTF 필요", size=9, color=C_DIM)
-for i, (t, d) in enumerate([
-    ("kprobe · tracepoint", "소켓 연결 · syscall 수준 이벤트"),
-    ("uprobe", "SSL_read/write 후킹 → 평문 캡처"),
-    ("socket filter", "HTTP/1.1 · HTTP/2 · gRPC 파싱 원천"),
-]):
-    yy = 18 - i * 4.4
-    box(4, yy - 1.8, 22, 3.6, "#241d1a")
-    text(15, yy + 0.6, t, size=10)
-    text(15, yy - 1.0, d, size=8, color=C_DIM)
+    d.box(2, 4, 22, 18, P["brown"])
+    d.text(13, 19, "커널 공간 (eBPF)", size=11, weight="bold")
+    d.box(4, 11.5, 18, 4.4, P["chip"])
+    d.text(13, 13.7, "uprobe · kprobe · tracepoint", size=9)
+    d.box(4, 6, 18, 4.4, P["chip"])
+    d.text(13, 8.2, "socket filter (HTTP/2·gRPC)", size=9)
 
-# app -> kernel (관측 대상)
-arrow(15, 30, 15, 26, color=C_ORANGE, lw=2.2)
-text(19.5, 28, "트래픽 관측", size=8.5, color=C_ORANGE)
+    # 중앙: Beyla 데몬
+    d.box(30, 4, 34, 40, P["green"], ec=P["accent"], lw=1.8)
+    d.text(47, 41, "Beyla (사용자 공간 데몬)", size=11.5, weight="bold", color=P["accent"])
+    for i, t in enumerate([
+        "프로세스 디스커버리",
+        "프로토콜 파싱 (HTTP·gRPC·SQL·Redis)",
+        "RED 메트릭 생성 (OTel semconv)",
+        "트레이스 / span 조립",
+    ]):
+        yy = 34 - i * 7
+        d.box(32, yy - 2.6, 30, 5.2, P["chip"])
+        d.text(47, yy, t, size=9.5)
 
-# ================= center: Beyla userspace =================
-box(36, 8, 30, 44, C_GREEN, ec=C_ACCENT, lw=2.0)
-text(51, 49.4, "Beyla (사용자 공간 데몬)", size=13.5, weight="bold", color=C_ACCENT)
-text(51, 47.2, "DaemonSet · 사이드카 · 단독 프로세스", size=9, color=C_DIM)
-for i, (t, d) in enumerate([
-    ("프로세스 디스커버리", "실행 파일·포트·K8s 메타데이터로 대상 선택"),
-    ("프로토콜 파싱", "HTTP/1.1 · HTTP/2 · gRPC · SQL · Redis · Kafka"),
-    ("RED 메트릭 생성", "http.server.request.duration 등 OTel semconv"),
-    ("트레이스/span 조립", "요청 단위 span + traceparent 전파"),
-    ("K8s 데코레이션", "namespace · pod · service 라벨 부착"),
-]):
-    yy = 42.5 - i * 6.4
-    box(38, yy - 2.5, 26, 5.0, "#1d2b24")
-    text(51, yy + 0.5, t, size=10.5)
-    text(51, yy - 1.4, d, size=8, color=C_DIM)
+    # 오른쪽: 백엔드 내보내기
+    d.box(74, 26, 24, 18, P["gray"])
+    d.text(86, 41, "내보내기 (OTLP)", size=11, weight="bold")
+    for i, t in enumerate([
+        "Alloy / OTel Collector",
+        "Tempo (트레이스)",
+        "Mimir / Prometheus (메트릭)",
+    ]):
+        yy = 37 - i * 4.4
+        d.box(76, yy - 1.8, 20, 3.6, P["chip"])
+        d.text(86, yy, t, size=9)
 
-# kernel -> Beyla
-arrow(28, 17, 36, 17, color=C_ORANGE, lw=2.2)
-text(32, 19.2, "ringbuf\n이벤트", size=8, color=C_ORANGE, weight="bold")
+    d.box(74, 6, 24, 15, P["blue"])
+    d.text(86, 16.5, "Prometheus 노출 모드", size=11, weight="bold")
+    d.text(86, 12.5, "/metrics 직접 노출 → pull", size=9, color=P["dim"])
 
-# ================= right: backends =================
-box(74, 30, 24, 22, C_GRAY)
-text(86, 49.6, "내보내기 (OTLP)", size=13, weight="bold")
-for i, (t, d) in enumerate([
-    ("Alloy / OTel Collector", "otelcol.receiver.otlp"),
-    ("Tempo", "트레이스 저장 · TraceQL"),
-    ("Mimir / Prometheus", "RED 메트릭 (remote_write)"),
-]):
-    yy = 45 - i * 5.4
-    box(76, yy - 2.2, 20, 4.4, "#1b232a")
-    text(86, yy + 0.6, t, size=10)
-    text(86, yy - 1.2, d, size=8, color=C_DIM)
+    # 흐름 화살표
+    d.arrow(13, 27, 13, 22, color=P["orange"])
+    d.text(16.8, 24.5, "관측", size=8, color=P["orange"])
+    d.arrow(24, 12, 30, 16, color=P["orange"])
+    d.text(27, 19.5, "ringbuf 이벤트", size=8, color=P["orange"])
+    d.arrow(64, 32, 74, 35, color=P["accent"])
+    d.text(69, 36.4, "OTLP push", size=8, color=P["accent"])
+    d.arrow(64, 15, 74, 13, color=P["violet"])
+    d.text(69, 10.6, "/metrics pull", size=8, color=P["violet"])
 
-box(74, 8, 24, 18, C_BLUE)
-text(86, 23.6, "Prometheus 노출 모드", size=13, weight="bold")
-text(86, 21.0, "/metrics 엔드포인트를 직접 노출해\nPrometheus가 스크레이프하는\npull 경로도 지원", size=9.5, color="#d4dae0")
-text(86, 12.5, "OTLP push / Prometheus pull\n둘 중 환경에 맞는 쪽 선택", size=8.5,
-     color=C_ACCENT, style="italic")
+    d.legend([
+        Line2D([0], [0], color=P["orange"], lw=2.5, label="커널 → 사용자 공간 이벤트"),
+        Line2D([0], [0], color=P["accent"], lw=2.5, label="OTLP push 경로"),
+        Line2D([0], [0], color=P["violet"], lw=2.5, label="Prometheus pull 경로"),
+    ])
 
-# Beyla -> backends
-arrow(66, 41, 74, 41, color=C_ACCENT, lw=2.2)
-text(70, 43.2, "OTLP", size=8.5, color=C_ACCENT, weight="bold")
-arrow(66, 17, 74, 17, color=C_VIOLET, lw=2.2)
-text(70, 19.2, "/metrics", size=8.5, color=C_VIOLET, weight="bold")
 
-# bottom
-text(50, 4.8, "코드 무수정 애플리케이션  →  커널 eBPF 이벤트  →  프로토콜 파싱  →  RED 메트릭 + 트레이스",
-     size=10, color=C_ACCENT, weight="bold")
-text(50, 2.4, "Beyla 코어는 OpenTelemetry eBPF Instrumentation(OBI)으로 기증 — Beyla는 OBI를 임베드한 Grafana 배포판",
-     size=9, color=C_DIM, style="italic")
-
-leg = [
-    Line2D([0], [0], color=C_ORANGE, lw=2.5, label="커널 → 사용자 공간 이벤트"),
-    Line2D([0], [0], color=C_ACCENT, lw=2.5, label="OTLP push 경로"),
-    Line2D([0], [0], color=C_VIOLET, lw=2.5, label="Prometheus pull 경로"),
-]
-ax.legend(handles=leg, loc="lower left", bbox_to_anchor=(0.005, 0.005),
-          fontsize=8.5, framealpha=0.0, labelcolor=C_DIM)
-
-import matplotlib.pyplot as plt
-plt.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01)
-save(fig, "39-beyla-architecture.png")
+diagram("39-beyla-architecture", draw, w=13, h=6.4, ymax=48)

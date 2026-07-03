@@ -36,7 +36,8 @@ next: /study/observability/06-data-model
 
 단일 바이너리 안에는 역할이 분명히 나뉜 서브시스템 네 개가 협업한다.
 
-![Prometheus 단일 프로세스 내부의 Retrieval·TSDB·HTTP Server(PromQL 엔진)·Rule Manager 네 컴포넌트가 Service Discovery·스크레이프 타깃·사용자 조회를 받아 협업하고 Rule Manager가 Alertmanager로 알림을 보내는 구조](/images/study-observability/05-core-components.png)
+![Prometheus 단일 프로세스 내부의 Retrieval·TSDB·HTTP Server(PromQL 엔진)·Rule Manager 네 컴포넌트가 Service Discovery·스크레이프 타깃·사용자 조회를 받아 협업하고 Rule Manager가 Alertmanager로 알림을 보내는 구조](/images/study-observability/05-core-components-light.png)
+![Prometheus 단일 프로세스 내부의 Retrieval·TSDB·HTTP Server(PromQL 엔진)·Rule Manager 네 컴포넌트가 Service Discovery·스크레이프 타깃·사용자 조회를 받아 협업하고 Rule Manager가 Alertmanager로 알림을 보내는 구조](/images/study-observability/05-core-components-dark.png)
 
 - <strong>Retrieval(스크레이프 매니저)</strong>은 서비스 디스커버리로부터 타깃 목록을 받아 `scrape_interval`마다 각 타깃의 `/metrics`를 HTTP GET으로 당겨온다. relabeling도 이 단계에서 적용된다.
 - <strong>TSDB(시계열 데이터베이스)</strong>는 긁어온 샘플을 WAL(Write-Ahead Log)에 먼저 쓰고, 메모리의 head 블록에 append한 뒤 주기적으로 디스크 블록으로 압축한다. 자세한 내부 구조는 4절에서 다룬다.
@@ -49,7 +50,8 @@ next: /study/observability/06-data-model
 
 Prometheus 서버 자체는 작지만, 주변 생태계가 실제 운영을 완성한다.
 
-![Prometheus 생태계 — 화이트박스 계측(Client Library+애플리케이션), 브릿지(Exporter+계측 불가 대상), 배치(단명 배치 잡+Pushgateway) 세 소스가 모두 /metrics pull로 Prometheus에 수집되고 Service Discovery가 타깃을 갱신하며 Prometheus가 Alertmanager로 알림을 전송하는 구조](/images/study-observability/05-ecosystem.png)
+![Prometheus 생태계 — 화이트박스 계측(Client Library+애플리케이션), 브릿지(Exporter+계측 불가 대상), 배치(단명 배치 잡+Pushgateway) 세 소스가 모두 /metrics pull로 Prometheus에 수집되고 Service Discovery가 타깃을 갱신하며 Prometheus가 Alertmanager로 알림을 전송하는 구조](/images/study-observability/05-ecosystem-light.png)
+![Prometheus 생태계 — 화이트박스 계측(Client Library+애플리케이션), 브릿지(Exporter+계측 불가 대상), 배치(단명 배치 잡+Pushgateway) 세 소스가 모두 /metrics pull로 Prometheus에 수집되고 Service Discovery가 타깃을 갱신하며 Prometheus가 Alertmanager로 알림을 전송하는 구조](/images/study-observability/05-ecosystem-dark.png)
 
 - <strong>클라이언트 라이브러리</strong>는 Go, Java, Python, Rust, Ruby 등 주요 언어를 공식 지원한다. 애플리케이션 코드 안에서 Counter·Gauge·Histogram 같은 메트릭을 직접 만들고 노출하는 화이트박스 계측(white-box instrumentation)의 기반이다. 자세한 내용은 [08장](/study/observability/08-exporters-instrumentation)에서 다룬다.
 - <strong>Exporter</strong>는 애플리케이션을 직접 고칠 수 없거나 계측 자체가 불가능한 대상(운영체제, DB, 하드웨어, 서드파티 서비스)을 위한 브릿지다. node_exporter, mysqld_exporter, blackbox_exporter가 대표적이며, 대상 시스템의 상태를 대신 읽어 Prometheus 노출 형식으로 변환해준다.
@@ -61,7 +63,8 @@ Prometheus 서버 자체는 작지만, 주변 생태계가 실제 운영을 완�
 
 샘플 하나가 타깃에서 나와 질의 결과로 잡히기까지의 경로를 추적하면 TSDB 내부 동작이 분명해진다.
 
-![샘플 하나의 여정 시퀀스 — scrape_interval마다 Retrieval이 타깃에서 GET /metrics로 샘플을 받아 WAL에 append(durability)하고 동시에 Head Block 메모리 청크에 append하며, 기본 2시간 주기로 Head를 디스크 블록으로 flush하고 대응 WAL 세그먼트를 truncate, PromQL 엔진이 최근·과거 데이터를 조회해 병합하는 흐름](/images/study-observability/05-data-flow.png)
+![샘플 하나의 여정 시퀀스 — scrape_interval마다 Retrieval이 타깃에서 GET /metrics로 샘플을 받아 WAL에 append(durability)하고 동시에 Head Block 메모리 청크에 append하며, 기본 2시간 주기로 Head를 디스크 블록으로 flush하고 대응 WAL 세그먼트를 truncate, PromQL 엔진이 최근·과거 데이터를 조회해 병합하는 흐름](/images/study-observability/05-data-flow-light.png)
+![샘플 하나의 여정 시퀀스 — scrape_interval마다 Retrieval이 타깃에서 GET /metrics로 샘플을 받아 WAL에 append(durability)하고 동시에 Head Block 메모리 청크에 append하며, 기본 2시간 주기로 Head를 디스크 블록으로 flush하고 대응 WAL 세그먼트를 truncate, PromQL 엔진이 최근·과거 데이터를 조회해 병합하는 흐름](/images/study-observability/05-data-flow-dark.png)
 
 - 스크레이프된 샘플은 <strong>먼저 WAL에 기록</strong>된다. WAL은 append-only 로그이며, Prometheus가 크래시해도 재시작 시 WAL을 재생(replay)해서 메모리 상태를 복구할 수 있게 해준다. durability의 핵심 장치다.
 - 동시에 샘플은 <strong>head 블록</strong>이라는 메모리 상의 구조에 청크(chunk) 형태로 쌓인다. 최근 데이터(기본 설정 기준 최근 몇 시간)에 대한 질의는 이 head 블록에서 바로 응답한다.
@@ -85,7 +88,8 @@ Prometheus 문서는 스스로 "무엇을 하지 않는지"를 명시적으로 �
 
 단일 노드 한계를 실제로 넘어서야 할 때 쓰는 경로는 크게 세 가지다.
 
-![단일 노드 한계를 넘는 두 확장 경로 — 리프 Prometheus 서버들(팀 A·B·C)이 federation(/federate)으로 글로벌 Prometheus에 요약 메트릭만 재수집해 전역 알림/대시보드를 만들거나, remote_write로 Mimir/Thanos에 실시간 스트리밍해 장기 저장·수평 확장과 전역 질의를 위임하는 구조](/images/study-observability/05-scaling-paths.png)
+![단일 노드 한계를 넘는 두 확장 경로 — 리프 Prometheus 서버들(팀 A·B·C)이 federation(/federate)으로 글로벌 Prometheus에 요약 메트릭만 재수집해 전역 알림/대시보드를 만들거나, remote_write로 Mimir/Thanos에 실시간 스트리밍해 장기 저장·수평 확장과 전역 질의를 위임하는 구조](/images/study-observability/05-scaling-paths-light.png)
+![단일 노드 한계를 넘는 두 확장 경로 — 리프 Prometheus 서버들(팀 A·B·C)이 federation(/federate)으로 글로벌 Prometheus에 요약 메트릭만 재수집해 전역 알림/대시보드를 만들거나, remote_write로 Mimir/Thanos에 실시간 스트리밍해 장기 저장·수평 확장과 전역 질의를 위임하는 구조](/images/study-observability/05-scaling-paths-dark.png)
 
 - <strong>Federation</strong>은 상위 Prometheus 서버가 하위 서버들의 `/federate` 엔드포인트를 스크레이프해서 요약된 메트릭만 끌어올리는 방식이다. 조직 계층별로 대시보드를 합치는 용도에는 쓸 만하지만, federation 자체도 pull이라 전체 raw 데이터를 옮기기엔 대역폭·카디널리티 부담이 크고, 진짜 샤딩이 아니라 "선택적 재수집"에 가깝다는 한계가 있다.
 - <strong>remote_write</strong>는 Prometheus가 수집한 샘플을 실시간으로 원격 스토리지에 스트리밍하는 프로토콜이다. 로컬 TSDB는 여전히 단기 버퍼 역할을 하고, 진짜 장기 저장·전역 질의는 remote_write 수신 측이 담당한다.

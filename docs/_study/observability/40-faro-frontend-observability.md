@@ -61,7 +61,8 @@ Web Vitals가 핵심이다. <strong>LCP</strong>(최대 콘텐츠 렌더링), <s
 
 브라우저는 신뢰할 수 없는 공개 인터넷이므로, 신호를 백엔드에 직접 쓰게 하지 않고 <strong>수집 엔드포인트</strong>를 사이에 둔다. [Alloy](/study/observability/28-alloy-overview)의 `faro.receiver` 컴포넌트가 그 역할이다.
 
-![Faro 프런트엔드 관측성 파이프라인 — 브라우저 Faro Web SDK에서 Alloy faro.receiver를 거쳐 Loki·Tempo로 분기하고 traceparent로 백엔드와 연결되는 구조](/images/study-observability/40-faro-pipeline.png)
+![Faro 프런트엔드 관측성 파이프라인 — 브라우저 Faro Web SDK에서 Alloy faro.receiver를 거쳐 Loki·Tempo로 분기하고 traceparent로 백엔드와 연결되는 구조](/images/study-observability/40-faro-pipeline-light.png)
+![Faro 프런트엔드 관측성 파이프라인 — 브라우저 Faro Web SDK에서 Alloy faro.receiver를 거쳐 Loki·Tempo로 분기하고 traceparent로 백엔드와 연결되는 구조](/images/study-observability/40-faro-pipeline-dark.png)
 
 ```alloy
 faro.receiver "web" {

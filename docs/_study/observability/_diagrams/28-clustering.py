@@ -1,64 +1,45 @@
-"""CH28 Alloy Cluster — gossip + 컨시스턴트 해싱 타깃 분배 (matplotlib → PNG)."""
-from _common import (new_fig, make_helpers, save,
-                     C_BG, C_EDGE, C_TEXT, C_DIM, C_ACCENT,
-                     C_BLUE, C_GREEN, C_BROWN, C_GRAY, C_ORANGE, C_PURPLE)
+"""CH28 Alloy Cluster — gossip + 컨시스턴트 해싱 타깃 분배 (light/dark PNG)."""
+from _common import diagram
 
-fig, ax = new_fig(w=14, h=8.6, ymax=56)
-box, text, arrow = make_helpers(ax)
 
-# ---- Title ----
-text(50, 53.0, "Alloy Cluster — gossip + 컨시스턴트 해싱 타깃 분배", size=18, weight="bold")
-text(50, 50.0, "StatefulSet 3 replica가 gossip으로 서로 발견 · 스크레이프 타깃을 자동 분배 · 장애 시 재조정",
-     size=11, color=C_DIM)
+def draw(d):
+    P = d.P
 
-# left: discovery targets
-box(3, 20, 20, 14, C_BLUE)
-text(13, 30.6, "discovery.kubernetes", size=11, weight="bold")
-text(13, 27.8, "타깃 N개", size=10, color=C_DIM)
-text(13, 24.0, "전체 목록을 모든\n레플리카에 동일 전달", size=8.3, color=C_ACCENT, style="italic")
+    # 왼쪽: discovery 타깃
+    d.box(2, 14, 20, 12, P["blue"])
+    d.text(12, 21.5, "discovery.\nkubernetes", size=10, weight="bold")
+    d.text(12, 16.6, "타깃 N개", size=9, color=P["dim"])
 
-# center: cluster box with 3 replicas
-box(30, 10, 40, 34, C_GRAY, ec=C_ACCENT, lw=2.0)
-text(50, 41.2, "Alloy Cluster (StatefulSet, 3 replica)", size=11.5, weight="bold", color=C_ACCENT)
+    # 중앙: 클러스터
+    d.box(29, 6, 42, 28, P["gray"], ec=P["accent"], lw=2.0)
+    d.text(50, 31.3, "Alloy Cluster (StatefulSet · 3 replica)", size=10,
+           weight="bold", color=P["accent"])
 
-reps = [
-    (36, 30, "alloy-0"),
-    (56, 30, "alloy-1"),
-    (46, 15, "alloy-2"),
-]
-rw, rh = 13, 6.4
-for x, y, name in reps:
-    box(x, y, rw, rh, C_GREEN)
-    text(x + rw / 2, y + rh / 2, name, size=11, weight="bold")
+    reps = [(34, 22), (54, 22), (44, 11)]
+    rw, rh = 13, 6.5
+    for x, y in reps:
+        d.box(x, y, rw, rh, P["green"])
+    d.text(34 + rw / 2, 22 + rh / 2, "alloy-0", size=10, weight="bold")
+    d.text(54 + rw / 2, 22 + rh / 2, "alloy-1", size=10, weight="bold")
+    d.text(44 + rw / 2, 11 + rh / 2, "alloy-2", size=10, weight="bold")
 
-# gossip edges (bidirectional) — drawn only in gaps between boxes
-gossip = [
-    (49, 33.2, 56, 33.2),      # alloy-0 ↔ alloy-1 (horizontal gap)
-    (43, 30.0, 49, 22.4),      # alloy-0 ↔ alloy-2
-    (61, 30.0, 55, 22.4),      # alloy-1 ↔ alloy-2
-]
-for x1, y1, x2, y2 in gossip:
-    arrow(x1, y1, x2, y2, color=C_ORANGE, lw=1.8, style="<|-|>")
-text(52.5, 35.2, "gossip", size=8.8, color=C_ORANGE, weight="bold")
+    # gossip (양방향, 박스 사이 여백)
+    d.arrow(47, 25.2, 54, 25.2, color=P["orange"], lw=1.6, style="<|-|>")
+    d.arrow(41, 22, 47, 17.5, color=P["orange"], lw=1.6, style="<|-|>")
+    d.arrow(60, 22, 54, 17.5, color=P["orange"], lw=1.6, style="<|-|>")
+    d.text(50.5, 27, "gossip", size=8.5, color=P["orange"], weight="bold")
 
-# discovery -> cluster
-arrow(23, 27, 30, 27, color=C_ACCENT, lw=2.2)
-text(26.5, 30.2, "컨시스턴트\n해싱 분배", size=8, color=C_ACCENT, weight="bold")
+    # discovery -> cluster
+    d.arrow(22, 20, 29, 20, color=P["accent"], lw=2.0)
+    d.text(25.5, 23, "컨시스턴트\n해싱 분배", size=8, color=P["accent"], weight="bold")
 
-# right: backends
-box(77, 20, 20, 14, C_BROWN)
-text(87, 30.6, "Mimir / Loki / Tempo", size=10, weight="bold")
-text(87, 27.4, "각 레플리카가", size=8.5, color=C_DIM)
-text(87, 24.6, "자기 몫만 remote_write", size=8.5, color=C_DIM)
+    # 오른쪽: 백엔드
+    d.box(78, 14, 20, 12, P["brown"])
+    d.text(88, 21.5, "Mimir / Loki\n/ Tempo", size=9.5, weight="bold")
+    d.text(88, 16.6, "자기 몫만 write", size=8.3, color=P["dim"])
 
-arrow(70, 27, 77, 27, color=C_ACCENT, lw=2.2)
+    d.arrow(71, 20, 78, 20, color=P["accent"], lw=2.0)
+    d.text(74.5, 22.6, "remote_write", size=8, color=P["dim"])
 
-# bottom
-text(50, 5.6, "특정 인스턴스가 죽으면 나머지가 그 타깃을 흡수해 재조정 — 레플리카 수로 스크레이프 부하를 수평 확장",
-     size=10, color=C_ACCENT, weight="bold")
-text(50, 2.8, "DaemonSet 배치는 '이 노드는 이 인스턴스가 담당'이 곧 분배이므로 clustering이 필요 없음",
-     size=9, color=C_DIM, style="italic")
 
-import matplotlib.pyplot as plt
-plt.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01)
-save(fig, "28-clustering.png")
+diagram("28-clustering", draw, w=13, h=5.6, ymax=38)

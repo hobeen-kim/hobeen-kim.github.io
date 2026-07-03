@@ -22,7 +22,8 @@ next: /study/observability/23-traceql-spanmetrics
 
 이 선택의 근거는 트레이스 데이터의 접근 패턴에 있다. 트레이스는 보통 "이미 trace ID를 알고 있는 상태"(로그나 메트릭의 exemplar에서 trace ID를 얻어 그 trace 하나를 열어보는 것)로 조회되는 경우가 압도적으로 많다. trace ID로 찾을 때는 별도 인덱스 없이도 해시 기반으로 어느 블록에 있을지 좁혀나갈 수 있다. 반면 속성 기반 전문 검색(TraceQL)은 상대적으로 드물게 쓰이며, 필요할 때는 블록을 스캔하는 비용을 감수한다.
 
-![전통적 백엔드는 Trace 데이터를 전용 검색 인덱스로 넣지만, Tempo는 블록(오브젝트 스토리지)만 두고 Bloom filter로 trace ID 조회, 블록 스캔으로 TraceQL 검색을 처리하는 설계 비교](/images/study-observability/22-tempo-design.png)
+![전통적 백엔드는 Trace 데이터를 전용 검색 인덱스로 넣지만, Tempo는 블록(오브젝트 스토리지)만 두고 Bloom filter로 trace ID 조회, 블록 스캔으로 TraceQL 검색을 처리하는 설계 비교](/images/study-observability/22-tempo-design-light.png)
+![전통적 백엔드는 Trace 데이터를 전용 검색 인덱스로 넣지만, Tempo는 블록(오브젝트 스토리지)만 두고 Bloom filter로 trace ID 조회, 블록 스캔으로 TraceQL 검색을 처리하는 설계 비교](/images/study-observability/22-tempo-design-dark.png)
 
 이 설계는 Loki와 같은 철학적 뿌리를 공유한다. 인덱스를 최소화해 운영 복잡도와 인덱스 비대화(카디널리티) 문제를 원천적으로 피하고, 저장 비용이 저렴한 오브젝트 스토리지에 무제한에 가깝게 데이터를 쌓는다. 대신 검색은 인덱스 기반 시스템보다 느릴 수 있다는 트레이드오프를 받아들인다. 자세한 설계 배경은 [Tempo 공식 문서](https://grafana.com/docs/tempo/latest/)를 참고한다.
 
@@ -30,7 +31,8 @@ next: /study/observability/23-traceql-spanmetrics
 
 Tempo로 들어오는 span은 <strong>distributor</strong>가 첫 번째로 받는다. distributor는 OTLP, Jaeger, Zipkin 등 여러 프로토콜을 동시에 수신할 수 있고, 각 span을 `trace_id` 기준 consistent hashing으로 특정 <strong>ingester</strong> 집합에 라우팅한다. 같은 trace에 속한 span은 항상 같은 ingester로 향하도록 보장된다 — 이래야 하나의 trace를 여러 ingester에 흩어놓지 않고 온전히 조립할 수 있다.
 
-![애플리케이션/Collector가 OTLP로 보낸 span을 Distributor가 trace_id 해싱으로 Ingester에 라우팅하고, Ingester가 WAL과 Head Block에 쌓아 Complete Block으로 cut한 뒤 오브젝트 스토리지로 flush하는 쓰기 경로](/images/study-observability/22-write-path.png)
+![애플리케이션/Collector가 OTLP로 보낸 span을 Distributor가 trace_id 해싱으로 Ingester에 라우팅하고, Ingester가 WAL과 Head Block에 쌓아 Complete Block으로 cut한 뒤 오브젝트 스토리지로 flush하는 쓰기 경로](/images/study-observability/22-write-path-light.png)
+![애플리케이션/Collector가 OTLP로 보낸 span을 Distributor가 trace_id 해싱으로 Ingester에 라우팅하고, Ingester가 WAL과 Head Block에 쌓아 Complete Block으로 cut한 뒤 오브젝트 스토리지로 flush하는 쓰기 경로](/images/study-observability/22-write-path-dark.png)
 
 ingester는 도착한 span을 먼저 로컬 <strong>WAL(Write-Ahead Log)</strong>에 기록해 프로세스 재시작에도 유실되지 않도록 한 뒤, 메모리의 <strong>head block</strong>에 쌓는다. 설정된 주기(`max_block_duration`, 기본값 근방 수 분)나 크기 임계값에 도달하면 head block을 <strong>complete block</strong>으로 잘라내고(cut), 이를 오브젝트 스토리지에 업로드한다. 업로드가 끝나면 로컬 사본은 정리된다.
 
@@ -42,7 +44,8 @@ Tempo의 읽기는 두 가지 질의 패턴으로 나뉜다.
 
 <strong>trace by ID 조회</strong>는 가장 단순하고 빠른 경로다. querier가 trace_id를 받으면, 아직 flush되지 않은 최근 데이터를 위해 ingester들에 직접 질의하는 동시에, 오브젝트 스토리지의 블록들에 대해서는 <strong>bloom filter</strong>로 "이 블록에 해당 trace_id가 있는가"를 먼저 걸러낸 뒤, 걸린 블록만 다운로드해 실제 데이터를 읽는다.
 
-![Grafana의 trace_id 조회를 Query Frontend가 Querier에 위임하고, Querier가 Ingester(메모리)와 오브젝트 스토리지(bloom filter로 선별한 블록)를 함께 조회해 trace를 병합·반환하는 읽기 경로 시퀀스](/images/study-observability/22-read-path.png)
+![Grafana의 trace_id 조회를 Query Frontend가 Querier에 위임하고, Querier가 Ingester(메모리)와 오브젝트 스토리지(bloom filter로 선별한 블록)를 함께 조회해 trace를 병합·반환하는 읽기 경로 시퀀스](/images/study-observability/22-read-path-light.png)
+![Grafana의 trace_id 조회를 Query Frontend가 Querier에 위임하고, Querier가 Ingester(메모리)와 오브젝트 스토리지(bloom filter로 선별한 블록)를 함께 조회해 trace를 병합·반환하는 읽기 경로 시퀀스](/images/study-observability/22-read-path-dark.png)
 
 <strong>TraceQL 검색</strong>은 trace_id를 모르는 상태에서 속성 조건으로 trace를 찾는 경로다. 예를 들어 "지난 1시간 동안 `http.status_code >= 500`이었던 trace를 모두 찾아라" 같은 질의는 해당 시간 범위의 모든 블록을 스캔해야 한다. <strong>query-frontend</strong>가 시간 범위와 블록 단위로 질의를 여러 조각(shard)으로 쪼개 다수의 querier에 병렬로 분산시키고, 각 querier가 담당 블록을 스캔한 결과를 모아 반환한다. TraceQL 문법 자체는 다음 챕터에서 자세히 다룬다.
 
@@ -68,7 +71,8 @@ Tempo는 트레이스 저장소이면서 동시에 <strong>metrics-generator</st
 - <strong>span metrics</strong>: span의 이름·서비스·status를 라벨로 하는 RED 메트릭(Rate, Errors, Duration)을 자동 생성한다. 예를 들어 `traces_spanmetrics_calls_total`(호출 수), `traces_spanmetrics_latency`(지연 히스토그램)가 나온다.
 - <strong>service graph metrics</strong>: span의 kind(`CLIENT`/`SERVER`)와 parent/child 관계를 분석해 서비스 간 호출 관계를 `traces_service_graph_request_total` 같은 메트릭으로 만든다. 이 메트릭으로 Grafana가 서비스 의존 관계 그래프를 자동으로 그릴 수 있다.
 
-![Ingester의 span 스트림을 metrics-generator가 관찰해 span metrics(traces_spanmetrics_*)와 service graph metrics(traces_service_graph_*)를 파생시키고 remote_write로 Mimir/Prometheus에 내보내는 흐름](/images/study-observability/22-metrics-generator.png)
+![Ingester의 span 스트림을 metrics-generator가 관찰해 span metrics(traces_spanmetrics_*)와 service graph metrics(traces_service_graph_*)를 파생시키고 remote_write로 Mimir/Prometheus에 내보내는 흐름](/images/study-observability/22-metrics-generator-light.png)
+![Ingester의 span 스트림을 metrics-generator가 관찰해 span metrics(traces_spanmetrics_*)와 service graph metrics(traces_service_graph_*)를 파생시키고 remote_write로 Mimir/Prometheus에 내보내는 흐름](/images/study-observability/22-metrics-generator-dark.png)
 
 계측 없이도(별도 Prometheus exporter를 붙이지 않아도) 트레이스만 계측되어 있으면 RED 메트릭과 서비스 그래프를 얻을 수 있다는 점이 metrics-generator의 실질적 가치다. 이 메트릭을 다루는 구체적인 쿼리와 exemplar 연계는 [TraceQL과 span metrics](/study/observability/23-traceql-spanmetrics) 챕터에서 이어진다.
 
@@ -79,7 +83,8 @@ Tempo는 Loki·Mimir와 마찬가지로 두 가지 배포 모드를 지원한다
 - <strong>모놀리식 모드(monolithic mode)</strong>: 단일 바이너리/프로세스가 distributor·ingester·querier·compactor 역할을 모두 수행한다. 소규모 트래픽이나 개발 환경에 적합하다.
 - <strong>마이크로서비스 모드(microservices mode)</strong>: distributor, ingester, querier, query-frontend, compactor, metrics-generator를 각각 독립된 워크로드로 분리 배포한다. 컴포넌트별로 트래픽 특성에 맞춰 수평 확장할 수 있다.
 
-![Distributor·Query Frontend·Querier는 Stateless로 수평 확장이 쉽고 Ingester·Compactor는 Stateful로 샤딩·리텐션 관리가 필요하며, 컴포넌트가 memberlist gossip 기반 Hash Ring을 조회·등록하는 배포·스케일링 구조](/images/study-observability/22-deployment-scaling.png)
+![Distributor·Query Frontend·Querier는 Stateless로 수평 확장이 쉽고 Ingester·Compactor는 Stateful로 샤딩·리텐션 관리가 필요하며, 컴포넌트가 memberlist gossip 기반 Hash Ring을 조회·등록하는 배포·스케일링 구조](/images/study-observability/22-deployment-scaling-light.png)
+![Distributor·Query Frontend·Querier는 Stateless로 수평 확장이 쉽고 Ingester·Compactor는 Stateful로 샤딩·리텐션 관리가 필요하며, 컴포넌트가 memberlist gossip 기반 Hash Ring을 조회·등록하는 배포·스케일링 구조](/images/study-observability/22-deployment-scaling-dark.png)
 
 distributor와 querier는 상태가 없어 트래픽에 따라 자유롭게 늘리고 줄일 수 있다. 반면 ingester는 최근 데이터를 메모리·로컬 디스크에 들고 있는 상태 저장 컴포넌트라, 스케일 조정 시 데이터 이관을 고려해야 한다. 컴포넌트 간 멤버십과 해시 링 정보는 memberlist gossip 프로토콜로 공유하며, 이는 Mimir·Loki와 동일한 방식이다. 쿠버네티스 위에서의 구체적인 배포는 이 스터디의 운영 심화 파트(Kubernetes 배포 챕터)에서 Loki·Mimir와 함께 다룬다.
 

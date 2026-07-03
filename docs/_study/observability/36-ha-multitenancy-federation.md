@@ -35,7 +35,8 @@ global:
 - <strong>Mimir/Thanos 쿼리 계층</strong>은 `replica` 라벨을 기준으로 동일 시계열의 여러 레플리카 데이터를 병합하며 중복 제거한다. Thanos Querier의 `--query.replica-label=replica` 옵션이나 Mimir 쿼리 시 벡터 셀렉터에서 `replica` 라벨을 무시하고 조인하는 방식이 대표적이다.
 - <strong>Alertmanager</strong>는 자체 gossip 기반 클러스터링으로 동일한 알림이 여러 Prometheus 레플리카에서 동시에 들어와도 하나로 묶어 한 번만 발송한다. 즉 두 Prometheus가 각각 같은 알림을 Alertmanager로 보내도, Alertmanager 클러스터가 알림의 fingerprint를 공유해 중복 알림을 억제한다.
 
-![Prometheus A(replica=a)와 Prometheus B(replica=b)가 독립적으로 타깃을 스크레이프하고 룰을 평가한 뒤 각각 동일한 Alert(fingerprint 동일)를 Alertmanager 클러스터로 발화하면 gossip으로 중복을 인지해 1건만 발송하고, 두 레플리카가 각각 remote_write(replica=a/b)로 Mimir에 보내면 쿼리 시 replica 라벨 기준으로 중복을 제거하는 Prometheus HA 순서 다이어그램](/images/study-observability/36-ha-dedup.png)
+![Prometheus A(replica=a)와 Prometheus B(replica=b)가 독립적으로 타깃을 스크레이프하고 룰을 평가한 뒤 각각 동일한 Alert(fingerprint 동일)를 Alertmanager 클러스터로 발화하면 gossip으로 중복을 인지해 1건만 발송하고, 두 레플리카가 각각 remote_write(replica=a/b)로 Mimir에 보내면 쿼리 시 replica 라벨 기준으로 중복을 제거하는 Prometheus HA 순서 다이어그램](/images/study-observability/36-ha-dedup-light.png)
+![Prometheus A(replica=a)와 Prometheus B(replica=b)가 독립적으로 타깃을 스크레이프하고 룰을 평가한 뒤 각각 동일한 Alert(fingerprint 동일)를 Alertmanager 클러스터로 발화하면 gossip으로 중복을 인지해 1건만 발송하고, 두 레플리카가 각각 remote_write(replica=a/b)로 Mimir에 보내면 쿼리 시 replica 라벨 기준으로 중복을 제거하는 Prometheus HA 순서 다이어그램](/images/study-observability/36-ha-dedup-dark.png)
 
 레플리카는 완전히 독립적이어야 한다는 점이 중요하다 — 같은 랙, 같은 가용영역, 같은 전원 계통에 두면 HA의 의미가 없다. 가능하면 서로 다른 가용영역(AZ)에 배치한다.
 
@@ -108,7 +109,8 @@ overrides:
 
 `X-Scope-OrgID`는 그 자체로는 인증 수단이 아니다 — 헤더 값을 임의로 바꾸면 다른 테넌트인 척할 수 있으므로, 신뢰할 수 없는 클라이언트가 직접 이 헤더를 붙이게 두면 안 된다. 실무에서는 Mimir/Loki/Tempo 앞에 <strong>게이트웨이</strong>(nginx, Mimir 자체 gateway 컴포넌트, 또는 클라우드 로드밸런서 + 인증 미들웨어)를 두고, 게이트웨이가 실제 인증(API 키, OAuth2/JWT, mTLS 클라이언트 인증서)을 수행한 뒤 검증된 신원에 대응하는 `X-Scope-OrgID`를 게이트웨이가 직접 주입한다. 백엔드 컴포넌트는 게이트웨이를 거친 요청만 신뢰하도록 네트워크 정책으로 직접 접근을 차단한다.
 
-![클라이언트(Prometheus/Grafana)가 mTLS와 Bearer Token으로 Gateway에 접속하면 Gateway가 OAuth2/JWT를 검증하고 X-Scope-OrgID를 주입해 내부 네트워크의 Mimir distributor와 query-frontend로 전달하고, 내부에서는 distributor가 ingester로, query-frontend가 store-gateway로 각각 mTLS로 통신하는 게이트웨이 인증·인가와 mTLS 다이어그램](/images/study-observability/36-gateway-auth.png)
+![클라이언트(Prometheus/Grafana)가 mTLS와 Bearer Token으로 Gateway에 접속하면 Gateway가 OAuth2/JWT를 검증하고 X-Scope-OrgID를 주입해 내부 네트워크의 Mimir distributor와 query-frontend로 전달하고, 내부에서는 distributor가 ingester로, query-frontend가 store-gateway로 각각 mTLS로 통신하는 게이트웨이 인증·인가와 mTLS 다이어그램](/images/study-observability/36-gateway-auth-light.png)
+![클라이언트(Prometheus/Grafana)가 mTLS와 Bearer Token으로 Gateway에 접속하면 Gateway가 OAuth2/JWT를 검증하고 X-Scope-OrgID를 주입해 내부 네트워크의 Mimir distributor와 query-frontend로 전달하고, 내부에서는 distributor가 ingester로, query-frontend가 store-gateway로 각각 mTLS로 통신하는 게이트웨이 인증·인가와 mTLS 다이어그램](/images/study-observability/36-gateway-auth-dark.png)
 
 컴포넌트 간 통신(distributor↔ingester, querier↔store-gateway 등)에는 <strong>mTLS</strong>를 적용해 내부 네트워크가 뚫려도 트래픽을 가로채거나 위조하지 못하게 한다. Mimir는 각 gRPC 클라이언트/서버 설정에 `tls_cert_path`, `tls_key_path`, `tls_ca_path`를 지정해 컴포넌트 간 상호 인증을 강제할 수 있다.
 

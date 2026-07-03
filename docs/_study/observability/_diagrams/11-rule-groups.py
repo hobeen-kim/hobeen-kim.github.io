@@ -1,62 +1,43 @@
-"""CH11 룰 그룹 평가 — 그룹 내 순차 · 그룹 간 병렬 (matplotlib → PNG)."""
-from _common import (new_fig, make_helpers, save, Line2D,
-                     C_TEXT, C_DIM, C_ACCENT, C_BLUE, C_GREEN, C_BROWN, C_GRAY, C_ORANGE)
+"""CH11 룰 그룹 평가 — 그룹 내 순차 · 그룹 간 병렬 (light/dark PNG)."""
+from _common import diagram, Line2D
 
-fig, ax = new_fig(w=15, h=8.6, ymax=54)
-box, text, arrow = make_helpers(ax)
 
-# ---- Title ----
-text(50, 51.0, "룰 그룹 평가 — 그룹 내 순차 · 그룹 간 병렬", size=19, weight="bold")
-text(50, 47.8, "같은 그룹의 룰은 파일 순서대로 순차 평가 → 앞 룰 결과를 뒤 룰이 즉시 참조",
-     size=11, color=C_DIM)
+def draw(d):
+    P = d.P
 
-# ================= Group A =================
-box(3, 30, 68, 14, C_GRAY, ec=C_ACCENT, lw=1.8)
-text(9, 41.4, "그룹 A", size=12, weight="bold", color=C_ACCENT, ha="left")
-text(24, 41.4, "interval: 30s · 순차 평가", size=9, color=C_DIM, ha="left")
-rules_a = [
-    (14, "rule 1", ""),
-    (35, "rule 2", "rule 1 결과 참조 가능"),
-    (56, "rule 3", ""),
-]
-for xc, t, d in rules_a:
-    box(xc - 8, 32, 16, 6.2, C_GREEN)
-    text(xc, 35.9 if d else 35.1, t, size=10, weight="bold")
-    if d:
-        text(xc, 33.2, d, size=7.2, color=C_DIM)
-arrow(22, 35.1, 27, 35.1, color=C_ORANGE, lw=2.0)
-arrow(43, 35.1, 48, 35.1, color=C_ORANGE, lw=2.0)
+    # 그룹 A
+    d.box(3, 28, 68, 14, P["gray"], ec=P["accent"], lw=1.8)
+    d.text(9, 39, "그룹 A", size=11, weight="bold", color=P["accent"], ha="left")
+    d.text(23, 39, "interval 30s · 순차 평가", size=8.5, color=P["dim"], ha="left")
+    rules_a = [(14, "rule 1", ""), (35, "rule 2", "rule 1 결과 참조"), (56, "rule 3", "")]
+    for xc, t, sub in rules_a:
+        d.box(xc - 8, 30, 16, 6.5, P["green"])
+        d.text(xc, 34 if sub else 33.2, t, size=9.5, weight="bold")
+        if sub:
+            d.text(xc, 31.2, sub, size=7, color=P["dim"])
+    d.arrow(22, 33.2, 27, 33.2, color=P["orange"])
+    d.arrow(43, 33.2, 48, 33.2, color=P["orange"])
 
-# ================= Group B =================
-box(3, 10, 48, 14, C_GRAY, ec=C_ACCENT, lw=1.8)
-text(9, 21.4, "그룹 B", size=12, weight="bold", color=C_ACCENT, ha="left")
-text(24, 21.4, "interval: 1m · 순차 평가", size=9, color=C_DIM, ha="left")
-rules_b = [(16, "rule 4"), (37, "rule 5")]
-for xc, t in rules_b:
-    box(xc - 8, 12, 16, 6.2, C_BLUE)
-    text(xc, 15.1, t, size=10, weight="bold")
-arrow(24, 15.1, 29, 15.1, color=C_ORANGE, lw=2.0)
+    # 그룹 B
+    d.box(3, 9, 48, 14, P["gray"], ec=P["accent"], lw=1.8)
+    d.text(9, 20, "그룹 B", size=11, weight="bold", color=P["accent"], ha="left")
+    d.text(23, 20, "interval 1m · 순차 평가", size=8.5, color=P["dim"], ha="left")
+    for xc, t in [(16, "rule 4"), (37, "rule 5")]:
+        d.box(xc - 8, 11, 16, 6.5, P["blue"])
+        d.text(xc, 14.2, t, size=9.5, weight="bold")
+    d.arrow(24, 14.2, 29, 14.2, color=P["orange"])
 
-# ---- independence note ----
-box(58, 10, 38, 14, C_BROWN)
-text(77, 20.4, "두 그룹은 독립적으로 병렬 평가", size=10.5, weight="bold", color=C_ACCENT)
-text(77, 16.6, "서로 순서를 보장하지 않는다", size=9, color=C_TEXT)
-text(77, 13.2, "B가 A의 결과에 의존하면\n반드시 같은 그룹에 A를 앞에 둔다", size=8.2, color=C_DIM)
+    # 독립성 노트
+    d.box(58, 9, 38, 14, P["brown"])
+    d.text(77, 19, "두 그룹은 독립 · 병렬 평가", size=10, weight="bold", color=P["accent"])
+    d.text(77, 14.5, "B가 A 결과에 의존하면\n같은 그룹에 A를 앞에 둔다", size=8.2)
 
-# dashed independence connector
-arrow(37, 30, 55, 24, color="#8a94a0", lw=1.8, ls="--", style="-")
+    d.arrow(37, 28, 55, 23, color=P["dim"], ls="--", style="-")
 
-# bottom
-text(50, 5.4, "interval이 짧을수록 반응은 빠르지만 평가 비용 증가 — 대부분 전역 기본값(예: 1분), 민감한 그룹만 짧게",
-     size=9.8, color=C_ACCENT, weight="bold")
+    d.legend([
+        Line2D([0], [0], color=P["orange"], lw=2.5, label="그룹 내 순차 평가"),
+        Line2D([0], [0], color=P["dim"], lw=2.5, ls="--", label="그룹 간 독립 · 병렬"),
+    ])
 
-leg = [
-    Line2D([0], [0], color=C_ORANGE, lw=2.5, label="그룹 내 순차 평가"),
-    Line2D([0], [0], color="#8a94a0", lw=2.5, ls="--", label="그룹 간 독립 · 병렬"),
-]
-ax.legend(handles=leg, loc="lower left", bbox_to_anchor=(0.005, 0.03),
-          fontsize=8.5, framealpha=0.0, labelcolor=C_DIM)
 
-import matplotlib.pyplot as plt
-plt.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01)
-save(fig, "11-rule-groups.png")
+diagram("11-rule-groups", draw, w=13, h=6.4, ymax=46)

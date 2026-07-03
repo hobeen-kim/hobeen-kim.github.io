@@ -22,7 +22,8 @@ next: /study/observability/22-tempo-architecture
 
 OpenTelemetry의 핵심 가치는 <strong>교차 신호(Cross-Signal)</strong>다. traces·metrics·logs 세 신호(profiles는 아직 실험 단계)를 하나의 계측 라이브러리, 하나의 리소스 모델, 하나의 전송 프로토콜(OTLP)로 다룬다. 이 스터디에서 지금까지 다룬 Prometheus(메트릭)와 Loki(로그)도 OTLP를 직접 수신할 수 있고, Alloy 같은 수집기는 세 신호를 하나의 파이프라인에서 함께 처리한다.
 
-![OTel SDK의 Traces·Metrics·Logs 세 신호가 단일 프로토콜 OTLP(gRPC/HTTP)를 거쳐 Tempo·Prometheus/Mimir·Loki 신호별 백엔드로 전달되는 교차 신호 구조](/images/study-observability/21-cross-signal-otlp.png)
+![OTel SDK의 Traces·Metrics·Logs 세 신호가 단일 프로토콜 OTLP(gRPC/HTTP)를 거쳐 Tempo·Prometheus/Mimir·Loki 신호별 백엔드로 전달되는 교차 신호 구조](/images/study-observability/21-cross-signal-otlp-light.png)
+![OTel SDK의 Traces·Metrics·Logs 세 신호가 단일 프로토콜 OTLP(gRPC/HTTP)를 거쳐 Tempo·Prometheus/Mimir·Loki 신호별 백엔드로 전달되는 교차 신호 구조](/images/study-observability/21-cross-signal-otlp-dark.png)
 
 벤더 중립성이 갖는 실질적 이점은 계측 코드를 한 번 작성하면 백엔드를 Tempo에서 다른 트레이싱 시스템으로, 또는 온프레미스에서 SaaS로 바꿔도 애플리케이션 코드를 건드리지 않아도 된다는 점이다. 자세한 개요는 [OpenTelemetry 공식 문서](https://opentelemetry.io/docs/)를 참고한다.
 
@@ -148,7 +149,8 @@ resource:
 
 <strong>OpenTelemetry Collector</strong>는 세 단계 파이프라인으로 동작한다. receiver가 데이터를 받아들이고, processor가 가공하며, exporter가 백엔드로 내보낸다.
 
-![Collector가 otlp·prometheus·filelog receiver로 받아 memory_limiter→attributes→tail_sampling→batch processor 체인으로 가공한 뒤 otlp/Tempo·prometheusremotewrite/Mimir·loki exporter로 내보내는 파이프라인](/images/study-observability/21-collector-pipeline.png)
+![Collector가 otlp·prometheus·filelog receiver로 받아 memory_limiter→attributes→tail_sampling→batch processor 체인으로 가공한 뒤 otlp/Tempo·prometheusremotewrite/Mimir·loki exporter로 내보내는 파이프라인](/images/study-observability/21-collector-pipeline-light.png)
+![Collector가 otlp·prometheus·filelog receiver로 받아 memory_limiter→attributes→tail_sampling→batch processor 체인으로 가공한 뒤 otlp/Tempo·prometheusremotewrite/Mimir·loki exporter로 내보내는 파이프라인](/images/study-observability/21-collector-pipeline-dark.png)
 
 파이프라인은 신호별(traces/metrics/logs)로 따로 구성하며, 하나의 receiver를 여러 파이프라인이 공유할 수도 있다.
 

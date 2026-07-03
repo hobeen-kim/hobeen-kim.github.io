@@ -56,6 +56,17 @@ next: false
 - [Alloy Component Reference](https://grafana.com/docs/alloy/latest/reference/components/) — 컴포넌트별 설정 레퍼런스
 - [Migrate from Grafana Agent](https://grafana.com/docs/alloy/latest/set-up/migrate/) — River→Alloy 구문 마이그레이션 가이드
 
+## 생태계 확장 — Beyla · Faro · k6 · Alerting
+
+- [Beyla Documentation](https://grafana.com/docs/beyla/latest/) — eBPF 자동 계측 설정·배포 전체 문서
+- [OpenTelemetry eBPF Instrumentation (OBI)](https://github.com/open-telemetry/opentelemetry-ebpf-instrumentation) — Beyla 코어가 기증된 OTel upstream 프로젝트
+- [Faro Web SDK](https://grafana.com/docs/grafana-cloud/monitor-applications/frontend-observability/faro-web-sdk/) — 프런트엔드 관측성 SDK 문서
+- [Alloy faro.receiver](https://grafana.com/docs/alloy/latest/reference/components/faro/faro.receiver/) — Faro 신호 수집 컴포넌트 레퍼런스
+- [k6 Documentation](https://grafana.com/docs/k6/latest/) — 부하 테스트 시나리오·executor·thresholds 전체 문서
+- [Grafana Synthetic Monitoring](https://grafana.com/docs/grafana-cloud/testing/synthetic-monitoring/) — 글로벌 프로브·check 유형 문서
+- [Grafana Alerting](https://grafana.com/docs/grafana/latest/alerting/) — 통합 알림 룰·notification policy 문서
+- [Grafana IRM](https://grafana.com/docs/grafana-cloud/alerting-and-irm/irm/) — 온콜·에스컬레이션·인시던트 대응 문서
+
 ## OpenTelemetry
 
 - [OpenTelemetry Documentation](https://opentelemetry.io/docs/) — SDK·Collector·계측 표준 전체 문서

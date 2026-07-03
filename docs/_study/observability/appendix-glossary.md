@@ -3,7 +3,7 @@ title: "용어집"
 description: "관측성 스터디 전체에 등장한 핵심 용어를 카테고리별로 정리한 레퍼런스. 일반 개념부터 메트릭·로그·트레이스·프로파일 신호별 용어, Prometheus/Mimir/Loki/Tempo/Pyroscope/Alloy 등 컴포넌트 용어까지 표로 모았다."
 date: 2026-07-02
 tags: [Observability, Glossary]
-prev: /study/observability/38-production-troubleshooting
+prev: /study/observability/42-grafana-alerting-irm
 next: /study/observability/appendix-cheatsheet
 ---
 

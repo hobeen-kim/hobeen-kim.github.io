@@ -1,8 +1,8 @@
 ---
 title: "관측성 (Observability) — Grafana 스택"
-description: "메트릭·로그·트레이스·프로파일 4대 신호를 Prometheus/Mimir, Loki, Tempo, Pyroscope로 다루는 Grafana LGTM+ 스택 완전 정복. Alloy 수집 파이프라인부터 SLO 알림 설계, 카디널리티 관리까지 SRE 운영 심화를 담는다."
+description: "메트릭·로그·트레이스·프로파일 4대 신호를 Prometheus/Mimir, Loki, Tempo, Pyroscope로 다루는 Grafana LGTM+ 스택 완전 정복. Alloy 수집 파이프라인부터 SLO 알림 설계, 카디널리티 관리까지 SRE 운영 심화에 더해 Beyla·Faro·k6·Grafana Alerting 생태계 확장까지 담는다."
 date: 2026-07-02
-tags: [Observability, Prometheus, Grafana, Loki, Tempo, Pyroscope, OpenTelemetry, SRE]
+tags: [Observability, Prometheus, Grafana, Loki, Tempo, Pyroscope, OpenTelemetry, SRE, Beyla, Faro, k6]
 ---
 
 # 관측성 (Observability) — Grafana 스택
@@ -22,6 +22,7 @@ tags: [Observability, Prometheus, Grafana, Loki, Tempo, Pyroscope, OpenTelemetry
 - **수집 파이프라인** — Alloy 컴포넌트 모델과 파이프라인 구성, OpenTelemetry Collector와의 비교
 - **통합·상관관계** — Grafana 데이터소스 연결, 신호 간 상관관계, 대시보드 as-code
 - **운영 심화(SRE)** — 카디널리티 관리와 비용, Mimir 장기 저장, HA/멀티테넌시, Kubernetes 배포, 프로덕션 트러블슈팅
+- **생태계 확장** — Beyla eBPF 자동 계측, Faro 프런트엔드 관측성(RUM), k6·Synthetic Monitoring, Grafana Alerting·IRM
 
 ## 전체 아키텍처
 
@@ -162,7 +163,10 @@ flowchart TD
     subgraph S9["운영 심화 — SRE (34~38)"]
         Z["카디널리티·비용"] --> AA["Mimir 장기저장"] --> AB["HA·멀티테넌시"] --> AC["K8s 배포·트러블슈팅"]
     end
-    S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9
+    subgraph S10["생태계 확장 (39~42)"]
+        AD["Beyla eBPF 자동 계측"] --> AE["Faro 프런트엔드 RUM"] --> AF["k6·Synthetic"] --> AG["Grafana Alerting·IRM"]
+    end
+    S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9 --> S10
 ```
 
 ## 전체 목차
@@ -249,6 +253,15 @@ flowchart TD
 | 36 | [HA·멀티테넌시·페더레이션](/study/observability/36-ha-multitenancy-federation) | 고가용성 구성, 테넌트 격리, 페더레이션 |
 | 37 | [Kubernetes 배포](/study/observability/37-kubernetes-deployment) | kube-prometheus-stack, Operator, ServiceMonitor |
 | 38 | [프로덕션 운영과 트러블슈팅](/study/observability/38-production-troubleshooting) | 장애 대응, 성능 튜닝, 운영 체크리스트 |
+
+### 생태계 확장 — LGTM 너머 (39~42)
+
+| 챕터 | 제목 | 한줄 설명 |
+|------|------|-----------|
+| 39 | [Beyla — eBPF 자동 계측](/study/observability/39-beyla-autoinstrumentation) | 코드 수정 없이 트레이스·RED 메트릭을 얻는 제로코드 계측 |
+| 40 | [Faro — 프런트엔드 관측성 (RUM)](/study/observability/40-faro-frontend-observability) | 브라우저에서 에러·Web Vitals·트레이스를 수집하는 Real User Monitoring |
+| 41 | [k6와 Synthetic Monitoring](/study/observability/41-k6-synthetic-monitoring) | 합성 트래픽으로 사용자보다 먼저 문제를 발견하는 능동적 관측 |
+| 42 | [Grafana Alerting과 IRM](/study/observability/42-grafana-alerting-irm) | 통합 알림 시스템과 온콜·에스컬레이션·인시던트 대응 체계 |
 
 ### 부록
 

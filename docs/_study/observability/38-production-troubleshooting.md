@@ -4,7 +4,7 @@ description: "Prometheus OOM과 고카디널리티 대응, 스크레이프 실�
 date: 2026-07-02
 tags: [Troubleshooting, SRE, Operations]
 prev: /study/observability/37-kubernetes-deployment
-next: /study/observability/appendix-glossary
+next: /study/observability/39-beyla-autoinstrumentation
 ---
 
 # 프로덕션 운영과 트러블슈팅
@@ -257,4 +257,4 @@ rate(container_cpu_usage_seconds_total{pod=~"alloy-.*"}[5m])
 
 ## 다음 챕터
 
-여기까지 Prometheus/Grafana 스택의 기초부터 운영 심화까지 관측성의 전 영역을 다뤘다. 마지막으로 [용어집](/study/observability/appendix-glossary)에서 스터디 전반에 등장한 핵심 용어를 정리하고, 이어지는 부록에서 PromQL/LogQL/TraceQL 치트시트와 참고 자료로 학습을 마무리한다.
+여기까지 LGTM 스택 본체의 기초부터 운영 심화까지를 다뤘다. 남은 것은 스택의 경계 바깥이다 — SDK를 넣을 수 없는 워크로드, 사용자의 브라우저, 트래픽이 없는 시간대. [Beyla — eBPF 자동 계측](/study/observability/39-beyla-autoinstrumentation)부터 이어지는 생태계 확장 챕터에서 이 사각지대들을 하나씩 메운다.

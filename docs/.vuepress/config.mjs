@@ -923,6 +923,16 @@ const theme = {
           ],
         },
         {
+          text: '생태계 확장 — LGTM 너머',
+          collapsible: false,
+          children: [
+            { text: 'CH39. Beyla — eBPF 자동 계측', link: '/study/observability/39-beyla-autoinstrumentation' },
+            { text: 'CH40. Faro — 프런트엔드 관측성 (RUM)', link: '/study/observability/40-faro-frontend-observability' },
+            { text: 'CH41. k6와 Synthetic Monitoring', link: '/study/observability/41-k6-synthetic-monitoring' },
+            { text: 'CH42. Grafana Alerting과 IRM', link: '/study/observability/42-grafana-alerting-irm' },
+          ],
+        },
+        {
           text: '부록',
           collapsible: false,
           children: [

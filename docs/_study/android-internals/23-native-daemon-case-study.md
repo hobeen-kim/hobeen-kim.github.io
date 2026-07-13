@@ -451,6 +451,147 @@ $ su 0 service call com.agmo.agcand.ICanAccessService/default 1 i32 0xFEE5
 
 로직 버그는 ①에서, 통합(정책·이미지) 문제는 ②에서 대부분 잡고, 하드웨어·전기적 문제만 ③④로 넘긴다. 위 칸을 건너뛰고 바로 실장비로 가면 원인 층이 뒤섞여 진단이 어려워진다.
 
+## 클라이언트 검증 — service call에서 테스트 앱까지
+
+`service call`(검증 5단계)은 Binder 경로가 뚫렸는지만 본다. 실제 클라이언트 코드로 호출을 검증하는 다음 두 단계가 있다.
+
+::: info 전제 — framework binder 등록
+[sepolicy](#sepolicy) 절에서 봤듯 vndbinder 경로는 vendor 프로세스 클라이언트용이다. 앱·시스템 서비스가 소비하는 구조라면 agcand를 <strong>AIDL HAL 방식으로 framework binder(/dev/binder)에 등록</strong>한다 — `stability: "vintf"` 덕분에 가능하고, `android.hardware.*` HAL들이 정확히 이 방식이다. 코드는 동일하고(`AServiceManager_addService`), sepolicy 라벨만 `vndservice_contexts`가 아니라 `service_contexts`로 옮기면 된다. 이 절부터는 이 구성을 가정한다.
+:::
+
+<strong>1단계 — 네이티브 테스트 클라이언트.</strong> 데몬과 같은 ndk 백엔드를 쓰므로 가장 간단하다.
+
+```cpp
+// test/can_client.cpp
+#include <android/binder_manager.h>
+#include <aidl/com/agmo/agcand/ICanAccessService.h>
+
+using aidl::com::agmo::agcand::ICanAccessService;
+
+int main() {
+    ndk::SpAIBinder binder(AServiceManager_waitForService(
+        "com.agmo.agcand.ICanAccessService/default"));
+    auto svc = ICanAccessService::fromBinder(binder);
+
+    CanFrame frame;
+    svc->getLatestFrame(0xFEE5, &frame);
+    printf("pgn=%x len=%zu\n", frame.pgn, frame.data.size());
+    return 0;
+}
+```
+
+```python
+// Android.bp에 추가
+cc_binary {
+    name: "can_client",
+    vendor: true,
+    srcs: ["test/can_client.cpp"],
+    shared_libs: ["libbinder_ndk"],
+    static_libs: ["com.agmo.agcand-V1-ndk"],
+}
+```
+
+`adb shell can_client`로 실행한다. 데몬 개발 단계의 호출 검증은 사실상 이것으로 충분하다.
+
+<strong>2단계 — 자바 테스트 앱.</strong> 여기서 벽을 하나 만난다. 일반 SDK 앱은 `ServiceManager.getService()`가 <strong>hidden API</strong>라 호출할 수 없다. 그래서 테스트 앱은 AOSP 트리 안에서 <strong>platform 권한으로</strong> 빌드한다([CH17 플랫폼 서명](/study/android-internals/17-package-management) 참고).
+
+```python
+// vendor/agmo/apps/CanTestApp/Android.bp
+android_app {
+    name: "CanTestApp",
+    srcs: ["src/**/*.java"],
+    platform_apis: true,          // hidden API 사용 허용
+    certificate: "platform",      // 플랫폼 서명
+    static_libs: ["com.agmo.agcand-V1-java"],  // AIDL java 백엔드 스텁
+}
+```
+
+```java
+// 앱 코드 — CH21의 codegen 산출물(Stub/Proxy)을 그대로 쓴다
+IBinder b = ServiceManager.waitForService(
+        "com.agmo.agcand.ICanAccessService/default");
+ICanAccessService svc = ICanAccessService.Stub.asInterface(b);
+
+CanFrame f = svc.getLatestFrame(0xFEE5);          // 동기 호출
+svc.subscribe(new ICanCallback.Stub() {            // 콜백 등록
+    @Override public void onFrame(CanFrame f) { /* ... */ }
+});
+```
+
+`aidl_interface`에 `java: { enabled: true }`를 켜뒀으므로(위 [AIDL 절](#aidl-인터페이스-정의)) 데몬(ndk)과 앱(java)이 같은 `.aidl`에서 나온 짝을 쓴다.
+
+<strong>호출자 쪽 sepolicy를 잊지 마라.</strong> 통합 4단계의 ④는 데몬만이 아니라 클라이언트에도 적용된다. 빠지면 "데몬은 떠 있는데 클라이언트가 못 찾는" 증상이 난다.
+
+```bash
+# 호출자 도메인(예: platform_app)에 추가
+allow platform_app agcand_service:service_manager find;   # 서비스 찾기
+binder_call(platform_app, agcand)                          # 호출
+binder_call(agcand, platform_app)                          # 콜백 역방향
+```
+
+## 일반 앱에 개방하기 — 게이트웨이와 SDK
+
+테스트 앱은 platform 서명으로 뚫었지만, <strong>자체 마켓에서 설치되는 서드파티 앱</strong>은 그럴 수 없다. hidden API도 못 쓰고, sepolicy도 막고, 무엇보다 막는 것이 맞다 — CAN 접근을 아무 앱에나 열면 안 되기 때문이다. 일반 앱에게 열어주는 표준 통로는 <strong>`bindService()`</strong> 하나이고, 그 앞에 게이트웨이를 세운다.
+
+![일반 앱이 ag-sdk.aar의 AgVehicleManager를 통해 bindService(공개 SDK API)로 platform 서명 시스템 앱 AgVehicleService에 붙고, AgVehicleService가 getCallingUid 권한 판정 후 hidden API·platform 전용 경로인 AIDL/Binder로 vendor 데몬 agcand에 위임하는 게이트웨이 구조](/images/study-android-internals/23-sdk-gateway-light.png)
+![일반 앱이 ag-sdk.aar의 AgVehicleManager를 통해 bindService(공개 SDK API)로 platform 서명 시스템 앱 AgVehicleService에 붙고, AgVehicleService가 getCallingUid 권한 판정 후 hidden API·platform 전용 경로인 AIDL/Binder로 vendor 데몬 agcand에 위임하는 게이트웨이 구조](/images/study-android-internals/23-sdk-gateway-dark.png)
+
+만들 것은 세 가지다. 구글의 `CameraManager`, AAOS(Android Automotive)의 `android.car`가 정확히 이 패턴이다.
+
+<strong>① 게이트웨이 — AgVehicleService.</strong> platform 서명 시스템 앱 안의 exported Service다. agcand 프록시를 쥐고(platform이므로 hidden API 사용 가능), 호출자를 검사한 뒤 위임한다.
+
+```xml
+<!-- 게이트웨이 앱 매니페스트 -->
+<permission android:name="farm.agmo.permission.CAN_ACCESS"
+            android:protectionLevel="signature|privileged" />
+<service android:name=".AgVehicleService"
+         android:exported="true"
+         android:permission="farm.agmo.permission.CAN_ACCESS">
+    <intent-filter>
+        <action android:name="farm.agmo.action.BIND_VEHICLE" />
+    </intent-filter>
+</service>
+```
+
+각 메서드에서 [CH21의 보안 프리미티브](/study/android-internals/21-binder-userspace)를 쓴다 — `Binder.getCallingUid()`는 커널이 보증하는 값이라 위조가 불가능하므로, 여기서 "어느 앱이 어느 데이터까지"의 정책을 집행한다.
+
+<strong>② 클라이언트 SDK — ag-sdk.aar.</strong> 앱 개발자에게 배포하는 것은 AIDL 파일과 그것을 감싼 Manager 클래스다.
+
+```kotlin
+class AgVehicleManager private constructor(private val svc: IAgVehicleService) {
+
+    companion object {
+        fun connect(ctx: Context, cb: (AgVehicleManager) -> Unit) {
+            val intent = Intent("farm.agmo.action.BIND_VEHICLE")
+                .setPackage("farm.agmo.vehicleservice")
+            ctx.bindService(intent, object : ServiceConnection {
+                override fun onServiceConnected(n: ComponentName, b: IBinder) =
+                    cb(AgVehicleManager(IAgVehicleService.Stub.asInterface(b)))
+                override fun onServiceDisconnected(n: ComponentName) {}
+            }, Context.BIND_AUTO_CREATE)
+        }
+    }
+
+    fun latestSpeed(): Float = svc.latestSpeed()   // AIDL을 깔끔한 API로 포장
+}
+```
+
+앱 개발자는 `AgVehicleManager.connect()`만 알면 되고 Binder·AIDL은 몰라도 된다. AIDL을 aar에 담아 배포하는 순간부터 [CH21의 버저닝 규칙](/study/android-internals/21-binder-userspace) — 기존 메서드 변경·삭제 금지, 추가만 허용 — 이 외부 계약이 된다.
+
+<strong>③ 권한 정책.</strong> `protectionLevel`로 개방 범위를 조절한다.
+
+| protectionLevel | 효과 | 쓰임 |
+|---|---|---|
+| `signature\|privileged` | 우리 서명 앱 + priv-app만 | 초기·통제 강화 단계에 추천. 마켓 심사를 통과한 앱만 priv-app 배치 + allowlist([CH10 sysconfig](/study/android-internals/10-configuration))로 열어준다 |
+| `normal` | 설치된 모든 앱 | 완전 개방. 데이터가 민감하지 않을 때만 |
+| `dangerous` | 사용자 동의 팝업 | 사용자가 판단할 성격의 데이터일 때 |
+
+::: info AAOS 방식과의 비교
+`context.getSystemService("agvehicle")`처럼 쓰게 하려면 프레임워크에 Manager를 박고 커스텀 android.jar(SDK add-on)까지 배포해야 한다 — AAOS의 `android.car`가 이 방식이다. 하지만 framework 수정이라 [CH1의 증축 원칙](/study/android-internals/01-architecture-evolution)에 어긋나고 버전업마다 유지비가 든다. bindService + aar 방식이 기능상 동일하면서 훨씬 가볍다. 생태계가 커져 SDK add-on이 필요해지는 시점에 옮겨도 늦지 않다.
+:::
+
+이로써 접근 통제가 이중으로 완성된다 — <strong>sepolicy가 "agcand에는 게이트웨이만 접근"을 강제</strong>하고, <strong>게이트웨이가 "앱에는 권한 있는 것만"을 판정</strong>한다. 앱이 CAN에 닿는 경로는 구조적으로 이 하나뿐이다.
+
 ## 트러블슈팅 모음
 
 데몬이 안 뜰 때는 위 검증 순서를 그대로 진단 플로로 쓴다. 막힌 단계의 오른쪽 원인부터 짚는다.
@@ -483,4 +624,6 @@ $ su 0 service call com.agmo.agcand.ICanAccessService/default 1 i32 0xFEE5
 - AIDL은 ndk 백엔드 + `stability: "vintf"`로 선언하고 버전을 freeze하며, 데몬은 `ABinderProcess` 스레드풀 + `AServiceManager_addService` + `joinThreadPool`로 올린다.
 - init rc는 class hal·capability와 함께 제어 소켓(`socket` 옵션)을 만들어 데몬에 물려주고, SELinux는 그 소켓의 `connectto`로 접속 주체를 통제한다.
 - 안 뜰 때는 ps→logcat→avc→service list→service call 순으로 진단하고, 검증은 <strong>vcan → Cuttlefish → USB-CAN → 실장비</strong> 사다리로 층을 나눠 원인을 분리한다.
+- 클라이언트 검증은 <strong>service call → 네이티브 클라이언트(cc_binary) → platform 테스트 앱</strong> 순으로 올라가고, 호출자 쪽에도 sepolicy(find·binder_call·콜백 역방향)가 필요하다.
+- 일반 앱 개방은 직접 노출이 아니라 <strong>게이트웨이(platform 시스템 앱) + bindService + Manager aar(SDK)</strong> 패턴으로 한다. sepolicy가 경로를, 게이트웨이의 getCallingUid 판정이 권한을 각각 강제하는 이중 통제다.
 :::

@@ -364,6 +364,83 @@ adb shell zcat /proc/config.gz | grep CONFIG_CAN
 
 이게 안 보이면 [CH15](/study/android-internals/15-native-level)에서 strace로 잡은 `socket(AF_CAN,...) = -1 EAFNOSUPPORT`(SELinux의 EACCES와는 다르다)를 만나게 된다. SocketCAN 프로그래밍 자체는 [CAN 스터디 CH13](/study/can/13-socketcan-basics)에서 다룬다.
 
+## CAN 커널 드라이버와 SocketCAN 경계
+
+config를 켜는 것으로 작업은 끝나지만, 그 아래에서 무슨 일이 벌어지는지 알아야 <strong>보드가 바뀌었을 때 무엇을 다시 해야 하는지</strong>를 판단할 수 있다. 커널의 CAN 수신 경로를 따라가 보면 칩셋 종속 코드와 공통 코드의 경계가 정확히 보인다.
+
+![CAN 수신 경로 — CAN 버스에서 컨트롤러 mailbox, 칩셋별 드라이버(flexcan 등)까지는 보드 종속이고, struct can_frame으로 변환된 뒤 SocketCAN 코어(af_can)와 agcand의 read()까지는 모든 보드에서 동일한 구조](/images/study-android-internals/14-can-rx-path-light.png)
+![CAN 수신 경로 — CAN 버스에서 컨트롤러 mailbox, 칩셋별 드라이버(flexcan 등)까지는 보드 종속이고, struct can_frame으로 변환된 뒤 SocketCAN 코어(af_can)와 agcand의 read()까지는 모든 보드에서 동일한 구조](/images/study-android-internals/14-can-rx-path-dark.png)
+
+수신 흐름은 다섯 단계다. CAN 프레임이 버스에 도착하면 ① 컨트롤러가 <strong>IRQ</strong>를 올리고, ② 드라이버가 컨트롤러의 mailbox <strong>레지스터에서 프레임을 읽어</strong>, ③ 표준 구조체 `can_frame`으로 변환해 skb에 담고, ④ `netif_receive_skb()`로 SocketCAN 코어(`net/can/af_can.c`)에 올리면, ⑤ raw/j1939 소켓 매칭을 거쳐 유저스페이스의 `read()`가 깨어난다.
+
+이 중 ①~②가 칩셋 종속 코드다. NXP i.MX의 flexcan 드라이버를 단순화한 수신부를 보면, 레지스터 접근이 얼마나 칩에 묶여 있는지 드러난다.
+
+::: details flexcan 수신부 단순화 (drivers/net/can/flexcan/flexcan-core.c 기반)
+```c
+// mailbox 레지스터에서 프레임을 꺼내 can_frame으로 변환
+static struct sk_buff *flexcan_mailbox_read(struct can_rx_offload *offload,
+                                            unsigned int n, u32 *timestamp)
+{
+    struct flexcan_mb __iomem *mb = flexcan_get_mb(priv, n);
+    struct sk_buff *skb;
+    struct can_frame *cf;
+
+    u32 reg_ctrl = priv->read(&mb->can_ctrl);
+    u32 reg_id   = priv->read(&mb->can_id);      // 하드웨어 레지스터에서 CAN ID
+
+    skb = alloc_can_skb(offload->dev, &cf);       // 표준 can_frame용 skb 할당
+
+    // 레지스터 값 → can_frame 변환. 여기서부터 하드웨어 독립 표현이 된다
+    if (reg_ctrl & FLEXCAN_MB_CNT_IDE)
+        cf->can_id = (reg_id & CAN_EFF_MASK) | CAN_EFF_FLAG;   // 29비트 확장 ID
+    else
+        cf->can_id = (reg_id >> 18) & CAN_SFF_MASK;            // 11비트 표준 ID
+
+    cf->len = can_cc_dlc2len((reg_ctrl >> 16) & 0xf);
+    *(__be32 *)(cf->data + 0) = cpu_to_be32(priv->read(&mb->data[0]));
+    *(__be32 *)(cf->data + 4) = cpu_to_be32(priv->read(&mb->data[1]));
+
+    return skb;   // netif_receive_skb()를 거쳐 SocketCAN 코어로
+}
+```
+:::
+
+경계가 되는 구조체가 `<linux/can.h>`의 `can_frame`이다. 이 변환이 일어나는 순간부터 하드웨어 정보는 완전히 사라지고, 유저스페이스(agcand)는 칩이 뭐든 동일한 코드로 받는다.
+
+```c
+struct can_frame {
+    canid_t can_id;   /* 11/29비트 ID + EFF/RTR/ERR 플래그 */
+    __u8    len;
+    __u8    data[8] __attribute__((aligned(8)));
+};
+```
+
+계층별로 <strong>무엇이 보드·칩셋에 따라 바뀌고 무엇이 불변인지</strong>를 정리하면 이렇다.
+
+| 계층 | 보드·칩셋별로 바뀌나 | 무엇이 바뀌나 |
+|---|---|---|
+| 앱 / AIDL 서비스 / agcand | 불변 | — |
+| SocketCAN 코어 (af_can, raw, j1939) | 불변 | 커널 공통 코드 |
+| <strong>CAN 컨트롤러 드라이버</strong> | <strong>칩마다 교체</strong> | flexcan(i.MX) vs m_can(Bosch IP, Rockchip 등) vs mcp251x(SPI 외장) — 레지스터 맵·mailbox 구조가 전부 다름 |
+| <strong>Device Tree</strong> | <strong>보드마다 교체</strong> | 같은 칩이라도 핀 배치·클럭·트랜시버 제어가 보드 배선에 따라 다름 |
+| 커널 config | 프로젝트 선택 | 어느 드라이버 심볼을 켤지 (`CONFIG_CAN_FLEXCAN` vs `CONFIG_CAN_M_CAN` 등) |
+| 트랜시버 하드웨어 | 보드마다 교체 | 순수 회로 — 커널은 standby 핀 GPIO 정도만 안다 |
+
+즉 <strong>칩셋 종속성은 전부 BSP(드라이버 + Device Tree) 안에 격리</strong>되고, SocketCAN 위의 산출물은 이식 비용이 사실상 0이다. 보드를 i.MX8에서 RK3588로 바꿔도 `can0`이라는 인터페이스 이름과 `can_frame` 포맷은 그대로다. 앞의 보드 선정 체크리스트에 "CAN이 SocketCAN으로 노출되는가"를 넣는 이유가 이것이다. 참고할 실제 소스는 `drivers/net/can/flexcan/`, `drivers/net/can/m_can/`, `drivers/net/can/spi/mcp251x.c`, 그리고 공통 계층 `net/can/`이다.
+
+### USB-CAN 어댑터도 SocketCAN이다
+
+보드에 CAN 핀이 없거나 개발 PC에서 실물 버스를 관찰하고 싶을 때는 USB-CAN 어댑터를 쓴다. 이것도 결국 SocketCAN 드라이버라서, 커널에 드라이버만 켜져 있으면 꽂는 순간 `can0`이 생긴다.
+
+| 드라이버 | 대상 어댑터 | 비고 |
+|---|---|---|
+| `gs_usb` | candleLight 펌웨어 계열 (CANable 2.0, Innomaker USB2CAN 등) | <strong>추천.</strong> 순수 커널 드라이버, 유저스페이스 데몬 불필요, 저가 |
+| `peak_usb` | PEAK PCAN-USB | 산업 표준, 고가 |
+| `kvaser_usb` | Kvaser 계열 | 산업 표준, 고가 |
+| `slcan` | 시리얼 기반 저가 어댑터 | slcand 데몬이 필요해 안드로이드에선 번거로움 — 비추천 |
+
+안드로이드에서 쓰려면 fragment에 `CONFIG_CAN_GS_USB=y`(또는 `=m`)를 추가하면 된다. 한 가지 실무 함정 — 안드로이드 이미지에는 `ip`(iproute2 full)나 `can-utils`가 기본으로 없어서, bitrate 설정(`ip link set can0 up type can bitrate 250000`)을 셸에서 못 할 수 있다. 해법은 둘이다: iproute2·can-utils를 `PRODUCT_PACKAGES`로 이미지에 넣거나, <strong>agcand가 기동 시 netlink(libsocketcan)로 직접 인터페이스를 올리게</strong> 하는 것이다. 후자가 제품에서는 더 깔끔하다.
+
 ## BSP 통합
 
 실무에서는 커널·드라이버·부트로더를 처음부터 만들지 않는다. SoC 벤더나 보드 제조사가 주는 <strong>BSP(Board Support Package)</strong>를 받아 통합한다. BSP는 대략 이런 것들의 묶음이다.
@@ -372,6 +449,14 @@ adb shell zcat /proc/config.gz | grep CONFIG_CAN
 - <strong>보드 커널과 드라이버</strong> — 해당 SoC·보드에 맞춘 커널 소스와 드라이버.
 - <strong>Device Tree(DTB)</strong> — 보드의 하드웨어 구성(어떤 버스에 어떤 칩이 붙었는지)을 기술한 트리.
 - <strong>HAL·펌웨어 blob</strong> — GPU·모뎀·카메라 등의 비공개 HAL 구현과 펌웨어 바이너리.
+
+<strong>전달 형태</strong>는 벤더마다 다르지만 보통 둘 중 하나다. repo manifest XML(벤더 git 서버를 가리키는 방식 — NXP i.MX가 "AOSP + i.MX 패치"를 이렇게 배포한다)이거나, 수십 GB짜리 SDK tarball(Rockchip 방식)이다. 어느 쪽이든 받아서 `repo sync`(또는 압축 해제) → `lunch <보드타깃>` → `m` 하면 <strong>그 보드에서 부팅되는 이미지가 나오는 것</strong>이 BSP의 존재 이유다. "BSP를 준다"를 계약 관점으로 번역하면, 보드값에 "이 보드에서 부팅되는 안드로이드 소스 트리 + 바이너리 + 문서 + (기간 한정) 기술지원이 포함된다"는 뜻이다. 맨 AOSP는 그 보드의 부트로더도, 핀 배치를 아는 Device Tree도, 드라이버도 없어서 부팅조차 안 된다 — BSP가 그 "부팅되는 기준선"을 제공하고, 우리는 그 위에 증축만 한다.
+
+::: warning BSP의 세 가지 현실
+- <strong>버전 고정</strong> — BSP는 특정 안드로이드 버전 + 특정 커널 버전에 묶여 있다. "Android 13용 BSP"를 받았는데 16으로 올리는 건 벤더가 새 BSP를 내주지 않는 한 사실상 불가능하다. 보드 선정 시 "어느 버전 BSP를 언제까지 지원하나"를 반드시 확인해야 하는 이유다.
+- <strong>품질 편차</strong> — NXP·Qualcomm급 대형 벤더는 문서·업데이트가 좋지만, 중소 보드사는 "한 번 주고 끝"인 경우가 많다.
+- <strong>blob은 블랙박스</strong> — GPU 등 바이너리로만 오는 부분은 문제가 생겨도 디버깅할 수 없고 벤더에 의존해야 한다. 라이선스상 커널·U-Boot(GPL)는 소스를 받을 권리가 있지만, 유저스페이스 blob은 받을 수 없는 게 정상이다.
+:::
 
 통합의 <strong>원칙</strong>이 중요하다. BSP를 잘못 다루면 다음 버전 업데이트 때 지옥을 본다.
 
@@ -387,6 +472,38 @@ adb shell zcat /proc/config.gz | grep CONFIG_CAN
 | 지원 안드로이드 버전 | 우리가 쓰려는 버전(예: 16)의 BSP가 있는지. 오래된 버전만 있으면 업그레이드 부담이 크다 |
 | 커널 소스 포함 여부 | `CONFIG_CAN`을 켜려면 커널을 재빌드해야 한다. 커널이 blob으로만 오면 config를 못 켠다 |
 | CAN 컨트롤러·트랜시버 지원 | 보드에 CAN 인터페이스가 있고 해당 드라이버가 BSP 커널에 있는지. 없으면 SPI CAN 칩 + 드라이버 추가가 필요하다 |
+
+## BSP가 없을 때 — 직접 bring-up과 상용 기기
+
+안드로이드 BSP가 없는 하드웨어에 올려야 할 때도 있다. 리눅스만 도는 ARM 보드를 안드로이드화하거나, 시중 태블릿을 개조하는 경우다. 가능은 하지만 난이도와 리스크가 완전히 달라지므로, 무엇을 감수하는지 알고 선택해야 한다.
+
+<strong>리눅스 ARM 보드를 직접 bring-up하는 경우</strong>, 먼저 전제 조건을 확인한다.
+
+| 항목 | 최소 요건 | 비고 |
+|---|---|---|
+| CPU | ARMv8 64비트 (aarch64) | 32비트는 최신 AOSP에서 사실상 지원 종료 |
+| RAM | 2GB 이상 권장 | 1GB로는 system_server 구동이 버겁다 |
+| 스토리지 | 8GB 이상 | system + vendor + data 최소 구성 |
+| 커널 | 소스 보유 + 재빌드 가능 | <strong>이게 사활이다</strong> — blob 커널이면 여기서 끝 |
+
+작업의 핵심은 <strong>커널 안드로이드화</strong>인데, Binder가 메인라인 커널에 들어가 있어서 의외로 config 문제로 수렴한다.
+
+```
+CONFIG_ANDROID_BINDER_IPC=y
+CONFIG_ANDROID_BINDERFS=y
+CONFIG_PSI=y                  # lmkd가 요구 (CH11)
+CONFIG_CGROUPS=y              # +cpuset, memcg 등
+CONFIG_SECURITY_SELINUX=y
+CONFIG_F2FS_FS=y              # 또는 EXT4 — /data용
+```
+
+그 위에 device 트리를 앞 절 그대로 직접 짜면 되는데, 복병은 <strong>그래픽</strong>이다. 디스플레이가 없는 headless 장비라도 SurfaceFlinger는 뜨려고 하고, 못 뜨면 부팅이 멈춘다. GPU 드라이버 없이 가려면 SwiftShader(소프트웨어 GL)와 drm_hwcomposer·가상 디스플레이 조합으로 해결한다. 커널이 안드로이드 config로 부팅까지 되면, system 이미지는 직접 빌드하기 전에 <strong>GSI(Generic System Image, [CH6](/study/android-internals/06-images-updates))를 그대로 얹어보는 것이 가장 빠른 검증</strong>이다 — GSI가 부팅하면 그 보드는 "안드로이드 가능"으로 증명된 것이다.
+
+<strong>상용 기기(태블릿·폰)를 개조하는 경우</strong>는 성격이 다르다. 제조사는 안드로이드 BSP를 주지 않는다 — 공개되는 건 GPL 의무분인 커널 소스뿐이고, device 트리·vendor blob·부트로더는 없다. 그래서 순수 AOSP를 처음부터 빌드해 올리는 건 사실상 불가능하고, 현실 경로는 <strong>커스텀 롬 커뮤니티(LineageOS 계열)가 리버스 엔지니어링으로 만든 device 트리 + 순정 펌웨어에서 추출한 blob</strong>으로 빌드하는 것이다. 진행 전 확인할 것 세 가지: ① 부트로더 언락이 가능한 기기·지역인지(제조사·지역에 따라 원천 차단), ② 그 기기의 커뮤니티 빌드가 존재하는지, ③ 언락 시 보안 efuse(삼성 Knox 등)가 <strong>영구적으로</strong> 끊어져 되돌릴 수 없다는 점을 감수할지.
+
+::: tip 어느 길을 갈까
+학습 목적이면 직접 bring-up이 최고의 실습이다(이 챕터와 [CH7](/study/android-internals/07-boot-process)·[CH16](/study/android-internals/16-selinux-avb)의 내용을 벤더 도움 없이 몸으로 겪는다). 하지만 제품 프로토타입이 목적이면 <strong>안드로이드 BSP를 공식 제공하는 보드를 사는 것</strong>이 비용·시간 양쪽에서 압도적으로 유리하다. bring-up에 쓸 몇 주가 보드값보다 비싸다.
+:::
 
 ## 외부 라이브러리 배치 기준
 
@@ -467,6 +584,16 @@ adb shell stop agcand && adb shell start agcand
 adb logcat -s agcand
 ```
 
+<strong>화면 없이 개발 — scrcpy.</strong> 실물 모니터가 없어도 개발에는 지장이 없다. 타깃이 안드로이드라는 점이 핵심인데, adb만 붙으면 <strong>scrcpy</strong>로 개발 PC에서 화면을 보면서 마우스·키보드 입력까지 보낼 수 있다. 클릭이 터치 이벤트로 들어가므로 HMI 앱 조작 테스트도 그대로 된다. HDMI에 아무것도 안 꽂아도 안드로이드는 기본 디스플레이를 렌더링하므로 동작하고, 스크린샷·화면 녹화도 scrcpy가 해준다.
+
+```bash
+brew install scrcpy            # 또는 apt install scrcpy
+adb connect <보드IP>:5555      # 같은 네트워크면 무선, USB도 가능
+scrcpy                          # PC 창에 보드 화면 + 클릭=터치
+```
+
+반대로 <strong>태블릿을 보드의 모니터로 쓰는 것은 안 된다</strong> — 태블릿의 USB-C/HDMI는 출력 전용이라 영상 입력을 받지 못한다. HDMI 캡처 동글로 태블릿에서 화면을 보는 우회는 가능하지만 터치가 보드로 전달되지 않는 보기 전용이라, scrcpy가 모든 면에서 낫다. 실물 터치 감각(장갑·직사광선) 검증이 필요한 단계에서만 HDMI+USB 터치 모니터를 붙인다.
+
 CAN처럼 하드웨어가 얽힌 기능은 <strong>검증 사다리</strong>를 단계적으로 오른다. 아래로 갈수록 실물에 가깝고 비용이 크다.
 
 1. <strong>호스트 vcan</strong> — 개발 PC에서 가상 CAN(`vcan0`)으로 프로토콜 로직만 검증. 하드웨어 0.
@@ -484,7 +611,9 @@ CAN처럼 하드웨어가 얽힌 기능은 <strong>검증 사다리</strong>를 
 - CAN 같은 기능은 커널 config로 켠다(CONFIG_CAN·CAN_RAW·CAN_VCAN·CAN_J1939). GKI면 드라이버를 vendor 모듈(.ko)로, 서브시스템 자체를 켜야 하면 커널을 재빌드한다.
 - BSP는 부트로더·보드 커널·DTB·HAL blob 묶음이다. device/는 폴더째 받아 inherit-product로 확장만 하고 vendor blob은 그대로 두며, 커널 config를 켜 재빌드하는 것이 사실상 유일한 능동 작업이다. 외부 오픈소스는 external/에 커밋 고정으로, 자사 코드는 vendor/<회사>/에 둔다.
 - 벤더 데몬은 NDK로 로직만 검증하고 최종 산출물은 AOSP 트리 안 `cc_binary`로 빌드하는 것이 정석이다. BOARD_VENDOR_SEPOLICY_DIRS가 CH16 정책 작업으로 이어진다.
-- 검증은 Cuttlefish(커스텀 커널 `-kernel_path` 부팅)로 실보드 전에 하고, NDK 크로스컴파일+adb push로 빠르게 반복하다 최종만 Soong 통합한다. CAN은 호스트 vcan → Cuttlefish → USB-CAN → 실보드 사다리로 오른다.
+- 검증은 Cuttlefish(커스텀 커널 `-kernel_path` 부팅)로 실보드 전에 하고, NDK 크로스컴파일+adb push로 빠르게 반복하다 최종만 Soong 통합한다. CAN은 호스트 vcan → Cuttlefish → USB-CAN → 실보드 사다리로 오른다. 화면은 scrcpy로 충분해 개발 단계에선 모니터도 필요 없다.
+- CAN 수신 경로에서 칩셋 종속 코드는 드라이버·Device Tree까지고, `struct can_frame`으로 변환된 뒤(SocketCAN 위)는 어떤 보드에서도 불변이다. USB-CAN 어댑터(gs_usb 계열)도 같은 SocketCAN 드라이버로 `can0`이 된다.
+- 안드로이드 BSP가 없는 하드웨어는 직접 bring-up(커널 안드로이드화 config + GSI 검증)이 가능하지만, 제품 프로토타입이면 BSP 제공 보드를 사는 것이 정석이다. 상용 기기 개조는 언락 가능 여부·커뮤니티 트리 존재·efuse 영구 소손을 먼저 확인한다.
 :::
 
 ## 다음 챕터

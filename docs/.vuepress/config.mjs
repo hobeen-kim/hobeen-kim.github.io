@@ -997,6 +997,82 @@ const theme = {
           ],
         },
       ],
+      '/study/android-internals/': [
+        {
+          text: '아키텍처와 하드웨어',
+          collapsible: false,
+          children: [
+            { text: '소개', link: '/study/android-internals/' },
+            { text: 'CH1. 안드로이드 아키텍처와 진화', link: '/study/android-internals/01-architecture-evolution' },
+            { text: 'CH2. 하드웨어와 SoC', link: '/study/android-internals/02-hardware-soc' },
+          ],
+        },
+        {
+          text: '파티션·스토리지·이미지',
+          collapsible: false,
+          children: [
+            { text: 'CH3. 파티션과 파일시스템', link: '/study/android-internals/03-partitions-filesystems' },
+            { text: 'CH4. 파일과 디렉토리 구조', link: '/study/android-internals/04-files-directories' },
+            { text: 'CH5. 스토리지 관리와 APEX', link: '/study/android-internals/05-storage-management' },
+            { text: 'CH6. 시스템 이미지와 업데이트', link: '/study/android-internals/06-images-updates' },
+          ],
+        },
+        {
+          text: '부팅과 시스템 기동',
+          collapsible: false,
+          children: [
+            { text: 'CH7. 부트로더와 커널 부팅', link: '/study/android-internals/07-boot-process' },
+            { text: 'CH8. init과 Zygote', link: '/study/android-internals/08-init-zygote' },
+            { text: 'CH9. 서비스 아키텍처', link: '/study/android-internals/09-service-architecture' },
+          ],
+        },
+        {
+          text: '시스템 관리와 관찰',
+          collapsible: false,
+          children: [
+            { text: 'CH10. 설정과 관리', link: '/study/android-internals/10-configuration' },
+            { text: 'CH11. 리눅스 렌즈로 본 애플리케이션', link: '/study/android-internals/11-linux-lens' },
+            { text: 'CH12. 로깅·통계·모니터링', link: '/study/android-internals/12-logging-monitoring' },
+            { text: 'CH13. 전원 관리', link: '/study/android-internals/13-power-management' },
+          ],
+        },
+        {
+          text: 'AOSP 빌드와 네이티브',
+          collapsible: false,
+          children: [
+            { text: 'CH14. AOSP 소스 빌드와 device bring-up', link: '/study/android-internals/14-building-aosp' },
+            { text: 'CH15. 네이티브 레벨과 Bionic', link: '/study/android-internals/15-native-level' },
+            { text: 'CH16. SELinux와 Verified Boot', link: '/study/android-internals/16-selinux-avb' },
+          ],
+        },
+        {
+          text: '패키지·앱·런타임',
+          collapsible: false,
+          children: [
+            { text: 'CH17. 패키지 관리', link: '/study/android-internals/17-package-management' },
+            { text: 'CH18. 애플리케이션 해부', link: '/study/android-internals/18-app-anatomy' },
+            { text: 'CH19. Dalvik과 DEX', link: '/study/android-internals/19-dalvik-dex' },
+            { text: 'CH20. ART 내부 구조', link: '/study/android-internals/20-art-internals' },
+          ],
+        },
+        {
+          text: 'Binder와 실전',
+          collapsible: false,
+          children: [
+            { text: 'CH21. Binder — 유저스페이스', link: '/study/android-internals/21-binder-userspace' },
+            { text: 'CH22. Binder — 커널과 드라이버', link: '/study/android-internals/22-binder-kernel' },
+            { text: 'CH23. 네이티브 데몬 서비스 만들기', link: '/study/android-internals/23-native-daemon-case-study' },
+          ],
+        },
+        {
+          text: '부록',
+          collapsible: false,
+          children: [
+            { text: '용어집', link: '/study/android-internals/appendix-glossary' },
+            { text: '참고 자료', link: '/study/android-internals/appendix-references' },
+          ],
+        },
+      ],
     },
     lastUpdated: false,
     contributors: false,

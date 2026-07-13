@@ -40,6 +40,7 @@ export const nodes = [
   { id: 'spicedb', label: 'SpiceDB', size: 24, status: 'active', link: '/study/spicedb/', x: 0.72, y: 0.20 },
   { id: 'network', label: '네트워크', size: 22, status: 'planned', link: null, x: 0.70, y: 0.22 },
   { id: 'os', label: '운영체제', size: 22, status: 'planned', link: null, x: 0.92, y: 0.22 },
+  { id: 'android-internals', label: 'Android\nInternals', size: 26, status: 'active', link: '/study/android-internals/', x: 0.97, y: 0.12 },
   { id: 'data-engineering', label: '데이터\n엔지니어링', size: 24, status: 'planned', link: null, x: 0.60, y: 0.40 },
   { id: 'observability', label: '관측성\n(Grafana 스택)', size: 26, status: 'active', link: '/study/observability/', x: 0.90, y: 0.80 },
 
@@ -84,6 +85,7 @@ export const edges = [
   { source: 'software', target: 'architecture' },
   { source: 'software', target: 'network' },
   { source: 'software', target: 'os' },
+  { source: 'os', target: 'android-internals' },
   { source: 'software', target: 'data-engineering' },
   { source: 'database', target: 'rdb' },
   { source: 'database', target: 'nosql' },

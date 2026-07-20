@@ -83,6 +83,66 @@ const theme = {
     ],
     sidebarDepth: 0,
     sidebar: {
+      '/study/agisostack/': [
+        {
+          text: 'AgIsoStack++ 시작하기',
+          collapsible: false,
+          children: [
+            { text: '소개', link: '/study/agisostack/' },
+            { text: 'CH1. AgIsoStack++ 개요', link: '/study/agisostack/01-overview' },
+            { text: 'CH2. ISOBUS 핵심 개념', link: '/study/agisostack/02-isobus-concepts' },
+            { text: 'CH3. Control Function과 NAME', link: '/study/agisostack/03-control-function-name' },
+            { text: 'CH4. 전송 계층 개념', link: '/study/agisostack/04-transport-concepts' },
+          ],
+        },
+        {
+          text: '설치와 빌드',
+          collapsible: false,
+          children: [
+            { text: 'CH5. 설치와 프로젝트 통합', link: '/study/agisostack/05-installation' },
+            { text: 'CH6. 개발자 가이드', link: '/study/agisostack/06-developer-guide' },
+          ],
+        },
+        {
+          text: '기본 통신',
+          collapsible: false,
+          children: [
+            { text: 'CH7. ISOBUS Hello World', link: '/study/agisostack/07-hello-world' },
+            { text: 'CH8. 메시지 수신', link: '/study/agisostack/08-receiving-messages' },
+            { text: 'CH9. 목적지 지정 통신', link: '/study/agisostack/09-adding-destination' },
+            { text: 'CH10. 전송 계층 사용하기', link: '/study/agisostack/10-transport-layer' },
+            { text: 'CH11. PGN 요청', link: '/study/agisostack/11-pgn-requests' },
+            { text: 'CH12. 디버그 로깅', link: '/study/agisostack/12-debug-logging' },
+          ],
+        },
+        {
+          text: '애플리케이션 계층',
+          collapsible: false,
+          children: [
+            { text: 'CH13. Virtual Terminal 클라이언트', link: '/study/agisostack/13-virtual-terminal' },
+            { text: 'CH14. Task Controller와 DDOP', link: '/study/agisostack/14-tc-ddop' },
+            { text: 'CH15. Task Controller 클라이언트', link: '/study/agisostack/15-tc-client' },
+            { text: 'CH16. 작업기 메시지와 ISB', link: '/study/agisostack/16-implement-messages' },
+          ],
+        },
+        {
+          text: '하드웨어와 이식',
+          collapsible: false,
+          children: [
+            { text: 'CH17. HardwareInterface', link: '/study/agisostack/17-hardware-interface' },
+            { text: 'CH18. ESP32와 PlatformIO', link: '/study/agisostack/18-esp32-platformio' },
+          ],
+        },
+        {
+          text: '레퍼런스',
+          collapsible: false,
+          children: [
+            { text: 'CH19. API 구조 훑어보기', link: '/study/agisostack/19-api-reference' },
+            { text: 'FAQ·릴리스·라이선스', link: '/study/agisostack/appendix-faq' },
+            { text: '참고 자료', link: '/study/agisostack/appendix-references' },
+          ],
+        },
+      ],
       '/study/isobus/': [
         {
           text: '통신과 CAN 기초',

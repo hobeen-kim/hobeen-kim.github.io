@@ -214,6 +214,25 @@ const theme = {
             { text: '참고 자료', link: '/study/isobus/appendix-references' },
           ],
         },
+        {
+          text: 'ISO 11783 표준 정리',
+          collapsible: true,
+          children: [
+            { text: 'Part 1. General standard', link: '/study/isobus/appendix-iso-part01' },
+            { text: 'Part 3. Data link layer', link: '/study/isobus/appendix-iso-part03' },
+            { text: 'Part 4. Network layer', link: '/study/isobus/appendix-iso-part04' },
+            { text: 'Part 5. Network management', link: '/study/isobus/appendix-iso-part05' },
+            { text: 'Part 6. Virtual terminal', link: '/study/isobus/appendix-iso-part06' },
+            { text: 'Part 7. Implement messages', link: '/study/isobus/appendix-iso-part07' },
+            { text: 'Part 8. Power train messages', link: '/study/isobus/appendix-iso-part08' },
+            { text: 'Part 9. Tractor ECU', link: '/study/isobus/appendix-iso-part09' },
+            { text: 'Part 10. Task controller', link: '/study/isobus/appendix-iso-part10' },
+            { text: 'Part 11. Data dictionary', link: '/study/isobus/appendix-iso-part11' },
+            { text: 'Part 12. Diagnostics services', link: '/study/isobus/appendix-iso-part12' },
+            { text: 'Part 13. File server', link: '/study/isobus/appendix-iso-part13' },
+            { text: 'Part 14. Sequence control', link: '/study/isobus/appendix-iso-part14' },
+          ],
+        },
       ],
       '/study/smart-agriculture/': [
         {

@@ -27,7 +27,20 @@ TC는 두 가지 핵심 기능을 수행한다.
 - **자동 제어**: 작업 계획(처방 맵, Prescription Map)에 따라 작업기를 자동으로 제어한다. 밭의 위치별로 미리 지정된 살포량·파종량을 GPS 위치와 연동하여 자동으로 적용한다.
 - **작업 기록**: 실제 작업 결과(As-Applied Data)를 수집하고 기록한다. 어느 위치에서 얼마나 살포했는지를 나중에 분석할 수 있도록 로그로 남긴다.
 
-TC가 없던 시대에는 농민이 수동으로 살포량을 조절해야 했다. TC는 이 과정을 자동화하여 비료·농약 과용을 줄이고 생산성을 높이다.
+TC가 없던 시대에는 농민이 수동으로 살포량을 조절해야 했다. TC는 이 과정을 자동화하여 비료·농약 과용을 줄이고 생산성을 높인다.
+
+### TC 기능성 구분
+
+Part 10 Annex F.2는 TC 기능을 네 가지 <strong>TC functionality</strong>로 구분한다. 제품이 어떤 기능성을 지원하는지에 따라 구현 요구사항이 달라진다.
+
+| 기능성 | 의미 | 내용 |
+|--------|------|------|
+| **TC-BAS** | basic | 작업 총계(task total) 기록 — 위치와 무관한 작업량 문서화 |
+| **TC-GEO** | geo-based | 위치 기반 로깅과 (선택적으로) 처방 맵 기반 위치 제어 |
+| **TC-SC** | section control | 섹션 자동 ON/OFF 제어 |
+| **LOG** | data logger | 로깅 전용 기능(DL) |
+
+현행 2015년판(2nd edition)은 프로토콜 <strong>버전 4</strong>를 정의하며, 로깅만 수행하는 별도 CF인 <strong>Data Logger(DL)</strong>와 Peer Control 등이 버전 4에서 추가되었다. DL은 TC 기능의 부분집합으로 같은 연결 메커니즘을 쓰고, 클라이언트는 동시에 TC 1개와 DL 1개에 연결할 수 있다.
 
 ## 2. TC의 역할
 
@@ -88,6 +101,15 @@ flowchart LR
 - <strong>TC-Server</strong>는 처방 맵에서 현재 GPS 위치에 해당하는 값을 조회하고, 그 값을 TC-Client에 전달한다.
 - <strong>TC-Client</strong>는 수신한 Setpoint에 맞게 밸브나 모터를 조절하고, 유량 센서 등으로 실제 값을 측정하여 TC-Server에 보고한다.
 
+### TC 연결 관리
+
+TC와 클라이언트의 연결은 Task Controller Status 메시지로 유지된다.
+
+- 클라이언트는 address claim 완료 후 <strong>6초 대기</strong> → TC의 Status 메시지 수신 확인 → Working Set Master 메시지로 자신을 식별하며 연결 절차를 시작한다.
+- TC는 Status 메시지를 <strong>2초 주기</strong>로 송신한다(상태 변화 시 즉시 송신 가능, 단 메시지 간 최소 200 ms).
+- 타임아웃은 양방향 모두 <strong>6초</strong>다. 클라이언트가 TC Status를 6초간 못 받으면 TC의 비정상 종료로 간주하고, TC가 클라이언트의 Task 메시지를 6초간 못 받으면 클라이언트의 비정상 종료로 간주한다.
+- 네트워크에는 TC가 여러 대 있을 수 있다. function instance 0인 TC가 <strong>primary TC</strong>이고, 오퍼레이터에게는 <strong>TC number</strong> = function instance + 1(1~32)로 표시한다. 클라이언트는 동시에 TC 1개·DL 1개에만 연결할 수 있다.
+
 ## 4. Section Control과 Rate Control
 
 TC의 두 가지 핵심 제어 기능이다.
@@ -129,22 +151,23 @@ GPS 위치에 따라 살포량(Rate)을 **가변적으로** 제어하는 기능�
 
 TC는 GPS 위치 데이터를 이용해 현재 위치에 해당하는 처방 맵의 값을 조회한다.
 
-### 위치 관련 PGN
+### 위치·속도 관련 메시지
 
-ISOBUS에서 GPS 정보는 다음 PGN으로 전달된다.
+ISOBUS는 위치 정보를 자체 정의하지 않고 <strong>IEC 61162-3(NMEA 2000)</strong>의 항법 위치 메시지를 그대로 사용한다(Part 7 B.5). 속도는 Part 7이 자체 정의한 트랙터 메시지로 전달된다.
 
-| PGN | 이름 | 주요 데이터 |
-|-----|------|-------------|
-| **65267** (0xFF13) | Vehicle Position | 위도(Latitude), 경도(Longitude) |
-| **65256** (0xFF08) | Vehicle Direction | 방위각(Heading), 피치, 롤 |
-| **65265** (0xFF11) | Wheel-based Vehicle Speed | 차속(km/h) |
+| 메시지 | PGN | 주요 데이터 |
+|--------|-----|-------------|
+| GNSS Position Data (NMEA 2000) | **129029** | 위도(Latitude), 경도(Longitude), 고도, 측위 방법 |
+| COG & SOG, Rapid Update (NMEA 2000) | **129026** | 대지 진행 방향(COG), 대지 속도(SOG) |
+| Wheel-based Speed and Distance (Part 7) | **65096** (0xFE48) | 휠 기준 차속·거리 |
+| Ground-based Speed and Distance (Part 7) | **65097** (0xFE49) | 대지 기준(레이더 등) 차속·거리 |
 
 ### 위치 기반 제어 흐름
 
 ```mermaid
 flowchart LR
     GNSS["GNSS 수신기<br>(NMEA 2000 / NMEA 0183)"]
-    PGN["PGN 65267<br>(위도/경도)"]
+    PGN["GNSS Position Data<br>(PGN 129029)"]
     TC["TC-Server"]
     MAP["처방 맵<br>(Prescription Map)"]
     CMD["Value Command<br>(Setpoint 전달)"]
@@ -157,17 +180,17 @@ flowchart LR
     CMD --> ECU
 ```
 
-처방 맵은 일반적으로 격자(Grid) 또는 폴리곤(Polygon) 형태로 밭을 구획하고, 각 구획에 목표 값을 지정해 놓다. TC는 현재 GPS 위치가 어느 구획에 속하는지 계산하고, 해당 구획의 목표 값을 TC-Client에 전달한다.
+처방 맵은 격자(Grid) 또는 폴리곤(Polygon) 형태로 밭을 구획하고, 각 구획에 목표 값을 지정해 놓는다(둘 다 TreatmentZone을 참조한다). TC는 현재 GPS 위치가 어느 구획(TreatmentZone)에 속하는지 계산하고, 해당 구획의 목표 값을 TC-Client에 전달한다.
 
 ### NMEA와 ISOBUS
 
-GPS 수신기는 NMEA 0183(시리얼) 또는 NMEA 2000(CAN 기반) 프로토콜로 데이터를 제공한다. ISOBUS 네트워크에서는 NMEA 2000과 ISOBUS가 같은 CAN 버스를 공유하거나, 브리지를 통해 연결될 수 있다.
+GPS 수신기는 NMEA 0183(시리얼) 또는 NMEA 2000(CAN 기반) 프로토콜로 데이터를 제공한다. Part 7이 항법 위치 메시지를 IEC 61162-3(NMEA 2000)에 위임하므로, NMEA 2000 항법 메시지는 ISOBUS 네트워크에서 그대로 사용된다. 이때 여러 데이터 프레임이 필요한 메시지(GNSS Position Data 등)는 ISO 11783-3의 transport protocol이 아니라 <strong>NMEA fast packet protocol</strong>을 사용해야 한다.
 
 > **핵심 정리**
-> - TC(Task Controller)는 ISO 11783-10에 정의된 정밀 농업 컴포넌트로, 처방 맵 기반 자동 제어와 작업 로그 기록을 담당한다.
-> - TC-Server는 트랙터 측에서 처방 맵을 읽고 명령하며, TC-Client는 작업기 ECU로 명령을 실행한다.
+> - TC(Task Controller)는 ISO 11783-10에 정의된 정밀 농업 컴포넌트로, 처방 맵 기반 자동 제어와 작업 로그 기록을 담당한다. 기능성은 TC-BAS·TC-GEO·TC-SC·LOG로 구분된다(Annex F.2).
+> - TC-Server는 트랙터 측에서 처방 맵을 읽고 명령하며, TC-Client는 작업기 ECU로 명령을 실행한다. 연결은 TC Status 메시지(2초 주기)로 유지되고 타임아웃은 양방향 6초다.
 > - Section Control은 구획별 ON/OFF로 중복 살포를 방지하고, Rate Control은 위치별 살포량을 가변 조절한다.
-> - GPS 위치(PGN 65267)를 처방 맵과 대조하여 해당 위치의 Setpoint를 실시간으로 TC-Client에 전달한다.
+> - GPS 위치(NMEA 2000 GNSS Position Data, PGN 129029)를 처방 맵과 대조하여 해당 위치의 Setpoint를 실시간으로 TC-Client에 전달한다.
 
 ## 다음 챕터
 

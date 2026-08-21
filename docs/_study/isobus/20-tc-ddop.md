@@ -41,9 +41,9 @@ DDOP는 5가지 타입의 오브젝트로 구성된다.
 |--------------|------|-----------|
 | **Device** | 장치 전체 정보 (최상위) | 제조사, 제품명, 시리얼번호, Structure Label |
 | **DeviceElement** | 장치의 논리적 구성 요소 | Element Type, Element Number, 부모 Element |
-| **DeviceProcessData** | 지원하는 프로세스 데이터 항목 | DDI, Property Flag (Setpoint/Measurement), Trigger Methods |
+| **DeviceProcessData** | 지원하는 프로세스 데이터 항목 | DDI, Property Flag (default/settable/control source), Trigger Methods |
 | **DeviceProperty** | 고정 속성값 | DDI, 값 (작업폭, 구획 폭 등) |
-| **DeviceValuePresentation** | 데이터 표현 방식 | 오프셋, 스케일, 단위 기호 |
+| **DeviceValuePresentation** | 데이터 표현 방식 | 오프셋, 스케일, 소수 자릿수, 단위 기호 |
 
 ```mermaid
 graph TD
@@ -80,30 +80,34 @@ graph TD
 - `Localization Label`: 언어·단위 설정
 
 **DeviceElement**
-- 작업기의 논리적 부품이다. Element Type으로 역할을 정의한다.
-- `Device`: 장치 전체를 대표하는 Element
-- `Function`: 살포 펌프, 파종 유닛 등 기능 단위
-- `Section`: 독립 제어 가능한 구획
-- `Bin`: 씨앗·비료 저장 용기
-- `Connector`: 히치 연결점
+- 작업기의 논리적 부품이다. Element Type(1바이트 코드)으로 역할을 정의한다.
+- `1 Device`: 장치 전체를 대표하는 Element (DDOP당 1개)
+- `2 Function`: 살포 펌프, 파종 유닛 등 기능 단위
+- `3 Bin`: 씨앗·비료 저장 용기
+- `4 Section`: 독립 제어 가능한 구획
+- `5 Unit`: Section 하위의 가장 세분화된 단위 (노즐, 파종 로우 유닛 등)
+- `6 Connector`: 히치 연결점
+- `7 Navigation Reference`: GPS 안테나 등 내비게이션 기준 위치
+- Element Number는 12비트(0~4095)이며, Parent Object ID로 상위 Element(또는 Device)를 참조해 계층을 구성한다.
 
 **DeviceProcessData**
 - DeviceElement에 연결되며, 해당 Element에서 지원하는 DDI 항목을 정의한다.
-- `Property Flag`: Setpoint 지원 여부, Measurement 지원 여부, Default 값 설정 가능 여부
-- `Trigger Methods`: 값 보고 트리거 (시간 기반, 변화량 기반, 요청 기반)
+- `Property Flag`(3비트): bit1 = 기본값(default) 세트 멤버 여부, bit2 = settable(TC가 값을 설정 가능 — Setpoint류), bit3 = control source(다른 CF의 setpoint 값을 결정하는 소스로 동작). bit2·bit3은 동시에 설정될 수 없다.
+- `Trigger Methods`(5비트): time interval(시간 간격), distance interval(거리 간격), threshold limits(임계값), on change(변화량), total(누적값)
 
 **DeviceProperty**
 - 변하지 않는 고정 속성이다. 작업폭, 구획 폭 등이 여기에 해당한다.
-- DeviceProcessData와 달리 TC가 값을 변경하지 않다.
+- DeviceProcessData와 달리 TC가 값을 변경하지 않는다.
 
 **DeviceValuePresentation**
 - 숫자값을 사람이 읽기 쉬운 형식으로 변환하는 규칙이다.
 - 공식: `표시값 = (원시값 + Offset) × Scale`
 - 예: 원시값 20000, Offset=0, Scale=0.01 → 표시값 200.00 L/ha
+- `Number of decimals`(0~7) 속성으로 표시 소수 자릿수도 함께 정의한다.
 
 ## 3. DDOP 전송 과정
 
-작업기가 ISOBUS 네트워크에 연결되면 다음 순서로 DDOP를 전송한다.
+DDOP 관련 메시지는 모두 <strong>TC-Client가 TC/DL에게 보내는 요청</strong>과 그에 대한 TC의 응답으로 구성된다 — TC가 먼저 DDOP를 요구하는 것이 아니라, 클라이언트가 자신의 device descriptor를 TC에 질의·전송·활성화하는 흐름이다.
 
 ```mermaid
 sequenceDiagram
@@ -112,31 +116,30 @@ sequenceDiagram
 
     Note over CLIENT,TC: 네트워크 연결 및 주소 클레임 완료
 
-    CLIENT ->> TC: Working Set Master 메시지<br>(버스 참여 알림)
+    CLIENT ->> TC: Working Set Master 메시지<br>(PGN 65037, 버스 참여 알림)
 
-    TC ->> CLIENT: Request Structure Label<br>(DDOP 버전 확인)
+    CLIENT ->> TC: Request Structure Label<br>(보유 중인 DDOP 버전 라벨 질의)
 
-    CLIENT -->> TC: Structure Label 응답<br>(예: "SPRAY-V2.1-20240101")
+    TC -->> CLIENT: Structure Label 응답<br>(일치하면 "SPRAY-V2.1-20240101", 없으면 FF로 채움)
 
-    alt DDOP가 캐시에 없거나 버전이 다름
-        TC ->> CLIENT: Request Object Pool Transfer<br>(DDOP 요청)
-        CLIENT -->> TC: Object Pool Transfer 시작<br>(Transport Protocol 사용)
-        CLIENT -->> TC: DDOP 데이터 전송 (멀티패킷)
-        CLIENT -->> TC: Object Pool Transfer 종료
-        TC -->> CLIENT: Object Pool Transfer Response<br>(성공/실패)
-    else DDOP가 캐시에 있음
-        Note over TC: 캐시된 DDOP 사용
+    alt TC에 DDOP가 없거나 버전이 다름
+        CLIENT ->> TC: Request Object-pool Transfer<br>(전송할 데이터 크기 통보)
+        TC -->> CLIENT: Request Object-pool Transfer Response<br>(메모리 확인 결과)
+        CLIENT ->> TC: Object-pool Transfer<br>(DDOP 데이터, TP/ETP로 멀티패킷 전송)
+        TC -->> CLIENT: Object-pool Transfer Response<br>(성공/실패)
+    else TC에 DDOP가 이미 있음
+        Note over TC: 기존 DDOP 사용
     end
 
-    TC ->> CLIENT: Object Pool Activate<br>(DDOP 활성화 요청)
-    CLIENT -->> TC: Object Pool Activate Response<br>(활성화 완료)
+    CLIENT ->> TC: Object-pool Activate<br>(DDOP 활성화 요청)
+    TC -->> CLIENT: Object-pool Activate Response<br>(활성화 완료)
 
     Note over TC,CLIENT: Task 수행 준비 완료
 ```
 
 ### 전송 프로토콜
 
-DDOP 데이터는 일반적으로 수백 바이트~수 킬로바이트에 달하므로, 단일 CAN 프레임으로 전송할 수 없다. ISO 11783의 **TP(Transport Protocol)** 또는 <strong>ETP(Extended Transport Protocol)</strong>를 사용하여 멀티패킷으로 분할 전송한다.
+DDOP 데이터는 일반적으로 수백 바이트~수 킬로바이트에 달하므로, 단일 CAN 프레임으로 전송할 수 없다. ISO 11783의 <strong>TP(Transport Protocol, TP.CM 60416/TP.DT 60160)</strong> 또는 <strong>ETP(Extended Transport Protocol, ETP.CM 51200/ETP.DT 50944)</strong>를 사용하여 멀티패킷으로 분할 전송한다. 1,785바이트를 넘는 DDOP는 ETP를 써야 한다.
 
 ## 4. DDOP 설계 예제
 
@@ -144,7 +147,7 @@ DDOP 데이터는 일반적으로 수백 바이트~수 킬로바이트에 달하
 
 - 총 작업폭: 9m (3구획 × 3m)
 - 지원 기능: Section Control(구획별 ON/OFF), Rate Control(살포량 가변)
-- 지원 DDI: DDI 1(Setpoint Volume/Area), DDI 2(Actual Volume/Area), DDI 141(Section Control State)
+- 지원 DDI: DDI 1(Setpoint Volume/Area), DDI 2(Actual Volume/Area), DDI 289(Setpoint Work State — 구획 ON/OFF 명령)
 
 ### DDOP 계층 구조
 
@@ -164,15 +167,15 @@ graph TD
 
     DPD_SP1["DeviceProcessData<br>ID: 7<br>DDI=1 Setpoint<br>(Section 1)"]
     DPD_MS1["DeviceProcessData<br>ID: 8<br>DDI=2 Measurement<br>(Section 1)"]
-    DPD_SC1["DeviceProcessData<br>ID: 9<br>DDI=141 SectionCtrl<br>(Section 1)"]
+    DPD_SC1["DeviceProcessData<br>ID: 9<br>DDI=289 SectionCtrl<br>(Section 1)"]
 
     DPD_SP2["DeviceProcessData<br>ID: 10<br>DDI=1 Setpoint<br>(Section 2)"]
     DPD_MS2["DeviceProcessData<br>ID: 11<br>DDI=2 Measurement<br>(Section 2)"]
-    DPD_SC2["DeviceProcessData<br>ID: 12<br>DDI=141 SectionCtrl<br>(Section 2)"]
+    DPD_SC2["DeviceProcessData<br>ID: 12<br>DDI=289 SectionCtrl<br>(Section 2)"]
 
     DPD_SP3["DeviceProcessData<br>ID: 13<br>DDI=1 Setpoint<br>(Section 3)"]
     DPD_MS3["DeviceProcessData<br>ID: 14<br>DDI=2 Measurement<br>(Section 3)"]
-    DPD_SC3["DeviceProcessData<br>ID: 15<br>DDI=141 SectionCtrl<br>(Section 3)"]
+    DPD_SC3["DeviceProcessData<br>ID: 15<br>DDI=289 SectionCtrl<br>(Section 3)"]
 
     DVP["DeviceValuePresentation<br>ID: 16<br>Unit=L/ha, Scale=0.01"]
 
@@ -231,7 +234,7 @@ graph TD
 |   |                   | Property Flag | Measurement 지원 |
 |   |                   | Trigger | 변화량(10 L/ha 이상 변화 시) |
 |   |                   | 연결 Element | DE(3) — Section 1 |
-| 9 | DeviceProcessData | DDI | 141 (Section Ctrl) |
+| 9 | DeviceProcessData | DDI | 289 (Setpoint Work State) |
 |   |                   | Property Flag | Setpoint 지원 |
 |   |                   | 연결 Element | DE(3) — Section 1 |
 | 10–12 | DeviceProcessData | (Section 2 동일 구조) | DE(4) 연결 |
@@ -243,16 +246,16 @@ graph TD
 이 DDOP를 수신한 TC-Server는 다음을 파악한다.
 
 - 이 작업기는 3개의 Section을 가진 살포기이다.
-- 각 Section에 DDI 1(Setpoint), DDI 2(Measurement), DDI 141(Section Control)을 지원한다.
+- 각 Section에 DDI 1(Setpoint), DDI 2(Measurement), DDI 289(Setpoint Work State)를 지원한다.
 - 전체 작업폭은 9m이다.
 - 값의 단위는 L/ha이며 스케일 인자는 0.01이다.
 
 > **핵심 정리**
 > - DDOP(Device Description Object Pool)는 작업기가 TC에게 자신의 구조와 능력을 알리는 데이터로, "작업기의 자기소개서"이다.
 > - DDOP는 Device, DeviceElement, DeviceProcessData, DeviceProperty, DeviceValuePresentation 5가지 오브젝트로 구성된다.
-> - TC-Client는 연결 시 Structure Label을 먼저 전달하고, TC가 요청하면 DDOP 전체를 멀티패킷으로 전송한다.
+> - TC-Client는 연결 시 자신의 Structure Label을 TC에 질의하고, TC가 모르는 버전이면 스스로 DDOP 전체를 멀티패킷으로 전송한다.
 > - TC는 DDOP를 파싱하여 지원 DDI, Section 구성, 작업폭 등을 파악한 뒤 Task를 활성화한다.
-> - 3구획 살포기 DDOP에는 Section별로 DDI 1(Setpoint), DDI 2(Measurement), DDI 141(Section Control) 항목이 정의된다.
+> - 3구획 살포기 DDOP에는 Section별로 DDI 1(Setpoint), DDI 2(Measurement), DDI 289(Setpoint Work State) 항목이 정의된다.
 
 ## 다음 챕터
 

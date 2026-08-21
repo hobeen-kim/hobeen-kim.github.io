@@ -22,19 +22,19 @@ ISOBUS의 주소 클레임은 J1939의 방식을 기반으로 하되, 농업 기
 
 ### CF (Control Function)
 
-ISOBUS에서는 네트워크에 참여하는 모든 장치를 <strong>CF(Control Function)</strong>라고 부른다. 하나의 물리적 ECU가 여러 CF를 포함할 수도 있다. 각 CF는 독립적인 주소를 가진다.
+ISOBUS에서는 네트워크에 참여하는 모든 통신 주체를 <strong>CF(Control Function)</strong>라고 부른다. 하나의 물리적 ECU가 여러 CF를 포함할 수도 있다. 각 CF는 독립적인 주소를 가진다.
 
 ### 주소 범위
 
 | 주소 범위 | 용도 |
 |-----------|------|
-| 0 ~ 127 | 고정 주소 (특정 기능에 예약) |
+| 0 ~ 127 | Preferred 주소 영역 (특정 기능에 할당) |
 | 128 ~ 247 | **Self-Configurable 주소** (동적 협상) |
-| 248 ~ 253 | 산업별 예약 |
-| 254 | Null Address (주소 미확정 상태) |
-| 255 | Global Address (브로드캐스트) |
+| 248 ~ 253 | Preferred 주소 영역 (특정 기능에 할당) |
+| 254 | Null Address (소스 주소 전용 — 클레임 전·실패 시 네트워크 관리 메시지에 사용) |
+| 255 | Global Address (목적지 주소 전용 — 브로드캐스트) |
 
-ISOBUS 작업기 ECU는 대부분 **128~247** 범위의 Self-Configurable 주소를 사용한다. 이 범위의 주소는 여러 장치가 동시에 원할 경우 NAME 값의 우선순위로 자동 협상된다.
+ISOBUS 작업기 ECU는 대부분 **128~247** 범위의 Self-Configurable 주소를 사용한다. 이 범위의 주소는 여러 장치가 동시에 원할 경우 NAME 값의 우선순위로 자동 협상된다. ISO 11783-5는 적합 CF에 <strong>self-configurable 능력을 필수</strong>로 요구하며, non-configurable CF는 구판·SAE J1939 호환을 위해 허용될 뿐이다.
 
 ### 주소 클레임 흐름
 
@@ -44,20 +44,25 @@ sequenceDiagram
     participant ECU_B as ECU B<br>(NAME: 높은 값)
     participant BUS as ISOBUS
 
-    ECU_A->>BUS: Request for Address Claimed<br>(주소 128 원함)
-    ECU_B->>BUS: Request for Address Claimed<br>(주소 128 원함)
+    ECU_A->>BUS: Request for Address Claimed<br>(SA=254, 주소 128 사용 여부 조회)
+    ECU_B->>BUS: Request for Address Claimed<br>(SA=254, 주소 128 사용 여부 조회)
 
-    Note over ECU_A,ECU_B: 충돌 발생 — 두 ECU가 같은 주소 요청
+    Note over ECU_A,ECU_B: 250 ms + RTxD 대기 — 응답 없으면 클레임 진행
 
     ECU_A->>BUS: Address Claimed (128)<br>NAME = 낮은 값
     ECU_B->>BUS: Address Claimed (128)<br>NAME = 높은 값
 
-    Note over ECU_A,ECU_B: NAME 값 비교: 낮은 값이 우선권 획득
+    Note over ECU_A,ECU_B: 충돌 — NAME 수치가 낮은 쪽이 우선권 획득
 
-    ECU_A->>BUS: Address Claimed (128) 유지<br>주소 128 확정
-    ECU_B->>BUS: Cannot Claim Address (128)<br>다른 주소(129)로 재시도
-    ECU_B->>BUS: Address Claimed (129) 확정
+    ECU_A->>BUS: Address Claimed (128) 재송신<br>주소 128 확정
+    ECU_B->>BUS: Address Claimed (129)<br>다른 빈 주소로 재클레임
+
+    Note over ECU_A,ECU_B: 클레임 후 250 ms 동안 경합이 없어야 성공
 ```
+
+Request for Address Claimed는 "주소를 원한다"는 요구가 아니라 <strong>해당 주소(또는 전체)의 클레임 상태를 조회</strong>하는 메시지다. 클레임 전의 CF는 SA를 NULL(254)로 하여 보내고, 최소 <strong>250 ms + RTxD</strong>(0~255 난수 × 0,6 ms)를 기다린 뒤 클레임을 진행한다.
+
+Address Claimed 송신 후 <strong>250 ms 동안</strong> 경합 클레임이 없어야 성공이며, 이 250 ms가 지나기 전에는 일반 메시지 송신을 시작할 수 없다(Request에 대한 응답은 예외). Self-configurable CF는 중재에서 지면 위 다이어그램처럼 다른 빈 주소를 재클레임하면 되고, <strong>Cannot Claim Address</strong>는 쓸 수 있는 주소가 하나도 없을 때 NULL 주소(SA=254)로 보내는 실패 보고 메시지다. 이를 보낸 CF는 이후 Request 응답 외의 송신을 중단한다.
 
 ## 2. Working Set
 
@@ -85,17 +90,17 @@ graph TD
     TC["TC<br>(작업 컨트롤러)"] -- "섹션 명령" --> WSM
 ```
 
-### Working Set 선언 메시지 (PGN 65070)
+### Working Set 선언 메시지 (PGN 65037)
 
-WSM은 네트워크에 참여한 후 <strong>PGN 65070 (Working Set Master)</strong>를 브로드캐스트하여 자신이 마스터임을 선언한다. 이 메시지에는 Working Set에 속한 멤버 수가 포함된다.
+WSM은 네트워크에 참여한 후 <strong>PGN 65037 (Working Set Master)</strong>를 브로드캐스트하여 자신이 마스터임을 선언한다. 이 메시지에는 Working Set에 속한 멤버 수(마스터 자신 포함)가 포함된다.
 
-멤버 ECU들은 <strong>PGN 65075 (Working Set Member)</strong>를 전송하여 자신이 특정 마스터에 속함을 알린다.
+멤버 식별용 <strong>PGN 65036 (Working Set Member)</strong> 메시지도 멤버가 아니라 <strong>마스터가</strong> 송신한다. 마스터는 멤버 수 − 1개의 Member 메시지를 각 멤버의 NAME을 담아 <strong>100 ms 간격</strong>으로 보내고, 수신 측은 마지막 Member 메시지 후 350 ms가 지나면 Working Set 정의가 완료된 것으로 간주한다.
 
-VT와 TC는 이 메시지를 수신하여 작업기의 구조를 파악하고, WSM을 통해서만 작업기와 통신한다.
+VT와 TC는 이 메시지들을 수신하여 작업기의 구조를 파악하고, Working Set 대상 통신 대부분을 WSM의 주소로 보낸다. 특히 TC의 명령은 WSM에게만 전달되며, 마스터가 멤버에게 명령을 전파하는 방법은 각 Working Set의 고유(proprietary) 설계 영역이다.
 
 ## 3. 진단 메시지
 
-ISOBUS는 ISO 11783-12를 통해 표준화된 진단 메시지를 정의한다. J1939의 진단 메시지 체계를 그대로 사용한다.
+ISOBUS는 ISO 11783-12를 통해 표준화된 진단 메시지를 정의한다. SAE J1939-73의 DM 메시지 체계를 가져와 농기계 환경에 맞게 요구사항을 좁힌 구조다.
 
 ### 고장 코드 구조: SPN + FMI
 
@@ -108,14 +113,14 @@ ISOBUS는 ISO 11783-12를 통해 표준화된 진단 메시지를 정의한다. 
 
 | 메시지 | PGN | 이름 | 설명 |
 |--------|-----|------|------|
-| DM1 | 65226 | Active Diagnostic Troubles | 현재 발생 중인 활성 고장 코드 목록 |
-| DM2 | 65227 | Previously Active Diagnostics | 이전에 발생했다가 해소된 고장 코드 |
-| DM3 | 65228 | Diagnostic Data Clear | 저장된 고장 코드 초기화 요청 |
+| DM1 | 65226 | Active Diagnostic Trouble Codes | 현재 발생 중인 활성 고장 코드 목록. 상태 변화 시 즉시 + 활성 고장이 있는 동안 <strong>1초에 1회(1 Hz)</strong> 주기 전송 |
+| DM2 | 65227 | Previously Active Diagnostic Trouble Codes | 이전에 발생했다가 해소된 고장 코드. <strong>요청(request) 시에만</strong> 전송하며 주기 전송은 없다 |
+| DM3 | 65228 | Diagnostic Data Clear | 저장된 이전 고장 코드(DM2) 초기화 요청. 활성 고장(DM1) 데이터에는 영향 없음 |
 
 ```mermaid
 graph LR
     subgraph 진단_메시지_흐름
-        FAULT[고장 발생<br>SPN+FMI 감지] --> DM1[DM1 전송<br>활성 고장 코드]
+        FAULT[고장 발생<br>SPN+FMI 감지] --> DM1[DM1 전송<br>활성 고장 코드, 1 Hz]
         DM1 --> VT_WARN[VT 화면에<br>경고 표시]
         FAULT_CLEAR[고장 해소] --> DM2[DM2로 이동<br>이전 고장 기록]
         TECH[정비사 요청] --> DM3[DM3 전송<br>고장 코드 초기화]
@@ -127,14 +132,14 @@ graph LR
 
 | FMI | 의미 |
 |-----|------|
-| 0 | 데이터 유효 범위 초과 (높음) |
-| 1 | 데이터 유효 범위 초과 (낮음) |
-| 2 | 데이터 불안정 / 간헐적 |
+| 0 | 데이터는 유효하나 정상 범위보다 높음 (most severe) |
+| 1 | 데이터는 유효하나 정상 범위보다 낮음 (most severe) |
+| 2 | 데이터 불안정 / 간헐적 / 부정확 |
 | 3 | 전압 높음 / 단락 (High) |
 | 4 | 전압 낮음 / 단락 (Low) |
 | 5 | 전류 낮음 / 단선 |
 | 6 | 전류 높음 / 단락 (GND) |
-| 12 | 고장 모드 불명확 |
+| 12 | 지능형 장치·컴포넌트 내부 고장 (ECU 교체 필요) |
 | 19 | 수신 네트워크 데이터 오류 |
 
 ## 4. 네트워크 관리 타임라인
@@ -151,13 +156,14 @@ gantt
     전원 ON / 버스 안정화      : 00.000, 50ms
 
     section 주소 클레임
-    모든 ECU 주소 클레임 시작  : 00.050, 50ms
-    주소 충돌 협상             : 00.100, 100ms
-    주소 클레임 완료 (~250ms)  : milestone, 00.250, 0ms
+    Request 송신 후 250ms+RTxD 대기 : 00.050, 250ms
+    Address Claimed 송신            : milestone, 00.300, 0ms
+    클레임 후 250ms 경합 감시 대기  : 00.300, 250ms
+    주소 확정·통신 시작 (~550ms)    : milestone, 00.550, 0ms
 
     section Working Set
-    WSM PGN 65070 브로드캐스트 : 00.250, 100ms
-    Member PGN 65075 응답      : 00.350, 150ms
+    WSM PGN 65037 브로드캐스트 : 00.550, 50ms
+    Member PGN 65036 송신 (100ms 간격) : 00.600, 300ms
     Working Set 구성 완료 (~1s): milestone, 01.000, 0ms
 
     section VT 연결
@@ -175,9 +181,10 @@ gantt
 | 시점 | 이벤트 |
 |------|--------|
 | 0 ms | 전원 ON, 버스 전압 안정화 |
-| ~50 ms | 각 ECU 주소 클레임 시작 |
-| ~250 ms | 모든 ECU 주소 확정 완료 |
-| ~250 ms | WSM Working Set 선언 (PGN 65070) |
+| ~50 ms | 각 ECU가 Request for Address Claimed 송신, 250 ms + RTxD 대기 시작 |
+| ~300 ms | Address Claimed 송신 |
+| ~550 ms | 250 ms 동안 경합 없음 확인 — 주소 확정, 일반 통신 시작 |
+| ~550 ms | WSM Working Set 선언 (PGN 65037) 후 Member 메시지(PGN 65036)를 100 ms 간격 송신 |
 | ~1,000 ms | Working Set 구성 완료 |
 | ~1,000 ms | VT Status 수신 시작 |
 | ~1,500 ms | Object Pool 전송 완료, 화면 표시 시작 |
@@ -187,8 +194,8 @@ gantt
 
 > **핵심 정리**
 > - ISOBUS에서 ECU는 CF(Control Function)라 불리며, Self-Configurable 주소(128~247)를 NAME 우선순위로 동적 협상한다.
-> - Working Set은 작업기 내 여러 ECU를 하나의 논리 단위로 묶으며, WSM이 VT·TC와의 모든 통신을 대표한다.
-> - DM1은 현재 활성 고장, DM2는 이전 고장 이력, DM3는 고장 코드 초기화 명령이다.
+> - Working Set은 작업기 내 여러 ECU를 하나의 논리 단위로 묶으며, WSM이 Master/Member 메시지(PGN 65037/65036)를 모두 송신해 구성을 선언하고 VT·TC와의 통신을 대표한다.
+> - DM1은 현재 활성 고장(활성 중 1 Hz 전송), DM2는 이전 고장 이력(요청 시에만 전송), DM3는 이전 고장 기록(DM2) 초기화 명령이다.
 > - 전원 ON 후 약 2초 안에 주소 클레임 → Working Set → VT 연결 → 정상 동작 순으로 초기화가 완료된다.
 
 ## 다음 챕터

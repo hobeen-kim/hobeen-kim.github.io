@@ -27,7 +27,7 @@ next: /study/isobus/17-vt-commands
 [Object ID: 16bit] [Object Type: 8bit] [속성(Attribute) 목록...]
 ```
 
-- **Object ID**: 0x0000 ~ 0xFFFF 범위의 고유 식별자. ID 0은 Working Set Object 예약
+- **Object ID**: 0x0000 ~ 0xFFFE 범위의 고유 식별자(한 Working Set의 풀 안에서만 유일하면 된다). 0xFFFF는 NULL Object ID로 예약
 - **Object Type**: 오브젝트 종류를 나타내는 1바이트 코드
 - **속성**: 오브젝트 타입에 따라 위치, 크기, 색상, 자식 오브젝트 목록 등
 
@@ -49,7 +49,7 @@ XML(IOP 형식)로 화면을 설계하고 빌드 시 바이너리로 변환하�
 
 ## 2. 오브젝트 타입 총정리
 
-ISO 11783-6에는 30여 가지 오브젝트 타입이 정의되어 있다. 역할별로 분류하면 다음과 같다.
+ISO 11783-6에는 40여 가지 오브젝트 타입이 정의되어 있다(v6 기준 Type 코드 0~48). 역할별로 분류하면 다음과 같다.
 
 ### 컨테이너 및 화면 구조
 
@@ -74,26 +74,26 @@ ISO 11783-6에는 30여 가지 오브젝트 타입이 정의되어 있다. 역�
 
 | 타입 이름 | Type 코드 | 역할 |
 |-----------|-----------|------|
+| **Input Boolean** | 7 | 체크박스 등 불리언 입력 |
+| **Input String** | 8 | 문자열 입력 필드 |
 | **Input Number** | 9 | 숫자 입력 필드 |
-| **Input String** | 10 | 문자열 입력 필드 |
-| **Input List** | 11 | 목록 선택 입력 |
-| **Input Boolean** | 8 | 체크박스 등 불리언 입력 |
+| **Input List** | 10 | 목록 선택 입력 |
 
 ### 출력 오브젝트
 
 | 타입 이름 | Type 코드 | 역할 |
 |-----------|-----------|------|
+| **Output String** | 11 | 문자열 출력 |
 | **Output Number** | 12 | 숫자 출력 (변수 참조 가능) |
-| **Output String** | 13 | 문자열 출력 |
-| **Output List** | 14 | 목록 출력 |
-| **Output Line** | 15 | 선 그리기 |
-| **Output Rectangle** | 16 | 사각형 그리기 |
-| **Output Ellipse** | 17 | 타원 그리기 |
-| **Output Polygon** | 18 | 다각형 그리기 |
-| **Output Meter** | 19 | 미터 게이지 |
-| **Output Linear Bar Graph** | 20 | 선형 막대 그래프 |
-| **Output Arched Bar Graph** | 21 | 호형 막대 그래프 |
-| **Picture Graphic** | 22 | 비트맵 이미지 |
+| **Output Line** | 13 | 선 그리기 |
+| **Output Rectangle** | 14 | 사각형 그리기 |
+| **Output Ellipse** | 15 | 타원 그리기 |
+| **Output Polygon** | 16 | 다각형 그리기 |
+| **Output Meter** | 17 | 미터 게이지 |
+| **Output Linear Bar Graph** | 18 | 선형 막대 그래프 |
+| **Output Arched Bar Graph** | 19 | 호형 막대 그래프 |
+| **Picture Graphic** | 20 | 비트맵 이미지 |
+| **Output List** | 37 | 목록 출력 (Version 4+) |
 
 ### 속성 오브젝트
 
@@ -102,17 +102,17 @@ ISO 11783-6에는 30여 가지 오브젝트 타입이 정의되어 있다. 역�
 | **Font Attributes** | 23 | 폰트 크기, 색상, 스타일 정의 |
 | **Line Attributes** | 24 | 선 색상, 두께, 스타일 정의 |
 | **Fill Attributes** | 25 | 채우기 색상, 패턴 정의 |
-| **Input Attributes** | 26 | 입력 유효성 검사 규칙 |
+| **Input Attributes** | 26 | 입력 필드의 유효 문자 목록 |
 
 ### 기타
 
 | 타입 이름 | Type 코드 | 역할 |
 |-----------|-----------|------|
+| **Number Variable** | 21 | 공유 숫자 변수 |
+| **String Variable** | 22 | 공유 문자열 변수 |
 | **Object Pointer** | 27 | 다른 오브젝트를 참조하는 포인터 |
-| **Variable Number** | 28 | 공유 숫자 변수 |
-| **Variable String** | 29 | 공유 문자열 변수 |
-| **External Object Pointer** | 36 | 외부 오브젝트 참조 |
 | **Macro** | 28 | 이벤트 기반 자동화 명령 목록 |
+| **External Object Pointer** | 43 | 다른 Working Set의 오브젝트 참조 (Version 5+) |
 
 ## 3. 오브젝트 간 계층 관계
 
@@ -152,7 +152,7 @@ graph TD
 - <strong>Data Mask</strong>는 Working Set에서 active mask로 지정되어야 화면에 표시된다.
 - <strong>Soft Key Mask</strong>는 Data Mask에 연결되어 함께 활성화된다.
 - **속성 오브젝트**(Font, Line, Fill Attributes)는 여러 오브젝트에서 공유할 수 있다.
-- <strong>Container</strong>는 가시성(visible/hidden) 속성으로 동적으로 표시/숨김이 가능한다.
+- <strong>Container</strong>는 가시성(visible/hidden) 속성으로 동적으로 표시/숨김이 가능하다.
 
 ## 4. 오브젝트 풀 전송 과정
 
@@ -163,20 +163,20 @@ sequenceDiagram
     participant ECU as 작업기 ECU (VT Client)
     participant VT as VT Server
 
-    ECU->>VT: Working Set Maintenance (주기적 광고, 100ms)
-    VT-->>ECU: VT Status Message (버전, 활성 마스크 등)
+    VT-->>ECU: VT Status Message (1초 주기 — 활성 마스크, busy 상태 등)
+    ECU->>VT: Working Set Maintenance (1초 주기)
 
-    ECU->>VT: Get Memory (오브젝트 풀 크기 전달)
+    ECU->>VT: Get Memory (오브젝트 풀 크기 전달, VT 버전 확인)
     VT-->>ECU: Get Memory Response (저장 가능 여부 확인)
 
     alt 버전이 일치하는 오브젝트 풀이 VT에 이미 저장된 경우
         ECU->>VT: Load Version (저장된 버전 로드 요청)
         VT-->>ECU: Load Version Response (성공)
     else 새로 전송해야 하는 경우
-        ECU->>VT: Object Pool Transfer (ETP로 대용량 전송)
-        Note over ECU, VT: ETP: Extended Transport Protocol<br>최대 117,964,800 바이트 전송 가능
-        VT-->>ECU: Object Pool Transfer Response
+        ECU->>VT: Object Pool Transfer (TP/ETP로 전송, 응답 없음)
+        Note over ECU, VT: 1785바이트 초과 시 ETP 사용<br>ETP 최대 117,440,505 바이트 전송 가능
         ECU->>VT: End of Object Pool (전송 완료 알림)
+        Note over VT: 파싱 동안 VT Status의 parsing 비트 = 1
         VT-->>ECU: End of Object Pool Response (파싱 결과 반환)
         ECU->>VT: Store Version (이후 Load Version을 위해 저장)
     end
@@ -185,9 +185,23 @@ sequenceDiagram
     Note over VT: Working Set의 Active Data Mask 표시
 ```
 
+### VT 능력 질의와 스케일링
+
+전송 전에 Working Set Master는 Get Memory 외에도 기술 데이터(Technical data) 메시지 — <strong>Get Number of Soft Keys</strong>, <strong>Get Text Font Data</strong>, <strong>Get Hardware</strong> 등 — 로 VT의 소프트키 수, 지원 폰트·스타일, 색상 모드, Data Mask 픽셀 크기를 질의할 수 있다. Master는 이 응답에 맞춰 풀을 조정해야 한다.
+
+- **위치·크기**: VT의 Data Mask 영역·designator 크기에 맞춰 오브젝트의 위치와 크기를 스케일한다.
+- **폰트**: 정의된 영역에 best-fit 알고리즘으로 폰트를 선택한다. 최소 폰트는 6×8이며, 스케일 결과가 그보다 작으면 6×8을 쓴다.
+- <strong>Picture Graphic</strong>은 VT가 오브젝트의 width 속성에 따라 자동 스케일한다.
+
+### 전송 완료 대기와 오류 처리
+
+End of Object Pool message를 보낸 뒤 VT는 파싱을 마칠 때까지 VT Status message의 parsing 비트를 1로 유지한다. Working Set Master는 parsing 비트가 0인 VT Status message가 <strong>연속 3번</strong> 수신될 때까지 End of Object Pool response를 기다려야 하고, 그때까지 응답이 없으면 메시지 미도달로 간주해 최대 3회 재시도할 수 있다(Load Version도 같은 대기 규칙을 쓴다).
+
+End of Object Pool response가 오류(풀 오류, 메모리 고갈 등)를 담으면 VT는 풀을 휘발성 메모리에서 삭제하고 Working Set 중단을 운전자에게 알람으로 알린다. 이 응답을 받은 ECU는 장치의 안전한 셧다운 절차를 제공하는 fail-safe 운전 모드로 들어가야 한다.
+
 ### 버전 관리 (Store/Load Version)
 
-오브젝트 풀이 크면 전송에 수 초가 걸릴 수 있다. 이를 개선하기 위해 VT는 오브젝트 풀을 <strong>버전 이름(8바이트 문자열)</strong>과 함께 내부에 저장할 수 있다. 다음 연결 시 **Load Version** 명령만으로 저장된 풀을 즉시 복원하여 전송 시간을 절약한다.
+오브젝트 풀이 크면 전송에 수 초가 걸릴 수 있다. 이를 개선하기 위해 VT는 오브젝트 풀을 <strong>버전 라벨(7문자 문자열, Version 5+는 32문자 확장 라벨도 지원)</strong>과 함께 비휘발성 저장소에 저장할 수 있다. 다음 연결 시 **Load Version** 명령만으로 저장된 풀을 즉시 복원하여 전송 시간을 절약한다.
 
 ## 5. 간단한 화면 구성 실습
 
@@ -199,7 +213,7 @@ sequenceDiagram
 Working Set (ID: 0)
 └── Data Mask (ID: 1) ← Active Data Mask로 지정
     ├── Output String (ID: 10) ← "엔진 온도:" 레이블
-    │   └── Font Attributes (ID: 30) ← 흰색, 18pt
+    │   └── Font Attributes (ID: 30) ← 검정, 24×32 픽셀
     └── Output Number (ID: 11) ← 85 (°C 단위)
         └── Font Attributes (ID: 30) ← 공유 사용
 ```
@@ -217,13 +231,13 @@ Working Set (ID: 0)
     <!-- active_mask="1" → Data Mask ID 1이 초기 화면 -->
   </workingset>
 
-  <!-- Font Attributes: 흰색, 18pt 폰트 -->
+  <!-- Font Attributes: 검정, 24×32 픽셀 폰트 -->
   <fontattributes id="30"
                   font_colour="0"
                   font_size="6"
                   font_style="0" />
-  <!-- font_colour 0 = 흰색(VT 팔레트 기준) -->
-  <!-- font_size 6 = 18pt -->
+  <!-- font_colour 0 = 검정(VT 표준 팔레트 기준. 1 = 흰색) -->
+  <!-- font_size 6 = 24×32 픽셀 -->
 
   <!-- Data Mask: 실제 화면 영역 -->
   <datamask id="1"
@@ -262,7 +276,7 @@ Working Set (ID: 0)
 
 ### 런타임 데이터 갱신
 
-화면이 표시된 후, ECU는 실측 온도가 바뀔 때마다 `Change Numeric Value` 명령(PGN: EF00)으로 Output Number의 값을 갱신한다. VT는 별도의 오브젝트 풀 재전송 없이 해당 오브젝트만 업데이트하여 화면에 반영한다.
+화면이 표시된 후, ECU는 실측 온도가 바뀔 때마다 `Change Numeric Value` 명령으로 Output Number의 값을 갱신한다. VT 명령은 ECU→VT 방향 PGN 0xE700(59136)으로 보내고, VT의 응답은 VT→ECU 방향 PGN 0xE600(58880)으로 돌아온다. VT는 별도의 오브젝트 풀 재전송 없이 해당 오브젝트만 업데이트하여 화면에 반영한다.
 
 ```
 ECU → VT: Change Numeric Value
@@ -273,7 +287,7 @@ ECU → VT: Change Numeric Value
 ::: tip 핵심 정리
 - 오브젝트 풀은 VT 화면 전체를 정의하는 바이너리 구조이며, 각 오브젝트는 ID + 타입 + 속성으로 구성된다.
 - Working Set → Data Mask → Container/Output/Input → 속성 오브젝트 순의 계층 구조를 가진다.
-- 오브젝트 풀 전송 시 ETP(Extended Transport Protocol)를 사용하며, Store/Load Version으로 재전송 시간을 절약한다.
+- 오브젝트 풀 전송 시 TP/ETP를 사용하며(1785바이트 초과 시 ETP), Store/Load Version으로 재전송 시간을 절약한다.
 - 화면 초기화 후 ECU는 Change Numeric Value 등의 명령어로 특정 오브젝트만 실시간 갱신한다.
 :::
 

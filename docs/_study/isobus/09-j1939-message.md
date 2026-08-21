@@ -38,7 +38,7 @@ packet-beta
 
 | 필드 | 비트 위치 | 범위 | 설명 |
 |---|---|---|---|
-| **Priority** | 28~26 | 0~7 | 버스 중재 우선순위. **0이 최고, 7이 최저** |
+| **Priority** | 28~26 | 0~7 | 버스 중재 우선순위. **0이 최고, 7이 최저**. 기본값은 제어 지향 메시지 3, 그 외 6 |
 | **EDP** | 25 | 0~1 | Extended Data Page. J1939에서는 0 고정 |
 | **DP** | 24 | 0~1 | Data Page. 0: 기본 J1939, 1: 확장 PGN 공간 |
 | **PF** | 23~16 | 0~255 | PDU Format. 메시지 종류 결정, PDU1/PDU2 구분 기준 |
@@ -59,10 +59,10 @@ CAN 29bit ID: 0x18FEEE00 (hex)
 
 hex → binary (29비트):
   0x18FEEE00 = 0001 1000 1111 1110 1110 1110 0000 0000 (32bit)
-  하위 29비트: 00 1 1000 1111 1110 1110 1110 0000 0000
+  하위 29비트: 1 1000 1111 1110 1110 1110 0000 0000
 
 필드 분해:
-  Priority : 000      = 6     ← 28~26번 비트
+  Priority : 110      = 6     ← 28~26번 비트
   EDP      : 0        = 0
   DP       : 0        = 0
   PF       : 1111 1110 = 0xFE = 254
@@ -107,7 +107,7 @@ PF < 240 (PDU1, 목적지 지정):
 
 검증:
   PF = 0xFE = 254, PS = 0xEE = 238
-  PGN = 254 * 256 + 238 = 65012 + 238 = 65262  ✓
+  PGN = 254 * 256 + 238 = 65024 + 238 = 65262  ✓
 
 CAN ID 구성 (Priority=6, DP=0, EDP=0, SA=0x00):
   0x18FEEE00
@@ -141,6 +141,10 @@ PGN 65262 (Engine Temperature) 내 SPN 목록:
   SPN 1134: Engine Intercooler Temp      (byte 7, 1byte)
   SPN 1135: Engine Intercooler Coolant Temp (byte 8, 1byte)
 ```
+
+::: tip 멀티바이트 파라미터는 LSB 먼저
+SPN 175처럼 2바이트 이상인 파라미터는 데이터 필드에 <strong>LSB 먼저</strong>(리틀엔디언) 배치한다. 예를 들어 byte 3~4에 놓인 2바이트 파라미터는 byte 3이 LSB, byte 4가 MSB다(ASCII 등 별도 명시된 경우는 예외).
+:::
 
 ## SPN 속성 (SPN 110 예시)
 
@@ -176,7 +180,7 @@ flowchart TD
     C{"PF < 240?"}
     D["PDU1<br>(Peer-to-Peer)"]
     E["PDU2<br>(Broadcast)"]
-    F["PS = Destination Address<br>특정 노드에게만 전송"]
+    F["PS = Destination Address<br>특정 노드 또는 전역(DA=255)"]
     G["PS = Group Extension<br>모든 노드에게 전송"]
 
     A --> B --> C
@@ -196,6 +200,8 @@ PS = DA (Destination Address)
   SA = 0xF9 (진단 도구)
   → CAN ID: 0x18EA00F9
 ```
+
+PDU1이 특정 노드 전용은 아니다. DA에 전역 주소 255(0xFF)를 넣으면 PDU1 메시지도 모든 노드를 대상으로 브로드캐스트할 수 있다. 반면 PDU2는 목적지를 지정할 수 없는 <strong>전역 전용</strong>이다.
 
 ## PDU2 (PF >= 240): 브로드캐스트 메시지
 
@@ -217,7 +223,7 @@ PS = Group Extension (PGN의 일부)
 |---|---|---|
 | PF 값 범위 | 0 ~ 239 (0x00 ~ 0xEF) | 240 ~ 255 (0xF0 ~ 0xFF) |
 | PS 의미 | Destination Address | Group Extension (PGN의 일부) |
-| 전송 방식 | 특정 노드 지정 | 버스 전체 브로드캐스트 |
+| 전송 방식 | 특정 노드 지정 (DA=255면 전역 전송) | 버스 전체 브로드캐스트 (전역 전용) |
 | 주요 용도 | 요청/응답, 진단 | 센서 데이터 주기적 전송 |
 
 # 5. PGN/SPN 디코딩 실습
@@ -225,7 +231,7 @@ PS = Group Extension (PGN의 일부)
 ## 대상 메시지
 
 ```
-18FEEE00#FFB03204FFFFFFFF
+18FEEE00#B03204FFFFFFFFFF
 ```
 
 ## 파싱 단계
@@ -234,7 +240,7 @@ PS = Group Extension (PGN의 일부)
 
 ```
 CAN ID   : 18FEEE00 (hex, 29비트)
-데이터   : FF B0 32 04 FF FF FF FF (8바이트)
+데이터   : B0 32 04 FF FF FF FF FF (8바이트)
            [0][1][2][3][4][5][6][7]
 ```
 
@@ -242,9 +248,9 @@ CAN ID   : 18FEEE00 (hex, 29비트)
 
 ```
 0x18FEEE00 → binary (29비트):
-  000 1 1000 1111 1110 1110 1110 0000 0000
+  1 1000 1111 1110 1110 1110 0000 0000
 
-Priority : 000         = 6
+Priority : 110         = 6
 EDP      : 0           = 0
 DP       : 0           = 0
 PF       : 1111 1110   = 0xFE = 254  (>= 240 → PDU2)
@@ -266,24 +272,23 @@ PGN = DP * 65536 + PF * 256 + PS
 
 ```mermaid
 packet-beta
-  0-7: "SPN 110<br>byte[0]=0xFF<br>(N/A)"
-  8-15: "SPN 110<br>byte[1]=0xB0<br>→ 136°C"
-  16-23: "SPN 174<br>byte[2]=0x32<br>→ 10°C"
-  24-31: "SPN 175<br>byte[3]=0x04<br>(low byte)"
-  32-39: "SPN 175<br>byte[4]=0xFF<br>(N/A)"
+  0-7: "SPN 110<br>byte[0]=0xB0<br>→ 136°C"
+  8-15: "SPN 174<br>byte[1]=0x32<br>→ 10°C"
+  16-23: "SPN 175<br>byte[2]=0x04<br>(LSB)"
+  24-31: "SPN 175<br>byte[3]=0xFF<br>(MSB)"
+  32-39: "SPN 176<br>byte[4]=0xFF<br>(N/A)"
   40-47: "SPN 176<br>byte[5]=0xFF<br>(N/A)"
-  48-55: "SPN 176<br>byte[6]=0xFF<br>(N/A)"
-  56-63: "SPN 1134<br>byte[7]=0xFF<br>(N/A)"
+  48-55: "SPN 1134<br>byte[6]=0xFF<br>(N/A)"
+  56-63: "SPN 1135<br>byte[7]=0xFF<br>(N/A)"
 ```
 
 ### 5단계: SPN 110 값 추출
 
 ```
 SPN 110 (Engine Coolant Temperature):
-  데이터 위치: byte[1] = 0xB0
+  데이터 위치: byte 1 (offset 0) → byte[0] = 0xB0
 
-  0xFF(byte[0]) → SAE 규약상 N/A (Not Available)
-  0xB0(byte[1]) = 176 (decimal)
+  0xB0 = 176 (decimal)
 
   실제 온도 = 176 * 1 °C/bit + (-40 °C)
             = 176 - 40
@@ -295,16 +300,17 @@ SPN 110 (Engine Coolant Temperature):
 ### 6단계: 전체 파싱 결과 요약
 
 ```
-메시지   : 18FEEE00#FFB03204FFFFFFFF
+메시지   : 18FEEE00#B03204FFFFFFFFFF
 Priority : 6
 SA       : 0x00 (Engine ECU #1)
 PGN      : 65262 (Engine Temperature)
 
-SPN 110  Engine Coolant Temperature : 136 °C  (byte[1]=0xB0)
-SPN 174  Engine Fuel Temperature 1  : 10 °C   (byte[2]=0x32, 50-40=10)
-SPN 175  Engine Oil Temperature 1   : N/A     (byte[3~4] 포함 0xFF)
+SPN 110  Engine Coolant Temperature : 136 °C  (byte[0]=0xB0)
+SPN 174  Engine Fuel Temperature 1  : 10 °C   (byte[1]=0x32, 50-40=10)
+SPN 175  Engine Oil Temperature 1   : N/A     (byte[2~3]=0x04,0xFF → raw=0xFF04, N/A 영역)
 SPN 176  Engine Turbo Temperature   : N/A
 SPN 1134 Intercooler Temp           : N/A
+SPN 1135 Intercooler Coolant Temp   : N/A
 ```
 
 ::: details Python 파싱 예제
@@ -317,7 +323,7 @@ def parse_j1939_message(can_id_hex: str, data_hex: str):
 
     Args:
         can_id_hex: 29비트 CAN ID (hex string, e.g. "18FEEE00")
-        data_hex:   데이터 필드 (hex string, e.g. "FFB03204FFFFFFFF")
+        data_hex:   데이터 필드 (hex string, e.g. "B03204FFFFFFFFFF")
     """
     can_id = int(can_id_hex, 16)
 
@@ -346,14 +352,14 @@ def parse_j1939_message(can_id_hex: str, data_hex: str):
 
     if pgn == 65262:  # Engine Temperature
         print("\n[PGN 65262: Engine Temperature]")
-        spn110_raw = data[1]
+        spn110_raw = data[0]  # SPN 110: byte 1 (offset 0)
         if spn110_raw == 0xFF:
             print("  SPN 110 Engine Coolant Temp: N/A")
         else:
             spn110_val = spn110_raw * 1 + (-40)
             print(f"  SPN 110 Engine Coolant Temp: {spn110_val} °C (raw=0x{spn110_raw:02X})")
 
-        spn174_raw = data[2]
+        spn174_raw = data[1]  # SPN 174: byte 2 (offset 1)
         if spn174_raw == 0xFF:
             print("  SPN 174 Engine Fuel Temp 1 : N/A")
         else:
@@ -362,7 +368,7 @@ def parse_j1939_message(can_id_hex: str, data_hex: str):
 
 
 # 실행 예시
-parse_j1939_message("18FEEE00", "FFB03204FFFFFFFF")
+parse_j1939_message("18FEEE00", "B03204FFFFFFFFFF")
 ```
 
 실행 결과:
@@ -384,8 +390,8 @@ PGN      : 65262 (0x0FEEE)
 - 29비트 ID는 Priority(3) + EDP(1) + DP(1) + PF(8) + PS(8) + SA(8)로 구성된다.
 - **PGN** = PF가 >= 240이면 PS 포함, PF < 240이면 PS 제외하여 계산한다.
 - <strong>SPN</strong>은 PGN 데이터 필드 내 개별 파라미터이며, `실제값 = raw * 분해능 + 오프셋` 공식으로 변환한다.
-- PDU1(PF < 240)은 특정 노드 지정, PDU2(PF >= 240)는 브로드캐스트 전송이다.
-- `18FEEE00#FFB03204FFFFFFFF` 파싱 결과: Priority=6, PGN=65262, SA=0x00, 냉각수 온도=136°C.
+- PDU1(PF < 240)은 목적지 지정이며 DA=255로 전역 전송도 가능하다. PDU2(PF >= 240)는 전역 전용 브로드캐스트다.
+- `18FEEE00#B03204FFFFFFFFFF` 파싱 결과: Priority=6, PGN=65262, SA=0x00, 냉각수 온도=136°C.
 :::
 
 ## 다음 챕터

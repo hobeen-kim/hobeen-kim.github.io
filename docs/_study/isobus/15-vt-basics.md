@@ -43,6 +43,8 @@ graph LR
     VTS -- "사용자 입력 이벤트" --> ECU
 ```
 
+VT 화면은 <strong>Data Mask 영역</strong>(작업기 UI가 표시되는 정사각형 영역, 최소 200 × 200 픽셀, version 6부터 최소 480 × 480)과 <strong>Soft Key Mask 영역</strong>(소프트키 라벨 영역, version 6부터 키당 최소 60 × 60 픽셀)으로 구성된다.
+
 ## 2. 왜 VT가 혁신적인가
 
 ### VT 이전: 전용 디스플레이 시대
@@ -94,13 +96,15 @@ sequenceDiagram
     participant VT as VT Server (디스플레이)
     participant User as 운전자
 
-    ECU->>VT: VT Status 요청 (Working Set Maintenance)
-    VT-->>ECU: VT Status 응답 (버전, 메모리 등)
+    VT-)ECU: VT Status (1초 주기 브로드캐스트)
+    ECU->>VT: Working Set Maintenance 전송 시작 (1초 주기)
+    ECU->>VT: Get Memory 등 기술 데이터 요청
+    VT-->>ECU: 응답 (VT 버전, 메모리 상태 등)
 
     ECU->>VT: Object Pool Transfer (화면 정의 데이터 전송)
-    VT-->>ECU: End of Object Pool Response (전송 완료 확인)
-
+    ECU->>VT: End of Object Pool (전송 완료 통지)
     VT->>VT: 오브젝트 풀 파싱 및 화면 렌더링
+    VT-->>ECU: End of Object Pool Response (오류 여부 보고)
 
     User->>VT: 버튼 클릭 / 소프트키 입력
     VT->>ECU: Button Activation Message (입력 이벤트 전달)
@@ -110,36 +114,38 @@ sequenceDiagram
     VT->>User: 새로운 값 화면 표시
 ```
 
+연결 유지는 두 주기 메시지가 담당한다. VT는 <strong>VT Status message</strong>를 1초 주기로 전체 브로드캐스트하고(요청-응답이 아니다), 각 Working Set은 <strong>Working Set Maintenance message</strong>를 1초 주기로 VT에 보낸다. 어느 쪽이든 <strong>3초간</strong> 끊기면 상대의 셧다운으로 판정한다 — 작업기 ECU는 안전 상태(safe state)로 진입하고, VT는 unexpected shutdown을 운전자에게 경보한 뒤 해당 풀을 휘발성 메모리에서 삭제한다.
+
 ## 4. VT 버전
 
 ISO 11783-6은 지속적으로 개정되어 왔으며, VT Server와 Client가 지원하는 <strong>버전(Version)</strong>에 따라 사용 가능한 기능이 달라진다.
 
 | 버전 | 주요 특징 |
 |------|-----------|
-| **Version 2** | 기본 오브젝트 타입, 기본 그래픽(픽셀 단위) |
-| **Version 3** | 색상 팔레트 확장(256색), 소프트키 마스크 개선 |
-| **Version 4** | 향상된 그래픽 품질, 윈도우 마스크(복수 화면 관리) |
-| **Version 5** | 스크롤 컨테이너, 드래그 앤 드롭 이벤트 지원 |
-| **Version 6** | 최신 버전, 추가 입력 이벤트, 다국어 개선 |
+| **Version 2** | 초판(2004) 기준 기본 기능 — 기본 오브젝트 타입, 256색 표준 팔레트, 구형 AUX(Type 1) |
+| **Version 3** | 2판(2010) — 새 AUX 프로토콜(Type 2, AUX-N) 도입, initiating bit 등 연결 관리 보강 |
+| **Version 4** | 2판(2010) — Window Mask·Key Group(여러 Working Set 동시 표시), Graphics Context, 커맨드 응답을 발신자에게 직접 전송 |
+| **Version 5** | 3판(2014) — Animation, External Object(Working Set 간 오브젝트 참조), Extended Version 명령, Auxiliary Capabilities, Unsupported VT Function message |
+| **Version 6** | 4판(2018) — Data Mask 최소 480×480·소프트키 최소 60×60, Colour Palette·Graphic Data·Scaled Graphic 오브젝트, AUX 입력 잠금(lock) 상태 |
 
-VT Server와 Client가 서로 다른 버전을 지원할 경우, <strong>낮은 버전으로 협상</strong>하여 동작한다. 협상 과정은 VT Status 메시지 교환 시 이루어진다.
+VT Server와 Client가 서로 다른 버전을 지원할 경우 별도의 협상 절차는 없다. 클라이언트가 <strong>Get Memory response 등 기술 데이터 메시지</strong>로 VT의 버전을 확인한 뒤, 자신이 VT 버전에 맞춰 오브젝트 풀과 사용 커맨드를 조정하는 <strong>일방향 적응</strong>이다. 낮은 버전 VT에 높은 버전 메시지를 보내서는 안 되며, 반대로 VT가 더 높은 버전이면 하위 호환으로 그대로 동작한다. Working Set Maintenance message에 보고하는 버전은 Working Set이 설계된 버전이며, VT에 맞춘 런타임 적응 때문에 바뀌지 않는다.
 
 ```mermaid
 graph LR
-    subgraph 버전 협상 예시
-        C[ECU: Version 5 지원]
+    subgraph 버전 적응 예시
+        C[ECU: Version 5 설계]
         V[VT: Version 4 지원]
-        R[실제 동작: Version 4]
-        C -- min 버전 협상 --> V
-        V --> R
+        R[동작: Version 4 기능 범위]
+        V -- "Get Memory response로 버전 4 보고" --> C
+        C -- "풀·커맨드를 v4에 맞게 조정" --> R
     end
 ```
 
 ## 5. AUX (보조 입력)
 
-<strong>AUX(Auxiliary Input)</strong>는 조이스틱, 추가 버튼 패드, 풋 페달 등 VT 디스플레이 외부의 보조 입력 장치를 ISOBUS에 통합하는 메커니즘이다. ISO 11783-6 Annex에 정의되어 있다.
+<strong>AUX(Auxiliary Input)</strong>는 조이스틱, 추가 버튼 패드, 풋 페달 등 VT 디스플레이 외부의 보조 입력 장치를 ISOBUS에 통합하는 메커니즘이다. ISO 11783-6 Annex J에 정의되어 있다.
 
-현재 표준에서 사용되는 버전은 **AUX-N**(New AUX)으로, 기존 AUX-O(Old AUX)를 대체했다.
+현재 표준에서 사용되는 버전은 **AUX-N**(New AUX, 표준의 Type 2, version 3 이상)으로, 기존 AUX-O(Old AUX, Type 1, version 2)를 대체했다. 두 프로토콜은 서로 호환되지 않는다.
 
 ### AUX 구성 요소
 
@@ -151,7 +157,7 @@ graph LR
 
 ### Preferred Assignment
 
-AUX의 핵심 개념 중 하나는 <strong>Preferred Assignment</strong>이다. 사용자가 한 번 입력 장치와 기능의 매핑을 설정하면, 그 설정이 VT에 저장된다. 다음에 같은 작업기를 연결하면 <strong>이전 매핑이 자동으로 복원</strong>된다.
+AUX의 핵심 개념 중 하나는 <strong>Preferred Assignment</strong>이다. 사용자가 한 번 입력 장치와 기능의 매핑을 설정하면, <strong>기능을 제공하는 Working Set(작업기 ECU)</strong>이 그 할당을 선호 할당으로 저장한다. 다음에 같은 작업기를 연결하면 Working Set이 Preferred Assignment command로 저장된 할당을 VT에 전달하고, VT가 이를 검증한 뒤 적용해 <strong>이전 매핑이 자동으로 복원</strong>된다.
 
 ```mermaid
 sequenceDiagram
@@ -159,24 +165,26 @@ sequenceDiagram
     participant VT as VT Server
     participant ECU as 작업기 ECU
 
-    ECU->>VT: AUX Function 정의 (오브젝트 풀 포함)
-    AUX->>VT: AUX Input Unit 능력 광고 (Available Input 목록)
+    AUX->>VT: 오브젝트 풀 업로드 (AUX Input 오브젝트 정의)
+    ECU->>VT: 오브젝트 풀 업로드 (AUX Function 오브젝트 포함)
 
-    VT->>VT: Preferred Assignment 복원 (이전 저장 설정)
-    VT->>ECU: Preferred Assignment 적용 알림
-    VT->>AUX: Assignment 적용 알림
+    ECU->>VT: Preferred Assignment command (저장해 둔 선호 할당 전달)
+    VT->>VT: 할당 검증 (기능-입력 타입 일치·충돌 확인)
+    VT->>AUX: AUX Input Status Enable (입력 상태 전송 활성화)
+    VT->>ECU: AUX Assignment command (할당 확정 통지)
 
     Note over AUX, ECU: 매핑 완료 — 조이스틱 조작 시 ECU 기능 실행
 
-    AUX->>VT: AUX Input Status (입력값 전달)
-    VT->>ECU: AUX Input Maintenance (기능에 매핑된 입력값 전달)
+    AUX-)ECU: AUX Input Type 2 Status (전체 Working Set에 직접 브로드캐스트)
 ```
+
+할당이 완료되면 입력값은 VT를 거치지 않는다. AUX Input Unit이 <strong>Auxiliary Input Type 2 Status message</strong>를 초당 1회(값 변경 시 즉시, 최대 20 Hz)로 전체 브로드캐스트하면, 할당된 기능의 Working Set이 이를 직접 수신해 실행한다. 입력 유닛은 별도로 Auxiliary Input Type 2 Maintenance message를 100 ms 주기로 브로드캐스트하며, 300 ms 동안 끊기면 VT와 기능 측 Working Set이 그 유닛의 할당을 제거한다. 다중 VT 환경에서 할당·검증은 <strong>function instance 0 VT</strong>만 수행한다.
 
 ::: tip 핵심 정리
 - VT는 ISO 11783-6에 정의된 표준 디스플레이 인터페이스로, 트랙터 디스플레이(VT Server)와 작업기 ECU(VT Client)로 구성된다.
-- 작업기 ECU는 오브젝트 풀을 VT로 전송하고, VT는 이를 렌더링한다.
-- VT는 버전(2~6)에 따라 지원 기능이 다르며, 낮은 버전으로 자동 협상한다.
-- AUX-N은 조이스틱 등 보조 입력 장치를 ISOBUS에 통합하며, Preferred Assignment로 매핑 설정을 저장한다.
+- 작업기 ECU는 오브젝트 풀을 VT로 전송하고, VT는 이를 렌더링한다. 연결은 VT Status·Working Set Maintenance(각 1초 주기, 3초 타임아웃)로 유지된다.
+- VT는 버전(2~6)에 따라 지원 기능이 다르며, 클라이언트가 기술 데이터 메시지로 확인한 VT 버전에 맞춰 풀·커맨드를 조정한다(일방향 적응).
+- AUX-N은 조이스틱 등 보조 입력 장치를 ISOBUS에 통합하며, 매핑 설정은 기능을 제공하는 Working Set이 Preferred Assignment로 저장했다가 VT에 전달해 복원한다. 할당된 입력값은 VT를 거치지 않고 전체 브로드캐스트된다.
 :::
 
 ## 다음 챕터

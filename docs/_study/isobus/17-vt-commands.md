@@ -20,17 +20,21 @@ next: /study/isobus/18-tc-basics
 
 VT Server가 사용자 입력이나 화면 상태 변화를 작업기 ECU(VT Client)에게 알리는 메시지이다. ECU는 이 메시지를 수신해 작업 제어 로직을 실행한다.
 
-모든 VT→ECU 메시지는 **Peer-to-Peer** 방식으로 전송되며, PGN <strong>0xE600 (EF00h)</strong>을 기반으로 한다.
+모든 VT→ECU 메시지는 **목적지 지정(destination-specific)** 방식으로 전송되며, PGN <strong>0xE600</strong>(58880)을 사용한다. 반대 방향인 ECU→VT 메시지에는 별도의 PGN <strong>0xE700</strong>(59136)이 예약되어 있다.
 
 | 명령어 이름 | PGN | 트리거 조건 | 주요 데이터 |
 |-------------|-----|-------------|-------------|
-| **Soft Key Activation** | EF00h | 소프트키(Key 오브젝트) 누름/뗌 | Key Object ID, 활성화 코드 (Pressed/Released/Held) |
-| **Button Activation** | EF00h | Button 오브젝트 누름/뗌 | Button Object ID, 활성화 코드 |
-| **Pointing Event** | EF00h | 터치스크린 탭/드래그 | X 좌표, Y 좌표, 터치 타입 |
-| **VT Select Input Object** | EF00h | 입력 필드 포커스 변경 | Input Object ID |
-| **VT ESC Message** | EF00h | ESC 키 입력 (입력 취소) | Input Object ID |
-| **VT Change Active Mask** | EF00h | 화면 전환 완료 알림 | New Active Data Mask ID |
-| **VT On User-Layout Hidden or Shown** | EF00h | 사용자 레이아웃 표시 상태 변경 | Object ID, 상태 |
+| **Soft Key Activation** | E600h | 소프트키(Key 오브젝트) 누름/뗌 | Key Object ID, 활성화 코드 (Pressed/Released/Held) |
+| **Button Activation** | E600h | Button 오브젝트 누름/뗌 | Button Object ID, 활성화 코드 |
+| **Pointing Event** | E600h | 터치스크린 탭/드래그 | X 좌표, Y 좌표, 터치 타입 |
+| **VT Select Input Object** | E600h | 입력 필드 포커스 변경 (운전자 조작·ESC에 의한 것만. ECU가 Select Input Object 명령으로 요청한 변경은 통지하지 않음) | Input Object ID |
+| **VT ESC Message** | E600h | ESC 키 입력 (입력 취소) | Input Object ID |
+| **VT Change Numeric Value** | E600h | 운전자가 Input Number·Input List·Input Boolean 등에 숫자 값 입력 완료 | Object ID, 새 값 |
+| **VT Change String Value** | E600h | 운전자가 Input String에 문자열 입력 완료 | Object ID, 새 문자열 |
+| **VT Change Active Mask** | E600h | 표시하려는 마스크·Key Group에서 누락 오브젝트 참조나 오류 감지 시 (심각한 오류면 풀 삭제까지 통지) | 마스크 Object ID, 에러 코드, 오류 오브젝트 ID |
+| **VT On User-Layout Hidden or Shown** | E600h | 사용자 레이아웃 표시 상태 변경 | Object ID, 상태 |
+
+운전자가 입력 필드에 값을 넣으면 <strong>VT Change Numeric Value / VT Change String Value message</strong>가 새 값을 ECU에 전달한다. 버튼 이벤트와 함께 사용자 입력이 ECU에 도달하는 핵심 경로다. 입력 오브젝트가 변수(Variable)를 참조하면 메시지에는 입력 오브젝트가 아니라 <strong>변수 오브젝트의 Object ID</strong>가 실린다. 한편 화면 전환 상태를 알고 싶다면 VT Change Active Mask(오류 통지용)가 아니라 <strong>VT Status message</strong>(활성 Working Set과 표시 중인 마스크 ID를 담아 초당 1회 브로드캐스트)를 참조해야 한다.
 
 ### Activation Code 상세
 
@@ -43,43 +47,49 @@ Button Activation과 Soft Key Activation의 `활성화 코드`는 다음 값을 
 | 2 | Held (길게 누르는 중, 반복 전송) |
 | 3 | Aborted (누르다 취소) |
 
+홀드 중에는 activation 메시지가 <strong>200 ms</strong>마다 반복 전송되며, Working Set은 메시지 간격이 300 ms를 넘으면 키가 릴리스된 것으로 처리해야 한다. 메시지에는 Object ID·활성화 코드 외에 Parent Object ID(표시 중인 마스크 또는 Key Group)와 key code(소프트키 코드 0은 알람 ACK 전용)도 실린다.
+
+### Activation 응답 규칙과 TAN
+
+Activation 메시지에는 ECU가 같은 내용을 반향(echo)하는 response가 정의되어 있다. v5 이하 조합에서는 응답이 선택이지만, <strong>v6 이상에서는 200 ms 이내 응답이 필수</strong>다. 300 ms 안에 응답이 없으면 VT는 최대 3회 재시도하고, 그래도 응답이 없으면 해당 Working Set의 unexpected shutdown으로 취급한다. v6부터는 메시지에 실리는 4비트 <strong>TAN(Transaction Number)</strong>으로, 빠르게 연속 발생할 수 있는 메시지-응답 쌍을 짝맞춘다.
+
 ## 2. ECU → VT 명령어
 
 작업기 ECU(VT Client)가 VT Server로 전송하는 명령어이다. 센서 데이터 갱신, 화면 전환, 오브젝트 속성 변경 등에 사용된다.
 
-ECU → VT 명령어도 **PGN 0xE600 (EF00h)** Peer-to-Peer 메시지로 전송된다.
+ECU → VT 명령어는 <strong>PGN 0xE700</strong>(59136) 목적지 지정 메시지로 전송된다. 모든 명령에는 에러 코드를 담은 response가 정의되어 있으며, 송신자는 응답을 받은 뒤 다음 명령을 보내는 것이 원칙이다. 단, <strong>1.5초</strong> 안에 응답이 없으면 다음 명령을 보낼 수 있다.
 
 ### 값 갱신 명령어
 
 | 명령어 이름 | 대상 오브젝트 | 설명 |
 |-------------|---------------|------|
-| **Change Numeric Value** | Output Number, Input Number, 변수 등 | 숫자 값을 새 값으로 갱신 |
-| **Change String Value** | Output String, Input String | 문자열 값을 새 값으로 갱신 |
-| **Change List Item** | Input List, Output List | 목록의 특정 항목을 변경 |
+| **Change Numeric Value** (A8h) | Output Number, Input Number, 변수 등 | 숫자 값을 새 값으로 갱신 |
+| **Change String Value** (B3h) | Output String, Input String | 문자열 값을 새 값으로 갱신 |
+| **Change List Item** (B1h) | Input List, Output List | 목록의 특정 항목을 변경 |
 
 ### 화면 전환 명령어
 
 | 명령어 이름 | 설명 |
 |-------------|------|
-| **Change Active Mask** | Working Set의 활성 Data Mask 또는 Alarm Mask를 교체 |
-| **Change Soft Key Mask** | Data Mask에 연결된 Soft Key Mask를 교체 |
+| **Change Active Mask** (ADh) | Working Set의 활성 Data Mask 또는 Alarm Mask를 교체 |
+| **Change Soft Key Mask** (AEh) | Data Mask에 연결된 Soft Key Mask를 교체 |
 
 ### 속성 변경 명령어
 
 | 명령어 이름 | 설명 |
 |-------------|------|
-| **Change Attribute** | 오브젝트의 특정 속성(배경색, 크기, 위치 등)을 런타임에 변경 |
-| **Change Priority** | Alarm Mask의 우선순위를 변경 |
-| **Change Size** | 오브젝트의 너비/높이를 변경 |
-| **Change Child Location** | 컨테이너 내 자식 오브젝트의 위치를 변경 |
-| **Change Child Position** | Data Mask 내 오브젝트의 절대 위치를 변경 |
+| **Change Attribute** (AFh) | AID(Attribute ID)가 부여된 속성(배경색, 폭·높이 등)을 런타임에 변경. 위치는 Change Child Location/Position, 문자열은 Change String Value를 사용 |
+| **Change Priority** (B0h) | Alarm Mask의 우선순위를 변경 |
+| **Change Size** (A6h) | 오브젝트의 너비/높이를 변경 |
+| **Change Child Location** (A5h) | 부모 오브젝트 내 자식 오브젝트의 위치를 상대 이동 |
+| **Change Child Position** (B4h) | 부모 오브젝트 좌상단 기준 절대 좌표로 자식 오브젝트의 위치를 변경 (Parent Object ID 함께 지정) |
 
 ### 표시 제어 명령어
 
 | 명령어 이름 | 설명 |
 |-------------|------|
-| **Hide/Show Object** | Container 또는 오브젝트의 가시성 토글 |
-| **Enable/Disable Object** | 입력 오브젝트의 활성화/비활성화 |
+| **Hide/Show Object** (A0h) | Container 오브젝트의 표시/숨김 제어. 개별 오브젝트를 숨기려면 Container로 묶어야 한다 |
+| **Enable/Disable Object** (A1h) | 입력 오브젝트의 활성화/비활성화 |
 
 ### Change Numeric Value 메시지 구조 예시
 
@@ -91,9 +101,11 @@ Byte 4: 0xFF          ← 예약 바이트
 Byte 5-8: 새로운 값   ← 32bit unsigned integer (Little Endian)
 ```
 
+Byte 5~8의 값 크기는 대상 오브젝트 타입에 따라 다르다 — Input Boolean은 1바이트, Meter·Bar Graph류는 2바이트, Input/Output Number·Number Variable은 4바이트이며 미사용 바이트는 0으로 채운다. 위 예시는 4바이트(32bit) 오브젝트 기준이다.
+
 ## 3. 매크로 (Macro)
 
-<strong>매크로(Macro)</strong>는 오브젝트 풀에 사전 정의된 **이벤트 기반 자동 동작** 목록이다. 특정 이벤트가 발생하면 VT가 자동으로 매크로를 실행한다. ECU에 메시지를 보내지 않고도 VT 레벨에서 화면 변화를 처리할 수 있어, ECU 부하를 줄이고 반응 속도를 높일 수 있다.
+<strong>매크로(Macro)</strong>는 오브젝트 풀에 사전 정의된 **이벤트 기반 자동 동작** 목록이다. 특정 이벤트가 발생하면 VT가 자동으로 매크로를 실행한다. ECU에 메시지를 보내지 않고도 VT 레벨에서 화면 변화를 처리할 수 있어, ECU 부하를 줄이고 반응 속도를 높일 수 있다. 매크로 안에서 실행된 명령에 대해서는 VT가 CAN 버스에 응답(response)을 보내지 않으므로 버스 트래픽도 줄어든다.
 
 ### 이벤트 종류
 
@@ -108,10 +120,10 @@ Byte 5-8: 새로운 값   ← 32bit unsigned integer (Little Endian)
 | **On Key Press** | Key 또는 Button이 눌릴 때 |
 | **On Key Release** | Key 또는 Button이 해제될 때 |
 | **On Change Attribute** | 오브젝트 속성이 변경될 때 |
-| **On Change String Value** | 문자열 값이 변경될 때 |
+| **On Change Value** | Change Numeric/String Value 명령으로 값이 변경될 때 |
 | **On Input Field Selection** | 입력 필드가 선택될 때 |
 | **On ESC** | ESC 이벤트 발생 시 |
-| **On VT Selection** | VT가 Working Set을 선택할 때 |
+| **On Activate / On Deactivate** | Working Set이 활성/비활성이 될 때 |
 
 ### 매크로 바인딩 XML 예시
 
@@ -129,8 +141,8 @@ Byte 5-8: 새로운 값   ← 32bit unsigned integer (Little Endian)
         background_colour="7"
         border_colour="8"
         key_code="1">
-  <macro_ref event_id="9" macro_id="50" />
-  <!-- event_id 9 = On Key Press -->
+  <macro_ref event_id="24" macro_id="50" />
+  <!-- event_id 24 = On Key Press -->
   <outputstring id="21" ... value="설정" />
 </button>
 ```
@@ -159,22 +171,22 @@ sequenceDiagram
 
     User->>VT: "시작" 버튼 터치
 
-    VT->>ECU: Button Activation (PGN EF00h)
+    VT->>ECU: Button Activation (PGN E600h)
     Note over VT, ECU: Button Object ID: 0x0014 (20)<br>Activation Code: 1 (Pressed)
 
     ECU->>ECU: 살포 시스템 시작 명령 실행
 
-    ECU->>VT: Button Activation Response (ACK)
-    Note over ECU, VT: 명령 수신 확인
+    ECU->>VT: Button Activation Response (PGN E700h)
+    Note over ECU, VT: 수신 확인 (v5 이하 선택, v6 이상 200ms 이내 필수)
 
-    VT->>ECU: Button Activation (PGN EF00h)
+    VT->>ECU: Button Activation (PGN E600h)
     Note over VT, ECU: Activation Code: 0 (Released)
 
-    ECU->>VT: Button Activation Response (ACK)
+    ECU->>VT: Button Activation Response (PGN E700h)
 
     ECU->>ECU: 살포량 센서 데이터 읽기 (예: 120 kg/h)
 
-    ECU->>VT: Change Numeric Value (PGN EF00h)
+    ECU->>VT: Change Numeric Value (PGN E700h)
     Note over ECU, VT: Output Number ID: 0x000B<br>New Value: 120
 
     VT->>User: 화면에 "살포량: 120 kg/h" 표시
@@ -196,7 +208,7 @@ sequenceDiagram
 
     ECU->>ECU: 온도 임계값 초과 감지 (92°C > 90°C)
 
-    ECU->>VT: Change Active Mask (PGN EF00h)
+    ECU->>VT: Change Active Mask (PGN E700h)
     Note over ECU, VT: New Active Mask: Alarm Mask ID (0x0003)
 
     VT->>User: 경고 화면 표시 ("온도 과열 경고!")
@@ -213,9 +225,9 @@ sequenceDiagram
 ```
 
 ::: tip 핵심 정리
-- VT → ECU 명령어는 사용자 입력 이벤트(버튼, 소프트키, 터치, ESC 등)를 ECU에 전달한다.
-- ECU → VT 명령어는 화면 값 갱신(Change Numeric/String Value), 화면 전환(Change Active Mask), 속성 변경에 사용된다.
-- 모든 명령어는 PGN EF00h(Peer-to-Peer)로 전송된다.
+- VT → ECU 메시지는 사용자 입력 이벤트(버튼, 소프트키, 터치, ESC)와 입력값(VT Change Numeric/String Value message)을 ECU에 전달한다.
+- ECU → VT 명령어는 화면 값 갱신(Change Numeric/String Value), 화면 전환(Change Active Mask), 속성 변경에 사용되며, 응답을 받은 뒤 다음 명령을 보낸다(1.5초 타임아웃).
+- VT→ECU 메시지는 PGN E600h(58880), ECU→VT 명령어는 PGN E700h(59136) — 모두 목적지 지정(destination-specific) 방식이다.
 - 매크로는 오브젝트 풀에 사전 정의된 이벤트 기반 자동 동작으로, ECU 개입 없이 VT 레벨에서 실행된다.
 - 버튼 클릭 → Button Activation → ECU 처리 → Change Numeric Value → 화면 갱신이 기본 상호작용 패턴이다.
 :::

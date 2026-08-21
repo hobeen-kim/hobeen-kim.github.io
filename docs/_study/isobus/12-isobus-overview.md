@@ -69,7 +69,7 @@ graph TD
 TECU(Tractor ECU)는 PGN 65097(Ground-Based Speed and Distance)을 100ms마다 브로드캐스트해야 한다. 데이터 형식도 정해져 있다.
 
 ```
-CAN ID: 0x0CFE610E  (Priority=3, PGN=65097, SA=0x0E)
+CAN ID: 0x0CFE490E  (Priority=3, PGN=65097(0xFE49), SA=0x0E)
 Data:   A0 0F 00 00 FF FF FF FF
         ↑
   Byte 1-2 = 0x0FA0 = 4000 → 4000 × 0.001 m/s = 4.0 m/s (약 14.4 km/h)
@@ -108,7 +108,7 @@ TC(Task Controller)가 처방 맵 기반으로 구획별 살포량을 조절할 
 | 주소 관리 | Address Claim 절차 수행 | 하드코딩된 주소 사용 |
 | VT 화면 | Object Pool로 UI 전송 | 전용 디스플레이에만 표시 |
 | TC 제어 | DDOP + Process Data 표준 명령 | 자체 제어 프로토콜 |
-| 물리 계층 | 250 kbps, TBC 9핀 커넥터 | 다른 속도, 다른 커넥터 |
+| 물리 계층 | 250 kbps, 9핀 브레이크어웨이 커넥터(IBBC) | 다른 속도, 다른 커넥터 |
 
 ## 3. ISO 11783 파트 구성
 
@@ -119,16 +119,16 @@ ISO 11783은 14개의 파트(Part)로 구성된 표준이다.
 | Part 1 | General | 표준의 범위, 용어 정의, 전체 구조 |
 | Part 2 | Physical Layer | 전기적 특성, 케이블, 커넥터 (CAN 250kbps) |
 | Part 3 | Data Link Layer | 프레임 형식, CAN 기반 데이터 링크 |
-| Part 4 | Network Layer | 네트워크 상호연결, 브리지 |
+| Part 4 | Network Layer | 네트워크 상호연결 장치(NIU: 리피터·브리지·라우터·게이트웨이·TECU) |
 | Part 5 | Network Management | 주소 클레임, CF(Control Function) 관리 |
 | Part 6 | Virtual Terminal | 작업기 UI를 트랙터 화면에 표시 |
 | Part 7 | Implement Messages | 작업기 기능 관련 PGN 정의 |
 | Part 8 | Power Train Messages | 엔진·변속기 관련 PGN 정의 |
 | Part 9 | Tractor ECU | 트랙터 정보(속도, PTO, 히치) 제공 ECU |
 | Part 10 | Task Controller | 작업 계획·기록, 정밀 농업 |
-| Part 11 | Mobile Data Element | 데이터 사전(Data Dictionary) |
+| Part 11 | Mobile Data Element Dictionary | 데이터 사전(DDE/DDI 정의) |
 | Part 12 | Diagnostics | 진단 메시지(DM), 고장 코드 |
-| Part 13 | File Server | ECU 간 파일 전송 |
+| Part 13 | File Server | 파일 저장소 제공, 파일 접근 명령 |
 | Part 14 | Sequence Control | 작업 순서 자동화 |
 
 ## 4. J1939과 ISOBUS의 관계
@@ -141,19 +141,21 @@ graph TB
         direction TB
         L7["응용 계층 (Application Layer)<br>─────────────────────────<br>VT (Virtual Terminal) — ISO 11783-6<br>TC (Task Controller) — ISO 11783-10<br>TECU (Tractor ECU) — ISO 11783-9<br>진단 (Diagnostics) — ISO 11783-12<br>─────────────────────────<br>★ ISOBUS 고유 기능"]
 
-        L4["네트워크 계층 (Network Layer)<br>─────────────────────────<br>ISO 11783-4 / J1939-31<br>TP(Transport Protocol) 포함"]
+        L4["네트워크 계층 (Network Layer)<br>─────────────────────────<br>ISO 11783-4 / J1939-31<br>NIU(세그먼트 상호연결 장치)"]
 
-        L3["데이터 링크 계층 (Data Link Layer)<br>─────────────────────────<br>ISO 11783-3 / J1939-21<br>29비트 CAN ID, PGN 체계"]
+        L3["데이터 링크 계층 (Data Link Layer)<br>─────────────────────────<br>ISO 11783-3 / J1939-21<br>29비트 CAN ID, PGN 체계<br>TP·ETP(멀티 패킷 전송)"]
 
-        L2["물리 계층 (Physical Layer)<br>─────────────────────────<br>ISO 11783-2 / J1939-11<br>CAN 250kbps, 종단 저항 120Ω"]
+        L2["물리 계층 (Physical Layer)<br>─────────────────────────<br>ISO 11783-2 / J1939-11<br>CAN 250kbps, 능동 종단(TBC)"]
 
         L7 --> L4 --> L3 --> L2
     end
 ```
 
 정리하면:
-- **물리·데이터링크·네트워크 계층**: J1939과 동일한 기반 사용
+- **물리·데이터링크·네트워크 계층**: J1939과 조화(harmonized)된 공통 기반 사용
 - **응용 계층**: VT, TC, TECU 등 ISOBUS 고유 기능이 추가됨
+
+여기서 TP(Transport Protocol, 최대 1785바이트)와 ETP(Extended Transport Protocol, 최대 약 117MB)는 <strong>데이터 링크 계층인 Part 3</strong>에 정의된 멀티 패킷 전송 기능이다. 네트워크 계층(Part 4)은 전송 프로토콜이 아니라 세그먼트 간 메시지를 중계하는 NIU(Network Interconnection Unit)를 다룬다.
 
 J1939을 이해했다면 ISOBUS의 하위 계층은 이미 알고 있는 것과 다름없다. ISOBUS 학습은 응용 계층의 고유 기능에 집중한다.
 

@@ -37,7 +37,7 @@ tags: [ISOBUS, 부록]
 |------|------|
 | **증상** | VT에 UI가 표시되지 않음, "Object Pool Upload Failed" 또는 타임아웃 발생 |
 | **원인 1** | VT의 가용 메모리가 부족하다. 오브젝트 풀 크기가 VT 사양을 초과한다. |
-| **원인 2** | TP 전송 타임아웃: 패킷 간 간격이 250ms를 초과했다. |
+| **원인 2** | TP 전송 타임아웃: destination-specific TP.DT는 송신 측이 패킷 간 간격을 최대 200ms 이내로 유지해야 하며(CTS로 흐름 제어), 수신 측은 다음 패킷을 최대 T1(750ms) 동안만 기다린다. 이를 넘기면 연결이 중단된다(ISO 11783-3 §5.10). |
 | **원인 3** | 오브젝트 풀 내부 참조 오류(존재하지 않는 오브젝트 ID 참조). |
 | **해결** | VT의 지원 메모리를 확인하고 오브젝트 풀을 최적화한다. 전송 속도를 높이고, ISO 11783-6 준수 여부를 검증 도구로 확인한다. |
 
@@ -46,8 +46,8 @@ tags: [ISOBUS, 부록]
 | 항목 | 내용 |
 |------|------|
 | **증상** | 멀티패킷 전송이 중간에 끊기고 Abort 메시지 수신 |
-| **원인** | J1939 TP 규격상 패킷(TP.DT) 간 전송 간격이 250ms를 초과하면 수신 측이 연결을 중단한다. 또는 CTS 응답 대기 시간(T3 = 1250ms)이 초과된다. |
-| **해결** | TP.DT 패킷 간 간격을 250ms 이내로 유지한다. 버스 부하가 높은 경우 전송 스케줄을 조정하거나, ETP(Extended Transport Protocol)로 전환한다. |
+| **원인** | ISO 11783-3 TP 규격상 destination-specific 전송에서 패킷(TP.DT) 간 전송 간격이 200ms를 초과하거나 수신 측의 다음 패킷 대기 한도 T1(750ms)을 넘기면 수신 측이 연결을 중단한다. 또는 마지막 패킷 송신 후 다음 CTS·EndOfMsgACK 대기 시간 T3(1250ms)이 초과된다. |
+| **해결** | TP.DT 패킷 간 간격을 200ms 이내로 유지한다. 버스 부하가 높은 경우 전송 스케줄을 조정하거나, 1,785바이트를 초과하는 대용량 데이터라면 ETP(Extended Transport Protocol, PGN: ETP.CM 51200/0xC800, ETP.DT 50944/0xC700)로 전환한다. |
 
 ## 6. DLC 불일치
 
@@ -71,7 +71,7 @@ tags: [ISOBUS, 부록]
 |------|------|
 | **증상** | VT에서 작업기 UI가 나타나지 않음, Working Set Master가 VT를 찾지 못함 |
 | **원인** | NAME의 Function 필드 설정 오류. Virtual Terminal 기능 코드(0x26)가 올바르게 설정되지 않아 VT를 인식하지 못한다. 또는 Working Set Maintenance 메시지 전송 누락. |
-| **해결** | Working Set Master의 NAME Function 필드를 올바르게 설정한다. 주소 획득 후 매 2초마다 Working Set Maintenance 메시지(PGN 0xE8FF)를 전송하는지 확인한다. |
+| **해결** | Working Set Master의 NAME Function 필드를 올바르게 설정한다. 주소 획득 후 <strong>매 1초마다</strong> Working Set Maintenance 메시지(ECU to VT PGN 59136/0xE700 위에 실림)를 전송하는지 확인한다. VT는 이 메시지가 3초간 오지 않으면 Master의 비정상 종료로 판정한다. |
 
 ## 9. TC가 DDOP를 거부
 
@@ -96,8 +96,8 @@ tags: [ISOBUS, 부록]
 | 항목 | 내용 |
 |------|------|
 | **증상** | GPS 위치 기반 자동 섹션 ON/OFF가 작동 안 함 |
-| **원인** | DDOP에서 섹션에 해당하는 DeviceElement의 DDI(Setpoint/Actual Section Control State) 설정 누락. 또는 TC와 TECU 간 작업 상태(Task Active) 동기화 문제. |
-| **해결** | DDOP의 각 섹션 DeviceElement에 DDI 160(Section Control State)을 올바르게 등록한다. TC가 Task Active 상태임을 확인하고, 작업 중 TC로부터 섹션 설정값이 수신되는지 로그를 확인한다. |
+| **원인** | DDOP에서 섹션에 해당하는 DeviceElement의 DDI(Section Control State 등) 설정 누락. 또는 TC와 TECU 간 작업 상태(Task Active) 동기화 문제. |
+| **해결** | DDOP의 각 섹션 DeviceElement에 DDI 160(Section Control State)과 161(Actual Condensed Work State)을 올바르게 등록한다. TC가 Task Active 상태임을 확인하고, 작업 중 TC로부터 섹션 설정값(DDI 290, Setpoint Condensed Work State)이 수신되는지 로그를 확인한다. |
 
 ## 12. 메시지 수신은 되나 데이터 값이 이상함
 
@@ -113,3 +113,4 @@ tags: [ISOBUS, 부록]
 - **에러 카운터 모니터링**: CAN 컨트롤러의 TEC/REC 값을 주기적으로 읽어 에러 누적 추세를 파악한다.
 - **전압 측정**: 정상 버스는 CAN_H 약 3.5V, CAN_L 약 1.5V (Dominant), 각각 2.5V (Recessive)여야 한다.
 - **로그 수준 분리**: 에러 프레임, 주소 협상, TP 세션을 별도 채널로 로깅하면 원인 파악이 빠르다.
+- **TC 연결 상태 확인**: TC Status 메시지(Process Data PGN 51968/0xCB00 위에 실림)는 2초 주기로 송신된다. 클라이언트가 이를 6초간 받지 못하면 TC의 비정상 종료로 간주하고 Client Task 송신을 중단해야 한다(ISO 11783-10 Annex B).

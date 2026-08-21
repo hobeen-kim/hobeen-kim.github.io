@@ -27,15 +27,15 @@ next: /study/isobus/23-summary
 0CF004FE#FF3C320000FFFF00
 18EAFFFE#00EE00
 18EEFF00#FFB03204FFFFFFFF
-0CAC1CFE#014B00FA02000000
+0CFE49FE#014B00FA02000000
 18EA26FF#FDEC00
 1CEA00FF#FDEC00
-18ECFF26#10280000FF04FEFE
+18ECFF26#20280006FF00CB00
 18EBFF26#01B003020006043C
 18EBFF26#02FFFFFFFFFFFFFE
 18EBFF26#03FF640000FFFFFF
 0CF00426#FF8C4B0000FFFF00
-18FEF026#FFB4032AFC000000
+18E60026#FFB4032AFC000000
 ```
 
 각 메시지를 분석한다.
@@ -43,17 +43,17 @@ next: /study/isobus/23-summary
 | # | CAN ID | PGN | SA | DA | 분류 |
 |---|--------|-----|----|----|------|
 | 1 | `0CF004FE` | 0xF004 (EEC1) | 0xFE | - | Engine Speed (엔진 RPM) |
-| 2 | `18EAFFFE` | 0xEAFF (Request PGN) | 0xFE | 0xFF | PGN 0xEE00 요청 (Address Claimed) |
+| 2 | `18EAFFFE` | 0xEA00 (Request PGN) | 0xFE | 0xFF | PGN 0xEE00 요청 (Address Claimed) |
 | 3 | `18EEFF00` | 0xEE00 (Address Claimed) | 0x00 | 0xFF | 주소 클레임 (SA=0x00) |
-| 4 | `0CAC1CFE` | 0xAC1C (TECU) | 0xFE | - | 지상 속도 (Ground Speed) |
-| 5 | `18EA26FF` | 0xEA26 (Request PGN) | 0xFF | 0x26 | SC에게 PGN 0xECFD 요청 |
+| 4 | `0CFE49FE` | 0xFE49 (Ground-based Speed) | 0xFE | - | 지상 속도 (Ground-based Speed and Distance) |
+| 5 | `18EA26FF` | 0xEA00 (Request PGN) | 0xFF | 0x26 | SC에게 PGN 0xECFD 요청 |
 | 6 | `1CEA00FF` | 0xEA00 (Request PGN) | 0xFF | 0x00 | 주소 0x00에게 PGN 요청 |
-| 7 | `18ECFF26` | 0xEC00 (TP.CM) | 0xFF | 0x26 | Transport Protocol 연결 개시 (RTS) |
-| 8 | `18EBFF26` | 0xEB00 (TP.DT) | 0xFF | 0x26 | Transport Protocol 데이터 패킷 1 |
-| 9 | `18EBFF26` | 0xEB00 (TP.DT) | 0xFF | 0x26 | Transport Protocol 데이터 패킷 2 |
-| 10 | `18EBFF26` | 0xEB00 (TP.DT) | 0xFF | 0x26 | Transport Protocol 데이터 패킷 3 |
+| 7 | `18ECFF26` | 0xEC00 (TP.CM) | 0x26 | 0xFF | Transport Protocol 연결 개시 (BAM) |
+| 8 | `18EBFF26` | 0xEB00 (TP.DT) | 0x26 | 0xFF | Transport Protocol 데이터 패킷 1 |
+| 9 | `18EBFF26` | 0xEB00 (TP.DT) | 0x26 | 0xFF | Transport Protocol 데이터 패킷 2 |
+| 10 | `18EBFF26` | 0xEB00 (TP.DT) | 0x26 | 0xFF | Transport Protocol 데이터 패킷 3 |
 | 11 | `0CF00426` | 0xF004 (EEC1) | 0x26 | - | Engine Speed (SA=0x26 ECU) |
-| 12 | `18FEF026` | 0xFEF0 (VT-to-ECU) | 0x26 | 0xFF | VT 소프트키 상태 전송 |
+| 12 | `18E60026` | 0xE600 (VT-to-ECU) | 0x26 | 0x00 | VT 소프트키 상태 전송 (Soft Key Activation) |
 
 ### 1.2 분석 도구 소개
 
@@ -146,7 +146,6 @@ def decode_eec1(data: bytes) -> dict:
     rpm_raw   = struct.unpack_from("<H", data, 3)[0]  # Little-endian uint16
 
     return {
-        "pgn":               "0xF004 (EEC1)",
         "engine_speed_rpm":  rpm_raw * 0.125,
         "accel_position_pct": accel_raw * 0.4,
     }
@@ -154,7 +153,7 @@ def decode_eec1(data: bytes) -> dict:
 
 def decode_ground_speed(data: bytes) -> dict:
     """
-    Decode TECU Ground Speed (PGN 0xFE48 / SPN 517).
+    Decode TECU Ground-based Speed and Distance (PGN 0xFE49 / SPN 517).
     Bytes [0..1]: speed in mm/s (1 bit = 1 mm/s), range 0..65530 mm/s.
     """
     if len(data) < 2:
@@ -164,7 +163,6 @@ def decode_ground_speed(data: bytes) -> dict:
     speed_mps = raw_speed / 1000.0  # Convert mm/s to m/s
 
     return {
-        "pgn":          "Ground Speed (TECU)",
         "speed_mm_s":   raw_speed,
         "speed_km_h":   round(speed_mps * 3.6, 2),
     }
@@ -202,7 +200,7 @@ def batch_decode(log_lines: list[str]) -> list[dict]:
 if __name__ == "__main__":
     log = [
         "0CF004FE#FF3C320000FFFF00",
-        "0CAC1CFE#014B00FA02000000",
+        "0CFE49FE#014B00FA02000000",
         "0CF00426#FF8C4B0000FFFF00",
     ]
     for entry in batch_decode(log):
@@ -212,12 +210,12 @@ if __name__ == "__main__":
 실행 결과 예시:
 
 ```
-{'priority': '0x3', 'pgn': 61444, 'pgn_hex': '0xF004', 'da': 'Broadcast',
- 'sa': '0xFE', 'engine_speed_rpm': 1600.0, 'accel_position_pct': 0.0, 'raw_id': '0x0CF004FE'}
-{'priority': '0x3', 'pgn': 44060, 'pgn_hex': '0xAC1C', 'da': 'Broadcast',
- 'sa': '0xFE', 'raw': '014B00FA02000000', 'raw_id': '0x0CAC1CFE'}
-{'priority': '0x3', 'pgn': 61444, 'pgn_hex': '0xF004', 'da': 'Broadcast',
- 'sa': '0x26', 'engine_speed_rpm': 2444.0, 'accel_position_pct': 0.0, 'raw_id': '0x0CF00426'}
+{'priority': 3, 'pgn': 61444, 'pgn_hex': '0xF004', 'da': 'Broadcast',
+ 'sa': '0xFE', 'engine_speed_rpm': 0.0, 'accel_position_pct': 24.0, 'raw_id': '0x0CF004FE'}
+{'priority': 3, 'pgn': 65097, 'pgn_hex': '0xFE49', 'da': 'Broadcast',
+ 'sa': '0xFE', 'raw': '014B00FA02000000', 'raw_id': '0x0CFE49FE'}
+{'priority': 3, 'pgn': 61444, 'pgn_hex': '0xF004', 'da': 'Broadcast',
+ 'sa': '0x26', 'engine_speed_rpm': 0.0, 'accel_position_pct': 56.0, 'raw_id': '0x0CF00426'}
 ```
 
 ## 3. VT 오브젝트 풀 전체 구성
@@ -236,18 +234,18 @@ if __name__ == "__main__":
 | 0x0001 | Working Set | Root WS | 메인 데이터 마스크 참조 |
 | 0x0010 | Data Mask | Main Screen | 800×480, 배경색 흰색 |
 | 0x0011 | Data Mask | Settings Screen | 800×480, 배경색 회색 |
-| 0x0020 | Number Output | Engine RPM | 값 범위 0~4000, 단위 rpm |
-| 0x0021 | Number Output | Ground Speed | 값 범위 0~50, 단위 km/h |
+| 0x0020 | Output Number | Engine RPM | 값 범위 0~4000, 단위 rpm |
+| 0x0021 | Output Number | Ground Speed | 값 범위 0~50, 단위 km/h |
 | 0x0022 | Output String | Work Status | "WORKING" / "STOPPED" |
-| 0x0030 | Number Input | Target Rate | 입력 범위 0~600, 단위 L/ha |
+| 0x0030 | Input Number | Target Rate | 입력 범위 0~600, 단위 L/ha |
 | 0x0040 | Soft Key Mask | Main SKM | 소프트키 4개 배치 |
 | 0x0041 | Key | Key: Settings | 설정 화면으로 전환 |
 | 0x0042 | Key | Key: Work ON | 작업 시작 명령 |
 | 0x0043 | Key | Key: Work OFF | 작업 중지 명령 |
 | 0x0050 | Container | RPM Container | RPM 레이블 + 출력 오브젝트 묶음 |
 | 0x0051 | Container | Speed Container | 속도 레이블 + 출력 오브젝트 묶음 |
-| 0x0060 | Output Archetype | RPM Label | "Engine RPM" 고정 텍스트 |
-| 0x0061 | Output Archetype | Speed Label | "Speed (km/h)" 고정 텍스트 |
+| 0x0060 | Output String | RPM Label | "Engine RPM" 고정 텍스트 |
+| 0x0061 | Output String | Speed Label | "Speed (km/h)" 고정 텍스트 |
 
 ### 3.3 화면 레이아웃 다이어그램
 
@@ -263,7 +261,7 @@ graph TD
 
     subgraph Settings["설정 화면 (Data Mask 0x0011)"]
         direction TB
-        RATE["Number Input: Target Rate (0x0030)<br>0~600 L/ha"]
+        RATE["Input Number: Target Rate (0x0030)<br>0~600 L/ha"]
         BACK["Soft Key: Back to Main"]
     end
 
@@ -288,15 +286,15 @@ graph TD
   <Include ObjectID="34"/>  <!-- Work Status String -->
 </DataMask>
 
-<!-- Engine RPM Number Output (ID=0x0020) -->
-<NumberOutput ObjectID="32" BackgroundColour="1"
+<!-- Engine RPM Output Number (ID=0x0020) -->
+<OutputNumber ObjectID="32" BackgroundColour="1"
               Value="0" Offset="0" Scale="1.0"
               NumberOfDecimals="0" Format="false"
               Justification="right" Width="120" Height="30"
               VariableReference="0">
-</NumberOutput>
+</OutputNumber>
 
-<!-- Target Rate Number Input (ID=0x0030) -->
+<!-- Target Rate Input Number (ID=0x0030) -->
 <InputNumber ObjectID="48" BackgroundColour="1"
              Value="150" Offset="0" Scale="1.0"
              NumberOfDecimals="0" Format="false"
@@ -332,7 +330,7 @@ sequenceDiagram
 
     Note over FMIS,SC: [Phase 3] 실시간 살포
     loop 작업 중 (1초 간격)
-        GPS->>TC: NMEA GGA / ISOBUS TECU<br>현재 위치 (lat, lon)
+        GPS->>TC: NMEA 2000 GNSS Position Data<br>(PGN 129029) 현재 위치 (lat, lon)
         TC->>TC: 위치 → 처방 맵 격자 셀 조회<br>목표 살포량 결정
         TC->>SC: Section Control 명령<br>(섹션 ON/OFF 비트맵)
         TC->>SC: Rate Control 명령<br>(목표 살포량 L/ha)

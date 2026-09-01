@@ -41,17 +41,10 @@ ECU 소프트웨어 업데이트(OTA), 레이더/카메라 데이터, 고정밀 
 
 Bosch는 이 두 한계를 모두 해결하기 위해 **2012년 CAN FD(CAN with Flexible Data-rate)** 규격을 발표했다.
 
-```
-Classic CAN 한계 요약
-─────────────────────────────────────
-  페이로드:   최대 8 bytes
-  비트레이트: 최대 1 Mbps
-  → 현대 차량 전자화 요구를 충족 불가
-─────────────────────────────────────
-CAN FD 개선
-  페이로드:   최대 64 bytes  (8배)
-  비트레이트: Data phase 최대 8 Mbps (8배)
-```
+| | Classic CAN | CAN FD | 개선 |
+|---|---|---|---|
+| 페이로드 | 최대 8 bytes | 최대 64 bytes | 8배 |
+| 비트레이트 | 최대 1 Mbps | Data phase 최대 8 Mbps | 8배 |
 
 # 2. CAN FD의 구조
 
@@ -144,12 +137,8 @@ gantt
 
 `BRS=1`이면 BRS 비트 직후부터 Data phase 비트레이트로 전환된다. `BRS=0`이면 Data phase도 동일한 Nominal Bit Rate로 전송된다(속도 이점 없음).
 
-```
-Arbitration phase  BRS  │  Data phase            │  EOF
-───────────────────[1]──┼──[고속 전송 구간]────────┼──[표준 복귀]
-500 kbps           ↑    │  2~8 Mbps               │  500 kbps
-                   전환 시점
-```
+![BRS 비트를 기점으로 Arbitration phase(500kbps)에서 Data phase(2~8Mbps)로 전환됐다가 EOF에서 500kbps로 복귀하는 타임라인](/images/study-isobus/07-brs-bitrate-switch-light.png)
+![BRS 비트를 기점으로 Arbitration phase(500kbps)에서 Data phase(2~8Mbps)로 전환됐다가 EOF에서 500kbps로 복귀하는 타임라인](/images/study-isobus/07-brs-bitrate-switch-dark.png)
 
 ## 실제 처리량 비교 예시
 

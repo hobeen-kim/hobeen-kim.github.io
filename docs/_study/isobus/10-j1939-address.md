@@ -20,13 +20,8 @@ next: /study/isobus/11-j1939-transport
 
 J1939 네트워크에서 모든 ECU는 <strong>소스 주소(Source Address, SA)</strong>를 가진다. SA는 8비트 값으로, 29비트 CAN ID의 <strong>하위 8비트(비트 7~0)</strong>에 위치한다.
 
-```
-┌─────────────────────────────────────────────────┐
-│           29-bit CAN Identifier                  │
-│  [28:26] P  [25] R  [24] DP  [23:16] PF          │
-│  [15:8] PS (DA or Group Ext)  [7:0] SA           │
-└─────────────────────────────────────────────────┘
-```
+![29비트 CAN Identifier 비트 필드 배치](/images/study-isobus/10-can-id-bitfields-light.png)
+![29비트 CAN Identifier 비트 필드 배치](/images/study-isobus/10-can-id-bitfields-dark.png)
 
 ### SA 값 범위
 
@@ -170,13 +165,8 @@ sequenceDiagram
 
 ### 메시지 구조
 
-```
-PGN 65240 (Commanded Address)
-┌────────────────────────────────────────┐
-│ Byte 1~8 : 대상 NAME (64bit)           │
-│ Byte 9   : 새로운 SA (8bit)            │
-└────────────────────────────────────────┘
-```
+![Commanded Address 9바이트 구조 — Byte 1~8은 대상 NAME, Byte 9는 새 SA. 8바이트를 넘어 BAM으로 전송한다](/images/study-isobus/10-commanded-address-light.png)
+![Commanded Address 9바이트 구조 — Byte 1~8은 대상 NAME, Byte 9는 새 SA. 8바이트를 넘어 BAM으로 전송한다](/images/study-isobus/10-commanded-address-dark.png)
 
 데이터가 9바이트라 단일 CAN 프레임(8바이트)에 담을 수 없으므로 <strong>BAM(Broadcast Announce Message) 전송 프로토콜로 Global(255)에 송신</strong>한다. 따라서 Commanded Address를 지원하는 장치는 BAM 수신도 지원해야 한다.
 

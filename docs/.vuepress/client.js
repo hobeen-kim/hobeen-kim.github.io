@@ -5,6 +5,8 @@ import LogList from "./components/LogList.vue";
 import BookList from "./components/BookList.vue";
 import StudyList from "./components/StudyList.vue";
 import KnowledgeGraph from "./components/KnowledgeGraph.vue";
+import VtObjectPoolDemo from "./components/VtObjectPoolDemo.vue";
+import IsobusFlowDemo from "./components/IsobusFlowDemo.vue";
 import Footer from "./theme/Footer.vue";
 import Header from "./theme/Header.vue";
 import Home from "./components/home/Home.vue";
@@ -19,6 +21,8 @@ export default defineClientConfig({
         app.component('BookList', BookList)
         app.component('StudyList', StudyList)
         app.component('KnowledgeGraph', KnowledgeGraph)
+        app.component('VtObjectPoolDemo', VtObjectPoolDemo)
+        app.component('IsobusFlowDemo', IsobusFlowDemo)
         app.component('Footer', Footer)
         app.component('Header', Header)
         app.component('ResumeCover', ResumeCover)

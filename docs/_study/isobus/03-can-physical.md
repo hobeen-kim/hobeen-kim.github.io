@@ -42,17 +42,8 @@ CAN은 <strong>두 개의 선(CAN_H, CAN_L)</strong>으로 신호를 전달한�
 | Recessive (비트 1) | 2.5 V | 2.5 V | ~0 V |
 | 유휴(버스 비어 있음) | 2.5 V | 2.5 V | ~0 V |
 
-```
-전압(V)
- 3.5 ─ ─ ─ ┌────┐    ┌────┐   CAN_H
- 2.5 ───────┘    └────┘    └────
-            │                    
- 2.5 ───────┐    ┌────┐    ┌────  CAN_L
- 1.5 ─ ─ ─ └────┘    └────┘   
-
-          [Dominant][Rec][Dominant][Rec]
-          [  bit 0 ][ 1 ][  bit 0 ][ 1 ]
-```
+![CAN_H/CAN_L 전압 레벨 — Dominant(비트 0)와 Recessive(비트 1) 구간](/images/study-isobus/03-voltage-levels-light.png)
+![CAN_H/CAN_L 전압 레벨 — Dominant(비트 0)와 Recessive(비트 1) 구간](/images/study-isobus/03-voltage-levels-dark.png)
 
 ## 2. Dominant vs Recessive — Wired-AND 동작
 
@@ -159,14 +150,8 @@ ID=0x7FF: 11111111111  ← 전부 1 → 누구에게나 짐
 
 **이상적인 파형:**
 
-```
-CAN_H ──┐  ┌──┐  ┌──┐  ┌──
-         └──┘  └──┘  └──┘  
-CAN_L ──┐  ┌──┐  ┌──┐  ┌──  ← 반전 (CAN_H와 대칭)
-         └──┘  └──┘  └──┘  
-Diff  ──┐  ┌──┐  ┌──┐  ┌──  ← 차동 전압 (CAN_H - CAN_L)
-     0V ┘  └  ┘  └  ┘  └  
-```
+![CAN_H / CAN_L / Diff 이상적인 파형 — CAN_L은 CAN_H의 반전, Diff는 CAN_H - CAN_L](/images/study-isobus/03-waveform-light.png)
+![CAN_H / CAN_L / Diff 이상적인 파형 — CAN_L은 CAN_H의 반전, Diff는 CAN_H - CAN_L](/images/study-isobus/03-waveform-dark.png)
 
 **실제 파형에서 보이는 현상:**
 
@@ -327,24 +312,8 @@ CAN_BitTiming timing_250k = {
 
 CAN 디버깅 장비나 PC 인터페이스에서 가장 많이 쓰이는 9핀 D-Sub 커넥터이다.
 
-```
-DB9 Female (장비 측)
- ┌─────────────────────┐
- │  ○   ○   ○   ○   ○  │  ← 핀 1~5
- │    ○   ○   ○   ○    │  ← 핀 6~9
- └─────────────────────┘
-
-핀 번호 → 신호:
-  Pin 1: 없음 (NC)
-  Pin 2: CAN_L  ← 통신
-  Pin 3: GND    ← 접지
-  Pin 4: 없음 (NC)
-  Pin 5: CAN_SHLD (선택적, 차폐 연결)
-  Pin 6: GND    ← 접지 (선택적)
-  Pin 7: CAN_H  ← 통신
-  Pin 8: 없음 (NC)
-  Pin 9: CAN_V+ (선택적, 전원 공급)
-```
+![DB9 Female 커넥터 핀아웃 — Pin2 CAN_L, Pin3/6 GND, Pin5 CAN_SHLD, Pin7 CAN_H, Pin9 CAN_V+, 나머지 NC](/images/study-isobus/03-db9-pinout-light.png)
+![DB9 Female 커넥터 핀아웃 — Pin2 CAN_L, Pin3/6 GND, Pin5 CAN_SHLD, Pin7 CAN_H, Pin9 CAN_V+, 나머지 NC](/images/study-isobus/03-db9-pinout-dark.png)
 
 **핵심 핀 요약:**
 

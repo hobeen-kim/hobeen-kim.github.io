@@ -277,6 +277,47 @@ sequenceDiagram
 > - Setpoint는 처방 맵 기반 목표값이고, Measurement는 센서 실측값이며, 그 차이가 제어 오차가 된다.
 > - GPS 위치(NMEA 2000 GNSS Position Data, PGN 129029) → 처방 맵 조회 → Value Command 전송 → 밸브 조절 → Measurement 보고 순으로 제어 루프가 완성된다.
 
+## 6. 전체 흐름 — 두 오브젝트 풀과 처방 맵
+
+§5는 이미 작업이 시작된 뒤의 제어 루프만 보여준다. 그런데 그 루프가 성립하려면 그 전에 준비가 끝나 있어야 한다. TC는 어떻게 DDI 1이 이 살포기의 살포량이라는 걸 알았고, 화면의 숫자는 누가 고치는가. 연결부터 실적 기록까지를 한 줄로 이으면 다음과 같다.
+
+### 데이터가 어디에 있는가
+
+먼저 짚을 것은, 작업기 ECU가 <strong>서로 다른 두 개의 오브젝트 풀</strong>을 플래시에 갖고 있다는 점이다.
+
+| | VT 오브젝트 풀 | DDOP |
+|---|---|---|
+| 정의 | ISO 11783-6 | ISO 11783-10 |
+| 올리는 곳 | Virtual Terminal | Task Controller |
+| 담는 것 | Data Mask, Output Number, Button 등 <strong>그리는 방법</strong> | DVC, DET, DPD 등 <strong>기계의 구조와 쓸 수 있는 DDI</strong> |
+| 읽는 주체 | 사람(운전자) | 소프트웨어(TC) |
+| 값 식별 | Object ID | DDI |
+| PGN | 0xE700 / 0xE600 | 0xCB00 |
+
+여기에 세 번째 데이터가 더해진다. <strong>처방 맵</strong>이다. 이건 작업기가 아니라 FMIS가 만들어 USB로 들어오고, CAN이 아니라 파일로 전달된다. TASKDATA.XML 안에 TreatmentZone(구획)과 그 구획의 목표값(ProcessDataVariable)이 들어 있고, 격자형 맵은 셀 값이 별도 바이너리 파일에 담긴다.
+
+정리하면 <strong>작업기는 "나를 어떻게 그리는지"와 "나를 어떻게 조작하는지"를, FMIS는 "밭의 어디에 얼마를 뿌릴지"를 각각 들고 온다.</strong> 이 셋이 만나야 가변 살포가 성립한다.
+
+### 직접 재생해 보기
+
+아래 애니메이션은 전원을 켠 순간부터 실제 살포까지를 그대로 재생한다. 위쪽에서는 패킷이 버스를 타고 노드 사이를 날아다니며 각 장치가 데이터를 하나씩 채워 가고, 아래에서는 트랙터가 처방 맵 위를 지나간다. <strong>붐의 섹션 6개가 각각 다른 색으로 바뀌는 순간</strong>을 보자 — 그때마다 Value command가 나간다. 화면을 누르면 멈추고 다시 누르면 이어진다.
+
+<IsobusFlowDemo />
+
+### 흐름에서 놓치기 쉬운 것
+
+<strong>두 풀은 서로를 모른다.</strong> TC가 setpoint를 바꿔 보내도 VT 화면은 저절로 바뀌지 않는다. 작업기 ECU가 값을 받은 뒤 <strong>따로</strong> VT에 Change Numeric Value를 보내 화면을 고친다. 표준에는 이 둘을 잇는 자동 경로가 없고, 동기화는 작업기 펌웨어의 몫이다. 이 분리 덕분에 VT만 있는 트랙터에서도 화면은 뜨고, TC만 지원하는 작업기도 처방 맵 제어가 된다.
+
+<strong>setpoint는 주기적으로 나가지 않는다.</strong> 표준은 관련 DeviceElement가 새 TreatmentZone에 들어갔을 때 그 구획의 setpoint를 전송하도록 규정한다. 구획 경계를 넘는 순간이 트리거다.
+
+<strong>구획 판정은 기계 단위가 아니라 device element 단위다.</strong> 12미터 붐이 경계에 걸쳐 있으면 왼쪽 섹션과 오른쪽 섹션이 서로 다른 구획에 속할 수 있고, 각각 다른 setpoint를 받는다. 이것이 정밀 살포의 핵심이며, DDOP에서 섹션을 DET로 하나하나 선언하는 이유이기도 하다.
+
+<strong>DDOP에 없는 DDI는 쓸 수 없다.</strong> DPD의 property 비트에 settable이 서 있는 DDI만 TC가 setpoint로 내릴 수 있고, 선언되지 않은 DDI로 명령하면 작업기는 PDACK로 거부한다. §5의 `[DDI=1, Element=3, Value=200]`이 성립하는 근거가 바로 연결 시점에 올라간 DDOP다.
+
+:::tip 한 줄 요약
+작업기는 VT 풀(화면)과 DDOP(구조)를 각각 다른 서버에 올리고, FMIS는 처방 맵을 파일로 넣는다. TC는 DDOP로 "무엇을 보낼 수 있는지"를, 처방 맵으로 "얼마를 보낼지"를, GNSS로 "지금 어디인지"를 알아 Value command 한 줄을 만든다.
+:::
+
 ## 다음 챕터
 
 - 다음 : [TC DDOP](/study/isobus/20-tc-ddop)

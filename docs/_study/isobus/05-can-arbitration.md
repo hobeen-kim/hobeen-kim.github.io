@@ -160,20 +160,8 @@ Priority 0이 가장 높고, Priority 7이 가장 낮다. 이를 통해 메시�
 
 Priority 필드는 29비트 ID의 최상위 3비트일 뿐이다. Priority가 같으면 중재가 끝나는 것이 아니라, **나머지 비트(EDP → DP → PF → PS → SA)로 계속 비교**한다. 결국 29비트 ID 전체가 하나의 우선순위 값이다.
 
-```
-메시지A: Priority=3, PF=0xF0, PS=0x04, SA=0x00
-  → ID = 0x0CF00400
-
-메시지B: Priority=3, PF=0xFE, PS=0xEE, SA=0x00
-  → ID = 0x0CFEEE00
-
-비교:
-  Priority: 011 vs 011 → 동점, 계속
-  EDP:      0   vs 0   → 동점, 계속
-  DP:       0   vs 0   → 동점, 계속
-  PF:       11110000 vs 11111110
-                    ↑ 비트 19에서 A=0, B=1 → 메시지A 승리
-```
+![메시지A(0x0CF00400)와 메시지B(0x0CFEEE00)의 29비트 ID 비트 비교: Priority·EDP·DP는 동점, PF의 5번째 비트에서 A=0, B=1로 메시지A 승리](/images/study-isobus/05-arbitration-bit-compare-light.png)
+![메시지A(0x0CF00400)와 메시지B(0x0CFEEE00)의 29비트 ID 비트 비교: Priority·EDP·DP는 동점, PF의 5번째 비트에서 A=0, B=1로 메시지A 승리](/images/study-isobus/05-arbitration-bit-compare-dark.png)
 
 | 상황 | 중재 방식 |
 |------|-----------|

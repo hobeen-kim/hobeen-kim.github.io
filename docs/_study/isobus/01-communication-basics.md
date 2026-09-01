@@ -168,11 +168,8 @@ graph LR
 
 **프레임 구조 요약:**
 
-```
-[ SOF | ID | DLC | 데이터(0~8byte) | CRC | ACK | EOF ]
-   ↑    ↑     ↑         ↑            ↑     ↑     ↑
-  시작  식별  길이     페이로드     오류검출 확인  종료
-```
+![CAN 프레임 필드 구조: SOF·ID·DLC·데이터·CRC·ACK·EOF와 각 역할](/images/study-isobus/01-can-frame-fields-light.png)
+![CAN 프레임 필드 구조: SOF·ID·DLC·데이터·CRC·ACK·EOF와 각 역할](/images/study-isobus/01-can-frame-fields-dark.png)
 
 ::: tip 핵심 정리
 - 현대 기계에는 수십 개의 ECU가 있고, 이들은 버스 통신으로 효율적으로 연결된다.

@@ -114,6 +114,14 @@ ISO 11783-6에는 40여 가지 오브젝트 타입이 정의되어 있다(v6 기
 | **Macro** | 28 | 이벤트 기반 자동화 명령 목록 |
 | **External Object Pointer** | 43 | 다른 Working Set의 오브젝트 참조 (Version 5+) |
 
+### 직접 눌러 보기
+
+아래는 오브젝트 타입별로 화면에 어떻게 그려지는지, 그리고 운전자가 누를 때 VT가 어떤 메시지를 내보내는지를 재현한 시뮬레이터다. 오브젝트를 누르면 해당 타입 설명과 실제 8바이트 메시지가 함께 표시된다.
+
+<VtObjectPoolDemo />
+
+출력 오브젝트(Output String·Output Number·Output Meter 등)는 눌러도 메시지가 나가지 않는다. 입력 오브젝트와 Button·Key만 운전자 조작을 Working Set에 통지한다. 메시지 종류와 바이트 배치는 [CH17 VT 명령어](/study/isobus/17-vt-commands)에서 더 자세히 다룬다.
+
 ## 3. 오브젝트 간 계층 관계
 
 오브젝트들은 트리 구조로 조직된다. <strong>Working Set Object</strong>가 루트이며, 모든 화면과 요소가 그 아래에 위치한다.
@@ -219,6 +227,10 @@ Working Set (ID: 0)
 ```
 
 ### IOP XML 예시
+
+:::info IOP는 표준 용어가 아니다
+ISO 11783-6 원문에는 "IOP"라는 표기가 없다. 표준은 이것을 그냥 <strong>object pool</strong>이라 부르며, `.iop`는 오브젝트 풀을 설계·빌드하는 툴체인이 관례적으로 쓰는 파일 확장자다. 아래 XML도 표준이 정의한 형식이 아니라 툴이 쓰는 중간 표현이며, 실제로 버스에 오르는 것은 이를 변환한 바이너리 레코드다.
+:::
 
 ```xml
 <objectpool>

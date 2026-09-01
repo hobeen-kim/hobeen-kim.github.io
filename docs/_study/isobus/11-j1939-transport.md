@@ -169,29 +169,15 @@ Transport Protocol은 <strong>두 가지 PGN</strong>으로 동작한다.
 
 연결 관리를 담당한다. BAM 공지, RTS/CTS 흐름 제어, EndOfMsg, Abort 메시지가 모두 이 PGN을 사용하며, <strong>Control Byte(Byte 1)</strong>로 메시지 종류를 구분한다.
 
-```
-TP.CM 메시지 (8 byte):
-┌────────────────────────────────────────────────────┐
-│ Byte 1: Control Byte (0x20=BAM, 0x10=RTS, 0x11=CTS,│
-│                        0x13=EndOfMsg, 0xFF=Abort)   │
-│ Byte 2~8: 메시지 종류에 따라 해석 방식 다름         │
-└────────────────────────────────────────────────────┘
-```
+![TP.CM 메시지(8 byte) 바이트 레이아웃](/images/study-isobus/11-tpcm-layout-light.png)
+![TP.CM 메시지(8 byte) 바이트 레이아웃](/images/study-isobus/11-tpcm-layout-dark.png)
 
 ### TP.DT (PGN 60160, 0xEB00) — Data Transfer
 
 실제 데이터를 7바이트씩 분할하여 전송한다. **Byte 1은 시퀀스 번호(1~255)**, Byte 2~8이 페이로드이다. 마지막 패킷의 남는 바이트는 0xFF로 채운다.
 
-```
-TP.DT 메시지 (8 byte):
-┌──────────────────────────────────────────┐
-│ Byte 1: Sequence Number (1 ~ 255)        │
-│ Byte 2: 페이로드 바이트 1                │
-│ Byte 3: 페이로드 바이트 2                │
-│ ...                                      │
-│ Byte 8: 페이로드 바이트 7 (또는 0xFF)   │
-└──────────────────────────────────────────┘
-```
+![TP.DT 메시지(8 byte) 바이트 레이아웃](/images/study-isobus/11-tpdt-layout-light.png)
+![TP.DT 메시지(8 byte) 바이트 레이아웃](/images/study-isobus/11-tpdt-layout-dark.png)
 
 **예시 — 16바이트 데이터 전송:**
 

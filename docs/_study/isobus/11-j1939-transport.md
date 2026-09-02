@@ -312,6 +312,146 @@ sequenceDiagram
 - 타임아웃 초과 시 Abort(Control Byte=0xFF)를 사유 코드와 함께 전송하여 연결을 종료한다.
 :::
 
+## 7. 20바이트를 직접 쪼개 보기
+
+앞 절들이 BAM·CMDT의 흐름과 필드 정의를 다이어그램·표로 다뤘다면, 여기서는 <strong>20바이트짜리 데이터 하나를 BAM과 CMDT 두 방식으로 전송할 때 버스에 실제로 흐르는 모든 프레임의 8바이트</strong>를 끝까지 나열한다.
+
+### 공통 설정 — 보낼 데이터와 목적 PGN
+
+전송할 데이터는 Component Identification(<strong>PGN 65259</strong>, `0x00FEEB`) 20바이트로 정한다. 이 PGN은 부록(ISO 11783-3 정리) Annex B.1의 오류 없는 전송 예제와 Annex C의 BROADCAST/RESPONSE 예제에서 실제로 쓰인 PGN이다. Make·Model·Serial·Unit을 `*`로 구분한 ASCII 문자열을 데이터로 쓴다.
+
+```
+원본 문자열: "AGMO*TP100*SN0007*01"   (Make=AGMO, Model=TP100, Serial=SN0007, Unit=01)
+
+hex(20 byte):
+41 47 4D 4F 2A 54 50 31 30 30 2A 53 4E 30 30 30 37 2A 30 31
+```
+
+### 패킷 수 계산
+
+TP.DT는 Byte 1이 시퀀스 번호이므로 <strong>페이로드는 프레임당 7바이트</strong>다(§4 TP.CM과 TP.DT 참고). 20바이트를 7바이트씩 나누면 다음과 같다.
+
+```
+20 byte ÷ 7 byte/packet = 2.86... → 올림하면 3 packet
+
+Packet #1 (Seq=1): 7 byte 실데이터
+Packet #2 (Seq=2): 7 byte 실데이터
+Packet #3 (Seq=3): 6 byte 실데이터 + FF 1byte 패딩   ← 20 − 7×2 = 6 byte
+```
+
+<strong>총 패킷 수 = 3</strong>이며, 마지막 패킷은 남는 1바이트를 `FF`로 채운다.
+
+### BAM 시퀀스 — 프레임 4개
+
+목적지는 Global(브로드캐스트)이다. TP.CM_BAM(Control Byte `0x20`) 1프레임과 TP.DT 3프레임, 총 4프레임이 순서대로 나간다.
+
+| 순번 | PGN | 8바이트 hex | 의미 |
+|---|---|---|---|
+| 1 | TP.CM (60416) | `20 14 00 03 FF EB FE 00` | BAM 공지 — Control=`0x20`, 총 크기=`14 00`(LE, 20byte), 총 패킷수=`03`, 예약=`FF`, 대상 PGN=`EB FE 00`(LE, 65259) |
+| 2 | TP.DT (60160) | `01 41 47 4D 4F 2A 54 50` | Seq=`01`, 데이터 `"AGMO*TP"` |
+| 3 | TP.DT (60160) | `02 31 30 30 2A 53 4E 30` | Seq=`02`, 데이터 `"100*SN0"` |
+| 4 | TP.DT (60160) | `03 30 30 37 2A 30 31 FF` | Seq=`03`, 데이터 `"007*01"`(6byte) + `FF` 패딩 |
+
+BAM 후 첫 TP.DT까지, 그리고 TP.DT 패킷 사이는 각각 <strong>10~200ms</strong> 대기해야 한다. 수신 측은 확인 응답을 보내지 않는다.
+
+### CMDT 시퀀스 — 프레임 6개
+
+목적지는 특정 CF다(예: 송신 SA=`0x23`, 수신 SA=`0x82`, §3 CMDT 흐름의 예시와 동일). RTS → CTS → TP.DT 3프레임 → EndOfMsgACK, 총 6프레임이 오간다. 20바이트·3패킷 정도는 CTS 한 번으로 전부 허용해도 되므로 CTS 묶음은 1회만 등장한다.
+
+| 순번 | 메시지 (PGN) | 8바이트 hex | 의미 |
+|---|---|---|---|
+| 1 | RTS · TP.CM (60416) | `10 14 00 03 FF EB FE 00` | Control=`0x10`, 총 크기=`14 00`(20byte), 총 패킷수=`03`, CTS당 최대 패킷수=`FF`(제한 없음), 대상 PGN=65259 |
+| 2 | CTS · TP.CM (60416) | `11 03 01 FF FF EB FE 00` | Control=`0x11`, 허용 패킷수=`03`, 시작 시퀀스=`01`, Byte4~5 예약=`FF FF`, 대상 PGN=65259 |
+| 3 | TP.DT (60160) | `01 41 47 4D 4F 2A 54 50` | Seq=`01`, 데이터 `"AGMO*TP"` |
+| 4 | TP.DT (60160) | `02 31 30 30 2A 53 4E 30` | Seq=`02`, 데이터 `"100*SN0"` |
+| 5 | TP.DT (60160) | `03 30 30 37 2A 30 31 FF` | Seq=`03`, 데이터 `"007*01"`(6byte) + `FF` 패딩 |
+| 6 | EndOfMsgACK · TP.CM (60416) | `13 14 00 03 FF EB FE 00` | Control=`0x13`, 총 크기=`14 00`(20byte), 총 패킷수=`03`, 예약=`FF`, 대상 PGN=65259 — 수신 완료 확인 |
+
+CTS의 Byte 2(`03`)는 RTS의 Byte 4(총 패킷수 `03`)와 Byte 5(`FF`=제한 없음) 중 <strong>작은 값을 넘지 않는다</strong>는 규칙을 그대로 지킨 값이다.
+
+### 두 방식 비교
+
+| 항목 | BAM | CMDT |
+|---|---|---|
+| 총 프레임 수 | 4 (BAM 1 + DT 3) | 6 (RTS 1 + CTS 1 + DT 3 + EndOfMsgACK 1) |
+| 목적지 | Global(브로드캐스트) | 특정 CF(destination-specific) |
+| 패킷 간격 규정 | BAM→DT1, DT1→DT2, DT2→DT3 각각 10~200ms(3구간) | DT1→DT2, DT2→DT3 최대 200ms·최소 규정 없음(2구간) |
+| 대략적 소요 시간(간격만) | 최소 30ms ~ 최대 600ms | 최소 0ms대 ~ 최대 약 400ms(+ RTS→CTS·EndOfMsgACK 응답 시간) |
+| 완료 확인 | 없음 | EndOfMsgACK로 확인 |
+| 재전송 | 불가 | 가능 — CTS로 누락 시퀀스부터 재요청 |
+
+::: tip 핵심 통찰
+같은 20바이트라도 <strong>CMDT가 프레임 수는 더 많다</strong>(6개 vs 4개). RTS·CTS·EndOfMsgACK라는 제어 오버헤드 3프레임이 붙기 때문이다. 대신 CMDT는 목적지가 명확하고 흐름 제어·재전송이 가능해 신뢰성이 필요한 1:1 전송에 쓰이고, BAM은 오버헤드 없이 여러 수신자에게 한 번에 뿌려야 할 때(Component ID·NAME 공지 등) 쓰인다. 어느 쪽이 항상 빠르거나 우월한 게 아니라, <strong>신뢰성이 필요한가 vs 여러 수신자에게 동시에 알려야 하는가</strong>가 선택 기준이다.
+:::
+
+:::details 파이썬으로 검산해 보기
+```python
+def tp_dt_frames(data: bytes):
+    """7바이트씩 잘라 시퀀스 번호를 붙이고 마지막 패킷은 FF로 패딩한다."""
+    frames = []
+    for i in range(0, len(data), 7):
+        chunk = data[i:i + 7]
+        seq = i // 7 + 1
+        payload = list(chunk) + [0xFF] * (7 - len(chunk))
+        frames.append([seq] + payload)
+    return frames
+
+
+DATA = b"AGMO*TP100*SN0007*01"
+PGN = 65259                      # Component Identification
+
+assert len(DATA) == 20
+
+total_size = len(DATA)
+size_lo, size_hi = total_size & 0xFF, (total_size >> 8) & 0xFF
+pgn_lo  = PGN & 0xFF
+pgn_mid = (PGN >> 8) & 0xFF
+pgn_hi  = (PGN >> 16) & 0xFF
+
+dt_frames = tp_dt_frames(DATA)
+num_packets = len(dt_frames)
+assert num_packets == 3
+
+bam = [0x20, size_lo, size_hi, num_packets, 0xFF, pgn_lo, pgn_mid, pgn_hi]
+rts = [0x10, size_lo, size_hi, num_packets, 0xFF, pgn_lo, pgn_mid, pgn_hi]
+cts = [0x11, num_packets, 1, 0xFF, 0xFF, pgn_lo, pgn_mid, pgn_hi]
+eom = [0x13, size_lo, size_hi, num_packets, 0xFF, pgn_lo, pgn_mid, pgn_hi]
+
+def show(label, frame):
+    print(f"{label:14s}", ' '.join(f'{b:02X}' for b in frame))
+
+show("TP.CM_BAM", bam)
+for f in dt_frames:
+    show(f"TP.DT#{f[0]}", f)
+
+print()
+show("RTS", rts)
+show("CTS", cts)
+for f in dt_frames:
+    show(f"TP.DT#{f[0]}", f)
+show("EndOfMsgACK", eom)
+
+# BAM 프레임 4개, CMDT 프레임 6개인지 검산
+assert 1 + len(dt_frames) == 4
+assert 3 + len(dt_frames) == 6
+```
+
+실행 결과:
+```
+TP.CM_BAM      20 14 00 03 FF EB FE 00
+TP.DT#1        01 41 47 4D 4F 2A 54 50
+TP.DT#2        02 31 30 30 2A 53 4E 30
+TP.DT#3        03 30 30 37 2A 30 31 FF
+
+RTS            10 14 00 03 FF EB FE 00
+CTS            11 03 01 FF FF EB FE 00
+TP.DT#1        01 41 47 4D 4F 2A 54 50
+TP.DT#2        02 31 30 30 2A 53 4E 30
+TP.DT#3        03 30 30 37 2A 30 31 FF
+EndOfMsgACK    13 14 00 03 FF EB FE 00
+```
+:::
+
 ## 다음 챕터
 
 - 다음 : [ISOBUS 개요](/study/isobus/12-isobus-overview)

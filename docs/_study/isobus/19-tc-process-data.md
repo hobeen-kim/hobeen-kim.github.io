@@ -277,7 +277,127 @@ sequenceDiagram
 > - Setpoint는 처방 맵 기반 목표값이고, Measurement는 센서 실측값이며, 그 차이가 제어 오차가 된다.
 > - GPS 위치(NMEA 2000 GNSS Position Data, PGN 129029) → 처방 맵 조회 → Value Command 전송 → 밸브 조절 → Measurement 보고 순으로 제어 루프가 완성된다.
 
-## 6. 전체 흐름 — 두 오브젝트 풀과 처방 맵
+## 6. Process Data 메시지 조립하기
+
+지금까지는 `[DDI=1, Element=3, Value=200]`처럼 필드를 나열한 표기로 메시지를 설명했다. 실제 버스에는 이 값들이 8바이트 안에 정확한 비트 위치로 눌러 담겨 나간다. §3의 바이트 배치표(Command → Element Number → DDI → Value)를 이번에는 숫자로 끝까지 채워본다.
+
+### 목표: Section 3에 200 L/ha 명령하기
+
+TC-Server가 Section 3(Element Number 3)에 DDI 1(Setpoint Volume Per Area Application Rate)로 목표 살포량 200 L/ha를 명령하는 상황이다. §1의 분해능 표에 따르면 DDI 1의 단위는 mm³/m², 분해능은 0.01이다.
+
+1. 물리량 → mm³/m² 환산: 1 L/ha = 100 mm³/m²이므로 200 L/ha = 20,000 mm³/m²
+2. mm³/m² → raw 값 환산: raw = 물리값 ÷ 분해능 = 20,000 ÷ 0.01 = 2,000,000
+
+즉 버스에 실어야 하는 32비트 정수는 <strong>2,000,000</strong>(`0x1E8480`)이다.
+
+### Byte 1~2 — Command 4비트와 Element Number 12비트를 나누어 담기
+
+§3에서 다룬 대로 Command와 Element Number는 8비트 경계를 걸쳐 나뉜다. 헷갈리는 지점이 바로 여기다.
+
+| 필드 | 비트 폭 | 위치 |
+|---|---|---|
+| Command | 4비트 | Byte 1의 <strong>하위</strong> 4비트(bit 4~1) |
+| Element Number 하위 4비트 | 4비트 | Byte 1의 <strong>상위</strong> 4비트(bit 8~5) |
+| Element Number 상위 8비트 | 8비트 | Byte 2 전체 |
+
+Element Number는 한 바이트에 다 담기지 않는다. <strong>하위 4비트는 Command와 한 바이트를 나눠 쓰고, 남은 상위 8비트가 다음 바이트를 통째로 차지</strong>한다. Command가 Byte 1의 절반을 먼저 차지하고 있기 때문에 생기는 배치다.
+
+이 명령은 Command = 3(Value command), Element Number = 3(Section 3)이다. Element Number 3을 12비트로 쓰면 `0000 0000 0011`이므로, 하위 4비트는 `0011`, 상위 8비트는 `0000 0000`이다.
+
+| 니블 | 값 | 비트 |
+|---|---|---|
+| Byte 1 bit 8~5 (Element 하위 4비트) | 3 | `0011` |
+| Byte 1 bit 4~1 (Command) | 3 | `0011` |
+| Byte 1 전체 | `0x33` | `0011 0011` |
+| Byte 2 (Element 상위 8비트) | 0 | `0000 0000` |
+
+Element Number가 16 미만이면 Byte 2는 항상 `0x00`이 된다. Element Number가 16 이상으로 올라가야 비로소 Byte 2에 값이 실린다 — 예를 들어 Element Number 20(`0001 0100`)이면 하위 4비트 `0100`이 Byte 1 상위 니블에, 상위 8비트 `0000 0001`이 Byte 2 전체에 들어가 Byte 2가 `0x01`이 된다.
+
+### Byte 3~8 채우기
+
+| 바이트 | 필드 | 값 |
+|---|---|---|
+| Byte 3~4 | DDI(LSB, MSB) | DDI=1 → `0x01 0x00` |
+| Byte 5~8 | Value(부호 있는 32비트, LSB부터) | 2,000,000 → `0x80 0x84 0x1E 0x00` |
+
+완성된 8바이트:
+
+```
+33 00 01 00 80 84 1E 00
+```
+
+### 분해: 수신한 8바이트에서 되돌리기
+
+이번엔 반대 방향이다. TC-Server가 Section 3의 DDI 2(Actual Volume Per Area Application Rate)를 Request Value(Command 2)로 요청했고, TC-Client가 다음 8바이트로 응답했다고 하자.
+
+```
+33 00 02 00 60 36 1E 00
+```
+
+| 단계 | 연산 | 결과 |
+|---|---|---|
+| Command | Byte1 bit 4~1 | `0x33 & 0x0F` = 3 → Value command(값 응답) |
+| Element Number | (Byte1 bit 8~5) \| (Byte2 << 4) | `(0x33 >> 4) \| (0x00 << 4)` = 3 → Section 3 |
+| DDI | Byte3 \| (Byte4 << 8) | `0x02 \| (0x00 << 8)` = 2 → Actual Volume Per Area |
+| Value(raw) | Byte5~8, LSB 우선, 부호 있는 32비트 | `0x1E3660` = 1,980,000 |
+
+### 해상도를 반영해야 진짜 값이 나온다
+
+raw 값 1,980,000은 그 자체로는 단위가 없다. DDI 2의 분해능 0.01을 곱해야 mm³/m²가 되고, 다시 100으로 나눠야 L/ha가 된다.
+
+1,980,000 × 0.01 = 19,800 mm³/m² → 19,800 ÷ 100 = <strong>198 L/ha</strong>
+
+§1 표의 값과 정확히 일치한다. 만약 해상도를 반영하지 않고 raw 200을 그대로 DDI 1에 실어 보냈다면 어떻게 될까 — 조립 예제와 같은 8바이트 구조에 Value만 200을 넣으면 `33 00 01 00 C8 00 00 00`이 되고, 수신 측이 규정대로 0.01을 곱하면 200 × 0.01 = 2 mm³/m² = 0.02 L/ha로 해석된다. 목표한 200 L/ha의 1만분의 1이다. <strong>정수 200을 "200 L/ha"로 착각해 그대로 실어 보내는 것</strong>이 현장에서 흔히 나는 실수다.
+
+### 같은 대상, 다른 Command — Byte 1이 어떻게 바뀌는가
+
+Element Number(3)와 DDI(1)는 그대로 두고 Command만 바꿔보면, Byte 1의 상위 니블은 고정된 채 하위 니블만 움직인다.
+
+| Command | 의미 | Byte 1 | 전체 프레임 |
+|---|---|---|---|
+| 2 | Request value(값 요청) | `0x32` | `32 00 01 00 00 00 00 00` |
+| 3 | Value command(설정값 전달) | `0x33` | `33 00 01 00 80 84 1E 00` |
+| A | Set Value and Acknowledge(설정 + 수신 확인 요구) | `0x3A` | `3A 00 01 00 80 84 1E 00` |
+
+Request value(2)의 Value 필드는 위 표에서 0으로 채웠다 — 값을 요청하는 메시지이므로 응답 전까지는 채울 값이 없다는 점만 확인 가능할 뿐, 이 자리를 반드시 0으로 채워야 한다는 규칙이 표준 원문에 명시된 것은 아니다. Command만 3에서 A로 바뀌어도 Byte 3~8은 동일하다는 점에 주목한다 — 두 메시지의 차이는 "TC-Client가 PDACK로 수신 확인을 보내야 하는가"뿐이며, 가리키는 대상과 값은 같다.
+
+:::details 파이썬으로 검산해 보기
+```python
+def build_frame(command, element, ddi, value):
+    byte1 = ((element & 0xF) << 4) | (command & 0xF)
+    byte2 = (element >> 4) & 0xFF
+    ddi_bytes = ddi.to_bytes(2, "little")
+    value_bytes = value.to_bytes(4, "little", signed=True)
+    return bytes([byte1, byte2]) + ddi_bytes + value_bytes
+
+
+def parse_frame(frame):
+    command = frame[0] & 0x0F
+    element = (frame[0] >> 4) | (frame[1] << 4)
+    ddi = frame[2] | (frame[3] << 8)
+    value = int.from_bytes(frame[4:8], "little", signed=True)
+    return command, element, ddi, value
+
+
+# 조립: Section 3(Element=3), DDI 1, 200 L/ha
+raw = int(200 * 100 / 0.01)          # 200 L/ha -> 20,000 mm3/m2 -> raw
+frame = build_frame(command=3, element=3, ddi=1, value=raw)
+print(frame.hex(' ').upper())        # 33 00 01 00 80 84 1E 00
+
+# 분해: 수신 프레임에서 필드 복원
+received = bytes.fromhex("33 00 02 00 60 36 1E 00")
+command, element, ddi, value = parse_frame(received)
+print(command, element, ddi, value)  # 3 3 2 1980000
+print(value * 0.01 / 100)            # 198.0 (L/ha)
+
+# 해상도를 빼먹은 경우
+mistake = build_frame(command=3, element=3, ddi=1, value=200)
+print(mistake.hex(' ').upper())      # 33 00 01 00 C8 00 00 00
+print(200 * 0.01 / 100)              # 0.02 (L/ha) — 의도한 200의 1/10000
+```
+:::
+
+## 7. 전체 흐름 — 두 오브젝트 풀과 처방 맵
 
 §5는 이미 작업이 시작된 뒤의 제어 루프만 보여준다. 그런데 그 루프가 성립하려면 그 전에 준비가 끝나 있어야 한다. TC는 어떻게 DDI 1이 이 살포기의 살포량이라는 걸 알았고, 화면의 숫자는 누가 고치는가. 연결부터 실적 기록까지를 한 줄로 이으면 다음과 같다.
 

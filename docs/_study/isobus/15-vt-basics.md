@@ -187,6 +187,77 @@ sequenceDiagram
 - AUX-N은 조이스틱 등 보조 입력 장치를 ISOBUS에 통합하며, 매핑 설정은 기능을 제공하는 Working Set이 Preferred Assignment로 저장했다가 VT에 전달해 복원한다. 할당된 입력값은 VT를 거치지 않고 전체 브로드캐스트된다.
 :::
 
+## 6. VT 연결 따라가기
+
+§3~§4는 절차를 다이어그램으로만 봤다. 여기서는 그 흐름을 <strong>메시지 단위로 실제 바이트까지</strong> 따라간다. 예제로 쓰는 오브젝트 풀은 [CH16 §5](/study/isobus/16-vt-object-pool)의 "엔진 온도: 85°C" 화면이며, 그 풀을 이루는 5개 오브젝트(Working Set·Data Mask·Font Attributes·Output String·Output Number)의 바이트 구성은 [CH16 §6](/study/isobus/16-vt-object-pool#_6-오브젝트-레코드를-바이트로-보기)에서 계산한다. 여기서는 그 결과(총 95바이트)가 VT에 오르기까지의 <strong>메시지 흐름</strong>만 본다.
+
+### 타임라인
+
+방향 표기는 작업 지시 그대로 <strong>VT→ECU는 PGN 58880(0xE600)</strong>, <strong>ECU→VT는 PGN 59136(0xE700)</strong>이다. 시각은 설명 편의상 붙인 예시값이며 표준이 규정하는 절대 시각이 아니다(주기·타임아웃 규정 자체는 §3에 정리돼 있다). ECU(작업기) 소스 주소는 예시로 `0x81`을 쓴다.
+
+| 시각 | 방향 | PGN | 데이터(hex) | 의미 |
+|---|---|---|---|---|
+| t=0.000s | VT→ECU | 0xE600 | `FE FF FF FF FF FF 00 FF` | VT Status — 소유 WS 없음(Byte2=FF), busy 없음. 요청 없이 매초 브로드캐스트 |
+| t=0.000s | ECU→VT | 0xE700 | `FF 01 04 FF FF FF FF FF` | Working Set Maintenance 최초 전송 — Byte2 bit0=Initiating(1), Byte3=Version 4 |
+| t=0.050s | ECU→VT | 0xE700 | `C0 FF 5F 00 00 00 FF FF` | Get Memory — Memory Required = 95(0x5F)바이트(풀 전체 크기), Byte1=함수코드 0xC0 |
+| t=0.060s | VT→ECU | 0xE600 | `C0 04 00 FF FF FF FF FF` | Get Memory response — Version=4, Status=0(메모리 가능) |
+| t=0.070s~ | ECU→VT | 0xE700 | (TP 다중 프레임 — 총 96바이트: 함수코드 `11` + 오브젝트 레코드 95바이트) | Object Pool Transfer — 5개 오브젝트 레코드 전송(TP/ETP 분해는 [CH11](/study/isobus/11-j1939-transport) 참고) |
+| t=0.900s | ECU→VT | 0xE700 | `12 FF FF FF FF FF FF FF` | End of Object Pool — 전송 완료 통지 |
+| t=0.901s | VT→ECU | 0xE600 | `FE FF FF FF FF FF 10 FF` | VT Status — Byte7 bit4(parsing)=1, 파싱 중 |
+| t=1.9~3.9s | VT→ECU | 0xE600 | `FE FF FF FF FF FF 00 FF` ×3(연속) | parsing 비트 0인 Status 연속 3회 — ECU가 response를 확정적으로 기다려도 되는 조건 |
+| t=3.910s | VT→ECU | 0xE600 | `12 00 FF FF FF FF 00 FF` | End of Object Pool response — Byte2 Error Codes=0(오류 없음), 결함 오브젝트 없음(FFFF) |
+| t=3.920s | VT→ECU | 0xE600 | `FE 81 01 00 FF FF 00 FF` | VT Status — Byte2=0x81(ECU가 소유), Byte3,4=Data Mask ID 1, Byte5,6=Soft Key Mask 없음(FFFF, 이 풀은 `soft_key_mask="65535"`). 화면 표시 완료 |
+
+Working Set Maintenance는 표에는 최초 1회만 적었지만 연결 내내 1초 주기로 계속 나간다. Get Memory 메시지의 Byte2·7~8과 응답의 Byte4~8은 부록이 값 범위를 명시하지 않은 예약 영역이라, 다른 VT 메시지들의 관례(미사용 필드는 `FF16`)를 따라 채웠다 — 이 두 바이트는 표준이 확정한 값이 아니라 관례적 추정이다.
+
+### 왜 이 순서인가
+
+- <strong>VT Status는 요청-응답이 아니다.</strong> 타임라인 첫 줄부터 VT가 먼저 말을 걸고, ECU가 아직 아무것도 안 보냈는데도 계속 브로드캐스트된다. ECU 입장에서는 이 메시지의 존재 자체가 "VT가 살아 있다"는 유일한 신호다.
+- Get Memory로 <strong>버전과 메모리 여유를 먼저 확인</strong>한 뒤에야 풀을 올린다 — 무효 풀을 먼저 보내고 나중에 고치는 방식은 허용되지 않는다(§4 "전송 완료 대기와 오류 처리" 참고).
+- End of Object Pool 이후의 대기는 <strong>폴링이 아니라 패턴 관찰</strong>이다. VT Status의 parsing 비트가 0인 상태가 연속 3번 나온 뒤에도 response가 없어야 "메시지가 VT에 안 갔다"고 확정한다 — 이미 큐에 있던 이전 Status가 파싱 상태를 잘못 반영하는 경쟁 상태를 피하기 위해서다.
+- 마지막 VT Status는 이전 상태들과 <strong>Byte2~6이 다르다</strong>. 이 변화(소유자·활성 마스크 지정)가 바로 "화면이 떴다"는 것을 ECU가 확인하는 방법이다.
+
+::: tip 핵심 통찰
+- VT Status·Working Set Maintenance는 연결 전 과정에서 요청 없이 계속 흐르는 <strong>배경 신호</strong>다. Object Pool Transfer·Get Memory 같은 "용건이 있는" 메시지들은 이 배경 신호 위에 얹혀 지나갈 뿐이다.
+- End of Object Pool response를 기다리는 조건은 <strong>"parsing=0 상태가 연속 3번"</strong>이지 "N초가 지났다"가 아니다. 파싱이 오래 걸리는 큰 풀일수록 이 규칙의 의미가 커진다.
+:::
+
+:::details 파이썬으로 바이트 구성 검산해 보기
+```python
+def le(v, n):
+    return v.to_bytes(n, "little")
+
+
+# VT Status — 소유 WS 없음
+vt_status_idle = bytes([0xFE, 0xFF]) + b"\xFF" * 4 + bytes([0x00, 0xFF])
+assert vt_status_idle.hex(" ").upper() == "FE FF FF FF FF FF 00 FF"
+
+# Working Set Maintenance — 최초 전송(Initiating=1), Version 4
+wsm_first = bytes([0xFF, 0b00000001, 4]) + b"\xFF" * 5
+assert wsm_first.hex(" ").upper() == "FF 01 04 FF FF FF FF FF"
+
+# Get Memory — Memory Required = CH16 §6에서 계산한 풀 전체 크기
+memory_required = 10 + 20 + 7 + 30 + 28  # Working Set + Data Mask + Font Attr + Output String + Output Number
+assert memory_required == 95
+get_memory = bytes([0xC0, 0xFF]) + le(memory_required, 4) + b"\xFF\xFF"
+assert get_memory.hex(" ").upper() == "C0 FF 5F 00 00 00 FF FF"
+
+# VT Status — parsing 비트(Byte7 bit4) = 1
+vt_status_parsing = bytes([0xFE, 0xFF]) + b"\xFF" * 4 + bytes([0b00010000, 0xFF])
+assert vt_status_parsing.hex(" ").upper() == "FE FF FF FF FF FF 10 FF"
+
+# End of Object Pool response — 오류 없음
+eop_resp = bytes([0x12, 0x00]) + b"\xFF\xFF\xFF\xFF" + bytes([0x00, 0xFF])
+assert eop_resp.hex(" ").upper() == "12 00 FF FF FF FF 00 FF"
+
+# VT Status — 연결 완료, ECU(0x81)가 소유, Data Mask ID=1, Soft Key Mask 없음
+vt_status_final = bytes([0xFE, 0x81]) + le(1, 2) + le(0xFFFF, 2) + bytes([0x00, 0xFF])
+assert vt_status_final.hex(" ").upper() == "FE 81 01 00 FF FF 00 FF"
+
+print("모든 프레임 검증 통과")
+```
+:::
+
 ## 다음 챕터
 
 - 다음 : [VT 오브젝트 풀](/study/isobus/16-vt-object-pool)

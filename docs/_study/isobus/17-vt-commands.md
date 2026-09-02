@@ -232,6 +232,124 @@ sequenceDiagram
 - 버튼 클릭 → Button Activation → ECU 처리 → Change Numeric Value → 화면 갱신이 기본 상호작용 패턴이다.
 :::
 
+## 5. 운전자 조작 따라가기
+
+앞 절들이 명령어를 개별 항목으로 나열했다면, 여기서는 운전자가 화면을 실제로 조작할 때 오가는 메시지를 <strong>시간순으로 8바이트까지</strong> 끝까지 따라간다. 시나리오는 4단계로 이루어진다.
+
+1. 운전자가 소프트키를 누른다
+2. 그 소프트키에 연결된 동작으로 작업기가 화면을 전환한다
+3. 운전자가 입력 필드에 숫자를 입력한다
+4. 작업기가 표시값을 갱신한다
+
+Object ID는 §3의 매크로 예시(`working_set_id="0"`, `new_active_mask="2"`)와 §4의 다이어그램(Output Number ID `0x000B`, "살포량" 표시값)에서 쓴 값을 그대로 이어받는다. 운전자가 소프트키로 설정 화면을 연 뒤, 입력 필드에 살포량 목표치 <strong>150</strong>을 입력해 확정하면 작업기가 같은 Output Number(`0x000B`)를 150으로 갱신하는 흐름이다.
+
+### 1) 운전자가 소프트키를 누른다
+
+소프트키 Object ID는 `0x0032`(50), 부모는 현재 표시 중인 Data Mask `0x0001`(1), 소프트키 코드는 `5`다. v6 이상이므로 Byte 8의 상위 니블에 TAN이 실린다.
+
+| 시각 | 방향 | PGN | 8바이트 hex | 의미 |
+|---|---|---|---|---|
+| t=0 ms | VT→ECU | E600h | `00 01 32 00 01 00 05 1F` | Soft Key Activation, code=1(Pressed), Key ID=0x0032, TAN=1 |
+| t=5 ms | ECU→VT | E700h | `00 01 32 00 01 00 05 1F` | 응답 — 명령 필드 그대로 반향 |
+| t=180 ms | VT→ECU | E600h | `00 00 32 00 01 00 05 2F` | Soft Key Activation, code=0(Released), TAN=2 |
+| t=185 ms | ECU→VT | E700h | `00 00 32 00 01 00 05 2F` | 응답 |
+
+누름부터 뗌까지 180 ms로 <strong>200 ms 홀드 반복 주기</strong>보다 짧기 때문에 code=2(Still held) 프레임은 한 번도 나오지 않는다. 릴리스는 상태 변화(code 0)로 명시적으로 통지되며, TAN이 1에서 2로 바뀐 것도 "새 상태 변화 이벤트"이기 때문이다 — 같은 상태를 재전송(재시도)할 때는 TAN을 바꾸지 않는다.
+
+### 2) 작업기가 화면을 전환한다
+
+작업기는 소프트키 릴리스 응답을 받은 뒤 이 소프트키에 매크로가 아니라 직접 로직으로 바인딩된 동작을 실행한다고 가정한다 — Working Set `0x0000`의 Active Mask를 설정 화면(`0x0002`)으로 바꾼다.
+
+| 시각 | 방향 | PGN | 8바이트 hex | 의미 |
+|---|---|---|---|---|
+| t=190 ms | ECU→VT | E700h | `AD 00 00 02 00 FF FF FF` | Change Active Mask 명령, WS ID=0x0000, 새 Active Mask=0x0002 |
+| t=195 ms | VT→ECU | E600h | `AD 02 00 00 FF FF FF FF` | 응답 — 새 Active Mask 반향(Byte 2,3), Error Code=0(Byte 4) |
+
+여기서 방향이 뒤집힌다는 점이 핵심이다. 1)단계는 VT가 보내는 <strong>message</strong>라 E600h를 쓰지만, 2)단계는 ECU가 보내는 <strong>command</strong>라 E700h를 쓴다. 같은 function code(0xAD)라도 어느 PGN에 실렸는지로 명령인지 통지인지가 갈리는 게 아니라, 두 PGN 자체가 애초에 서로 다른 메시지 집합(Annex F 명령·Annex H activation)에 배정되어 있다.
+
+### 3) 운전자가 입력 필드에 숫자를 입력한다
+
+설정 화면의 Input Number 오브젝트(`0x0028`)를 운전자가 탭해 포커스·편집을 열고, 150을 입력해 확정한 뒤 다른 곳으로 포커스를 옮겨 닫는다.
+
+| 시각 | 방향 | PGN | 8바이트 hex | 의미 |
+|---|---|---|---|---|
+| t=4000 ms | VT→ECU | E600h | `03 28 00 01 01 FF FF 3F` | VT Select Input Object, Object ID=0x0028, Selection=1(선택), Byte5 bit0=1(입력용으로 열림), TAN=3 |
+| t=4005 ms | ECU→VT | E700h | `03 28 00 01 01 FF FF 3F` | 응답 |
+| t=8500 ms | VT→ECU | E600h | `05 28 00 4F 96 00 00 00` | VT Change Numeric Value, Object ID=0x0028, TAN=4, 값=150(0x96, 4바이트 LE) |
+| t=8505 ms | ECU→VT | E700h | `05 28 00 4F 96 00 00 00` | 응답 — 값을 그대로 반향 |
+| t=8510 ms | VT→ECU | E600h | `03 28 00 00 00 FF FF 5F` | VT Select Input Object, Selection=0(선택 해제), TAN=5 |
+| t=8515 ms | ECU→VT | E700h | `03 28 00 00 00 FF FF 5F` | 응답 |
+
+VT Change Numeric Value는 "값이 실제로 바뀌었는지와 무관하게" 확정 시점에 전송된다. 입력을 취소했다면 이 메시지 대신 VT ESC message(function 4)가 나갔을 것이다. Select Input Object가 열림→닫힘 두 번 나오는 이유는 §H.8의 규칙대로 이 메시지가 포커스 획득·상실을 각각 알리기 때문이며, 운전자가 값을 입력하는 동안(=닫히기 전)에는 편집이 끝나지 않은 상태다.
+
+### 4) 작업기가 표시값을 갱신한다
+
+작업기는 입력이 확정된 것을 확인한 뒤(Select 닫힘 응답까지 받은 뒤), §4에서 다루었던 Output Number `0x000B`를 새 값 150으로 갱신한다.
+
+| 시각 | 방향 | PGN | 8바이트 hex | 의미 |
+|---|---|---|---|---|
+| t=8520 ms | ECU→VT | E700h | `A8 0B 00 FF 96 00 00 00` | Change Numeric Value 명령, Object ID=0x000B, Byte4 Reserved=FF, 값=150 |
+| t=8525 ms | VT→ECU | E600h | `A8 0B 00 00 96 00 00 00` | 응답 — Error Code=0(Byte 4), 값 반향 |
+
+::: tip 이 흐름에서 확인되는 규칙
+- <strong>방향이 PGN을 정한다</strong>: 표의 왼쪽 절반(1·3단계, VT가 발신)은 항상 E600h, 오른쪽 절반(2·4단계, ECU가 발신)은 항상 E700h다. Soft Key Activation(0x00)과 VT Select Input Object(0x03)·VT Change Numeric Value(0x05)는 Annex H의 message이고, Change Active Mask(0xAD)·Change Numeric Value(0xA8)는 Annex F의 command다 — 같은 "명령-응답" 짝이라도 어느 Annex에 속하는지에 따라 발신 방향과 PGN이 고정된다.
+- <strong>명령-응답 규칙</strong>: 표의 모든 프레임에 응답이 따라붙고, 다음 프레임은 그 응답 이후에만 나간다. Annex F 명령(2·4단계)은 1,5 s 안에 응답이 없으면 다음 명령을 보낼 수 있고, Annex H activation(1·3단계, v6 이상)은 200 ms 이내 응답이 필수이며 300 ms 안에 안 오면 최대 3회 재시도한다.
+- <strong>TAN</strong>은 Annex H message에만 실린다 — Soft Key Activation은 Byte 8의 상위 니블, VT Select Input Object도 Byte 8의 상위 니블, VT Change Numeric Value는 Byte 4의 상위 니블이다. Annex F 명령·응답(2·4단계)에는 TAN이 없다 — 이 쌍은 애초에 겹쳐 발생할 일이 드물고 순차적으로 처리되기 때문이다.
+- <strong>홀드·릴리스</strong>: 1)단계처럼 누름-뗌 간격이 200 ms 미만이면 "Still held(code 2)" 프레임 없이 곧바로 릴리스로 끝난다. 반대로 200 ms를 넘겨 누르고 있으면 그 사이 code=2 프레임이 200 ms 간격으로 반복되고, Working Set은 이 반복이 300 ms 넘게 끊기면 릴리스로 간주해야 한다.
+:::
+
+:::info 원문에 명시되지 않은 부분
+TAN을 싣는 바이트의 <strong>하위 4비트</strong> 값은 Soft Key Activation(H.2)에서만 `Fh`로 명시되어 있다. VT Select Input Object(H.8)·VT Change Numeric Value(H.12)는 원문이 "Bits 7~4 = TAN"까지만 규정하고 하위 4비트 값을 규정하지 않는다. 위 표에서는 H.2의 관례를 따라 하위 4비트를 `Fh`로 채웠지만, 이는 ISO 11783-6 appendix가 명시한 값이 아니라 추정이며 실제 구현은 다를 수 있다. 마찬가지로 Change Active Mask 명령·응답의 사용되지 않는 꼬리 바이트도 F.34~F.35 원문에 "Reserved FF16"라고 못 박혀 있지는 않아, Annex F 다른 명령들의 관례를 따라 FF16으로 채웠을 뿐이다.
+:::
+
+:::details 파이썬으로 14개 프레임 검산해 보기
+```python
+def tan_byte(tan, low_nibble=0xF):
+    return ((tan & 0xF) << 4) | (low_nibble & 0xF)
+
+def le(value, nbytes):
+    return [(value >> (8 * i)) & 0xFF for i in range(nbytes)]
+
+def hx(bs):
+    return " ".join(f"{b:02X}" for b in bs)
+
+
+# 1) Soft Key Activation (H.2~H.3, VT function=0)
+key_obj, parent_mask, key_code = 0x0032, 0x0001, 0x05
+
+press = [0x00, 0x01] + le(key_obj, 2) + le(parent_mask, 2) + [key_code, tan_byte(1)]
+release = [0x00, 0x00] + le(key_obj, 2) + le(parent_mask, 2) + [key_code, tan_byte(2)]
+
+# 2) Change Active Mask (F.34~F.35, VT function=173=0xAD)
+ws_obj, new_mask = 0x0000, 0x0002
+cam_cmd = [0xAD] + le(ws_obj, 2) + le(new_mask, 2) + [0xFF, 0xFF, 0xFF]
+cam_resp = [0xAD] + le(new_mask, 2) + [0x00] + [0xFF, 0xFF, 0xFF, 0xFF]
+
+# 3) VT Select Input Object (H.8~H.9, function=3) + VT Change Numeric Value (H.12~H.13, function=5)
+input_obj, new_val = 0x0028, 150
+sel_open = [0x03] + le(input_obj, 2) + [0x01, 0x01, 0xFF, 0xFF, tan_byte(3)]
+cnv_msg = [0x05] + le(input_obj, 2) + [tan_byte(4)] + le(new_val, 4)
+sel_close = [0x03] + le(input_obj, 2) + [0x00, 0x00, 0xFF, 0xFF, tan_byte(5)]
+
+# 4) Change Numeric Value command (F.22~F.23, VT function=168=0xA8)
+disp_obj = 0x000B
+cnv_cmd = [0xA8] + le(disp_obj, 2) + [0xFF] + le(new_val, 4)
+cnv_cmd_resp = [0xA8] + le(disp_obj, 2) + [0x00] + le(new_val, 4)
+
+frames = [press, press, release, release, cam_cmd, cam_resp,
+          sel_open, sel_open, cnv_msg, cnv_msg, sel_close, sel_close,
+          cnv_cmd, cnv_cmd_resp]
+
+for f in frames:
+    assert len(f) == 8
+print(hx(press))      # 00 01 32 00 01 00 05 1F
+print(hx(cam_cmd))    # AD 00 00 02 00 FF FF FF
+print(hx(cnv_msg))    # 05 28 00 4F 96 00 00 00
+print(hx(cnv_cmd))    # A8 0B 00 FF 96 00 00 00
+print("14 frames, all 8 bytes: OK")
+```
+:::
+
 ## 다음 챕터
 
 - 다음 : [Task Controller (TC) 기초](/study/isobus/18-tc-basics)

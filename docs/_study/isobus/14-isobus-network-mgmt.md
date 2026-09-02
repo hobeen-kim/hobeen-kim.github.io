@@ -198,6 +198,113 @@ gantt
 > - DM1은 현재 활성 고장(활성 중 1 Hz 전송), DM2는 이전 고장 이력(요청 시에만 전송), DM3는 이전 고장 기록(DM2) 초기화 명령이다.
 > - 전원 ON 후 약 2초 안에 주소 클레임 → Working Set → VT 연결 → 정상 동작 순으로 초기화가 완료된다.
 
+## 5. Working Set 구성 따라가기
+
+2절이 Working Set의 개념을 다뤘다면, 여기서는 <strong>ECU 3개로 이루어진 작업기가 Working Set을 선언하는 과정</strong>을 메시지 하나하나 끝까지 따라간다. 대상은 스프레이어(방제기) 작업기이며, 메인 컨트롤러가 좌·우 두 분무 섹션 컨트롤러를 거느린다.
+
+### 구성
+
+세 CF 모두 §1의 절차로 <strong>이미 주소 클레임을 마친 상태</strong>에서 이 절이 시작된다. 즉 여기서 다루는 건 클레임 이후, Working Set을 선언하는 단계만이다.
+
+| CF | 역할 | SA (주소) | Working Set에서의 위치 |
+|---|---|---|---|
+| 메인 컨트롤러 | 스프레이어 전체 제어, VT·TC와 통신 | 0x90 (144) | Working Set Master |
+| 좌측 섹션 컨트롤러 | 좌측 분무 섹션 개폐 | 0x91 (145) | Member 1 |
+| 우측 섹션 컨트롤러 | 우측 분무 섹션 개폐 | 0x92 (146) | Member 2 |
+
+### 타임라인
+
+Working Set 정의에는 두 메시지가 필요하다 — 크기를 알리는 <strong>Working Set Master 메시지(PGN 65037)</strong>와 멤버를 식별하는 <strong>Working Set Member 메시지(PGN 65036)</strong>다. <strong>둘 다 master가 보낸다.</strong>
+
+| t (ms) | 송신 CF | 메시지 (PGN, 8바이트 데이터) | 의미 |
+|---|---|---|---|
+| 0 | 메인 컨트롤러 (SA 0x90) | PGN 65037, `03 FF FF FF FF FF FF FF` | Working Set 크기 선언 — 멤버 3명(마스터 자신 포함) |
+| 100 | 메인 컨트롤러 (SA 0x90) | PGN 65036, `00 00 A8 82 0D 00 91 81` | 좌측 섹션 컨트롤러의 NAME 통지 |
+| 200 | 메인 컨트롤러 (SA 0x90) | PGN 65036, `00 00 A8 82 0D 00 92 81` | 우측 섹션 컨트롤러의 NAME 통지 |
+| 550 | (없음 — 수신측 타임아웃) | — | 마지막 member 메시지 후 <strong>350 ms</strong> 경과, Working Set 구성 완료로 판정 |
+
+t=100과 t=200 사이의 100ms 간격은 규격이 정한 값이다. 반면 t=0(마스터 메시지)에서 t=100(첫 member 메시지)까지의 간격은 표준에 규정이 없다 — 위 표는 이해를 돕기 위해 같은 100ms 주기를 그대로 이어 쓴 예시일 뿐이다.
+
+### 메시지 바이트 뜯어보기
+
+**Working Set Master 메시지 (PGN 65037)**
+
+| Byte | 값 | 의미 |
+|---|---|---|
+| 1 | `03` | Working Set 멤버 수 — <strong>마스터 자신을 포함</strong>한 값. "멤버 2명 + 마스터"이므로 `2`가 아니라 `3`이다 |
+| 2~8 | `FF FF FF FF FF FF FF` | Reserved |
+
+**Working Set Member 메시지 (PGN 65036)**
+
+| Byte | 값 | 의미 |
+|---|---|---|
+| 1~8 | 해당 멤버의 NAME (8바이트) | 그 멤버가 주소를 클레임할 때 쓴 것과 동일한 NAME |
+
+마스터가 보내는 member 메시지의 개수는 <strong>멤버 수 − 1</strong>, 즉 3 − 1 = 2개다. 마스터 자신의 NAME은 별도 메시지 없이 마스터의 address claim에서 이미 알 수 있으므로 다시 보내지 않는다.
+
+여기서 CAN ID를 보면 흥미로운 점이 하나 있다. PGN 65037 메시지와 두 PGN 65036 메시지 모두 <strong>Source Address가 0x90(메인 컨트롤러)으로 동일</strong>하다. 두 member 메시지는 PGN·데이터는 다르지만 ID의 SA는 완전히 같다 — 송신자가 항상 마스터이기 때문이다.
+
+### 타이밍 규정
+
+- member 메시지 간격: <strong>100 ms</strong>
+- 완료 판정: 마지막 member 메시지 후 <strong>350 ms</strong> 경과 시 수신측(service provider)은 마스터가 모든 멤버 NAME 송신을 마쳤다고 간주한다
+- 실패 시: 정확한 개수의 member 메시지를 받지 못한 service provider는 마스터에게 PGN 65037을 재요청할 수 있고, 마스터는 요청을 받으면 master 메시지 + member 메시지 전체를 다시 보낸다. 응용 계층에 별도 규정이 없다면 <strong>최소 3회</strong> 완전한 멤버 목록 확보에 실패한 service provider는 해당 Working Set을 무시할 수 있다
+
+### 흔한 오해 정정
+
+member 메시지를 <strong>각 멤버 ECU가 직접 보낸다</strong>고 생각하기 쉽지만, 실제로는 <strong>마스터가 대신 보낸다</strong>. 위 타임라인의 세 프레임 — PGN 65037 1개, PGN 65036 2개 — 모두 SA 0x90(메인 컨트롤러)에서 나간다. 좌·우 섹션 컨트롤러(SA 0x91, 0x92)는 이 과정에서 <strong>아무 메시지도 보내지 않는다.</strong> 이들의 존재는 오직 마스터가 실어 보내는 NAME 바이트를 통해서만 네트워크에 드러난다.
+
+::: tip 핵심 통찰
+Working Set Master 메시지의 Byte 1은 "멤버 수(마스터 포함)"이지 "마스터 아닌 멤버 수"가 아니다. 그리고 이어지는 member 메시지의 개수는 그 값에서 1을 뺀 값이며, 두 메시지 모두 <strong>마스터의 SA</strong>로 나간다. 이 두 가지를 헷갈리면 Working Set 구성 로직이 어긋난다.
+:::
+
+:::details 파이썬으로 검산해 보기
+```python
+PRIORITY = 7                     # ISO 11783-7 B.23.2/B.23.3 — 두 메시지 모두 priority 7
+PF_MASTER, PS_MASTER = 0xFE, 0x0D  # PGN 65037 (0x00FE0D) — Working Set Master
+PF_MEMBER, PS_MEMBER = 0xFE, 0x0C  # PGN 65036 (0x00FE0C) — Working Set Member
+
+
+def can_id(priority, pf, ps, sa):
+    return (priority << 26) | (pf << 16) | (ps << 8) | sa
+
+
+MASTER_SA = 0x90                 # 메인 컨트롤러
+MEMBER_SAS = [0x91, 0x92]        # 좌측·우측 섹션 컨트롤러 (참고용 — 메시지 자체엔 SA가 실리지 않음)
+NUM_MEMBERS = 1 + len(MEMBER_SAS)  # 마스터 자신 포함 = 3
+
+NAME_LEFT  = [0x00, 0x00, 0xA8, 0x82, 0x0D, 0x00, 0x91, 0x81]
+NAME_RIGHT = [0x00, 0x00, 0xA8, 0x82, 0x0D, 0x00, 0x92, 0x81]
+
+wsm_id   = can_id(PRIORITY, PF_MASTER, PS_MASTER, MASTER_SA)
+wsm_data = [NUM_MEMBERS] + [0xFF] * 7          # Byte1=멤버 수, Byte2~8=Reserved
+
+wsmem_id = can_id(PRIORITY, PF_MEMBER, PS_MEMBER, MASTER_SA)  # SA는 두 메시지 모두 master!
+
+frames = [
+    (0,   wsm_id,   wsm_data),
+    (100, wsmem_id, NAME_LEFT),
+    (200, wsmem_id, NAME_RIGHT),
+]
+
+for t, cid, data in frames:
+    print(f"t={t:>4}ms  ID=0x{cid:08X}  DATA={' '.join(f'{b:02X}' for b in data)}")
+
+assert wsm_data[0] == NUM_MEMBERS                       # Byte1 = 3 (마스터 포함)
+assert len(frames) - 1 == NUM_MEMBERS - 1                # member 메시지 수 = 멤버 수 - 1 = 2
+assert all(cid == wsmem_id for _, cid, _ in frames[1:])  # 모든 member 메시지가 master SA에서 나감
+
+completion_ms = frames[-1][0] + 350                       # 마지막 member 메시지 + 350ms
+print("Working Set 구성 완료 판정 시각:", completion_ms, "ms")
+
+# 출력:
+# t=   0ms  ID=0x1CFE0D90  DATA=03 FF FF FF FF FF FF FF
+# t= 100ms  ID=0x1CFE0C90  DATA=00 00 A8 82 0D 00 91 81
+# t= 200ms  ID=0x1CFE0C90  DATA=00 00 A8 82 0D 00 92 81
+# Working Set 구성 완료 판정 시각: 550 ms
+```
+:::
+
 ## 다음 챕터
 
 - 다음 : [Virtual Terminal 기초](/study/isobus/15-vt-basics)

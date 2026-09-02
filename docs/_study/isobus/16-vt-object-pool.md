@@ -303,6 +303,147 @@ ECU → VT: Change Numeric Value
 - 화면 초기화 후 ECU는 Change Numeric Value 등의 명령어로 특정 오브젝트만 실시간 갱신한다.
 :::
 
+## 6. 오브젝트 레코드를 바이트로 보기
+
+§2의 타입 표는 이름과 역할을 보여줄 뿐, 실제로 버스에 오를 때 바이트가 어떻게 배치되는지는 보여주지 않는다. Annex B의 공통 규칙은 <strong>모든 오브젝트 레코드가 Object ID(2바이트, 리틀엔디언) + Object Type(1바이트) + 타입별 속성</strong> 순으로 이어진다는 것이다. §5의 "엔진 온도: 85°C" 화면을 이루는 세 오브젝트(Font Attributes, Output String, Output Number)를 실제 바이트로 펼쳐본다.
+
+::: info 정확도 표기
+아래 표의 값 중 §5 XML에 명시된 속성(width, height, font_attributes, justification, value, font_colour, font_size, font_style 등)은 ISO 11783-6 Annex B 정의를 그대로 적용한 <strong>확정값</strong>이다. XML에 없는 속성(background colour, Options, 일부 Font type)은 "(가정)"으로 표시했고, 실제 툴체인 결과와 다를 수 있다.
+:::
+
+### Font Attributes(ID 30) — 7바이트
+
+Output String·Output Number가 공유 참조하는 오브젝트부터 본다.
+
+| 오프셋 | 바이트(hex) | 크기 | XML 속성 | 설명 |
+|---|---|---|---|---|
+| 0 | `1E 00` | 2 | `id="30"` | Object ID = 30, 리틀엔디언 |
+| 2 | `17` | 1 | — | Object Type = 23(0x17) = Font Attributes |
+| 3 | `00` | 1 | `font_colour="0"` | 검정 |
+| 4 | `06` | 1 | `font_size="6"` | 24×32 픽셀(고정폭 크기 6) |
+| 5 | `00` (가정) | 1 | (미지정) | Font type — XML에 없는 속성. 코드플레인 0(기본 ASCII 계열)으로 가정 |
+| 6 | `00` | 1 | `font_style="0"` | 일반 텍스트(Bold·Italic 등 비트 없음) |
+
+### Output String(ID 10) — 30바이트
+
+| 오프셋 | 바이트(hex) | 크기 | XML 속성 | 설명 |
+|---|---|---|---|---|
+| 0 | `0A 00` | 2 | `id="10"` | Object ID = 10 |
+| 2 | `0B` | 1 | — | Object Type = 11(0x0B) = Output String |
+| 3 | `78 00` | 2 | `width="120"` | 120픽셀 |
+| 5 | `1E 00` | 2 | `height="30"` | 30픽셀 |
+| 7 | `01` (가정) | 1 | (미지정) | Background colour — Data Mask와 같은 흰색으로 가정 |
+| 8 | `1E 00` | 2 | `font_attributes="30"` | Font Attributes ID 30 참조 |
+| 10 | `00` (가정) | 1 | (미지정) | Options — 불투명·Auto-Wrap 없음으로 가정 |
+| 11 | `FF FF` | 2 | (미지정, 추정) | Variable reference — XML에 없지만 `value`가 직접 있으므로 스펙상 NULL(65535) 확정 |
+| 13 | `00` | 1 | `justification="0"` | 좌측 정렬 |
+| 14 | `0E 00` | 2 | (계산값) | Length = 14바이트(아래 Value 참고) |
+| 16 | `FF FE D4 C5 C0 C9 20 00 28 C6 C4 B3 3A 00` | 14 | `value="엔진 온도:"` | WideString(UTF-16LE) — BOM(`FF FE`) + "엔"(U+C5D4)"진"(U+C9C0)" "(U+0020)"온"(U+C628)"도"(U+B3C4)":"(U+003A) |
+
+`value` 속성이 한글을 담고 있어 8-bit 인코딩(Annex K 코드플레인)으로는 표현할 수 없다. 그래서 실제 바이너리 변환 시 이 Value는 <strong>WideString</strong>으로 인코딩된다 — 첫 2바이트가 `FF FE`(BOM)로 시작하는 것으로 VT가 WideString임을 판별한다(§3.3의 "첫 2바이트가 FF16 FE16이면 WideString" 규칙). XML 자체에는 이를 나타내는 플래그가 없고, 바이너리 변환 도구가 문자열 내용을 보고 결정한다.
+
+### Output Number(ID 11) — 28바이트
+
+| 오프셋 | 바이트(hex) | 크기 | XML 속성 | 설명 |
+|---|---|---|---|---|
+| 0 | `0B 00` | 2 | `id="11"` | Object ID = 11 |
+| 2 | `0C` | 1 | — | Object Type = 12(0x0C) = Output Number |
+| 3 | `50 00` | 2 | `width="80"` | 80픽셀 |
+| 5 | `1E 00` | 2 | `height="30"` | 30픽셀 |
+| 7 | `01` (가정) | 1 | (미지정) | Background colour — 위와 동일하게 가정 |
+| 8 | `1E 00` | 2 | `font_attributes="30"` | Font Attributes ID 30 참조 |
+| 10 | `00` (가정) | 1 | (미지정) | Options — 불투명·선행0 없음·0도 표시·반올림으로 가정 |
+| 11 | `FF FF` | 2 | `variable_reference="65535"` | NULL — Value 속성 직접 사용 |
+| 13 | `55 00 00 00` | 4 | `value="85"` | 원시값 85(unsigned 32bit, LE) |
+| 17 | `00 00 00 00` | 4 | `offset="0"` | Offset(signed 32bit) |
+| 21 | `00 00 80 3F` | 4 | `scale="1.0"` | Scale — IEEE-754 단정밀도 부동소수 1.0(LE) |
+| 25 | `00` | 1 | `number_of_decimals="0"` | 소수점 이하 0자리 |
+| 26 | `01` (가정) | 1 | `format="true"` | Format(0=고정소수/1=지수 표기) — XML의 `true` 표기가 이 0/1 enum과 정확히 어떻게 대응하는지 이 챕터 범위에서는 확정할 수 없어 1로 가정 |
+| 27 | `00` | 1 | `justification="0"` | 좌측 정렬 |
+
+표시값 계산식 `(value + Offset) × Scale = (85 + 0) × 1.0 = 85`로, XML 주석의 "초기값 85°C"와 일치한다.
+
+### Object Pool Transfer에 실리는 순서
+
+Annex C.2.3에 따르면 Object Pool Transfer message는 <strong>Byte 1 = 함수코드 `0x11`</strong> 뒤에 오브젝트 레코드가 그대로 이어지는 구조다. §5 화면의 풀 전체를 구성하면 다음과 같다.
+
+| 순서 | 오브젝트 | 바이트 수 | 비고 |
+|---|---|---|---|
+| 1 | Working Set(ID 0) | 10 | designator 오브젝트 0개로 단순화한 크기. Annex B.1은 <strong>Soft Key designator용 오브젝트를 최소 1개</strong> 포함해야 한다고 규정하지만 §5 XML은 이를 생략했으므로, 실제 툴체인이 만드는 정확한 바이트 수는 이보다 클 수 있다 |
+| 2 | Data Mask(ID 1) | 20 | 자식 오브젝트 2개(Output String 10, Output Number 11) 포함 |
+| 3 | Font Attributes(ID 30) | 7 | 위 표 참고 |
+| 4 | Output String(ID 10) | 30 | 위 표 참고 |
+| 5 | Output Number(ID 11) | 28 | 위 표 참고 |
+| 합계 | | <strong>95</strong> | Object Pool Transfer message 전체 길이 = 1(함수코드) + 95 = 96바이트 |
+
+이 95바이트가 [CH15 §6](/study/isobus/15-vt-basics#_6-vt-연결-따라가기) 타임라인의 Get Memory 메시지에 그대로 들어가는 Memory Required 값이다.
+
+### ETP가 필요해지는 지점
+
+§4에서 "1785바이트 초과 시 ETP"라고 했다. 이번 예제 풀은 95바이트라 TP 한 세션이면 충분하다. 하지만 오브젝트 5개의 평균 크기가 95 ÷ 5 = 19바이트인 것을 기준으로 보면, <strong>1785 ÷ 19 ≈ 94개</strong> — 이 정도 크기의 오브젝트 90여 개만 모여도 ETP 임계값을 넘는다. 실제 작업기 화면은 여러 Data Mask에 버튼·라벨·컨테이너가 수십~수백 개씩 들어가는 경우가 흔하고, Picture Graphic처럼 원시 비트맵 데이터를 통째로 담는 오브젝트(§2 "Picture Graphic")가 하나만 있어도 크기가 급격히 커진다. 풀이 조금만 커져도 ETP 경로를 타게 되는 이유다.
+
+:::details 파이썬으로 바이트 구성 검산해 보기
+```python
+def le(v, n):
+    return v.to_bytes(n, "little", signed=False)
+
+
+# Font Attributes(ID 30)
+font_attr = le(30, 2) + bytes([23, 0, 6, 0, 0])
+assert font_attr.hex(" ").upper() == "1E 00 17 00 06 00 00"
+assert len(font_attr) == 7
+
+# Output String(ID 10) — Value는 WideString(BOM + UTF-16LE)
+text = "엔진 온도:"
+value = b"\xFF\xFE" + text.encode("utf-16-le")
+assert value.hex(" ").upper() == "FF FE D4 C5 C0 C9 20 00 28 C6 C4 B3 3A 00"
+assert len(value) == 14
+
+output_string = (
+    le(10, 2) + bytes([11])
+    + le(120, 2) + le(30, 2)
+    + bytes([0x01])          # background colour(가정)
+    + le(30, 2)               # font attributes
+    + bytes([0x00])           # options(가정)
+    + le(0xFFFF, 2)            # variable reference(NULL)
+    + bytes([0])               # justification
+    + le(len(value), 2)
+    + value
+)
+assert len(output_string) == 30
+
+# Output Number(ID 11)
+import struct
+scale = struct.pack("<f", 1.0)
+assert scale.hex(" ").upper() == "00 00 80 3F"
+
+output_number = (
+    le(11, 2) + bytes([12])
+    + le(80, 2) + le(30, 2)
+    + bytes([0x01])            # background colour(가정)
+    + le(30, 2)
+    + bytes([0x00])            # options(가정)
+    + le(0xFFFF, 2)
+    + le(85, 4)                 # value
+    + (0).to_bytes(4, "little", signed=True)  # offset
+    + scale
+    + bytes([0, 1, 0])          # decimals, format(가정=1), justification
+)
+assert len(output_number) == 28
+
+pool_size = len(font_attr) + len(output_string) + len(output_number) + 10 + 20  # + Working Set(10) + Data Mask(20)
+assert pool_size == 95
+print("풀 전체 크기:", pool_size, "바이트 — Get Memory의 Memory Required와 일치")
+```
+:::
+
+::: tip 핵심 정리
+- 오브젝트 레코드는 항상 Object ID(2바이트 LE) + Type(1바이트) + 속성 순이며, 값의 크기·순서는 오브젝트 타입마다 Annex B가 고정한다.
+- IOP XML의 속성 이름은 사람이 읽기 위한 것이고, 바이너리에서는 고정된 오프셋의 바이트 값일 뿐이다. XML에 없는 속성도 바이너리에는 반드시 존재한다(위 예제의 "(가정)" 항목들).
+- 문자열에 비-ASCII 문자가 있으면 8-bit 인코딩 대신 WideString(BOM + UTF-16LE)으로 바뀐다 — XML에는 이를 나타내는 표시가 없다.
+- Object Pool Transfer message는 함수코드 `0x11` 뒤에 오브젝트 레코드가 그대로 이어지는 단순한 구조이며, 풀이 커질수록(오브젝트 수·이미지 데이터) TP의 1785바이트 한계를 넘어 ETP가 필요해진다.
+:::
+
 ## 다음 챕터
 
 - 다음 : [VT 명령어와 상호작용](/study/isobus/17-vt-commands)

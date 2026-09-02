@@ -204,6 +204,127 @@ Priority 7 (ID 앞자리 111): 정보성 메시지, 로그
 - 동일 Priority 내에서는 기능별로 ID 범위를 구분해 관리한다
 :::
 
+지금까지는 §2에서 2개 노드짜리 예시로 중재 원리를 봤다. 이번에는 노드 3개가 동시에 전송을 시작하는 실제 ISOBUS 메시지 조합으로, ID의 첫 비트부터 승부가 갈리는 순간까지 끝까지 따라가 본다.
+
+## 5. 중재 과정 따라가기
+
+### 시나리오: 노드 3개가 동시에 전송을 시작한다
+
+버스가 유휴 상태였다가, 세 노드가 <strong>같은 순간</strong> SOF를 보내며 전송을 시작한다.
+
+| 노드 | 메시지 | PGN | 근거 | Priority | SA |
+|---|---|---|---|---|---|
+| A (엔진 ECU) | EEC1(엔진 속도) | 61444 (0xF004) | [CAN 데이터 프레임](/study/isobus/04-can-data-frame)에서 이미 파싱해 본 PGN | 3 | 0x00 |
+| B (차속 센서) | Wheel-based Speed and Distance(차속·거리) | 65096 (0xFE48) | ISO 11783-7 Part 7의 차속 메시지 | 6 | 0x1C |
+| C (진단 도구) | DM1(활성 고장 코드) | 65226 (0xFECA) | ISO 11783-12 Annex B의 DM1 | 6 | 0xF9(오프보드 진단 도구 주소) |
+
+Priority는 두 값만 쓴다. EEC1처럼 <strong>제어와 직결된 상태 메시지</strong>는 기본값 3, 차속·진단처럼 <strong>제어 명령이 아닌 상태·기록 메시지</strong>는 기본값 6이다. 이 기본값 규칙 자체는 새로 만든 게 아니라 J1939 29비트 ID 구조를 다룬 앞 챕터에서 이미 정리된 것이다.
+
+PGN을 PF/PS로 역산하고 SA를 붙이면 29비트 ID가 나온다. Priority(3bit) + EDP(1bit) + DP(1bit) + PF(8bit) + PS(8bit) + SA(8bit) = 29bit다.
+
+| 노드 | ID(hex) | Priority(3) | EDP(1) | DP(1) | PF(8) | PS(8) | SA(8) |
+|---|---|---|---|---|---|---|---|
+| A | `0x0CF00400` | `011` | `0` | `0` | `11110000`(0xF0) | `00000100`(0x04) | `00000000`(0x00) |
+| B | `0x18FE481C` | `110` | `0` | `0` | `11111110`(0xFE) | `01001000`(0x48) | `00011100`(0x1C) |
+| C | `0x18FECAF9` | `110` | `0` | `0` | `11111110`(0xFE) | `11001010`(0xCA) | `11111001`(0xF9) |
+
+각 칸을 왼쪽부터 순서대로 이으면(비트28→비트0) 위 ID(hex)가 그대로 나온다.
+
+::: tip 비트 번호 규칙
+29비트 ID는 SOF 다음으로 <strong>맨 처음 나가는 비트를 비트28(MSB, Priority 최상위)</strong>, <strong>맨 마지막에 나가는 비트를 비트0(LSB, SA 최하위)</strong>이라 부른다. Priority는 비트28~26, EDP는 비트25, DP는 비트24, PF는 비트23~16, PS는 비트15~8, SA는 비트7~0이다.
+:::
+
+### 1라운드 만에 갈리는 승부
+
+세 노드가 SOF 직후 ID의 첫 비트(비트28, Priority 최상위 비트)를 동시에 내보낸다.
+
+| 라운드 | 비트 위치 | 노드A 송신 | 노드B 송신 | 노드C 송신 | 버스(wired-AND) | 판정 |
+|---|---|---|---|---|---|---|
+| 1 | 비트28 | 0 (Dominant) | 1 (Recessive) | 1 (Recessive) | **Dominant(0)** | A 계속 · <strong>B, C 동시 탈락</strong> |
+
+Priority 3은 이진수로 `011`, Priority 6은 `110`이다. 최상위 비트만 봐도 A는 0, B와 C는 1이다. 버스는 세 값을 wired-AND로 합친 결과이므로, 하나라도 Dominant(0)를 내보내면 버스는 무조건 0이 된다. B와 C는 자신이 1을 보냈는데 버스가 0으로 관측되는 것을 <strong>동시에</strong> 감지하고, <strong>같은 라운드에서</strong> 각자 독립적으로 전송을 중단하고 수신 모드로 전환한다. 서로의 존재와 무관하게, 자신이 보낸 값과 버스 값을 비교하는 것만으로 판단이 끝난다는 점이 핵심이다.
+
+::: tip 중재는 반드시 한 명씩 떨어지지 않는다
+2개 노드짜리 예시(§2)에서는 매 라운드 최대 1개 노드만 탈락했다. 하지만 노드가 3개 이상이면, Dominant를 보낸 노드를 제외한 <strong>Recessive 노드 전부가 한 라운드에 동시에</strong> 탈락할 수 있다. 중재는 승자를 한 명씩 좁혀가는 토너먼트가 아니라, 매 비트마다 "그 순간 버스 값과 다르게 보낸 노드는 전부 탈락"하는 규칙이 반복될 뿐이다.
+:::
+
+A는 자신이 보낸 0과 버스 값 0이 일치하는 것을 확인하고 <strong>중단 없이</strong> 나머지 28비트(Priority 나머지 2비트 + EDP + DP + PF + PS + SA)를 마저 보낸 뒤, RTR/SRR, IDE, r0, DLC, Data, CRC, ACK, EOF까지 프레임 전체를 끝까지 전송한다. 이 과정에서 A의 데이터는 한 비트도 다시 보내지 않는다 — 중재에서 이긴 메시지는 처음부터 끝까지 그대로 버스에 실린다.
+
+### 패배한 노드는 어떻게 되는가
+
+B와 C는 전송을 중단한 순간부터 수신 노드로 동작하며, A가 보내는 프레임을 끝까지 수신한다(다른 목적지로 가는 메시지라도 버스에 실린 이상 모든 노드가 물리적으로 수신한다). A의 EOF까지 끝나고 버스가 다시 유휴 상태가 되면, B와 C는 각자 <strong>처음부터 다시</strong> SOF를 보내며 재전송을 시도한다. 이번에는 둘 다 이전과 동일한 ID를 다시 내보내므로, §3에서 정리한 원칙대로 <strong>같은 우선순위 관계가 그대로 반복</strong>된다.
+
+여기서 이 절 전체를 관통하는 결론이 나온다. B와 C는 이번 라운드에서 메시지를 <strong>보내지 못했을 뿐, 데이터 자체를 잃어버리지는 않았다.</strong> 재시도해서 버스가 비는 다음 기회에 다시 온전히 보낼 수 있다. 이것이 §1에서 이더넷과 대비해 언급한 <strong>비파괴적 중재(non-destructive arbitration)</strong>다 — 충돌이 나도 아무도 데이터를 버리지 않는다.
+
+### 우선순위가 같다면 몇 라운드까지 가는가
+
+방금 예시는 A의 Priority(3)가 B·C(6)보다 낮아 1라운드 만에 끝났다. 그렇다면 <strong>Priority가 완전히 같은 두 메시지</strong>는 몇 라운드까지 가야 승부가 갈릴까? B와 C만 놓고 — A가 잠시 버스에 없었다고 가정하고 — 계속 비교해보자.
+
+B와 C는 둘 다 Priority 6, EDP 0, DP 0이고, PGN이 둘 다 65000번대라 <strong>PF도 0xFE로 완전히 같다.</strong> 즉 비트28부터 비트16까지 13비트가 전부 동일하다. 승부는 PS 필드로 넘어가서야 갈린다.
+
+| 구간 | 비트 위치 | 노드B | 노드C | 비고 |
+|---|---|---|---|---|
+| Priority(3bit) | 비트28~26 | `110` | `110` | 완전히 동일, 계속 |
+| EDP | 비트25 | `0` | `0` | 동일, 계속 |
+| DP | 비트24 | `0` | `0` | 동일, 계속 |
+| PF(8bit) | 비트23~16 | `11111110`(0xFE) | `11111110`(0xFE) | 완전히 동일, 계속 |
+| PS 최상위 비트 | 비트15 | `0` (Dominant, PS=0x48) | `1` (Recessive, PS=0xCA) | **여기서 갈림** — B 승, C 탈락 |
+
+SOF 이후 <strong>14번째로 나가는 비트(비트15, PS 필드 최상위 비트)</strong>에 가서야 승부가 갈린다. B의 PS(0x48 = `01001000`)는 최상위 비트가 0이고, C의 PS(0xCA = `11001010`)는 최상위 비트가 1이기 때문이다. 이 예시가 §3에서 정리한 "Priority가 같으면 EDP → DP → PF → PS → SA 순서로 계속 비교한다"는 원칙을 실제 비트로 보여준다 — Priority와 PF까지 같아도, PS 한 비트 차이로 승부가 갈린다.
+
+:::details 파이썬으로 검산해 보기
+```python
+def build_id(priority, edp, dp, pf, ps, sa):
+    return (priority << 26) | (edp << 25) | (dp << 24) | (pf << 16) | (ps << 8) | sa
+
+
+def pgn_to_pf_ps(pgn):
+    return pgn // 256, pgn % 256          # PF>=240(PDU2) 기준: PGN = PF*256 + PS
+
+
+def bits29(v):
+    return [(v >> i) & 1 for i in range(28, -1, -1)]   # 비트28(MSB) -> 비트0(LSB)
+
+
+# 노드 정의: (이름, priority, PGN, SA)
+defs = [
+    ("A_엔진(EEC1)",  3, 61444, 0x00),
+    ("B_차속",        6, 65096, 0x1C),
+    ("C_진단(DM1)",   6, 65226, 0xF9),
+]
+
+ids = {}
+for name, prio, pgn, sa in defs:
+    pf, ps = pgn_to_pf_ps(pgn)
+    ids[name] = build_id(prio, 0, 0, pf, ps, sa)
+    print(f"{name}: PF=0x{pf:02X} PS=0x{ps:02X} ID=0x{ids[name]:08X}")
+
+# 3-way 중재 시뮬레이션
+alive = set(ids)
+bitstreams = {k: bits29(v) for k, v in ids.items()}
+for i in range(29):
+    vals = {k: bitstreams[k][i] for k in alive}
+    bus = min(vals.values())              # 하나라도 0(Dominant)이면 버스는 0
+    losers = [k for k, v in vals.items() if v != bus]
+    if losers:
+        print(f"round {i+1} (bit{28-i}): bus={bus}, 탈락={losers}")
+    for l in losers:
+        alive.discard(l)
+    if len(alive) == 1:
+        print("최종 승자:", alive)
+        break
+
+# B vs C만 남았다면 (Priority가 같을 때) 몇 라운드까지 가는가
+bB, bC = bitstreams["B_차속"], bitstreams["C_진단(DM1)"]
+for i in range(29):
+    if bB[i] != bC[i]:
+        print(f"B vs C 결정 라운드: {i+1} (bit{28-i}), B={bB[i]} C={bC[i]}")
+        break
+```
+
+실행하면 노드A가 round 1(bit28)에서 즉시 승리하고, B와 C만 남길 경우 결정 라운드가 14(bit15)로 나온다 — 위 표와 정확히 일치한다.
+:::
+
 ::: tip 핵심 정리
 
 - CAN의 **CSMA/CD+AMP** 방식은 비트 단위로 중재해, 우선순위 높은 메시지가 데이터 손실 없이 전송된다.

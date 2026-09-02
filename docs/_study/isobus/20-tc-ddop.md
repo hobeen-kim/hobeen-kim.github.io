@@ -257,6 +257,94 @@ graph TD
 > - TC는 DDOP를 파싱하여 지원 DDI, Section 구성, 작업폭 등을 파악한 뒤 Task를 활성화한다.
 > - 3구획 살포기 DDOP에는 Section별로 DDI 1(Setpoint), DDI 2(Measurement), DDI 289(Setpoint Work State) 항목이 정의된다.
 
+## 5. DDOP를 바이트로 보기
+
+§2와 §4에서 다룬 DDOP 오브젝트들은 결국 TP/ETP로 전송되는 바이트열이다. 어디까지 바이트 단위로 확인 가능한지, 그리고 그 바이트가 §4의 3구획 스프레이어 예제에서 무엇을 나타내는지 살펴본다.
+
+### 오브젝트 공통 구조
+
+모든 DDOP 오브젝트는 <strong>Object ID</strong>(DDOP 전체에서 유일, 참조 없음은 NULL Object ID `0xFFFF`)와 오브젝트 타입(Device·DeviceElement·DeviceProcessData·DeviceProperty·DeviceValuePresentation 다섯 종류 중 하나) 뒤에 타입별 속성이 이어지는 구조다.
+
+:::info 확인 범위
+이 절에서 다루는 것은 <strong>타입별로 어떤 필드가 몇 바이트인지</strong>까지다. Object ID와 오브젝트 타입 식별자가 바이트열의 정확히 몇 번째 바이트에 어떤 순서로 놓이는지 — 오브젝트 타입을 텍스트로 싣는지 숫자 코드로 싣는지를 포함해서 — 는 이번에 확인한 정리 자료(`appendix-iso-part10.md`)에 명시돼 있지 않다. 그래서 전체 오브젝트를 바이트 오프셋까지 조립하는 대신, 각 오브젝트가 담아야 하는 필드와 그 폭까지만 다룬다.
+:::
+
+### DeviceElement — 계층을 만드는 필드
+
+| 필드 | 폭 | §4 Object 3(DE, Section 1)의 값 |
+|---|---|---|
+| DeviceElementType | 1바이트 | 4(Section) |
+| DeviceElementNumber | 2바이트 (0~4095) | 1 |
+| Parent Object ID | Object ID와 같은 폭(2바이트) | 2 (DE(2), 전체 기능 루트) |
+
+DeviceElementNumber가 4095까지인 것은 우연이 아니다. Process Data 메시지의 Element Number 필드도 12비트(0~4095)이므로, DDOP에서 선언한 Element Number를 그대로 [Process Data 메시지의 Element Number 자리](/study/isobus/19-tc-process-data)에 실어 보낼 수 있다.
+
+### DeviceProcessData — DDI·property·trigger를 담는 필드
+
+| 필드 | 폭 | 내용 |
+|---|---|---|
+| Process data DDI | 2바이트 | ISO 11783-11 정의 DDI |
+| Process data properties | 1바이트(비트셋) | bit1=default set 멤버, bit2=settable, bit3=control source(bit2·3 동시 설정 불가) |
+| Process data available trigger methods | 1바이트(비트셋) | bit1=time interval, bit2=distance interval, bit3=threshold limits, bit4=on change, bit5=total |
+| Device value presentation object ID | 2바이트 | 없으면 NULL(`0xFFFF`) |
+
+§4의 Object 7(Section 1의 DDI 1, Setpoint)과 Object 8(Section 1의 DDI 2, Measurement — 변화량 10 L/ha 이상 트리거)을 이 필드에 채우면 다음과 같다.
+
+| Object | DDI | Properties 비트 | Properties 바이트 | Trigger 비트 | Trigger 바이트 |
+|---|---|---|---|---|---|
+| 7 (Setpoint) | 1 | bit2(settable)=1, 나머지 0 | `0x02` | §4 표에 트리거 명시 없음 | 확인 불가 |
+| 8 (Measurement) | 2 | 전부 0(설정 불가) | `0x00` | bit4(on change)=1, 나머지 0 | `0x08` |
+
+<strong>Object 7의 Properties 바이트가 `0x02`로 bit2(settable)를 세운 것</strong>이 [TC 프로세스 데이터 챕터의 "전체 흐름"](/study/isobus/19-tc-process-data)에서 말한 "DDOP에 없는 DDI는 쓸 수 없다"의 실체다. TC가 `[DDI=1, Element=3, Value=200]`처럼 Value Command를 내려도, 대상 Element에 연결된 DeviceProcessData의 Properties 바이트에 bit2가 서 있지 않으면 작업기는 이를 받아들일 근거가 없어 PDACK 오류 코드(bit5, "process data가 settable 아님")로 거부한다. Object 8은 반대로 bit2가 0이므로 TC가 setpoint로 내릴 수 없고, 오직 작업기가 측정값을 올리는 용도로만 쓰인다.
+
+### DDOP 전송도 같은 PGN, 같은 바이트 배치를 쓴다
+
+앞 챕터에서 다룬 Process Data 메시지(PGN 51968/`0xCB00`, Command 4비트 + Element/DDI/Value)는 살포량 같은 "값"을 나를 때의 구조다. DDOP 자체를 실어 나르는 메시지는 같은 PGN 위에서 <strong>Command 1(Device descriptor)</strong>의 서브커맨드로 오간다. Byte 1의 자리 배치는 형식적으로 같다 — 하위 4비트가 Command(`0001`), 상위 4비트는 이번엔 Element Number가 아니라 서브커맨드를 나타낸다.
+
+| 서브커맨드(Byte 1 bit 8~5) | 메시지 | Byte 1 |
+|---|---|---|
+| `0000` | Request Structure Label | `0x01` |
+| `0110` | Object-pool Transfer(DDOP 본문 전송) | `0x61` |
+| `1000` | Object-pool Activate/Deactivate | `0x81` |
+
+`0x61`(Object-pool Transfer)로 시작한 메시지의 뒤(Byte 2~n)에 위에서 채운 DVC·DET·DPD·DPT·DVP 오브젝트 레코드들이 이어져 TP(1,785바이트 이하) 또는 ETP(초과 시)로 분할 전송된다. 즉 DDOP 전송과 Process Data 값 전달은 같은 PGN·같은 Command 니블 구조를 공유하되, Command 값(1 vs 2~A)에 따라 그 뒤에 오는 바이트열의 의미가 완전히 달라진다.
+
+:::details 파이썬으로 검산해 보기
+```python
+def properties_byte(default=False, settable=False, control_source=False):
+    return (int(default) << 0) | (int(settable) << 1) | (int(control_source) << 2)
+
+
+def trigger_byte(time_interval=False, distance_interval=False,
+                  threshold=False, on_change=False, total=False):
+    return (
+        (int(time_interval) << 0)
+        | (int(distance_interval) << 1)
+        | (int(threshold) << 2)
+        | (int(on_change) << 3)
+        | (int(total) << 4)
+    )
+
+
+def device_descriptor_byte1(subcommand):
+    command = 1  # Device descriptor
+    return (subcommand << 4) | command
+
+
+# Object 7 — DDI 1 Setpoint: settable만 세운다
+print(hex(properties_byte(settable=True)))          # 0x2
+
+# Object 8 — DDI 2 Measurement: settable 없음, on change 트리거
+print(hex(properties_byte()))                       # 0x0
+print(hex(trigger_byte(on_change=True)))            # 0x8
+
+# Device descriptor 서브커맨드별 Byte 1
+print(hex(device_descriptor_byte1(0b0000)))         # 0x1  Request Structure Label
+print(hex(device_descriptor_byte1(0b0110)))         # 0x61 Object-pool Transfer
+print(hex(device_descriptor_byte1(0b1000)))         # 0x81 Object-pool Activate/Deactivate
+```
+:::
+
 ## 다음 챕터
 
 - 다음 : [ISOBUS 기타 기능](/study/isobus/21-isobus-misc)

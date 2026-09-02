@@ -205,6 +205,121 @@ Commanded Address를 수락한 ECU는 명령받은 주소를 새 SA로 하는 <s
 - Commanded Address(PGN 65240)는 외부에서 ECU의 주소를 강제 지정하는 방법이며, 9바이트 데이터라 BAM으로 전송된다.
 :::
 
+## 5. 주소 클레임 따라가기
+
+앞 절이 절차를 일반화해서 설명했다면, 여기서는 <strong>서로 다른 제조사의 작업기 ECU 2개가 같은 주소를 동시에 클레임해 충돌하고, NAME 비교로 승패가 갈린 뒤, 진 쪽이 다른 주소를 재클레임하는 전 과정</strong>을 시각(ms) 단위로 끝까지 따라간다.
+
+### 등장인물 — 두 파종기 컨트롤러의 NAME
+
+두 CF 모두 파종기(Device class 4, Planter — [부속서 ISO 11783-5](/study/isobus/appendix-iso-part05) Annex A.3에서 확인) 컨트롤러이고, 둘 다 ISOBUS 적합 장치라 self-configurable(AAC=1)이다. Industry Group(농업 장비)·Device class·Function까지 같아서, NAME이 갈리는 지점은 제조사 고유 필드(Manufacturer Code, Identity Number)뿐이다.
+
+| 필드 | 비트 | CF A — 그린텍 파종기 컨트롤러 | CF B — 블루팜 파종기 컨트롤러 |
+|------|------|------|------|
+| Self-configurable address (AAC) | 1 | 1 (self-configurable) | 1 (self-configurable) |
+| Industry Group (IG) | 3 | 2 (Agricultural) | 2 (Agricultural) |
+| Vehicle System Instance (VSI) | 4 | 0 | 0 |
+| Vehicle System (VS) | 7 | 4 (Planter) | 4 (Planter) |
+| Reserved | 1 | 0 | 0 |
+| Function | 8 | 130 | 130 |
+| Function Instance (FI) | 5 | 0 | 0 |
+| ECU Instance (EI) | 3 | 0 | 0 |
+| Manufacturer Code | 11 | 105 (그린텍) | 320 (블루팜) |
+| Identity Number | 21 | 500000 | 250000 |
+
+Function·Manufacturer Code·Identity Number의 실제 등록값은 isobus.net 데이터베이스가 관리하며 이 스터디의 부속서에는 실려 있지 않다. 위 표의 값은 필드 인코딩·비교 방식을 보여주기 위한 예시다. 이 값을 64비트로 이어 붙이면 다음과 같다.
+
+```
+NAME_A = 0xA00882000D27A120   (바이트: A0 08 82 00 0D 27 A1 20)
+NAME_B = 0xA00882002803D090   (바이트: A0 08 82 00 28 03 D0 90)
+```
+
+### 타임라인 — 충돌부터 재클레임까지
+
+두 CF 모두 제조 시 저장된 initial address가 우연히 128(self-configurable 범위의 첫 주소)로 같다고 하자.
+
+| 시각(ms) | 송신자 | 메시지 (PGN, 데이터) | 버스 상태 | 판정 |
+|------|------|------|------|------|
+| 0 | CF A, CF B (각자) | Request for Address Claimed (PGN 59904, DA=255, 데이터=PGN 60928 조회) | 정상 송신 | 사용 중 주소 조회 시작 — 각자 <strong>250 ms + RTxD</strong> 대기 진입 |
+| 0~331.6 | CF A | (대기, RTxD_A = 136 × 0.6 ms = 81.6 ms) | 유휴 — SA=128 클레임 수신 없음 | SA=128을 빈 주소로 판단 |
+| 0~332.2 | CF B | (대기, RTxD_B = 137 × 0.6 ms = 82.2 ms) | 유휴 — SA=128 클레임 수신 없음 | SA=128을 빈 주소로 판단 |
+| 331.6 | CF A | Address Claimed (PGN 60928, CAN ID 0x18EEFF80, SA=128, DATA=NAME_A) | 정상 송신 | SA=128 클레임 시작 |
+| 332.2 | CF B | Address Claimed (PGN 60928, CAN ID 0x18EEFF80, SA=128, DATA=NAME_B) | 정상 송신 — RTxD 차이가 0.6 ms뿐이라 A의 클레임을 반영하기 전에 이미 자신의 클레임 전송에 들어간 상태 | SA=128 중복 클레임 발생 |
+| 332.2 | CF A, CF B | (서로의 Address Claimed 수신) | SA=128 충돌 감지 | NAME 비교: `0xA00882000D27A120`(A) `<` `0xA00882002803D090`(B) → <strong>A 승, B 패</strong> |
+| 332.2 | CF A | Address Claimed 재송신 (PGN 60928, SA=128, NAME_A) | 정상 송신 | 승자도 재송신해야 SA=128을 지킨다 |
+| 332.2 | CF B | Address Claimed (PGN 60928, CAN ID 0x18EEFF81, SA=129, NAME_B) | 정상 송신 | AAC=1이므로 128~247 범위의 다음 빈 주소(129)를 즉시 재클레임 |
+| 582.2 | — | 250 ms 동안 SA=128·SA=129 모두 경합 클레임 없음 | 유휴 | CF A는 SA=128, CF B는 SA=129 <strong>클레임 성공 확정</strong> |
+| 582.2 이후 | CF A, CF B | 일반 메시지 송신 시작 | 정상 | 클레임 성공 후 250 ms 경과 — 일반 통신 허용(Request 응답은 이 전에도 예외적으로 가능) |
+
+### 승패 규칙 — NAME을 64비트 정수로 통째 비교
+
+NAME 비교는 각 필드를 개별로 견주는 것이 아니라, <strong>address-claimed 데이터 필드(8바이트) 전체를 하나의 정수로 취급해 비교</strong>한다. AAC를 최상위 비트로 놓고 이어 붙이면, 상위 필드가 같을 때만 하위 필드가 승패를 가른다.
+
+이번 예시에서는 AAC·IG·VSI·VS·Reserved·Function·FI·EI가 완전히 같아 NAME의 앞 4바이트(`A0 08 82 00`)까지 일치한다. 갈리는 지점은 5번째 바이트, 즉 <strong>Manufacturer Code</strong>의 상위 8비트부터다 — 그린텍은 `0x0D`(제조사 코드 105), 블루팜은 `0x28`(제조사 코드 320)이라 `0x0D < 0x28`이므로 그린텍(CF A)이 이긴다.
+
+:::tip 핵심 통찰
+NAME 비교는 상위 필드가 같으면 그대로 하위 필드로 내려가는 <strong>사전식(lexicographic) 비교</strong>다. 그리고 self-configurable 비트(AAC)가 NAME의 <strong>최상위 비트</strong>이므로, 다른 필드가 전부 같더라도 AAC=0(non-configurable)인 CF는 AAC=1(self-configurable)인 CF를 항상 이긴다.
+:::
+
+### 패자의 행동 — 재클레임 또는 Cannot Claim
+
+패자(CF B)가 이후 무엇을 하는지는 <strong>AAC 값</strong>에 따라 갈린다.
+
+| AAC | 패자의 행동 |
+|------|------|
+| 1 (self-configurable, 이번 시나리오) | 128~247 범위에서 다음 빈 주소를 골라 재클레임한다. 위 타임라인처럼 SA=129를 클레임하고, 250 ms 무경합을 확인하면 통신을 시작한다 |
+| 0 (non-configurable) | 재클레임을 시도하지 않고 <strong>RTxD를 삽입한 뒤 Cannot Claim Address(PGN 60928, SA=254, 데이터=자신의 NAME)</strong>를 송신한다. 이후 Null Address 상태로 남아 request-for-address-claimed 응답과 commanded-address 처리 외에는 통신할 수 없다 |
+
+이번 시나리오의 CF B는 ISOBUS 적합 장치라 AAC=1이므로 위 표의 첫 줄대로 SA=129를 재클레임한다.
+
+### 타이밍 규정이 시나리오에 어떻게 적용되는가
+
+이 타임라인에 실제로 반영된 [§3 타이밍 규칙](#_3-주소-클레임-절차)은 세 가지다.
+
+- <strong>주소 조회 후 대기</strong>: t=0에서 Request for Address Claimed를 보낸 뒤 최소 250 ms + RTxD를 기다린 다음에야 Address Claimed를 송신했다(t=331.6ms, 332.2ms).
+- <strong>클레임 성공 판정</strong>: A와 B 모두 마지막 Address Claimed(t=332.2ms) 이후 250 ms 동안 경합이 없어야 성공이 확정된다(t=582.2ms).
+- <strong>일반 통신 시작</strong>: 클레임 성공 확정(t=582.2ms) 이전에는 일반 메시지를 보낼 수 없다.
+
+:::details 파이썬으로 검산해 보기
+```python
+FIELDS = [  # (필드명, 비트 수) — AAC가 최상위
+    ("aac", 1), ("ig", 3), ("vsi", 4), ("vs", 7), ("rsvd", 1),
+    ("func", 8), ("fi", 5), ("ei", 3), ("mfg", 11), ("ident", 21),
+]
+
+
+def encode_name(**kw):
+    val = 0
+    for name, bits in FIELDS:
+        v = kw[name]
+        assert 0 <= v < (1 << bits)
+        val = (val << bits) | v
+    assert val.bit_length() <= 64
+    return val
+
+
+# CF A - 그린텍 파종기 컨트롤러
+NAME_A = encode_name(aac=1, ig=2, vsi=0, vs=4, rsvd=0,
+                      func=130, fi=0, ei=0, mfg=105, ident=500000)
+# CF B - 블루팜 파종기 컨트롤러
+NAME_B = encode_name(aac=1, ig=2, vsi=0, vs=4, rsvd=0,
+                      func=130, fi=0, ei=0, mfg=320, ident=250000)
+
+print(hex(NAME_A), NAME_A.to_bytes(8, "big").hex())   # 0xa00882000d27a120 a00882000d27a120
+print(hex(NAME_B), NAME_B.to_bytes(8, "big").hex())   # 0xa00882002803d090 a00882002803d090
+print("A < B:", NAME_A < NAME_B)                      # True -> CF A(그린텍) 승
+
+a_bytes, b_bytes = NAME_A.to_bytes(8, "big"), NAME_B.to_bytes(8, "big")
+for i, (x, y) in enumerate(zip(a_bytes, b_bytes)):
+    if x != y:
+        print(f"byte[{i}]에서 최초로 갈림: A=0x{x:02X} B=0x{y:02X}")  # byte[4]: A=0x0D B=0x28
+        break
+
+# RTxD(0~255 난수 x 0.6ms)로 만든 두 대기 시간
+RTXD_A, RTXD_B = 136 * 0.6, 137 * 0.6
+print("t_A =", 250 + RTXD_A, "ms /", "t_B =", 250 + RTXD_B, "ms")  # 331.6 / 332.2
+```
+:::
+
 ## 다음 챕터
 
 - 다음 : [J1939 Transport Protocol](/study/isobus/11-j1939-transport)

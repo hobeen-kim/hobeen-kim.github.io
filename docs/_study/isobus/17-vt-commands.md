@@ -93,13 +93,8 @@ ECU → VT 명령어는 <strong>PGN 0xE700</strong>(59136) 목적지 지정 메�
 
 ### Change Numeric Value 메시지 구조 예시
 
-```
-Byte 1: 0xA8          ← Command Byte (Change Numeric Value)
-Byte 2: LSB of Object ID
-Byte 3: MSB of Object ID
-Byte 4: 0xFF          ← 예약 바이트
-Byte 5-8: 새로운 값   ← 32bit unsigned integer (Little Endian)
-```
+![Change Numeric Value 메시지 8바이트 구조: Byte1 Command Byte(0xA8), Byte2-3 Object ID(LE), Byte4 예약(0xFF), Byte5-8 새 값(32bit unsigned, LE)](/images/study-isobus/17-change-numeric-value-layout-light.png)
+![Change Numeric Value 메시지 8바이트 구조: Byte1 Command Byte(0xA8), Byte2-3 Object ID(LE), Byte4 예약(0xFF), Byte5-8 새 값(32bit unsigned, LE)](/images/study-isobus/17-change-numeric-value-layout-dark.png)
 
 Byte 5~8의 값 크기는 대상 오브젝트 타입에 따라 다르다 — Input Boolean은 1바이트, Meter·Bar Graph류는 2바이트, Input/Output Number·Number Variable은 4바이트이며 미사용 바이트는 0으로 채운다. 위 예시는 4바이트(32bit) 오브젝트 기준이다.
 

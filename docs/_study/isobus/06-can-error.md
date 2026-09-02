@@ -93,12 +93,8 @@ ACK Slot 전송: 1 (Recessive)
 
 오류를 감지한 노드는 즉시 <strong>에러 프레임(Error Frame)</strong>을 전송해 버스 전체에 오류 발생을 알린다.
 
-```mermaid
-packet-beta
-title Error Frame 구조
-0-5: "Active Error Flag (6 Dominant bits)"
-6-13: "Error Delimiter (8 Recessive bits)"
-```
+![Error Frame 구조: Active Error Flag 6bit Dominant, Error Delimiter 8bit Recessive](/images/study-isobus/06-error-frame-light.png)
+![Error Frame 구조: Active Error Flag 6bit Dominant, Error Delimiter 8bit Recessive](/images/study-isobus/06-error-frame-dark.png)
 
 **Active Error Flag (6 Dominant bits)**
 

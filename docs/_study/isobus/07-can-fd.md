@@ -60,15 +60,8 @@ CAN FD는 Classic CAN 프레임에 세 개의 비트를 추가해 하위 호환�
 
 ## CAN FD 프레임 구조
 
-```mermaid
-packet-beta
-  0-10: "SOF + Arbitration ID (11/29 bit)"
-  11-14: "Control (IDE, FDF, res, BRS, ESI, DLC)"
-  15-78: "Data (0~64 bytes)"
-  79-93: "CRC (17 or 21 bit)"
-  94-95: "CRC Del + ACK"
-  96-97: "ACK Del + EOF"
-```
+![CAN FD 프레임 구조 개요: SOF+Arbitration ID(11/29bit), Control(IDE·FDF·res·BRS·ESI·DLC), Data(0~64byte), CRC(17 or 21bit), CRC Del+ACK, ACK Del+EOF](/images/study-isobus/07-canfd-frame-light.png)
+![CAN FD 프레임 구조 개요: SOF+Arbitration ID(11/29bit), Control(IDE·FDF·res·BRS·ESI·DLC), Data(0~64byte), CRC(17 or 21bit), CRC Del+ACK, ACK Del+EOF](/images/study-isobus/07-canfd-frame-dark.png)
 
 > 참고: CAN FD의 CRC는 페이로드 길이에 따라 17비트(0~16바이트) 또는 21비트(20~64바이트)로 확장된다.
 
@@ -95,16 +88,16 @@ sequenceDiagram
 
 DLC(Data Length Code) 값과 실제 데이터 길이의 매핑이 CAN FD에서 확장되었다.
 
-```
-DLC  0~ 8 → 0~8 bytes  (Classic CAN과 동일)
-DLC  9    → 12 bytes
-DLC 10    → 16 bytes
-DLC 11    → 20 bytes
-DLC 12    → 24 bytes
-DLC 13    → 32 bytes
-DLC 14    → 48 bytes
-DLC 15    → 64 bytes
-```
+| DLC | 데이터 길이 |
+|---|---|
+| 0~8 | 0~8 bytes (Classic CAN과 동일) |
+| 9 | 12 bytes |
+| 10 | 16 bytes |
+| 11 | 20 bytes |
+| 12 | 24 bytes |
+| 13 | 32 bytes |
+| 14 | 48 bytes |
+| 15 | 64 bytes |
 
 # 3. 듀얼 비트레이트
 

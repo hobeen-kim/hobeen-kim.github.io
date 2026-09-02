@@ -65,19 +65,8 @@ graph LR
 
 ### NAME 필드 구성
 
-```mermaid
-packet-beta
-  0-0: "AAC"
-  1-3: "IG"
-  4-7: "VSI"
-  8-14: "VS"
-  15-15: "Rsvd"
-  16-23: "Function"
-  24-28: "FI"
-  29-31: "EI"
-  32-42: "Manufacturer Code"
-  43-63: "Identity Number"
-```
+![64비트 NAME 필드 구성 — MSB(bit 63) AAC부터 LSB(bit 0) Identity Number까지](/images/study-isobus/10-name-fields-light.png)
+![64비트 NAME 필드 구성 — MSB(bit 63) AAC부터 LSB(bit 0) Identity Number까지](/images/study-isobus/10-name-fields-dark.png)
 
 | 필드 | 비트 수 | 위치 (MSB 기준) | 설명 |
 |------|---------|-----------------|------|
@@ -94,18 +83,10 @@ packet-beta
 
 **NAME 예시 (16진수):**
 
-```
-NAME = 0x2000000000000000
-       └─────────────────┘
-         Arbitrary Address Capable = 0,
-         Industry Group = 2 (Agricultural equipment),
-         Function = 0 (Engine),
-         Manufacturer Code = 0,
-         Identity Number = 0
+NAME 값 `0x2000000000000000`은 Arbitrary Address Capable = 0, Industry Group = 2(Agricultural equipment), Function = 0(Engine), Manufacturer Code = 0, Identity Number = 0을 뜻한다. 최상위 바이트(Byte 1) `0x20`을 8비트로 분해하면 AAC·IG·VSI 값을 얻을 수 있다.
 
-최상위 바이트 = 0b0010_0000 = 0x20
-  → AAC(1bit)=0, IG(3bit)=010(2), VSI(4bit)=0000
-```
+![NAME=0x2000000000000000의 Byte 1(0x20)을 AAC·IG·VSI로 분해](/images/study-isobus/10-name-example-light.png)
+![NAME=0x2000000000000000의 Byte 1(0x20)을 AAC·IG·VSI로 분해](/images/study-isobus/10-name-example-dark.png)
 
 ## 3. 주소 클레임 절차
 

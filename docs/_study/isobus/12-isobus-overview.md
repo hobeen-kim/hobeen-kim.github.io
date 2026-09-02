@@ -68,12 +68,10 @@ graph TD
 
 TECU(Tractor ECU)는 PGN 65097(Ground-Based Speed and Distance)을 100ms마다 브로드캐스트해야 한다. 데이터 형식도 정해져 있다.
 
-```
-CAN ID: 0x0CFE490E  (Priority=3, PGN=65097(0xFE49), SA=0x0E)
-Data:   A0 0F 00 00 FF FF FF FF
-        ↑
-  Byte 1-2 = 0x0FA0 = 4000 → 4000 × 0.001 m/s = 4.0 m/s (약 14.4 km/h)
-```
+![CAN ID 0x0CFE490E(Priority/PGN/SA)와 8바이트 Data — Byte 1~2가 속도 값 0x0FA0](/images/study-isobus/12-speed-message-light.png)
+![CAN ID 0x0CFE490E(Priority/PGN/SA)와 8바이트 Data — Byte 1~2가 속도 값 0x0FA0](/images/study-isobus/12-speed-message-dark.png)
+
+Byte 1-2 = 0x0FA0 = 4000 → 4000 × 0.001 m/s = 4.0 m/s (약 14.4 km/h)
 
 John Deere 트랙터든 Fendt 트랙터든 같은 PGN, 같은 바이트 위치, 같은 분해능(0.001 m/s)으로 전송한다. 덕분에 어떤 제조사의 작업기를 연결해도 속도를 정확히 읽을 수 있다. 만약 제조사가 자체 PGN을 쓰거나 분해능을 바꾸면, 다른 제조사 장비가 속도를 잘못 읽거나 아예 못 읽는다.
 

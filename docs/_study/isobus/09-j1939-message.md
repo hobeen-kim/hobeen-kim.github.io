@@ -26,15 +26,8 @@ tags:
 
 ## 필드별 상세 설명
 
-```mermaid
-packet-beta
-  0-2: "Priority<br>3 bit"
-  3-3: "EDP<br>1 bit"
-  4-4: "DP<br>1 bit"
-  5-12: "PF (PDU Format)<br>8 bit"
-  13-20: "PS (PDU Specific)<br>8 bit"
-  21-28: "SA (Source Address)<br>8 bit"
-```
+![J1939 29비트 CAN ID 필드 구조와 비트 번호(28~0)](/images/study-isobus/09-canid-fields-light.png)
+![J1939 29비트 CAN ID 필드 구조와 비트 번호(28~0)](/images/study-isobus/09-canid-fields-dark.png)
 
 | 필드 | 비트 위치 | 범위 | 설명 |
 |---|---|---|---|
@@ -45,30 +38,14 @@ packet-beta
 | **PS** | 15~8 | 0~255 | PDU Specific. PF < 240이면 목적지 주소(DA), PF >= 240이면 그룹 확장 |
 | **SA** | 7~0 | 0~253 | Source Address. 메시지 송신 노드 주소 |
 
-## 비트 레이아웃 (29비트 전체)
-
-```
-비트 번호: 28  27  26  25  24  23  22  21  20  19  18  17  16  15  14  13  12  11  10  9   8   7   6   5   4   3   2   1   0
-필드:      [  Priority  ][EDP][DP][                PF (8bit)               ][              PS (8bit)             ][            SA (8bit)            ]
-```
+각 필드가 차지하는 비트 위치는 위 그림의 눈금(28~0)과 표가 그대로 대응한다.
 
 ## 예제: 0x18FEEE00 분해
 
-```
-CAN 29bit ID: 0x18FEEE00 (hex)
+CAN 29비트 ID `0x18FEEE00`을 hex → binary로 풀면 `0001 1000 1111 1110 1110 1110 0000 0000`(32bit)이고, 하위 29비트만 취해 필드로 나누면 다음과 같다.
 
-hex → binary (29비트):
-  0x18FEEE00 = 0001 1000 1111 1110 1110 1110 0000 0000 (32bit)
-  하위 29비트: 1 1000 1111 1110 1110 1110 0000 0000
-
-필드 분해:
-  Priority : 110      = 6     ← 28~26번 비트
-  EDP      : 0        = 0
-  DP       : 0        = 0
-  PF       : 1111 1110 = 0xFE = 254
-  PS       : 1110 1110 = 0xEE = 238
-  SA       : 0000 0000 = 0x00 = 0 (엔진 ECU)
-```
+![0x18FEEE00 CAN ID 분해: Priority=6, EDP=0, DP=0, PF=0xFE(254), PS=0xEE(238), SA=0x00](/images/study-isobus/09-canid-example-18feee00-light.png)
+![0x18FEEE00 CAN ID 분해: Priority=6, EDP=0, DP=0, PF=0xFE(254), PS=0xEE(238), SA=0x00](/images/study-isobus/09-canid-example-18feee00-dark.png)
 
 # 2. PGN (Parameter Group Number)
 
@@ -246,17 +223,10 @@ CAN ID   : 18FEEE00 (hex, 29비트)
 
 ### 2단계: 29비트 ID 분해
 
-```
-0x18FEEE00 → binary (29비트):
-  1 1000 1111 1110 1110 1110 0000 0000
+CAN ID `18FEEE00`을 binary로 풀어 필드별로 나누면 앞서 본 것과 동일하다 (PF = 0xFE = 254 → PDU2).
 
-Priority : 110         = 6
-EDP      : 0           = 0
-DP       : 0           = 0
-PF       : 1111 1110   = 0xFE = 254  (>= 240 → PDU2)
-PS       : 1110 1110   = 0xEE = 238
-SA       : 0000 0000   = 0x00 (Engine ECU)
-```
+![0x18FEEE00 CAN ID 분해: Priority=6, EDP=0, DP=0, PF=0xFE(254), PS=0xEE(238), SA=0x00](/images/study-isobus/09-canid-example-18feee00-light.png)
+![0x18FEEE00 CAN ID 분해: Priority=6, EDP=0, DP=0, PF=0xFE(254), PS=0xEE(238), SA=0x00](/images/study-isobus/09-canid-example-18feee00-dark.png)
 
 ### 3단계: PGN 계산
 
@@ -270,17 +240,8 @@ PGN = DP * 65536 + PF * 256 + PS
 
 ### 4단계: 데이터 필드 해석
 
-```mermaid
-packet-beta
-  0-7: "SPN 110<br>byte[0]=0xB0<br>→ 136°C"
-  8-15: "SPN 174<br>byte[1]=0x32<br>→ 10°C"
-  16-23: "SPN 175<br>byte[2]=0x04<br>(LSB)"
-  24-31: "SPN 175<br>byte[3]=0xFF<br>(MSB)"
-  32-39: "SPN 176<br>byte[4]=0xFF<br>(N/A)"
-  40-47: "SPN 176<br>byte[5]=0xFF<br>(N/A)"
-  48-55: "SPN 1134<br>byte[6]=0xFF<br>(N/A)"
-  56-63: "SPN 1135<br>byte[7]=0xFF<br>(N/A)"
-```
+![데이터 필드(8byte) 내 SPN 배치: byte[0]=SPN110→136°C, byte[1]=SPN174→10°C, byte[2~3]=SPN175(LSB/MSB), byte[4~5]=SPN176, byte[6]=SPN1134, byte[7]=SPN1135](/images/study-isobus/09-spn-byte-layout-light.png)
+![데이터 필드(8byte) 내 SPN 배치: byte[0]=SPN110→136°C, byte[1]=SPN174→10°C, byte[2~3]=SPN175(LSB/MSB), byte[4~5]=SPN176, byte[6]=SPN1134, byte[7]=SPN1135](/images/study-isobus/09-spn-byte-layout-dark.png)
 
 ### 5단계: SPN 110 값 추출
 

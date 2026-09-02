@@ -45,22 +45,8 @@ CAN 버스를 무전기 채널이라고 생각해보자.
 
 데이터 프레임은 여러 필드로 구성되며, 각각 정해진 역할이 있다.
 
-```mermaid
-packet-beta
-title CAN Standard Data Frame (2.0A)
-0: "SOF"
-1-11: "Identifier (11bit)"
-12: "RTR"
-13: "IDE"
-14: "r0"
-15-18: "DLC (4bit)"
-19-82: "Data (0~64bit)"
-83-97: "CRC (15bit)"
-98: "CRC Del"
-99: "ACK Slot"
-100: "ACK Del"
-101-107: "EOF (7bit)"
-```
+![CAN Standard Data Frame(2.0A) 필드 배치: SOF, Identifier 11bit, RTR, IDE, r0, DLC 4bit, Data 0~64bit, CRC 15bit, CRC Del, ACK Slot, ACK Del, EOF 7bit](/images/study-isobus/04-std-frame-light.png)
+![CAN Standard Data Frame(2.0A) 필드 배치: SOF, Identifier 11bit, RTR, IDE, r0, DLC 4bit, Data 0~64bit, CRC 15bit, CRC Del, ACK Slot, ACK Del, EOF 7bit](/images/study-isobus/04-std-frame-dark.png)
 
 각 필드를 순서대로 살펴보자.
 
@@ -85,25 +71,8 @@ CAN 버스에서 0을 Dominant, 1을 Recessive라 부른다. 여러 노드가 �
 
 CAN 2.0A는 11bit Identifier를, CAN 2.0B는 29bit Identifier를 사용한다. ISOBUS(ISO 11783)는 29bit Extended ID를 기반으로 한다.
 
-```mermaid
-packet-beta
-title CAN Extended Data Frame (2.0B) — 29bit ID
-0: "SOF"
-1-11: "Base ID (11bit)"
-12: "SRR"
-13: "IDE=1"
-14-31: "Extended ID (18bit)"
-32: "RTR"
-33: "r1"
-34: "r0"
-35-38: "DLC (4bit)"
-39-102: "Data (0~64bit)"
-103-117: "CRC (15bit)"
-118: "CRC Del"
-119: "ACK"
-120: "ACK Del"
-121-127: "EOF (7bit)"
-```
+![CAN Extended Data Frame(2.0B, 29bit ID) 필드 배치: SOF, Base ID 11bit, SRR, IDE=1, Extended ID 18bit, RTR, r1, r0, DLC 4bit, Data 0~64bit, CRC 15bit, CRC Del, ACK Slot, ACK Del, EOF 7bit](/images/study-isobus/04-ext-frame-light.png)
+![CAN Extended Data Frame(2.0B, 29bit ID) 필드 배치: SOF, Base ID 11bit, SRR, IDE=1, Extended ID 18bit, RTR, r1, r0, DLC 4bit, Data 0~64bit, CRC 15bit, CRC Del, ACK Slot, ACK Del, EOF 7bit](/images/study-isobus/04-ext-frame-dark.png)
 
 **Standard와 Extended의 차이**
 
@@ -302,34 +271,37 @@ Data  : FF 3C 32 00 00 FF FF 00
 
 **CAN ID 분해 (ISOBUS PGN 구조)**
 
-```
-0C F0 04 FE  →  이진수로 변환
-= 0000 1100  1111 0000  0000 0100  1111 1110
+0x0CF004FE를 32bit 이진수로 펼치면 `0000 1100 1111 0000 0000 0100 1111 1110`이다. 상위 3bit는 29bit ID를 32bit 16진수로 표기하면서 생기는 미사용 패딩이고, 그다음부터 Priority·EDP·DP·PF·PS·SA가 이어진다.
 
-29bit ID (Extended):
-  Priority  : 000 (3bit)       → 우선순위 0
-  Reserved  : 0 (1bit)
-  Data Page : 0 (1bit)
-  PGN       : F004 (16진수)    → PGN = 61444 (EEC1, 엔진 속도)
-  Source Addr: FE (16진수)     → 소스 주소 254
-```
+![CAN ID 0x0CF004FE를 4바이트로 나눠 Priority·EDP·DP·PF·PS·SA 비트로 분해한 결과, PF와 PS를 합치면 PGN 0xF004(61444, EEC1)](/images/study-isobus/04-can-id-decode-light.png)
+![CAN ID 0x0CF004FE를 4바이트로 나눠 Priority·EDP·DP·PF·PS·SA 비트로 분해한 결과, PF와 PS를 합치면 PGN 0xF004(61444, EEC1)](/images/study-isobus/04-can-id-decode-dark.png)
+
+| 필드 | 값 | 해석 |
+|---|---|---|
+| Priority | `011` (3bit) | 우선순위 3 |
+| EDP (Reserved) | `0` (1bit) | — |
+| DP (Data Page) | `0` (1bit) | — |
+| PF | `0xF0` | PGN 상위 바이트 |
+| PS | `0x04` | PGN 하위 바이트 → PGN = 0xF004 = 61444 (EEC1, 엔진 속도) |
+| SA | `0xFE` | 소스 주소 254 |
+
+::: tip 검산
+`0x0C` = `0000 1100`인데 이 안에 패딩(3bit)·Priority(3bit)·EDP(1bit)·DP(1bit)가 모두 들어 있다. `000`(패딩) + `011`(Priority=3) + `0`(EDP) + `0`(DP) = `00001100` = `0x0C`로 정확히 맞아떨어진다.
+:::
 
 **Data 필드 해석**
 
-```
-Data (8바이트): FF 3C 32 00 00 FF FF 00
+DLC = 8이므로 Data는 8바이트다. PGN F004(EEC1) 기준으로 각 바이트를 해석하면 다음과 같다.
 
-DLC = 8 (데이터 8바이트)
-
-PGN F004 (EEC1) 기준 해석:
-  Byte 0 (FF): Engine Torque Mode — 0xFF = 데이터 없음
-  Byte 1 (3C): Driver's Demand Torque — 0x3C = 60 (offset -125 → -65%)
-  Byte 2 (32): Actual Engine Torque  — 0x32 = 50 (offset -125 → -75%)
-  Byte 3-4 (0000): Engine Speed      — 0x0000 = 0 RPM
-  Byte 5 (FF): Source Address — 0xFF = 데이터 없음
-  Byte 6 (FF): Engine Demand Torque — 0xFF = 데이터 없음
-  Byte 7 (00): Reserved
-```
+| 바이트 | 값 | 필드 | 해석 |
+|---|---|---|---|
+| Byte 0 | `FF` | Engine Torque Mode | 0xFF = 데이터 없음 |
+| Byte 1 | `3C` | Driver's Demand Torque | 0x3C = 60 (offset -125 → -65%) |
+| Byte 2 | `32` | Actual Engine Torque | 0x32 = 50 (offset -125 → -75%) |
+| Byte 3-4 | `00 00` | Engine Speed | 0x0000 = 0 RPM |
+| Byte 5 | `FF` | Source Address | 0xFF = 데이터 없음 |
+| Byte 6 | `FF` | Engine Demand Torque | 0xFF = 데이터 없음 |
+| Byte 7 | `00` | Reserved | — |
 
 ```mermaid
 flowchart LR

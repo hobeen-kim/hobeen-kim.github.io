@@ -86,14 +86,8 @@ with can.Bus(interface="virtual", channel="test") as bus:
 
 29비트 CAN ID 구조 (J1939 기준):
 
-```
-[28:26] Priority (3bit)
-[25]    Reserved (1bit)
-[24]    Data Page (1bit)
-[23:16] PGN High byte (PDU Format, PF)
-[15:8]  PGN Low byte or Destination Address (PS / DA)
-[7:0]   Source Address (SA)
-```
+![29비트 CAN Identifier 비트 필드 배치](/images/study-isobus/10-can-id-bitfields-light.png)
+![29비트 CAN Identifier 비트 필드 배치](/images/study-isobus/10-can-id-bitfields-dark.png)
 
 PF < 0xF0 이면 Peer-to-Peer(DA 있음), PF >= 0xF0 이면 Broadcast.
 

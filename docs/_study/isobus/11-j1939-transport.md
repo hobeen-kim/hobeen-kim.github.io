@@ -75,13 +75,15 @@ sequenceDiagram
 
 ### TP.CM_BAM 메시지 구조 (8바이트)
 
-```
-Byte 1 : Control Byte = 0x20 (BAM 식별자)
-Byte 2~3: 총 데이터 크기 (Little-Endian, 9 ~ 1785 byte)
-Byte 4 : 총 패킷 수 (2~255)
-Byte 5 : 0xFF (예약)
-Byte 6~8: 전송할 PGN (24bit, Little-Endian)
-```
+| Byte | 내용 |
+|------|------|
+| Byte 1 | Control Byte = `0x20` (BAM 식별자) |
+| Byte 2~3 | 총 데이터 크기 (Little-Endian, 9 ~ 1785 byte) |
+| Byte 4 | 총 패킷 수 (2~255) |
+| Byte 5 | `0xFF` (예약) |
+| Byte 6~8 | 전송할 PGN (24bit, Little-Endian) |
+
+(전체 8바이트 안에서 Control Byte가 차지하는 위치는 아래 §4 TP.CM 바이트 레이아웃 그림 참고)
 
 ### 타이밍 규칙
 
@@ -181,13 +183,8 @@ Transport Protocol은 <strong>두 가지 PGN</strong>으로 동작한다.
 
 **예시 — 16바이트 데이터 전송:**
 
-```
-원본 데이터: [A1 A2 A3 A4 A5 A6 A7 | B1 B2 B3 B4 B5 B6 B7 | C1 C2]
-
-TP.DT Packet #1: [01] A1 A2 A3 A4 A5 A6 A7
-TP.DT Packet #2: [02] B1 B2 B3 B4 B5 B6 B7
-TP.DT Packet #3: [03] C1 C2 FF FF FF FF FF  ← 남은 자리 0xFF 패딩
-```
+![16바이트 원본 데이터를 7바이트씩 3개의 TP.DT 패킷으로 분할 — 마지막 패킷은 FF 패딩](/images/study-isobus/11-tpdt-segmentation-light.png)
+![16바이트 원본 데이터를 7바이트씩 3개의 TP.DT 패킷으로 분할 — 마지막 패킷은 FF 패딩](/images/study-isobus/11-tpdt-segmentation-dark.png)
 
 ## 5. ETP (Extended Transport Protocol)
 

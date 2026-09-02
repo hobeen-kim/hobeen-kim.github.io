@@ -217,14 +217,8 @@ End of Object Pool response가 오류(풀 오류, 메모리 고갈 등)를 담�
 
 ### 필요한 오브젝트 구성
 
-```
-Working Set (ID: 0)
-└── Data Mask (ID: 1) ← Active Data Mask로 지정
-    ├── Output String (ID: 10) ← "엔진 온도:" 레이블
-    │   └── Font Attributes (ID: 30) ← 검정, 24×32 픽셀
-    └── Output Number (ID: 11) ← 85 (°C 단위)
-        └── Font Attributes (ID: 30) ← 공유 사용
-```
+![오브젝트 풀 계층 구조: Working Set(ID 0) → Data Mask(ID 1) → Output String(ID 10)·Output Number(ID 11) → Font Attributes(ID 30)](/images/study-isobus/16-object-pool-tree-light.png)
+![오브젝트 풀 계층 구조: Working Set(ID 0) → Data Mask(ID 1) → Output String(ID 10)·Output Number(ID 11) → Font Attributes(ID 30)](/images/study-isobus/16-object-pool-tree-dark.png)
 
 ### IOP XML 예시
 

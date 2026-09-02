@@ -69,10 +69,8 @@ ID 구간이 끝나면 중재도 끝나고, 승자만 나머지(DLC, Data, CRC �
 
 **ID 이진수 변환**
 
-```
-노드A ID = 0x100 = 0001 0000 0000 (11bit)
-노드B ID = 0x200 = 0010 0000 0000 (11bit)
-```
+![노드A(0x100)와 노드B(0x200)의 11bit ID를 비트별로 나열한 비교: bit10~9는 동일, bit8에서 노드A=0 노드B=1](/images/study-isobus/05-id11-compare-light.png)
+![노드A(0x100)와 노드B(0x200)의 11bit ID를 비트별로 나열한 비교: bit10~9는 동일, bit8에서 노드A=0 노드B=1](/images/study-isobus/05-id11-compare-dark.png)
 
 **비트별 중재 과정**
 
@@ -147,12 +145,8 @@ flowchart LR
 
 ISOBUS는 29bit Extended ID를 사용하며, ID의 상위 3비트가 Priority 필드다.
 
-```
-29bit ID 구조:
-[P P P][R][DP][PF 8bit][PS 8bit][SA 8bit]
-  ↑
-Priority (0~7, 낮을수록 높은 우선순위)
-```
+![29bit Extended ID 구조: Priority 3bit, R 1bit, DP 1bit, PF 8bit, PS 8bit, SA 8bit — Priority는 0~7이며 낮을수록 우선순위가 높다](/images/study-isobus/05-id29-structure-light.png)
+![29bit Extended ID 구조: Priority 3bit, R 1bit, DP 1bit, PF 8bit, PS 8bit, SA 8bit — Priority는 0~7이며 낮을수록 우선순위가 높다](/images/study-isobus/05-id29-structure-dark.png)
 
 Priority 0이 가장 높고, Priority 7이 가장 낮다. 이를 통해 메시지 종류별 우선순위를 명시적으로 설정할 수 있다.
 

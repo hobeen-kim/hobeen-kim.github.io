@@ -345,6 +345,175 @@ print(hex(device_descriptor_byte1(0b1000)))         # 0x81 Object-pool Activate/
 ```
 :::
 
+## 6. 실물 예시: 7섹션 붐 살포기
+
+§4의 3구획 예시는 살포량·구획 ON/OFF만 다루는 최소 구성이었다. 실제 붐 스프레이어는 총계 보고(TC-BAS)·구획 제어(TC-SC)·기하 정보까지 함께 갖춘다. 이 절은 12m 붐에 1,714mm 폭 섹션 7개를 단 살포기의 DDOP를, `appendix-iso-part10.md`의 Annex A·F와 `appendix-ddi.md`에서 확인한 값만으로 설계한다.
+
+### DDOP 계층 구조
+
+Device 아래 루트 Device Element(Element 0) 하나를 두고, 그 형제로 커넥터(트랙터 히치 연결점, type 6)·빈(약액 탱크, type 3)·붐(Function, type 2)을 배치한 뒤 붐 아래에 섹션(type 4) 7개를 매단다. Section의 Element Number는 <strong>기계 좌→우 순으로 증가</strong>시키는 것이 권장 규칙이므로(Annex F.3.5), 11~17을 좌에서 우로 배정한다.
+
+```
+DVC Device                                        Object ID 1
+└─ DET type=1 device            Element 0         Object ID 2
+   ├─ DET type=6 connector      Element 1         Object ID 3
+   ├─ DET type=3 bin            Element 2         Object ID 4
+   └─ DET type=2 function(붐)   Element 3         Object ID 5
+      ├─ DET type=4 section 1   Element 11        Object ID 6
+      ├─ DET type=4 section 2   Element 12        Object ID 7
+      ├─ DET type=4 section 3   Element 13        Object ID 8
+      ├─ DET type=4 section 4   Element 14        Object ID 9
+      ├─ DET type=4 section 5   Element 15        Object ID 10
+      ├─ DET type=4 section 6   Element 16        Object ID 11
+      └─ DET type=4 section 7   Element 17        Object ID 12
+```
+
+이 배치는 "Function이 붐인 경우 actual/setpoint 값·X·Y offset·maximum working width는 모두 그 Function 안에 두고, 루트는 actual work state 속성 외의 actual/setpoint 값을 가지면 안 된다"(Annex F.3.4)는 규칙을 따른다 — 그래서 살포량·구획 상태 관련 DPD는 전부 붐(Element 3) 아래에 몰려 있고 루트(Element 0)에는 총계만 남는다.
+
+### 레벨별 DPD·DPT
+
+<strong>Device 레벨(Element 0)</strong> — 총계만 붙는다. TC-BAS는 "TC 클라이언트는 총계의 부분집합만 제공해도 되지만 최소한 DDI 119(total time)는 제공해야 한다"고 요구하므로 DDI 119는 필수다.
+
+| Object ID | DDI | 이름 | 타입 | Properties | Trigger |
+|---|---|---|---|---|---|
+| 13 | 119 | Effective Total Time | DPD | settable | total, time interval |
+| 14 | 116 | Total Area | DPD | settable | total |
+| 15 | 117 | Total Distance | DPD | settable | total |
+
+task total DDI는 "trigger method total + property settable"을 함께 세우는 것이 일반 규칙이다 — TC가 태스크 시작 시 이어서 셀 시작값을 지정할 수 있어야 하기 때문이다. DDI 119만 Annex F.3.3에 따라 time interval 트리거가 추가로 요구된다.
+
+<strong>붐(Function) 레벨(Element 3)</strong>
+
+| Object ID | DDI | 이름 | 타입 | Properties | Trigger | 비고 |
+|---|---|---|---|---|---|---|
+| 16 | 1 | Setpoint Volume Per Area | DPD | settable | - | TC→작업기, 살포량 목표 |
+| 17 | 2 | Actual Volume Per Area | DPD | (읽기 전용) | on change | 작업기→TC, 실제 살포량 |
+| 18 | 141 | Actual Work State | DPD | (읽기 전용) | on change, time interval | 붐의 마스터 작업 스위치 |
+| 19 | 161 | Actual Condensed Work State | DPD | (읽기 전용) | on change, time interval | 7섹션 실제 ON/OFF 비트 |
+| 20 | 290 | Setpoint Condensed Work State | DPD | settable | on change | 7섹션 목표 ON/OFF 비트, TC→작업기 |
+| 21 | 160 | Section Control State | DPD | settable | on change | TC-SC 활성/비활성 스위치 |
+| 22 | 70 | Maximum Working Width | DPT | - | - | 11,998mm |
+
+141·161의 on change·time interval은 Annex F.3.5가 "Actual Work State(들)와 Actual Condensed Work State(들)에는 On Change·Time Interval 지원이 필수"라고 못 박은 항목이다. 160(Section Control State)은 같은 절에서 "settable + on-change 트리거 필수"로 명시된다.
+
+<strong>섹션 레벨(대표: Section 1, Element 11)</strong> — DPD 없이 DPT만 붙는다.
+
+| Object ID | DDI | 이름 | 타입 | 값 |
+|---|---|---|---|---|
+| 23 | 70 | Maximum Working Width | DPT | 1,714mm |
+| 24 | 134 | Offset X | DPT | 0mm |
+| 25 | 135 | Offset Y | DPT | −5,142mm |
+| 26 | 136 | Offset Z | DPT | 0mm |
+
+Section 2~7도 같은 4개 DPT 패턴이 반복된다(Object ID 27~50). DDI 70(1,714mm)·134·136(0mm)은 7개 섹션이 전부 동일하고, DDI 135(Offset Y)만 섹션마다 다르다 — 다음 절에서 계산한다. Offset X·Z를 0mm로 둔 것은 이 예시에서 모든 섹션이 붐과 같은 전후·높이 위치에 일렬로 달려 있다고 가정했기 때문이다(실측값이 아니라 이 예시의 설계 가정).
+
+표시용 DeviceValuePresentation은 §4와 같은 패턴으로 2개면 충분하다 — Object ID 51(Offset 0, Scale 0.01, L/ha)을 DDI 1·2가 참조하고, Object ID 52(Offset 0, Scale 1, mm)를 DDI 70·134·135·136이 참조한다. 여기까지 합치면 DVC 1개, DET 11개, DPD 9개(장치 3 + 붐 6), DPT 29개(붐 1 + 섹션 7×4), DVP 2개로 총 52개 오브젝트다.
+
+### Y 오프셋 계산
+
+DRP(Device Reference Point) 기준 오른손 좌표계에서 y축은 <strong>주행 방향 기준 우측이 양수</strong>다(Annex A.1). 섹션이 홀수 개(7개)이므로 가운데 4번 섹션이 y=0에 오고, 나머지 6개가 좌우로 대칭 배치된다.
+
+| 섹션 | Element | Object ID(DDI 135) | Y 오프셋 |
+|---|---|---|---|
+| 1 | 11 | 25 | −5,142mm |
+| 2 | 12 | 29 | −3,428mm |
+| 3 | 13 | 33 | −1,714mm |
+| 4 | 14 | 37 | 0mm |
+| 5 | 15 | 41 | 1,714mm |
+| 6 | 16 | 45 | 3,428mm |
+| 7 | 17 | 49 | 5,142mm |
+
+붐 전체 폭은 7 × 1,714mm = 11,998mm — 정확히 12m는 아니고 2mm 모자란다. DDI 70(Maximum Working Width)에는 이 11,998mm를 붐(Function) 레벨 값으로 넣는다.
+
+:::details 파이썬으로 검산해 보기
+```python
+n = 7
+width = 1714  # mm, 섹션 1개 폭
+
+offsets = {i: (i - 4) * width for i in range(1, n + 1)}
+for i, y in offsets.items():
+    print(f"section {i} (element {10+i}): Y = {y:+d} mm")
+
+# 홀수 섹션 → 가운데(4번)가 0, 나머지는 좌우 대칭
+assert offsets[4] == 0
+assert offsets[1] == -offsets[7]
+assert offsets[2] == -offsets[6]
+assert offsets[3] == -offsets[5]
+
+print("total width =", n * width, "mm")
+```
+```
+section 1 (element 11): Y = -5142 mm
+section 2 (element 12): Y = -3428 mm
+section 3 (element 13): Y = -1714 mm
+section 4 (element 14): Y = +0 mm
+section 5 (element 15): Y = +1714 mm
+section 6 (element 16): Y = +3428 mm
+section 7 (element 17): Y = +5142 mm
+total width = 11998 mm
+```
+:::
+
+### 설계 판단 세 가지
+
+**섹션 폭은 DPT, 살포량은 DPD인 이유.** 섹션 폭(1,714mm)은 물리적으로 고정된 값이라 DeviceProperty(DPT)로 담는다 — TC가 바꿀 수도, 바뀔 수도 없는 상수다. 반대로 살포량은 처방 맵·운전자 입력에 따라 태스크 중 계속 바뀌므로 DeviceProcessData(DPD)로 담아야 한다. 이 구분을 반대로 하면 안 되는 이유가 DDI 67(Actual Working Width)에서 드러난다 — 붐(Function) 레벨의 DDI 67은 "On 상태인 하위 섹션 폭의 합"으로 정의된다. 섹션 하나가 꺼지면 이 값 자체가 줄어든다는 뜻이라, 섹션의 물리적 폭을 이 값 하나로만 표현했다면 "섹션이 꺼져서 폭이 줄어든 것"과 "섹션 자체 폭이 바뀐 것"을 구분할 수 없다. 그래서 이 설계는 <strong>섹션 개별 폭(고정, DPT 70)</strong>과 <strong>붐 레벨 Actual Working Width(가변, on 섹션의 합)</strong>를 별도 DDI로 분리해 둔다 — 이번 DDOP에는 DDI 67 자체를 넣지 않았지만, 넣었다면 반드시 붐 레벨의 process data(DPD)여야지 섹션의 property가 되면 안 된다는 뜻이다.
+
+**섹션별 개별 setpoint 대신 Condensed를 쓰는 이유.** ISO 11783-10 Annex F.3.5는 "DDOP에서 섹션 작업 상태의 보고·제어에 허용되는 것은 Actual/Setpoint Condensed Work State뿐이다 — Section 요소 안에 개별 Actual Work State(141)나 개별 Setpoint Work State(289)를 두면 안 된다"고 명시한다. 즉 섹션 7개마다 DDI 289를 하나씩 붙이는 구성은 최적화 이전에 <strong>표준 위반</strong>이다. 설령 허용됐더라도 대역폭이 문제다 — [연결당·variable당 상한은 초당 10개](/study/isobus/19-tc-process-data)인데, 이 상한을 넘겨도 되는 예외는 <strong>Condensed Work State류 DDI</strong>에만 적용된다. 헤드랜드 진입처럼 여러 섹션을 한꺼번에 전환해야 하는 순간에도, DDI 290 하나로 7섹션 상태를 동시에 담으면 이 burst 예외를 그대로 쓸 수 있다.
+
+**settable 비트는 DDI 1과 290에만 세운다.** DDI 2(Actual Volume Per Area)·141(Actual Work State)·161(Actual Condensed Work State)은 작업기가 실측·실제 상태를 보고하는 값이다. 이 DPD들의 Properties 바이트에 settable(bit2)을 세우면 TC가 "실측값"이라는 이름의 필드에 값을 명령할 수 있게 되는데, §5에서 다룬 Object 8(DDI 2)의 규칙과 같은 원리로 잘못이다 — 읽기 전용이어야 할 DDI를 설정용으로 여는 것이 흔한 설계 실수다. 이 DDOP에서 settable은 DDI 1(살포량 목표)·290(구획 목표 상태)·160(Section Control State, TC-SC 활성화 스위치)·그리고 앞서 device 레벨에 둔 총계 3종(119·116·117 — 총계는 태스크 시작 시 TC가 이어서 셀 시작값을 지정할 수 있어야 하므로 성격이 다른 settable이다)에만 세운다.
+
+### 이 DDOP로 만들 수 있는 메시지
+
+이 DDOP는 붐(Element 3)에만 DDI 1을 정의하고 섹션(Element 11~17)에는 DDI 1을 두지 않는다 — 즉 "섹션 1의 살포량만 따로 정한다"는 명령 자체가 이 설계에서 성립하지 않는다. `[DDI=1, Element=11]`로 명령을 보내면 작업기는 그 Element에 연결된 DeviceProcessData가 없으므로 PDACK(command D)로 거부한다. 붐 전체 살포량을 바꾸는 유일한 방법은 붐(Element 3)에 명령하는 것이다.
+
+바이트 배치는 [CH19 §6](/study/isobus/19-tc-process-data)의 Command 4비트(Byte 1 하위)+Element Number 12비트(Byte 1 상위 4비트+Byte 2)를 그대로 따른다.
+
+**메시지 1 — 붐 전체 살포량 220 L/ha 설정 (Element 3, DDI 1, Command 3)**
+
+| Byte | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
+|---|---|---|---|---|---|---|---|---|
+| 값 | `0x33` | `0x00` | `0x01` | `0x00` | `0xC0` | `0x91` | `0x21` | `0x00` |
+
+220 L/ha → 22,000 mm³/m² → raw = 22,000 ÷ 0.01 = 2,200,000(`0x2191C0`), LSB부터 `C0 91 21 00`.
+
+**메시지 2 — 붐의 7섹션 ON/OFF 일괄 명령 (Element 3, DDI 290, Command 3)**
+
+가장자리 두 섹션(1·7)은 끄고 가운데 다섯 섹션(2~6)은 켜는 상황을 예로 든다. DDI 290은 [섹션당 2비트(00=Off, 01=On)로 최대 16섹션까지 한 32비트 값에 담는다](/study/isobus/19-tc-process-data). 섹션 1이 LSB 쪽 2비트를 차지한다고 두면(이 대응 순서 자체는 이번 확인 자료에 명시돼 있지 않아 이 예시의 가정이다), 정의되지 않은 8~16번은 141(Actual Work State)에서 확인된 2비트 코드표(00=Off, 01=On, 10=오류, 11=미설치) 중 "미설치(11)"를 빌려 채운다 — 290 자체의 코드값이 이번 확인 자료에 별도로 명시돼 있지는 않다.
+
+| Byte | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
+|---|---|---|---|---|---|---|---|---|
+| 값 | `0x33` | `0x00` | `0x22` | `0x01` | `0x54` | `0xC5` | `0xFF` | `0xFF` |
+
+:::details 파이썬으로 검산해 보기
+```python
+def build_frame(command, element, ddi, value):
+    byte1 = ((element & 0xF) << 4) | (command & 0xF)
+    byte2 = (element >> 4) & 0xFF
+    ddi_bytes = ddi.to_bytes(2, "little")
+    value_bytes = value.to_bytes(4, "little", signed=True)
+    return bytes([byte1, byte2]) + ddi_bytes + value_bytes
+
+
+# 메시지 1: 붐(Element 3)에 DDI 1, 220 L/ha
+raw = int(220 * 100 / 0.01)
+frame1 = build_frame(command=3, element=3, ddi=1, value=raw)
+print(frame1.hex(' ').upper())   # 33 00 01 00 C0 91 21 00
+
+# 메시지 2: 붐(Element 3)에 DDI 290, 섹션 1·7 Off / 2~6 On / 8~16 미설치
+states = {1: 0, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 0}
+value = 0
+for i in range(1, 17):
+    bits = states.get(i, 0b11)   # 정의 안 된 섹션(8~16)은 미설치
+    value |= bits << (2 * (i - 1))
+value_signed = value - 2**32 if value >= 2**31 else value
+
+frame2 = build_frame(command=3, element=3, ddi=290, value=value_signed)
+print(frame2.hex(' ').upper())   # 33 00 22 01 54 C5 FF FF
+```
+:::
+
+두 메시지 모두 Byte 1이 `0x33`인 것은 우연이다 — Command(3, Value command)와 Element Number(3, 붐)가 두 메시지에서 같은 값이라 니블이 똑같이 채워졌을 뿐이다. Byte 3~4(DDI)와 Byte 5~8(Value)이 완전히 다른 두 명령을 구분한다.
+
 ## 다음 챕터
 
 - 다음 : [ISOBUS 기타 기능](/study/isobus/21-isobus-misc)

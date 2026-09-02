@@ -397,7 +397,55 @@ print(200 * 0.01 / 100)              # 0.02 (L/ha) — 의도한 200의 1/10000
 ```
 :::
 
-## 7. 전체 흐름 — 두 오브젝트 풀과 처방 맵
+## 7. 클라이언트가 지켜야 할 송신 규칙
+
+지금까지 다룬 예제는 대부분 TC가 먼저 명령이나 요청을 보내고 클라이언트가 응답하는 흐름이었다. 그런데 클라이언트가 스스로 값을 밀어 넣을 수 있는 경로도 있다(§3의 Measurement, §1의 Trigger Method). 이 절은 그 송신 쪽에 표준이 정해 둔 제약을 정리한다.
+
+### 핵심 원칙 — 요청받은 것만 보낸다
+
+클라이언트는 자기가 가진 값을 임의로 골라 TC에 뿌리지 않는다. 클라이언트가 값을 보낼 수 있는 경로는 다음 세 가지뿐이다.
+
+| 경로 | 트리거 |
+|---|---|
+| Request value 명령 | TC의 1회성 요청(Command 2, §3) |
+| Default data logging | `RequestDefaultProcessData`(DDI `0xDFFF`)로 활성화된, 클라이언트 스스로 정한 데이터·주기 |
+| 개별 measurement 명령 | TC가 지정한 Trigger Method(Command 4~8, §3)에 따른 주기적 보고 |
+
+이 세 경로 밖에서 클라이언트가 임의로 값을 송신하는 것은 표준을 벗어난 동작이다.
+
+### 대역폭 상한과 burst 예외
+
+<strong>연결당·process data variable당 초당 최대 10개 메시지</strong>가 기본 상한이다. 예외적으로 헤드랜드 진입·이탈처럼 work state를 짧게 몰아 제어해야 하는 상황에서는 이 상한을 일시적으로 넘길 수 있다. 단 이 예외는 아무 DDI에나 적용되지 않고, <strong>Setpoint/Actual Condensed Work State(§1의 DDI 290 등) 같이 ISO 11783-11 데이터 사전에 명시된 DDI</strong>에 한정된다.
+
+### measurement 명령 ACK — 응답 전에는 다음 명령 불가
+
+TC가 보내는 measurement 명령(Command 4~8, §3)에는 클라이언트가 반드시 <strong>PDACK</strong>(§3)로 응답해야 한다. 이 응답이 오기 전까지 TC는 같은 클라이언트로 다음 measurement 명령을 보낼 수 없다 — 명령이 순차적으로만 진행된다는 뜻이다.
+
+수락 시 클라이언트는 <strong>positive ACK와 함께, 측정을 시작하는 시점의 초기값</strong>을 함께 보낸다. 이 초기값 전송은 버전 4에서 도입됐다 — 버전 3까지는 거부할 때만 negative ACK를 보내면 됐고, 수락 시 초기값을 함께 보내야 한다는 규정은 없었다.
+
+### 요청-응답 동기화 — 버전 3과 버전 4의 차이
+
+버전 4부터는 TC가 보낸 요청에 클라이언트가 응답해야만 TC가 같은 클라이언트로 다음 요청을 보낼 수 있다. 버전 3까지는 이와 달리, 클라이언트의 응답을 기다리지 않고 요청을 여러 개 묶어 보내는 <strong>블록 요청</strong>이 가능했다. 즉 버전 4는 요청 흐름을 순차적(하나씩 확인하며 진행)으로 바꾼 변화다.
+
+### DDOP 활성화 전 초기화 의무
+
+클라이언트는 DDOP를 TC에 <strong>활성화하기 전에</strong> 내부 process data variable들을 올바른 운영값으로 초기화해 둬야 한다. DDOP가 활성화되면 TC는 곧바로 장치 지오메트리 등을 요청할 수 있는데, 이때 클라이언트가 아직 초기화 전이라 임의값이나 미정의값을 돌려주면 TC는 그 잘못된 값을 그대로 신뢰하고 이후 제어를 시작하게 된다.
+
+### Task totals active 비트와 measurement
+
+TC Status 메시지의 <strong>"Task totals active" 비트</strong>가 0에서 1로, 또는 1에서 0으로 바뀌면 — 즉 태스크가 시작되거나 종료되는 시점마다 — 그 TC Status를 송신하는 CF가 지정한 <strong>모든 measurement를 클라이언트가 중지</strong>해야 한다. 중지된 measurement는 TC가 개별 measurement 명령을 다시 보내거나 default data logging 트리거로 재시작한다.
+
+비트가 0인 동안(태스크 비활성 상태)에도 TC가 시작한 measurement는 존재할 수 있다 — 이 measurement는 TC가 중지 명령으로 멈출 수 있지만, <strong>비트를 0에서 1로 바꾸기 직전에 미리 중지해서는 안 된다</strong>. "Task totals active" 비트 자체는 default data logging 명령의 송수신만 제한할 뿐, 그 외의 Process Data 명령 송수신 전반을 막지는 않는다.
+
+### TC 쪽 대응 규칙 — 참고
+
+반대로 TC는 태스크 파일에 없는 process data variable을 담은 메시지도 만들 수 있다(예: 센서 시스템 값 활용). 다만 TC는 <strong>클라이언트가 지원한다고 밝힌 variable만</strong> 그 클라이언트에 송신·요청해야 한다 — 클라이언트 입장에서는 DDOP에 선언한 범위를 벗어난 요청이 오지 않는다는 전제로 동작한다.
+
+### 재시도
+
+PGN 응답 대기 시간, 요청이 응답 없이 실패했을 때의 재시도 간격은 이 표준이 아니라 <strong>ISO 11783-3</strong>(네트워크 계층)을 따른다. 클라이언트가 특정 measurement를 지원하지 않아 TC가 주기적 값 요청(Command 2)으로 폴백하는 경우도 마찬가지다.
+
+## 8. 전체 흐름 — 두 오브젝트 풀과 처방 맵
 
 §5는 이미 작업이 시작된 뒤의 제어 루프만 보여준다. 그런데 그 루프가 성립하려면 그 전에 준비가 끝나 있어야 한다. TC는 어떻게 DDI 1이 이 살포기의 살포량이라는 걸 알았고, 화면의 숫자는 누가 고치는가. 연결부터 실적 기록까지를 한 줄로 이으면 다음과 같다.
 

@@ -2,7 +2,6 @@
   <div class="skills-section">
     <div class="header2">기술 스택</div>
     <div class="skills-container">
-      <div class="skill-description">*실무에서 사용한 기술입니다.</div>
       <div class="skill-category">
         <div class="skill-category-title">언어/프레임워크</div>
         <div class="skill-list"> Java, Kotlin, Spring Boot, Spring Batch</div>

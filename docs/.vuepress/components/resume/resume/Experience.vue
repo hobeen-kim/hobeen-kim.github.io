@@ -14,17 +14,6 @@
             <div class="experience-description"> &#8226; <span>SeamOS World</span> : ISOBUS 기반 농기계 소프트웨어를 개발·검증하는 디지털 트윈 플랫폼</div>
             <div class="experience-description"> • <span>SEAMOS</span> : 농기계/건설기계 OS 플랫폼 서비스. ISOBUS 기반 장비용 앱 마켓플레이스 백엔드 구축</div>
             <div class="experience-description"> • <span>자율주행 데이터 파이프라인</span> : 차량 이벤트 로그 수집·실시간 집계·배치 적재·모니터링 API 까지 E2E 파이프라인 개발 </div>
-            <div class="experience-skills">
-              <div class="tech-stack">
-                <span class="tag">Kotlin/Spring</span>
-                <span class="tag">Kafka Streams</span>
-                <span class="tag">Spring Batch</span>
-                <span class="tag">AWS IoT</span>
-                <span class="tag">Postgres</span>
-                <span class="tag">MongoDB</span>
-                <span class="tag">Redis</span>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -40,17 +29,6 @@
             <div class="experience-description"> • <span>Interest detection</span> : 사용자가 선택한 상품을 통해 GPT 로 관심사 키워드를 추출하고 상품을 추천하는 LLM 서비스 개발 </div>
             <div class="experience-description"> • <span>연합뉴스 추천 시스템</span> : 뉴스 추천 서비스를 위한 뉴스 피드 이벤트 데이터 수집 ETL 파이프라인 개발 </div>
             <div class="experience-description"> • 하루 8000만 건의 쇼핑몰 사용자 로그를 수집하고 분석하는 ETL 파이프라인 관리 </div>
-            <div class="experience-skills">
-              <div class="tech-stack">
-                <span class="tag">Java/Spring</span>
-                <span class="tag">Kotlin</span>
-                <span class="tag">Python</span>
-                <span class="tag">AWS Kinesis</span>
-                <span class="tag">Postgres</span>
-                <span class="tag">MongoDB</span>
-                <span class="tag">OpenAI API</span>
-              </div>
-            </div>
 
           </div>
         </div>

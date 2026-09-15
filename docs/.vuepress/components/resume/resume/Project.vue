@@ -19,16 +19,6 @@
             <div class="responsibility-detail"> &#8226; QEMU 로 Bosch CCU 하드웨어 에뮬레이션 — CAN FD·IMU 칩 모델을 직접 제작해 실 디바이스와 동일한 SDK 스택 구동</div>
             <div class="responsibility-detail"> &#8226; 3D 시뮬레이터가 GPS·CAN·ISOBUS 신호를 실시간 공급, Rust 신호 허브·브리지로 앱까지 전달</div>
             <div class="responsibility-detail"> &#8226; Electron 대시보드(텔레메트리·로그·MQTT) 개발, Homebrew·APT·S3 로 릴리스 자동화</div>
-            <div class="responsibility-skills">
-              <div class="tech-stack">
-                <span class="tag">QEMU</span>
-                <span class="tag">Rust</span>
-                <span class="tag">Three.js</span>
-                <span class="tag">Electron</span>
-                <span class="tag">ISOBUS/CAN</span>
-                <span class="tag">AWS</span>
-              </div>
-            </div>
           </div>
         </div>
         <div class="responsibility-item">
@@ -41,15 +31,6 @@
             <div class="responsibility-detail"> &#8226; 마켓플레이스 백엔드 API(앱 설치/다운로드/검색, 디바이스·회원·조직 관리)를 멀티모듈 아키텍처로 설계</div>
             <div class="responsibility-detail"> &#8226; AWS IoT(MQTT)/HTTPS 디바이스 상태 수집 + 상태 전이 엔진 구현, idempotency·retry·rollback 정책과 Redis 분산 락으로 멱등성 확보</div>
             <div class="responsibility-detail"> &#8226; 디바이스 Shadow 상태 SQS Consumer 적재 + Redis 캐싱으로 인증·가드 경로의 반복 DB 조회 제거</div>
-            <div class="responsibility-skills">
-              <div class="tech-stack">
-                <span class="tag">Kotlin/Spring</span>
-                <span class="tag">AWS IoT</span>
-                <span class="tag">SQS</span>
-                <span class="tag">Postgres</span>
-                <span class="tag">Redis</span>
-              </div>
-            </div>
           </div>
         </div>
         <div class="responsibility-item">
@@ -62,16 +43,6 @@
             <div class="responsibility-detail"> &#8226; Protobuf 이벤트 수집 서버에서 Kafka 전송 + 위치정보 AWS KMS 암호화, Kafka Streams 로 실시간 위치·작업량·경고 집계와 DLQ 설계</div>
             <div class="responsibility-detail"> &#8226; Spring Batch 일배치로 history S3 적재·통계 산출, 청크·메모리 튜닝으로 OOM 해소</div>
             <div class="responsibility-detail"> &#8226; LiveLocation WebSocket 송출 소켓 서버와 주행기록·사용자 통계 모니터링 API 개발</div>
-            <div class="responsibility-skills">
-                <div class="tech-stack">
-                  <span class="tag">Kotlin/Spring</span>
-                  <span class="tag">Kafka Streams</span>
-                  <span class="tag">Spring Batch</span>
-                  <span class="tag">MongoDB</span>
-                  <span class="tag">Protobuf</span>
-                  <span class="tag">AWS KMS</span>
-                </div>
-            </div>
           </div>
         </div>
       </div>
@@ -94,15 +65,6 @@
             <div class="responsibility-detail"> &#8226; 상품/리뷰 데이터로 추천문구를 추출하는 LLM 기반 ETL 파이프라인과 langchain FastAPI 서버 개발</div>
             <div class="responsibility-detail"> &#8226; 수 초 이상 걸리던 GPT 요청을 비동기 구조로 전환해 응답 200~300ms 로 개선</div>
             <div class="responsibility-detail"> &#8226; EKS·Lambda·SNS 서버리스 이벤트 아키텍처로 일 100만 건 상품·1만 건 리뷰의 키워드 추출 처리</div>
-            <div class="responsibility-skills">
-              <div class="tech-stack">
-                <span class="tag">Kotlin/Spring</span>
-                <span class="tag">Python</span>
-                <span class="tag">AWS EKS</span>
-                <span class="tag">MongoDB</span>
-                <span class="tag">OPENAI API</span>
-              </div>
-            </div>
           </div>
         </div>
         <div class="responsibility-item">
@@ -115,14 +77,6 @@
             <div class="responsibility-detail"> &#8226; 구독자 이벤트를 수집·적재하는 ETL 파이프라인과 주기(일/시간)별 추천 배치 프로세스 구축</div>
             <div class="responsibility-detail"> &#8226; 추천 결과 및 사용자 이벤트 대시보드 API 개발</div>
             <div class="responsibility-detail"> &#8226; 반정규화·파티셔닝으로 수백만 row DB 조회를 초 단위에서 500ms 이하로 단축</div>
-            <div class="responsibility-skills">
-              <div class="tech-stack">
-                <span class="tag">Kotlin/Spring</span>
-                <span class="tag">Postgres(AWS Aurora)</span>
-                <span class="tag">Kinesis</span>
-                <span class="tag">Redshift</span>
-              </div>
-            </div>
           </div>
         </div>
         <div class="responsibility-item">
@@ -134,16 +88,6 @@
             <div class="responsibility-detail-main"><span> • 하루 8000만 건 로그, API 호출 4000만 회의 Spring 기반 추천 API 및 배치 시스템 관리</span></div>
             <div class="responsibility-detail"> • 데이터독 PoC 및 도입 및 고도화로 실시간 모니터링 시스템 구축</div>
             <div class="responsibility-detail"> • 자사 6개 모든 서비스에 대한 기능/부하 테스트 진행 및 비용감소 프로젝트로 AWS 비용 월 56% 감축</div>
-            <div class="responsibility-skills">
-              <div class="tech-stack">
-                <span class="tag">Java/Spring</span>
-                <span class="tag">Kotlin</span>
-                <span class="tag">Postgres(AWS Aurora)</span>
-                <span class="tag">Kinesis</span>
-                <span class="tag">Datadog</span>
-                <span class="tag">S3</span>
-              </div>
-            </div>
           </div>
         </div>
       </div>

@@ -95,6 +95,18 @@ export default {
             doc.documentElement.classList.remove('dark')
           }
         },
+        pagebreak: {
+          mode: ['css', 'legacy'],  // CSS break-inside 와 legacy 규칙을 함께 적용
+          avoid: [                  // 페이지 경계에서 쪼개지면 안 되는 블록
+            '.responsibility-item',
+            '.experience-item',
+            '.skill-category',
+            '.certification-item',
+            '.contact-item',
+            '.project-header',
+            '.responsibility-header'
+          ]
+        },
         jsPDF: {
           unit: 'mm',             // PDF 문서의 측정 단위를 밀리미터(mm)로 설정
           format: 'a4',           // PDF 문서 크기를 A4 용지 크기로 설정
@@ -118,6 +130,18 @@ export default {
 </script>
 
 <style>
+/* PDF 출력 시 항목이 페이지 경계에서 잘리지 않도록 */
+.responsibility-item,
+.experience-item,
+.skill-category,
+.certification-item,
+.contact-item,
+.project-header,
+.responsibility-header {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
 .resume-tabs {
   position: relative;
 }

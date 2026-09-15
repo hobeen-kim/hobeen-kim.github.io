@@ -7,7 +7,6 @@
 
     <!-- 각 섹션을 컴포넌트로 분리 -->
     <BasicInfo />
-    <Summary />
     <Skills />
     <Experience />
     <Project />
@@ -18,7 +17,6 @@
 <script>
 // 백엔드 이력서 섹션 컴포넌트 (resume/)
 import BasicInfo from './resume/BasicInfo.vue'
-import Summary from './resume/Summary.vue'
 import Project from './resume/Project.vue'
 import Experience from './resume/Experience.vue'
 import Skills from './resume/Skills.vue'
@@ -28,7 +26,6 @@ export default {
   name: "ResumeBackend",
   components: {
     BasicInfo,
-    Summary,
     Project,
     Experience,
     Skills,

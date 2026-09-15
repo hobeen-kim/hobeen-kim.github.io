@@ -11,15 +11,13 @@
         <div>
           <span class="company-description"> 농기계 자율주행 시스템 및 ISOBUS 기반 OS 플랫폼 스타트업</span>
           <div class="experience-descriptions">
-            <div class="experience-description"> • <span>SEAMOS</span> : 농기계/건설기계 OS 플랫폼 서비스. 앱 마켓플레이스, 디바이스 OTA 관리, 통합 Keycloak 인증 서버 구축</div>
+            <div class="experience-description"> • <span>SEAMOS</span> : 농기계/건설기계 OS 플랫폼 서비스. ISOBUS 기반 장비용 앱 마켓플레이스 백엔드 구축</div>
             <div class="experience-description"> • <span>자율주행 데이터 파이프라인</span> : 차량 이벤트 로그 수집·실시간 집계·배치 적재·모니터링 API 까지 E2E 파이프라인 개발 </div>
-            <div class="experience-description"> • <span>NISHIBE</span> : 일본 택시 운행관리 서비스 백엔드 신규 설계·구축 (ReBAC 권한 시스템, 운행일보 배치) </div>
             <div class="experience-skills">
               <div class="tech-stack">
                 <span class="tag">Kotlin/Spring</span>
                 <span class="tag">Kafka Streams</span>
                 <span class="tag">Spring Batch</span>
-                <span class="tag">Keycloak</span>
                 <span class="tag">AWS IoT</span>
                 <span class="tag">Postgres</span>
                 <span class="tag">MongoDB</span>

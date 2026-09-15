@@ -11,6 +11,30 @@
       <div class="responsibilities">
         <div class="responsibility-item">
           <div class="responsibility-header">
+            <div class="responsibility-title">SeamOS World — ISOBUS 농기계 시뮬레이터</div>
+            <div class="period">2026.04 ~ 현재</div>
+          </div>
+          <div class="responsibility-description">
+            <div class="responsibility-detail-main"><span> &#8226; 실 장비 없이 농기계 앱을 개발·검증하는 시뮬레이션 플랫폼을 단독 설계·구축</span></div>
+            <div class="responsibility-detail"> &#8226; QEMU 로 Bosch CCU(Telechips TCC8031) 하드웨어 에뮬레이션 — CAN FD(MCP251XFD)·IMU(SMI230) 칩 모델 직접 제작해 실 디바이스와 동일한 커널·rootfs·SDK 스택 구동</div>
+            <div class="responsibility-detail"> &#8226; 3D 트랙터 시뮬레이터(Three.js)가 GPS·CAN·ISOBUS 신호를 실시간 공급, 앱 관점에서 실 장비와 동일한 데이터 경로 구현</div>
+            <div class="responsibility-detail"> &#8226; Rust 사이드카로 신호 허브·CAN/ISOBUS 브리지 구현, 신호 정의를 단일 소스로 관리</div>
+            <div class="responsibility-detail"> &#8226; Electron 대시보드 개발 — 시뮬레이터·앱 설치/실행·텔레메트리·통합 로그·MQTT 토픽·외부 API 패널</div>
+            <div class="responsibility-detail"> &#8226; Homebrew tap·APT 저장소·S3 배포 파이프라인 구성으로 런처와 VM 이미지 릴리스 자동화</div>
+            <div class="responsibility-skills">
+              <div class="tech-stack">
+                <span class="tag">QEMU</span>
+                <span class="tag">Rust</span>
+                <span class="tag">Three.js</span>
+                <span class="tag">Electron</span>
+                <span class="tag">ISOBUS/CAN</span>
+                <span class="tag">AWS</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="responsibility-item">
+          <div class="responsibility-header">
             <div class="responsibility-title">SEAMOS 마켓플레이스</div>
             <div class="period">2025.04 ~ 현재</div>
           </div>

@@ -11,7 +11,7 @@
         <div>
           <span class="company-description"> 농기계 자율주행 시스템 및 ISOBUS 기반 OS 플랫폼 스타트업</span>
           <div class="experience-descriptions">
-            <div class="experience-description"> &#8226; <span>SeamOS World</span> : ISOBUS 기반 농기계 소프트웨어를 개발·검증하는 시뮬레이션 플랫폼</div>
+            <div class="experience-description"> &#8226; <span>SeamOS World</span> : ISOBUS 기반 농기계 소프트웨어를 개발·검증하는 디지털 트윈 플랫폼</div>
             <div class="experience-description"> • <span>SEAMOS</span> : 농기계/건설기계 OS 플랫폼 서비스. ISOBUS 기반 장비용 앱 마켓플레이스 백엔드 구축</div>
             <div class="experience-description"> • <span>자율주행 데이터 파이프라인</span> : 차량 이벤트 로그 수집·실시간 집계·배치 적재·모니터링 API 까지 E2E 파이프라인 개발 </div>
             <div class="experience-skills">

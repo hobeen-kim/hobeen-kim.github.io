@@ -15,7 +15,7 @@
             <div class="period">2026.04 ~ 현재</div>
           </div>
           <div class="responsibility-description">
-            <div class="responsibility-detail-main"><span> &#8226; ISOBUS 기반 농기계 소프트웨어를 개발·검증하는 시뮬레이션 플랫폼 구축</span></div>
+            <div class="responsibility-detail-main"><span> &#8226; ISOBUS 기반 농기계 소프트웨어를 개발·검증하는 디지털 트윈 플랫폼 구축</span></div>
             <div class="responsibility-detail"> &#8226; QEMU 로 Bosch CCU 하드웨어 에뮬레이션 — CAN FD·IMU 칩 모델을 직접 제작해 실 디바이스와 동일한 SDK 스택 구동</div>
             <div class="responsibility-detail"> &#8226; 3D 시뮬레이터가 GPS·CAN·ISOBUS 신호를 실시간 공급, Rust 신호 허브·브리지로 앱까지 전달</div>
             <div class="responsibility-detail"> &#8226; Electron 대시보드(텔레메트리·로그·MQTT) 개발, Homebrew·APT·S3 로 릴리스 자동화</div>

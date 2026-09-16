@@ -210,6 +210,7 @@ const theme = {
             { text: '용어 사전', link: '/study/isobus/appendix-glossary' },
             { text: 'PGN/SPN 목록', link: '/study/isobus/appendix-pgn-spn' },
             { text: 'DDI 목록', link: '/study/isobus/appendix-ddi' },
+            { text: 'AEF 기능 카테고리', link: '/study/isobus/appendix-aef-functionalities' },
             { text: '트러블슈팅', link: '/study/isobus/appendix-troubleshooting' },
             { text: '참고 자료', link: '/study/isobus/appendix-references' },
           ],

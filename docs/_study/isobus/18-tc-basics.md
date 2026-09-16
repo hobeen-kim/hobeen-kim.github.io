@@ -40,6 +40,8 @@ Part 10 Annex F.2는 TC 기능을 네 가지 <strong>TC functionality</strong>�
 | **TC-SC** | section control | 섹션 자동 ON/OFF 제어 |
 | **LOG** | data logger | 로깅 전용 기능(DL) |
 
+TC 외의 기능(UT, AUX-N, TIM 등)까지 포함한 AEF 기능 단위 전체 구도는 [AEF 기능 카테고리](/study/isobus/appendix-aef-functionalities)에서 다룬다.
+
 현행 2015년판(2nd edition)은 프로토콜 <strong>버전 4</strong>를 정의하며, 로깅만 수행하는 별도 CF인 <strong>Data Logger(DL)</strong>와 Peer Control 등이 버전 4에서 추가되었다. DL은 TC 기능의 부분집합으로 같은 연결 메커니즘을 쓰고, 클라이언트는 동시에 TC 1개와 DL 1개에 연결할 수 있다.
 
 ### TC-BAS·TC-GEO 최소 요건

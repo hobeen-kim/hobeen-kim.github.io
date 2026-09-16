@@ -112,6 +112,10 @@ flowchart TD
 |--|------|------|
 | | [용어집 (Glossary)](/study/isobus/appendix-glossary) | ISOBUS/CAN 주요 용어를 A-Z 순으로 정리 |
 | | [PGN/SPN 주요 목록](/study/isobus/appendix-pgn-spn) | 자주 사용하는 PGN과 SPN을 표로 정리한 참조 자료 |
+| | [DDI 목록](/study/isobus/appendix-ddi) | Process Data에서 쓰는 DDI를 용도별로 정리 |
+| | [AEF 기능 카테고리](/study/isobus/appendix-aef-functionalities) | UT, AUX-N, TC-BAS/GEO/SC, TIM, ISB 등 기능 단위와 인증 구조 |
+| | [흔한 실수와 트러블슈팅](/study/isobus/appendix-troubleshooting) | 통합 과정에서 자주 겪는 문제와 해결 방법 |
+| | [참고 자료](/study/isobus/appendix-references) | 표준 문서, 도구, 오픈소스 구현 등 |
 
 ### ISO 11783 표준 정리
 

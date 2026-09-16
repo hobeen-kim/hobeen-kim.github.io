@@ -167,6 +167,8 @@ AEF는 ISOBUS의 실질적 표준화를 이끄는 국제 단체이다. ISO 표�
 - **ISOBUS 인증 마크**: 테스트를 통과한 장비에 부여. 인증 마크가 있으면 상호운용성 보장
 - **AEF Database**: 인증된 제품 목록 공개, 농민이 조합 가능한 장비 확인 가능
 
+AEF는 인증을 장비 전체가 아니라 <strong>기능 단위</strong>로 부여한다. UT, AUX-N, TC-BAS/TC-GEO/TC-SC, TIM, ISB 같은 약어가 그 단위이며, 각 기능이 무엇이고 서로 어떤 관계인지는 [AEF 기능 카테고리](/study/isobus/appendix-aef-functionalities)에 정리했다.
+
 ### 주요 참여 제조사
 
 John Deere, AGCO, CNH Industrial(케이스·뉴홀랜드), CLAAS, Fendt, Kverneland, Amazone, Horsch 등 전 세계 주요 농기계 제조사가 AEF 멤버로 참여하고 있다.

@@ -8,9 +8,9 @@
           <div class="certification-item todo">
             <div class="cert-name-group">
               <div class="cert-logo-box"><img class="cert-logo cert-logo-sm" src="/images/cert/hrdk.svg" alt="한국산업인력공단" /></div>
-              <div class="certification-name">전자기사<span class="todo-badge">목표</span></div>
+              <div class="certification-name">로봇소프트웨어개발기사<span class="todo-badge">목표</span></div>
             </div>
-            <div class="certification-date">2027 예정</div>
+            <div class="certification-date">2027 하반기</div>
           </div>
           <div class="certification-item">
             <div class="cert-name-group">

@@ -35,19 +35,21 @@
 <script>
 import ResumeInfraTobe from './ResumeInfraTobe.vue'
 import PortfolioTobe from './PortfolioTobe.vue'
+import ResumeDeviceTobe from './ResumeDeviceTobe.vue'
 // html2pdf는 SSR 환경에서 'self'를 참조하여 빌드 오류가 발생할 수 있으므로
 // 클라이언트 사이드에서만 동적 로딩합니다.
 
 export default {
   name: 'TobeCover',
-  components: { ResumeInfraTobe, PortfolioTobe },
+  components: { ResumeInfraTobe, PortfolioTobe, ResumeDeviceTobe },
   data() {
     return {
       tabs: [
+        { key: 'device', label: '디바이스 플랫폼 (28.05)', component: 'ResumeDeviceTobe' },
         { key: 'infra', label: '인프라 경력서', component: 'ResumeInfraTobe' },
         { key: 'portfolio', label: '포트폴리오', component: 'PortfolioTobe' },
       ],
-      currentTab: 'infra',
+      currentTab: 'device',
       contentScale: 1
     }
   },
@@ -70,6 +72,7 @@ export default {
 
       const element = this.$refs.contentToDownload;
       const filenameMap = {
+        device: '김호빈_디바이스플랫폼_목표이력서.pdf',
         infra: '김호빈_인프라_경력서.pdf',
         portfolio: '김호빈_포트폴리오.pdf',
       };
@@ -112,6 +115,35 @@ export default {
 </script>
 
 <style>
+/* To-Be 이력서: 아직 채우지 않은 칸 표시 */
+.todo-item {
+  display: inline-block;
+  margin-left: 0.3rem;
+  padding: 0 0.35rem;
+  border: 1px dashed var(--vp-c-text-mute, #9aa0a6);
+  border-radius: 4px;
+  color: var(--vp-c-text-mute, #9aa0a6);
+  font-size: 0.85em;
+}
+
+.todo-badge {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0 0.35rem;
+  border: 1px dashed var(--vp-c-text-mute, #9aa0a6);
+  border-radius: 999px;
+  color: var(--vp-c-text-mute, #9aa0a6);
+  font-size: 0.7rem;
+  font-weight: 400;
+  vertical-align: middle;
+}
+
+.responsibility-item.todo,
+.certification-item.todo,
+.experience-description.todo {
+  opacity: 0.62;
+}
+
 .resume-tabs {
   position: relative;
 }

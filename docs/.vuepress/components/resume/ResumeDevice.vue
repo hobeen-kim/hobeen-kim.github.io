@@ -2,7 +2,7 @@
   <div class="resume-variant">
     <div class="resume-header">
       <h1>김호빈</h1>
-      <div class="resume-header-sub">디바이스 플랫폼 엔지니어</div>
+      <div class="resume-header-sub">백엔드 엔지니어 · 디바이스 플랫폼</div>
     </div>
 
     <!-- 각 섹션을 컴포넌트로 분리 -->

@@ -11,19 +11,6 @@
       <div class="responsibilities">
         <div class="responsibility-item">
           <div class="responsibility-header">
-            <div class="responsibility-title">SeamOS World 시뮬레이터</div>
-            <div class="period">2026.04 ~ 현재</div>
-          </div>
-          <div class="responsibility-description">
-            <div class="responsibility-detail-main"><span> &#8226; ISOBUS 기반 농기계 소프트웨어를 개발·검증하는 디지털 트윈 플랫폼 구축</span></div>
-            <div class="responsibility-detail"> &#8226; QEMU 로 Bosch CCU 하드웨어 에뮬레이션 — CAN FD·IMU 칩 모델을 직접 제작해 실 디바이스와 동일한 SDK 스택 구동</div>
-            <div class="responsibility-detail"> &#8226; 3D 시뮬레이터가 GPS·CAN·ISOBUS 신호를 실시간 공급, Rust 신호 허브·브리지로 앱까지 전달</div>
-            <div class="responsibility-detail"> &#8226; 엣지 디바이스 상태를 실시간 관측하는 Electron 대시보드(텔레메트리·로그·MQTT) 개발</div>
-            <div class="responsibility-detail"> &#8226; Homebrew·APT·S3 로 크로스 플랫폼 릴리스 자동화</div>
-          </div>
-        </div>
-        <div class="responsibility-item">
-          <div class="responsibility-header">
             <div class="responsibility-title">SEAMOS 디바이스 플랫폼 &amp; OTA</div>
             <div class="period">2025.04 ~ 현재</div>
           </div>
@@ -45,6 +32,19 @@
             <div class="responsibility-detail"> &#8226; Protobuf 이벤트 수집 서버에서 Kafka 전송 + 위치정보 AWS KMS 암호화, Kafka Streams 로 실시간 위치·작업량·경고 집계와 DLQ 설계</div>
             <div class="responsibility-detail"> &#8226; Spring Batch 일배치로 history S3 적재·통계 산출, 청크·메모리 튜닝으로 OOM 해소</div>
             <div class="responsibility-detail"> &#8226; LiveLocation WebSocket 송출 소켓 서버와 주행기록·장비 가동 통계 관제 API 개발</div>
+          </div>
+        </div>
+        <div class="responsibility-item">
+          <div class="responsibility-header">
+            <div class="responsibility-title">SeamOS World SIL 검증 플랫폼</div>
+            <div class="period">2026.04 ~ 현재</div>
+          </div>
+          <div class="responsibility-description">
+            <div class="responsibility-detail-main"><span> &#8226; ISOBUS 기반 농기계 소프트웨어를 개발·검증하는 SIL(Software-in-the-Loop) 디지털 트윈 플랫폼 구축</span></div>
+            <div class="responsibility-detail"> &#8226; QEMU 로 Bosch CCU 하드웨어 에뮬레이션 — CAN FD·IMU 칩 모델을 직접 제작해 실 디바이스와 동일한 SDK 스택 구동</div>
+            <div class="responsibility-detail"> &#8226; 3D 시뮬레이터가 GPS·CAN·ISOBUS 신호를 실시간 공급, Rust 신호 허브·브리지로 앱까지 전달</div>
+            <div class="responsibility-detail"> &#8226; 엣지 디바이스 상태를 실시간 관측하는 Electron 대시보드(텔레메트리·로그·MQTT) 개발</div>
+            <div class="responsibility-detail"> &#8226; Homebrew·APT·S3 로 크로스 플랫폼 릴리스 자동화</div>
           </div>
         </div>
       </div>

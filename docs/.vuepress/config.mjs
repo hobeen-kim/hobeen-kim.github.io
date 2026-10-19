@@ -1153,6 +1153,84 @@ const theme = {
           ],
         },
       ],
+      '/study/webrtc/': [
+        {
+          text: 'WebRTC 기초',
+          collapsible: false,
+          children: [
+            { text: '소개', link: '/study/webrtc/' },
+            { text: 'CH1. 왜 WebRTC인가', link: '/study/webrtc/01-why-webrtc' },
+            { text: 'CH2. WebRTC API 한눈에', link: '/study/webrtc/02-webrtc-api' },
+            { text: 'CH3. 시그널링', link: '/study/webrtc/03-signaling' },
+          ],
+        },
+        {
+          text: '연결 수립 — SDP·NAT·ICE·TURN',
+          collapsible: false,
+          children: [
+            { text: 'CH4. SDP와 Offer/Answer(JSEP)', link: '/study/webrtc/04-sdp-jsep' },
+            { text: 'CH5. NAT와 STUN', link: '/study/webrtc/05-nat-stun' },
+            { text: 'CH6. ICE', link: '/study/webrtc/06-ice' },
+            { text: 'CH7. TURN', link: '/study/webrtc/07-turn' },
+          ],
+        },
+        {
+          text: '미디어와 데이터 전송',
+          collapsible: false,
+          children: [
+            { text: 'CH8. RTP/RTCP와 코덱', link: '/study/webrtc/08-rtp-codecs' },
+            { text: 'CH9. 품질 제어와 지연 예산', link: '/study/webrtc/09-quality-latency' },
+            { text: 'CH10. 보안: DTLS-SRTP', link: '/study/webrtc/10-dtls-srtp' },
+            { text: 'CH11. DataChannel', link: '/study/webrtc/11-datachannel' },
+          ],
+        },
+        {
+          text: '아키텍처와 운영',
+          collapsible: false,
+          children: [
+            { text: 'CH12. 토폴로지: Mesh·SFU·MCU', link: '/study/webrtc/12-topology-sfu' },
+            { text: 'CH13. 브라우저 밖 WebRTC: 디바이스 구현', link: '/study/webrtc/13-native-webrtc' },
+            { text: 'CH14. WHIP/WHEP와 스트리밍', link: '/study/webrtc/14-whip-whep' },
+            { text: 'CH15. 모니터링과 디버깅', link: '/study/webrtc/15-monitoring-debugging' },
+          ],
+        },
+        {
+          text: 'AWS 관리형 WebRTC — 개관과 KVS',
+          collapsible: false,
+          children: [
+            { text: 'CH16. AWS 관리형 WebRTC 서비스 지도', link: '/study/webrtc/16-aws-landscape' },
+            { text: 'CH17. KVS WebRTC 아키텍처', link: '/study/webrtc/17-kvs-architecture' },
+            { text: 'CH18. KVS 시그널링 API 상세', link: '/study/webrtc/18-kvs-signaling-api' },
+            { text: 'CH19. 디바이스 측 구현: KVS C SDK', link: '/study/webrtc/19-kvs-c-sdk' },
+            { text: 'CH20. 뷰어·백엔드 구현', link: '/study/webrtc/20-kvs-viewer-backend' },
+            { text: 'CH21. WebRTC 인제스트와 저장', link: '/study/webrtc/21-kvs-ingestion-storage' },
+            { text: 'CH22. KVS 운영·보안·비용', link: '/study/webrtc/22-kvs-operations' },
+          ],
+        },
+        {
+          text: 'AWS 관리형 WebRTC — Chime SDK·IVS',
+          collapsible: false,
+          children: [
+            { text: 'CH23. Amazon Chime SDK', link: '/study/webrtc/23-chime-sdk' },
+            { text: 'CH24. Amazon IVS Real-Time Streaming', link: '/study/webrtc/24-ivs-real-time' },
+          ],
+        },
+        {
+          text: '캡스톤',
+          collapsible: false,
+          children: [
+            { text: 'CH25. 캡스톤: 농기계 원격 영상·제어 플랫폼', link: '/study/webrtc/25-capstone-farm-platform' },
+          ],
+        },
+        {
+          text: '부록',
+          collapsible: false,
+          children: [
+            { text: '용어집', link: '/study/webrtc/appendix-glossary' },
+            { text: '참고 자료', link: '/study/webrtc/appendix-references' },
+          ],
+        },
+      ],
     },
     lastUpdated: false,
     contributors: false,

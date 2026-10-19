@@ -44,6 +44,7 @@ export const nodes = [
   { id: 'android-internals', label: 'Android\nInternals', size: 26, status: 'active', link: '/study/android-internals/', x: 0.97, y: 0.12 },
   { id: 'data-engineering', label: '데이터\n엔지니어링', size: 24, status: 'planned', link: null, x: 0.60, y: 0.40 },
   { id: 'observability', label: '관측성\n(Grafana 스택)', size: 26, status: 'active', link: '/study/observability/', x: 0.90, y: 0.80 },
+  { id: 'webrtc', label: 'WebRTC\n(+AWS KVS)', size: 26, status: 'active', link: '/study/webrtc/', x: 0.79, y: 0.47 },
 
   // === AI — 하단 중앙 ===
   { id: 'ai', label: 'AI', size: 36, status: 'active', link: null, x: 0.50, y: 0.30 },
@@ -98,6 +99,8 @@ export const edges = [
   { source: 'infra', target: 'aws' },
   { source: 'infra', target: 'kubernetes' },
   { source: 'infra', target: 'cicd' },
+  { source: 'network', target: 'webrtc' },
+  { source: 'aws', target: 'webrtc' },
   { source: 'infra', target: 'observability' },
   { source: 'kubernetes', target: 'observability' },
   { source: 'software', target: 'auth' },

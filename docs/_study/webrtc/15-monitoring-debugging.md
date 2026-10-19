@@ -415,14 +415,14 @@ for (const [pcId, pc] of Object.entries(dump.PeerConnections ?? {})) {
 
 ### 배포 전 체크리스트
 
-- [ ] TURN이 UDP 3478과 함께 TCP/TLS 443을 제공하고, `iceTransportPolicy: 'relay'` 단독 테스트를 통과한다.
-- [ ] TURN 자격증명 TTL이 최대 세션 길이보다 길거나, 만료 전 ICE restart가 구현돼 있다.
-- [ ] 시그널링 연결의 keepalive 주기가 로드밸런서 idle timeout보다 짧다.
-- [ ] 네트워크 변경(`connectionState`가 `disconnected`/`failed`)에 ICE restart로 대응한다.
-- [ ] 디바이스 시계가 NTP로 동기화된다(DTLS 인증서 유효기간, 서명 기반 인증).
-- [ ] 송신 측이 PLI에 키프레임으로 응답한다(하드웨어 인코더의 키프레임 강제 API 연결).
-- [ ] 디바이스 인코더 프로파일과 시청 브라우저 디코더의 코덱 교집합을 확인했다.
-- [ ] 클라이언트 `getStats()` 요약이 세션 키와 함께 서버로 수집된다.
+- TURN이 UDP 3478과 함께 TCP/TLS 443을 제공하고, `iceTransportPolicy: 'relay'` 단독 테스트를 통과한다.
+- TURN 자격증명 TTL이 최대 세션 길이보다 길거나, 만료 전 ICE restart가 구현돼 있다.
+- 시그널링 연결의 keepalive 주기가 로드밸런서 idle timeout보다 짧다.
+- 네트워크 변경(`connectionState`가 `disconnected`/`failed`)에 ICE restart로 대응한다.
+- 디바이스 시계가 NTP로 동기화된다(DTLS 인증서 유효기간, 서명 기반 인증).
+- 송신 측이 PLI에 키프레임으로 응답한다(하드웨어 인코더의 키프레임 강제 API 연결).
+- 디바이스 인코더 프로파일과 시청 브라우저 디코더의 코덱 교집합을 확인했다.
+- 클라이언트 `getStats()` 요약이 세션 키와 함께 서버로 수집된다.
 
 ## 6. 서버 측 관측
 

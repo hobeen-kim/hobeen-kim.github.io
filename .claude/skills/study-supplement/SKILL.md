@@ -53,6 +53,8 @@ triggers:
   - `<br/>` 사용 금지 — `<br>` 사용
   - `**bold**한글` 패턴 금지 — CommonMark에서 닫는 `**` 뒤에 한글이 바로 오면 bold가 적용되지 않음. `<strong>bold</strong>한글` 사용
   - GitHub 스타일 callout(`> [!TIP]`, `> [!INFO]`) 사용 금지 — VuePress에서 렌더링되지 않음
+  - 체크박스(`- [ ]`) 금지 — task-list 플러그인이 없어 글자 그대로 보인다. 코드 블록 밖 `{{ }}`도 Vue 보간 에러를 낸다
+  - 전체 형식·마크다운 함정의 원본은 `.claude/skills/study-add/references/chapter-format.md`, 다이어그램 규칙 원본은 `.claude/skills/study-add/references/diagrams.md`다. 규칙이 헷갈리면 원본을 따른다
 - VuePress 마크다운 컨테이너 활용:
   - `:::tip 제목` — 핵심 정리, 팁
   - `:::info 제목` — 참고 정보, 부연 설명
@@ -112,8 +114,9 @@ diagram("{챕터번호}-{이름}", draw, w=12, h=6, ymax=48)
 
 ```bash
 cd /Users/hobeen/private/hobeen-kim.github.io
+python3 .claude/skills/study-add/scripts/lint_study.py {slug}   # 수정한 파일에 새 ERROR/WARN이 없는지
 npm run docs:build
-git add docs/_study/ docs/.vuepress/public/images/ docs/.vuepress/config.mjs
+git add docs/_study/ docs/.vuepress/public/images/ docs/.vuepress/config.mjs docs/.vuepress/public/sitemap.xml
 git commit -m "docs: {챕터명} 내용 보충 — {추가한 내용 요약}"
 git push origin master
 ```

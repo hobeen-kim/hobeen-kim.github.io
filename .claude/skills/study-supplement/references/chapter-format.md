@@ -1,71 +1,7 @@
 # 스터디 챕터 표준 포맷
 
-모든 스터디 챕터는 아래 구조를 따른다. 새 챕터 생성 시 이 포맷을 그대로 복제하여 내용만 채운다.
+이 파일은 사본이 낡지 않도록 원본 하나만 유지한다. 원본을 읽는다.
 
-## 템플릿
-
-```markdown
----
-title: "챕터 제목"
-description: "한 줄 설명"
-date: YYYY-MM-DD
-tags: [태그1, 태그2]
-prev: /study/{slug}/{이전 챕터 경로}
-next: /study/{slug}/{다음 챕터 경로}
----
-
-# 챕터 제목
-
-::: info 학습 목표
-- 목표1
-- 목표2
-- 목표3
-:::
-
-## 1. 첫 번째 섹션 제목
-
-본문 내용. Mermaid 다이어그램, 테이블 등 포함.
-
-### 소제목 (필요 시)
-
-상세 설명.
-
-## 2. 두 번째 섹션 제목
-
-본문 내용.
-
-## 3. 세 번째 섹션 제목
-
-본문 내용.
-
-::: tip 핵심 정리
-- 요약 1
-- 요약 2
-- 요약 3
-:::
-
-## 다음 챕터
-
-- 다음 : [다음 챕터 제목](/study/{slug}/{다음 챕터 파일})
-```
-
-## 체크리스트
-
-| 항목 | 규칙 |
-|------|------|
-| frontmatter | title, description, date, tags, prev, next 필수 |
-| `# 제목` | frontmatter 직후, 반드시 h1 제목 포함 |
-| 학습 목표 | `::: info 학습 목표` 컨테이너 사용 |
-| 섹션 번호 | `## 1.`, `## 2.`, `## 3.` ... 번호 명시 |
-| 소제목 | `###` 사용 (h3) |
-| 구분선 | `---` 사용 금지 |
-| 강조 | `**bold**한글` 금지 → `<strong>bold</strong>한글` |
-| 핵심 정리 | `::: tip 핵심 정리` 컨테이너, 마지막 섹션 뒤 |
-| 다음 챕터 | `## 다음 챕터` + `- 다음 : [제목](경로)` |
-| 마지막 챕터 | 다음 챕터 섹션 없음 |
-| 첫 챕터 | prev: null |
-| 문체 | 해라체 (~이다, ~한다). 경어체 금지 |
-| Mermaid | `\n` 금지 → `<br>`, `timeline`은 `<br>` 미지원(쉼표), `quadrantChart`은 영문만 |
-| `<br/>` | 금지 → `<br>` 사용 |
-| GitHub callout | `> [!TIP]` 금지 → `:::tip` 사용 |
-| 교차 링크 | 관련 블로그 포스트(`/posts/...`)나 다른 스터디 챕터(`/study/...`)가 있으면 본문에 링크 삽입 |
+- 챕터 템플릿·체크리스트·마크다운 함정: `.claude/skills/study-add/references/chapter-format.md`
+- 다이어그램 규칙: `.claude/skills/study-add/references/diagrams.md`
+- 기계 점검: `python3 .claude/skills/study-add/scripts/lint_study.py {slug}`

@@ -4,7 +4,7 @@ description: "실제 ISOBUS CAN 로그 분석, PGN 디코딩, VT 오브젝트 �
 date: 2026-04-13
 tags: [ISOBUS, CAN, PGN, VirtualTerminal, TaskController, Python]
 prev: /study/isobus/21-isobus-misc
-next: /study/isobus/23-summary
+next: /study/isobus/appendix-glossary
 ---
 
 # 종합 실습

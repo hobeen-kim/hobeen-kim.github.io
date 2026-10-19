@@ -122,7 +122,7 @@ Alertmanager는 상태를 gossip으로만 공유하는 가벼운 컴포넌트라
 
 <strong>단일 바이너리 / Docker</strong>: 개발·소규모 환경에서는 `alertmanager` 바이너리 하나를 `--config.file=alertmanager.yml`로 실행한다.
 
-<strong>Kubernetes(Prometheus Operator)</strong>: [kube-prometheus-stack](/study/kubernetes/37-kubernetes-deployment)을 쓰면 `Alertmanager` CRD가 StatefulSet으로 클러스터를 구성하고, `AlertmanagerConfig` CRD로 라우팅 설정을 네임스페이스별로 선언적으로 분리할 수 있다.
+<strong>Kubernetes(Prometheus Operator)</strong>: [kube-prometheus-stack](/study/observability/37-kubernetes-deployment)을 쓰면 `Alertmanager` CRD가 StatefulSet으로 클러스터를 구성하고, `AlertmanagerConfig` CRD로 라우팅 설정을 네임스페이스별로 선언적으로 분리할 수 있다.
 
 ```yaml
 apiVersion: monitoring.coreos.com/v1

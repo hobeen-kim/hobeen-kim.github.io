@@ -165,4 +165,4 @@ flowchart LR
 
 Zanzibar 스터디는 여기서 마무리된다. 실제 구현을 살펴보며 같은 개념을 다른 각도로 다시 만나보자.
 
-- [SpiceDB CH1. SpiceDB 소개](/study/spicedb/01-intro)
+- [SpiceDB CH1. SpiceDB 개요](/study/spicedb/01-overview)

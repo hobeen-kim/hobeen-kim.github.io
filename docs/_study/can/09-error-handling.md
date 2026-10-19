@@ -3,7 +3,7 @@ title: "CH9. 오류 감지·격리"
 description: "CAN의 5가지 오류 종류, TEC/REC 카운터와 Error Active/Passive/Bus-off 상태 전이, Fault Confinement가 네트워크 건강을 지키는 방식을 뜯어본다."
 date: 2026-04-20
 tags: [CAN, ErrorHandling, FaultConfinement, TEC, REC]
-prev: /study/can/08-arbitration
+prev: /study/can/08-can-xl
 next: /study/can/10-busload-response-time
 ---
 

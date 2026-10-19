@@ -31,7 +31,7 @@ RBAC(Role-Based Access Control)은 가장 친숙한 모델이다. 사용자에�
 user → role → permission
 ```
 
-admin·editor·viewer 같은 역할 이름으로 권한을 관리하기 때문에 이해하기 쉽고, 관리자 UI도 단순하다. LDAP 그룹, 리눅스 유저 그룹, 대부분의 엔터프라이즈 시스템이 이 모델을 쓴다. [Keycloak 스터디 CH11. Role과 Group](/study/keycloak/11-role-and-group)에서 본 realm role/client role도 같은 계보다.
+admin·editor·viewer 같은 역할 이름으로 권한을 관리하기 때문에 이해하기 쉽고, 관리자 UI도 단순하다. LDAP 그룹, 리눅스 유저 그룹, 대부분의 엔터프라이즈 시스템이 이 모델을 쓴다. [Keycloak 스터디 CH6. Role·Group과 Composite Role](/study/keycloak/06-role-group)에서 본 realm role/client role도 같은 계보다.
 
 그러나 RBAC은 규모가 커지면 세 가지 문제에 부딪힌다.
 

@@ -4,7 +4,7 @@ description: "CAN은 실시간 시스템이다. Bus load 계산, priority-based 
 date: 2026-04-20
 tags: [CAN, RealTime, BusLoad, WCRT, Scheduling]
 prev: /study/can/09-error-handling
-next: /study/can/11-canfd
+next: /study/can/11-controller-transceiver
 ---
 
 # CH10. 버스 부하와 응답시간

@@ -4,7 +4,7 @@ description: "작업기가 자신의 구조와 능력을 TC에 알리는 Device 
 date: 2026-04-13
 tags: [ISOBUS, ISO11783, TaskController, TC, DDOP, DeviceDescription, ObjectPool]
 prev: /study/isobus/19-tc-process-data
-next: /study/isobus/21-tc-task
+next: /study/isobus/21-isobus-misc
 ---
 
 # TC 디바이스 디스크립션 (DDOP)

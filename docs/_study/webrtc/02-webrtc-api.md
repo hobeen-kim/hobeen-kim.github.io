@@ -115,6 +115,27 @@ const pc = new RTCPeerConnection({
 | `iceCandidatePoolSize` | 정수 | offer 전에 후보를 미리 수집해 둘 개수 |
 | `certificates` | `RTCCertificate[]` | DTLS 인증서 지정([10장](/study/webrtc/10-dtls-srtp)) |
 
+::: info STUN과 TURN
+`iceServers`에 넣는 두 서버는 모두 NAT 때문에 필요하지만 역할은 정반대다. STUN은 주소만 알려 주는 안내 데스크이고, TURN은 미디어를 실어 나르는 중계소다.
+
+| | STUN | TURN |
+|---|---|---|
+| 하는 일 | "밖에서 보이는 내 공인 주소"를 알려 준다 | 직접 연결이 안 될 때 미디어를 받아 상대에게 다시 보낸다 |
+| 미디어 통과 | 하지 않는다 | 연결 내내 전부 지나간다 |
+| 트래픽·비용 | 연결 초기의 작은 패킷 몇 개 | 영상 대역폭만큼 |
+| 인증 | 보통 없다. 공개 서버도 흔하다 | 필수다. 직접 운영(coturn)하거나 관리형 서비스를 쓴다 |
+
+ICE는 이 서버들을 이용해 세 종류의 후보 주소를 모아 시그널링으로 상대에게 보내고, 통하는 쌍 중 더 나은 쪽(host → srflx → relay 순)을 고른다.
+
+| 후보 | 어디서 얻나 | 언제 통하나 |
+|---|---|---|
+| host | 단말 자신의 (사설) 주소 | 같은 네트워크 안이거나 공인 IP를 가진 경우 |
+| srflx | STUN이 알려 준 공인 주소 | 홀펀칭에 성공한 경우 |
+| relay | TURN이 빌려준 중계 주소 | 거의 항상. 대신 비용이 든다 |
+
+TURN 서버는 STUN 요청에도 응답하므로 STUN 서버를 겸할 수 있다. 자세한 동작은 [05장](/study/webrtc/05-nat-stun)(STUN), [06장](/study/webrtc/06-ice)(ICE), [07장](/study/webrtc/07-turn)(TURN)에서 다룬다.
+:::
+
 ### 생명주기
 
 PeerConnection 하나가 태어나서 연결되고 닫히기까지는 대략 다음 순서를 밟는다.

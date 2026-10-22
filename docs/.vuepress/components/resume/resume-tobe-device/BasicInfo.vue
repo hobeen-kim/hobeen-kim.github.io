@@ -15,13 +15,13 @@
     <div class="channel-section">
       <div class="section-title">채널</div>
       <div class="contact-item">
-        <div class="contact-label">블로그</div>
+        <div class="contact-label">깃허브</div>
         <div class="contact-value">
           <a href="https://github.com/hobeen-kim" target="_blank">https://github.com/hobeen-kim</a>
         </div>
       </div>
       <div class="contact-item">
-        <div class="contact-label">깃허브</div>
+        <div class="contact-label">블로그</div>
         <div class="contact-value">
           <a href="https://hobeen-kim.github.io/" target="_blank">https://hobeen-kim.github.io/</a>
         </div>

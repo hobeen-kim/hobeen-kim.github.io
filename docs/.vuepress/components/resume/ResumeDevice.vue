@@ -2,7 +2,7 @@
   <div class="resume-variant">
     <div class="resume-header">
       <h1>김호빈</h1>
-      <div class="resume-header-sub">백엔드 엔지니어 · 디바이스 플랫폼</div>
+      <div class="resume-header-sub">IoT 디바이스 플랫폼 · 로보틱스 · DevOps 엔지니어</div>
     </div>
 
     <!-- 각 섹션을 컴포넌트로 분리 -->
@@ -10,6 +10,7 @@
     <Skills />
     <Experience />
     <Project />
+    <Writings />
     <Education />
   </div>
 </template>
@@ -20,6 +21,7 @@ import BasicInfo from './resume-device/BasicInfo.vue'
 import Project from './resume-device/Project.vue'
 import Experience from './resume-device/Experience.vue'
 import Skills from './resume-device/Skills.vue'
+import Writings from './resume-device/Writings.vue'
 import Education from './resume-device/Education.vue'
 
 export default {
@@ -29,6 +31,7 @@ export default {
     Project,
     Experience,
     Skills,
+    Writings,
     Education
   }
 }

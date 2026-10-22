@@ -3,36 +3,36 @@
     <div class="header2">기술 스택</div>
     <div class="skills-container">
       <div class="skill-category">
-        <div class="skill-category-title">언어/프레임워크</div>
-        <div class="skill-list"> Kotlin, Java, Spring Boot, Spring Batch</div>
-      </div>
-      <div class="skill-category">
-        <div class="skill-category-title">데이터베이스</div>
-        <div class="skill-list"> PostgreSQL, MongoDB, Redis</div>
-      </div>
-      <div class="skill-category">
-        <div class="skill-category-title">메시징/스트리밍</div>
-        <div class="skill-list"> Kafka, Kafka Streams, AWS SQS/SNS, Protobuf</div>
-      </div>
-      <div class="skill-category">
-        <div class="skill-category-title">컨테이너/인프라</div>
-        <div class="skill-list"> Docker, Kubernetes(EKS), AWS(Lambda, S3, KMS)</div>
-      </div>
-      <div class="skill-category">
         <div class="skill-category-title">디바이스 연동</div>
-        <div class="skill-list"> AWS IoT(MQTT), Device Shadow, OTA, CAN/CAN FD, ISOBUS(ISO 11783)</div>
+        <div class="skill-list"> AWS IoT Core(MQTT mTLS, Device Shadow, Jobs, Custom Authorizer), OTA, 디바이스 프로비저닝, WebRTC(Amazon KVS)</div>
       </div>
       <div class="skill-category">
-        <div class="skill-category-title">인증/보안</div>
-        <div class="skill-list"> Keycloak(OIDC), Spring Security</div>
+        <div class="skill-category-title">장비 통신</div>
+        <div class="skill-list"> CAN/CAN FD, ISOBUS(ISO 11783 VT·TC)</div>
       </div>
       <div class="skill-category">
-        <div class="skill-category-title">로그/모니터링</div>
-        <div class="skill-list"> Datadog, 텔레메트리 수집·집계, 실시간 대시보드</div>
+        <div class="skill-category-title">시뮬레이션/SIL</div>
+        <div class="skill-list"> QEMU 하드웨어 에뮬레이션, 센서·차량 동역학 시뮬레이션, 디지털 트윈</div>
       </div>
       <div class="skill-category">
-        <div class="skill-category-title">테스트</div>
-        <div class="skill-list"> JUnit, Testcontainers, Kover</div>
+        <div class="skill-category-title">언어/프레임워크</div>
+        <div class="skill-list"> Kotlin, Java, Rust, Python, Spring Boot, Spring Batch</div>
+      </div>
+      <div class="skill-category">
+        <div class="skill-category-title">DevOps/IaC</div>
+        <div class="skill-list"> Terraform, ArgoCD, Helm, GitHub Actions, AWS SAM</div>
+      </div>
+      <div class="skill-category">
+        <div class="skill-category-title">클라우드/컨테이너</div>
+        <div class="skill-list"> AWS(EKS, Lambda, SQS/SNS, Firehose, Aurora, DynamoDB, S3, KMS), Docker, Kubernetes</div>
+      </div>
+      <div class="skill-category">
+        <div class="skill-category-title">데이터/메시징</div>
+        <div class="skill-list"> Kafka, Kafka Streams, Protobuf, PostgreSQL, Redis, MongoDB</div>
+      </div>
+      <div class="skill-category">
+        <div class="skill-category-title">관측성/보안</div>
+        <div class="skill-list"> Grafana·Prometheus·Loki·Tempo, Datadog, Keycloak(OIDC), Prowler</div>
       </div>
     </div>
   </div>

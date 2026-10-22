@@ -11,27 +11,54 @@
       <div class="responsibilities">
         <div class="responsibility-item">
           <div class="responsibility-header">
-            <div class="responsibility-title">SEAMOS 디바이스 플랫폼 &amp; OTA</div>
-            <div class="period">2025.04 ~ 현재</div>
+            <div class="responsibility-title">방제기 IoT 플랫폼</div>
+            <div class="period">2026.10 ~ 현재</div>
           </div>
           <div class="responsibility-description">
-            <div class="responsibility-detail-main"><span> &#8226; ISOBUS 장비에 앱을 배포·관리하는 디바이스 플랫폼 및 OTA 서비스</span></div>
-            <div class="responsibility-detail"> &#8226; AWS IoT(MQTT)/HTTPS 디바이스 상태 수집 + 상태 전이 엔진, OTA 캠페인·업데이트·취소·retry 구현</div>
-            <div class="responsibility-detail"> &#8226; idempotency·retry·timeout·rollback 정책과 Redis 분산 락으로 멱등하고 회귀에 강한 OTA 처리 구현</div>
-            <div class="responsibility-detail"> &#8226; 디바이스 Shadow 상태 SQS Consumer 적재 + Redis 캐싱으로 디바이스 상태 조회 경로의 반복 DB 조회 제거</div>
-            <div class="responsibility-detail"> &#8226; 앱 설치/다운로드/검색, 디바이스·회원·조직 관리 API 를 멀티모듈 아키텍처로 설계</div>
+            <div class="responsibility-detail-main"><span> &#8226; 방제기 원격 관제·조종을 위한 IoT 백엔드, AWS 리소스, 디바이스 인터페이스 설계·구축</span></div>
+            <div class="responsibility-detail"> &#8226; 디바이스–클라우드 인터페이스 정의 — MQTT 토픽, Device Shadow 상태 모델, cmd/ack 명령 프로토콜, 공장 프로비저닝 흐름</div>
+            <div class="responsibility-detail"> &#8226; Kotlin Spring 백엔드 — IoT Rule → SQS 이벤트 처리, 앱용 MQTT Custom Authorizer Lambda, Amazon KVS WebRTC 영상·DataChannel 원격 조종 연동</div>
+            <div class="responsibility-detail"> &#8226; AWS 리소스 Terraform IaC — IoT Core(mTLS 인증서·정책), VPC·ALB·EC2·RDS·Redis·SQS, Firehose 텔레메트리 S3 아카이브</div>
+            <div class="responsibility-detail"> &#8226; Python 디바이스 시뮬레이터로 로컬 E2E 검증 환경 구성</div>
           </div>
         </div>
         <div class="responsibility-item">
           <div class="responsibility-header">
-            <div class="responsibility-title">차량 텔레메트리 파이프라인</div>
+            <div class="responsibility-title">NISHIBE 택시 운행관리 플랫폼</div>
+            <div class="period">2026.04 ~ 현재</div>
+          </div>
+          <div class="responsibility-description">
+            <div class="responsibility-detail-main"><span> &#8226; 일본 택시 7만 대 이상의 단말 데이터를 수집·통제하는 운행관리 서비스 백엔드와 클라우드 인프라 구축</span></div>
+            <div class="responsibility-detail"> &#8226; 미터기·DTG(디지털 운행기록계) 로그 sync API 를 sequence 기반 멱등 처리로 설계</div>
+            <div class="responsibility-detail"> &#8226; SD카드 일계 데이터 일괄 수신과 운행기록 CSV 처리 개발</div>
+            <div class="responsibility-detail"> &#8226; 도쿄 리전 EKS·Aurora·Redis·ArgoCD 인프라 신규 구축, Terraform 모듈화와 GitHub OIDC CI 인증, ApplicationSet 배포 전환</div>
+          </div>
+        </div>
+        <div class="responsibility-item">
+          <div class="responsibility-header">
+            <div class="responsibility-title">자율주행 앱 데이터 수집 &amp; 앱 관리</div>
             <div class="period">2025.02 ~ 현재</div>
           </div>
           <div class="responsibility-description">
-            <div class="responsibility-detail-main"><span> &#8226; 주행 중인 장비의 이벤트를 수집·집계·적재·관제하는 E2E 텔레메트리 파이프라인 개발</span></div>
+            <div class="responsibility-detail-main"><span> &#8226; 자율주행 농기계 앱의 주행 데이터를 수집·집계·관제하는 파이프라인과 앱 운영 관리</span></div>
             <div class="responsibility-detail"> &#8226; Protobuf 이벤트 수집 서버에서 Kafka 전송 + 위치정보 AWS KMS 암호화, Kafka Streams 로 실시간 위치·작업량·경고 집계와 DLQ 설계</div>
             <div class="responsibility-detail"> &#8226; Spring Batch 일배치로 history S3 적재·통계 산출, 청크·메모리 튜닝으로 OOM 해소</div>
             <div class="responsibility-detail"> &#8226; LiveLocation WebSocket 송출 소켓 서버와 주행기록·장비 가동 통계 관제 API 개발</div>
+            <div class="responsibility-detail"> &#8226; 자율주행 서비스(log-server·stream·batch·monitor) GitHub Actions CI/CD 와 Lambda SAM 배포 파이프라인 구축</div>
+          </div>
+        </div>
+        <div class="responsibility-item">
+          <div class="responsibility-header">
+            <div class="responsibility-title">SDM 플랫폼 인프라 · IoT · 기기 관리</div>
+            <div class="period">2025.04 ~ 현재</div>
+          </div>
+          <div class="responsibility-description">
+            <div class="responsibility-detail-main"><span> &#8226; ISOBUS 장비에 앱을 배포·관리하는 SEAMOS 디바이스 관리(SDM) 플랫폼의 인프라·IoT·기기 관리 백엔드</span></div>
+            <div class="responsibility-detail"> &#8226; AWS IoT Core 토픽·정책·인증서 설계, Device Shadow 상태 SQS 적재 + Redis 캐싱, 디바이스 상태 전이 엔진 구현</div>
+            <div class="responsibility-detail"> &#8226; OTA 캠페인·업데이트·취소·retry 와 idempotency·timeout·rollback 정책, Redis 분산 락으로 멱등한 OTA 처리</div>
+            <div class="responsibility-detail"> &#8226; AWS IoT Job 상태 기반 잔류 배포 확정, presigned URL 만료 재발송, 재설치 루프 차단, 최소 BSP·런타임 버전 검사로 현장 OTA 실패 경로 정리</div>
+            <div class="responsibility-detail"> &#8226; EKS·Terraform·ArgoCD(Helm) GitOps 로 dev/prod 운영, Karpenter·HPA 오토스케일링, Grafana·Prometheus·Loki·Tempo 관측성 구축</div>
+            <div class="responsibility-detail"> &#8226; 위치정보사업자 인증 2건 획득 — KMS 암호화, IAM·RBAC 최소권한, 접근 로그 감사, Prowler 보안 점검 자동화</div>
           </div>
         </div>
         <div class="responsibility-item">
@@ -43,8 +70,9 @@
             <div class="responsibility-detail-main"><span> &#8226; ISOBUS 기반 농기계 소프트웨어를 개발·검증하는 SIL(Software-in-the-Loop) 디지털 트윈 플랫폼 구축</span></div>
             <div class="responsibility-detail"> &#8226; QEMU 로 Bosch CCU 하드웨어 에뮬레이션 — CAN FD·IMU 칩 모델을 직접 제작해 실 디바이스와 동일한 SDK 스택 구동</div>
             <div class="responsibility-detail"> &#8226; 3D 시뮬레이터가 GPS·CAN·ISOBUS 신호를 실시간 공급, Rust 신호 허브·브리지로 앱까지 전달</div>
-            <div class="responsibility-detail"> &#8226; 엣지 디바이스 상태를 실시간 관측하는 Electron 대시보드(텔레메트리·로그·MQTT) 개발</div>
-            <div class="responsibility-detail"> &#8226; Homebrew·APT·S3 로 크로스 플랫폼 릴리스 자동화</div>
+            <div class="responsibility-detail"> &#8226; ISO 11783-6 VT·ISO 11783-10 TC 서버, Lidar·Radar·초음파 센서, 흙 역학·ISO 8608 노면 모델, 스프레이어·균평기·이앙기 작업기 ECU 모델 구현</div>
+            <div class="responsibility-detail"> &#8226; 시크릿 키 하나로 시뮬레이터 EC2 를 생성·접속·삭제하는 온디맨드 클라우드(API Gateway·Lambda·DynamoDB·ALB, Keycloak device flow, Terraform)</div>
+            <div class="responsibility-detail"> &#8226; 엣지 디바이스 상태 Electron 대시보드(텔레메트리·로그·MQTT), Homebrew·APT·S3 크로스 플랫폼 릴리스 자동화</div>
           </div>
         </div>
       </div>

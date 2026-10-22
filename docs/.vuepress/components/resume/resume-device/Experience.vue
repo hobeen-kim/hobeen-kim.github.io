@@ -6,13 +6,15 @@
         <div class="experience-header">
           <div class="experience-name">아그모</div>
           <div class="position">TD팀 백엔드 엔지니어</div>
-          <div class="period">25.02 ~ 현재 / 1년</div>
+          <div class="period">25.02 ~ 현재 / 1년 8개월</div>
         </div>
         <div>
           <span class="company-description"> 농기계 자율주행 시스템 및 ISOBUS 기반 OS 플랫폼 스타트업</span>
           <div class="experience-descriptions">
-            <div class="experience-description"> • <span>SEAMOS</span> : ISOBUS 장비용 앱 배포·OTA 플랫폼. 디바이스 상태 수집과 원격 설치·업데이트 백엔드 구축</div>
-            <div class="experience-description"> • <span>차량 텔레메트리 파이프라인</span> : 주행 이벤트 수집·실시간 집계·배치 적재·관제 API 까지 E2E 구축 </div>
+            <div class="experience-description"> &#8226; <span>방제기 IoT</span> : 방제기 원격 관제·조종 IoT 백엔드, AWS 리소스, 디바이스 인터페이스 설계·구축</div>
+            <div class="experience-description"> &#8226; <span>NISHIBE 택시</span> : 일본 택시 7만 대 이상의 단말 데이터 수집·통제 백엔드와 클라우드 인프라 구축</div>
+            <div class="experience-description"> &#8226; <span>자율주행 데이터</span> : 자율주행 앱 주행 데이터 수집·실시간 집계·관제 API 와 앱 운영 관리</div>
+            <div class="experience-description"> &#8226; <span>SDM 플랫폼</span> : SEAMOS 디바이스 관리 플랫폼의 EKS 인프라, AWS IoT 연동, 기기·OTA 관리</div>
             <div class="experience-description"> &#8226; <span>SeamOS World</span> : QEMU 하드웨어 에뮬레이션과 CAN·ISOBUS 신호 시뮬레이션 기반 SIL 검증 플랫폼</div>
           </div>
         </div>

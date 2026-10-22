@@ -36,7 +36,7 @@ def draw(d):
 
     # TURN 경유
     d.box(40, 4, 20, 7, P["gray"])
-    d.text(50, 7.5, "STUN / TURN\n(NAT 통과 · 릴레이)", size=9)
+    d.text(50, 7.5, "TURN 서버\n(미디어 릴레이)", size=9)
     d.arrow(13, 18, 40, 8.5, color=P["violet"], ls=":", style="<|-|>")
     d.arrow(87, 18, 60, 8.5, color=P["violet"], ls=":", style="<|-|>")
     d.text(22, 10.6, "직접 실패 시 릴레이", size=8, color=P["violet"])

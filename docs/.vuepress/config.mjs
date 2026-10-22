@@ -61,10 +61,11 @@ const theme = {
         text: '책',
         link: '/books/',
       },
-      {
-        text: '짧은 글',
-        link: '/logs/',
-      },
+      // 짧은 글: 네비게이션에서만 숨김 (/logs/ 페이지와 글은 유지)
+      // {
+      //   text: '짧은 글',
+      //   link: '/logs/',
+      // },
       {
         text: '공부하기',
         link: '/study/',

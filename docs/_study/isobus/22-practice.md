@@ -29,11 +29,11 @@ next: /study/isobus/appendix-glossary
 ```
 0CF00400#FF3C320000FFFF00
 18EAFFFE#00EE00
-18EEFF00#FFB03204FFFFFFFF
+18EEFF00#FFB0320400000200
 0CFE49F0#014B00FA02000000
 18EA2681#C5FD00
-1CEA00F9#C5FD00
-18ECFF26#20280006FF00CB00
+1CEA00F9#DAFE00
+18ECFF26#20120003FF12FF00
 18EBFF26#01B003020006043C
 18EBFF26#02FFFFFFFFFFFFFE
 18EBFF26#03FF640000FFFFFF
@@ -47,11 +47,11 @@ next: /study/isobus/appendix-glossary
 |---|--------|-----|----|----|------|
 | 1 | `0CF00400` | 0xF004 (EEC1) | 0x00 | - | Engine Speed (엔진 RPM) |
 | 2 | `18EAFFFE` | 0xEA00 (Request PGN) | 0xFE | 0xFF | PGN 0xEE00 요청 (Address Claimed) |
-| 3 | `18EEFF00` | 0xEE00 (Address Claimed) | 0x00 | 0xFF | 주소 클레임 (SA=0x00) |
+| 3 | `18EEFF00` | 0xEE00 (Address Claimed) | 0x00 | 0xFF | 주소 클레임 (SA=0x00, 엔진 ECU의 NAME — Part 5 A.1) |
 | 4 | `0CFE49F0` | 0xFE49 (Ground-based Speed) | 0xF0 | - | 지상 속도 (Ground-based Speed and Distance) |
 | 5 | `18EA2681` | 0xEA00 (Request PGN) | 0x81 | 0x26 | VT(0x26)에게 PGN 0xFDC5(ECU identification) 요청 |
-| 6 | `1CEA00F9` | 0xEA00 (Request PGN) | 0xF9 | 0x00 | 주소 0x00에게 PGN 요청 |
-| 7 | `18ECFF26` | 0xEC00 (TP.CM) | 0x26 | 0xFF | Transport Protocol 연결 개시 (BAM) |
+| 6 | `1CEA00F9` | 0xEA00 (Request PGN) | 0xF9 | 0x00 | 엔진(0x00)에게 PGN 0xFEDA(Software identification) 요청 |
+| 7 | `18ECFF26` | 0xEC00 (TP.CM) | 0x26 | 0xFF | Transport Protocol 연결 개시 (BAM — Proprietary B PGN 0xFF12, 18바이트·3패킷) |
 | 8 | `18EBFF26` | 0xEB00 (TP.DT) | 0x26 | 0xFF | Transport Protocol 데이터 패킷 1 |
 | 9 | `18EBFF26` | 0xEB00 (TP.DT) | 0x26 | 0xFF | Transport Protocol 데이터 패킷 2 |
 | 10 | `18EBFF26` | 0xEB00 (TP.DT) | 0x26 | 0xFF | Transport Protocol 데이터 패킷 3 |

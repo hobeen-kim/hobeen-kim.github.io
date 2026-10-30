@@ -36,32 +36,26 @@
 </template>
 
 <script>
-import Portfolio from './Portfolio.vue'
-import ResumeBackend from './ResumeBackend.vue'
-import ResumeInfra from './ResumeInfra.vue'
 import ResumeDevice from './ResumeDevice.vue'
 // html2pdf는 SSR 환경에서 'self'를 참조하여 빌드 오류가 발생할 수 있으므로
 // 클라이언트 사이드에서만 동적 로딩합니다.
 
 export default {
   name: 'ResumeCover',
-  components: { Portfolio, ResumeBackend, ResumeInfra, ResumeDevice },
+  components: { ResumeDevice },
   data() {
     return {
       tabs: [
-        { key: 'backend', label: '백엔드 이력서', component: 'ResumeBackend' },
         { key: 'device', label: '디바이스 플랫폼', component: 'ResumeDevice' },
-        { key: 'infra', label: '인프라 이력서', component: 'ResumeInfra' },
-        { key: 'portfolio', label: '포트폴리오 (작성중)', component: 'Portfolio' },
       ],
-      currentTab: 'backend',
+      currentTab: 'device',
       contentScale: 1
     }
   },
   computed: {
     currentTabComponent() {
       const found = this.tabs.find(t => t.key === this.currentTab)
-      return found ? found.component : 'ResumeBackend'
+      return found ? found.component : 'ResumeDevice'
     }
   },
   methods: {
@@ -76,10 +70,7 @@ export default {
       }
 
       const filenameMap = {
-        backend: '김호빈_백엔드_이력서.pdf',
         device: '김호빈_디바이스플랫폼_이력서.pdf',
-        infra: '김호빈_인프라_이력서.pdf',
-        portfolio: '김호빈_포트폴리오.pdf',
       };
       const filename = filenameMap[this.currentTab] || '김호빈_이력서.pdf';
 

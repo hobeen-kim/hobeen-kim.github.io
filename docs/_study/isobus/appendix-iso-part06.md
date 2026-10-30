@@ -921,7 +921,7 @@ VT는 Table A.1의 오브젝트 집합을 관리할 수 있어야 한다(기능�
 | A0 | Hide/Show Object | Yes | 2 |
 | A1 | Enable/Disable Object | Yes | 2 |
 | A2 | Select Input Object | Yes | 2 |
-| 92 | ESC | Yes | 2 |
+| 92 | ESC | No | 2 |
 | A3 | Control Audio Signal | Yes | 2 |
 | A4 | Set Audio Volume | Yes | 2 |
 | A5 | Change Child Location | Yes | 2 |
@@ -1258,12 +1258,12 @@ Output field 공통 이벤트는 다음과 같다.
 | On Change Size | Change Size 명령 | 현재 위치를 배경색으로 지우고 부모 마스크 갱신 | Change Size response |
 
 :::info 매크로 레코드 공통 구조
-Annex B의 거의 모든 오브젝트 레코드는 끝부분에 <strong>Number of macros to follow</strong>(1바이트) + {Event ID(1), Macro ID(1)} 반복 쌍을 가진다. 지정된 이벤트가 발생하면 연결된 Macro가 실행된다. VT version 5 이상에서 16-bit Object ID를 가진 Macro를 참조하면 이 카운트에서 참조 2개로 계산하며, Event ID 자리에는 이벤트 타입 또는 0xFF, Macro ID 자리에는 Macro Object ID의 하위/상위 바이트가 들어간다. 이하 각 오브젝트 표에서는 이 공통 매크로 필드를 생략한다.
+Annex B의 대부분의 오브젝트 레코드는 <strong>Number of macros to follow</strong>(1바이트, 0이어도 생략 불가) 필드와 {Event ID(1), Macro ID(1)} 반복 쌍을 가진다. 카운트 바이트의 위치는 오브젝트마다 다르다. 출력 오브젝트처럼 고정 길이 레코드는 고정부의 마지막 바이트에 두지만, Working Set(Byte 9)·Data Mask(Byte 8)처럼 다른 가변 목록이 있는 레코드는 고정부 안에 다른 카운트들과 나란히 두고, Picture Graphic은 Byte 17에 둔다. 반복 쌍이 레코드의 어디에 놓이는지도 각 레코드 표가 정한다(예: Working Set은 오브젝트 목록을 모두 나열한 뒤 매크로 쌍을 둔다). 지정된 이벤트가 발생하면 연결된 Macro가 실행된다. VT version 5 이상에서 16-bit Object ID를 가진 Macro를 참조하면 이 카운트에서 참조 2개로 계산하며, Event ID 자리에는 이벤트 타입 또는 0xFF, Macro ID 자리에는 Macro Object ID의 하위/상위 바이트가 들어간다. 이하 각 오브젝트 표에서는 이 공통 매크로 필드를 생략한다.
 :::
 
 ### B.9.2 Output String object (Type 11)
 
-텍스트 문자열을 출력한다. 표시 가능한 문자는 Annex K의 코드플레인 표를 따르고, 값 안에 특수 포맷팅 문자(개행 등)를 넣을 수 있으며 VT가 4.6.19.6 규칙대로 해석한다.
+텍스트 문자열을 출력한다. 표시 가능한 문자는 Annex K의 Table K.2~K.8(Font type별 ISO 8859 계열 문자 집합)을 따르고, 값 안에 특수 포맷팅 문자(개행 등)를 넣을 수 있으며 VT가 4.6.19.6 규칙대로 해석한다.
 
 | 속성 | AID | 크기(B) | 범위 | 설명 |
 |---|---|---|---|---|
@@ -1560,7 +1560,7 @@ Change Size 명령으로 "bar graph width"가 오브젝트 폭·높이의 절반
 | Object ID / Type | —/[0] | 2/1 | =23 | Font Attributes |
 | Font colour | 1 | 1 | 0~255 | 글자 색 |
 | Font size | 2 | 1 | 0~14ᵃ / 0~14 또는 8~Nᵇ | 아래 참조 |
-| Font type | 3 | 1 | 0, 1, 255ᵃ / 0~2, 4, 5, 7, 240~255ᵇ | 코드플레인 선택(Table K.1). WideString에 적용될 때는 무시됨 |
+| Font type | 3 | 1 | 0, 1, 255ᵃ / 0~2, 4, 5, 7, 240~255ᵇ | 문자 집합 선택(Table K.1, 예: 0 = ISO 8859-1). WideString에 적용될 때는 무시됨 |
 | Font style | 4 | 1 | 0~127ᵃ / 0~255ᵇ | 아래 참조 |
 
 ᵃ VT v3 이하, ᵇ VT v4 이상.
@@ -2048,7 +2048,7 @@ VT 메시지 프로토콜에 예약된 PGN 두 개:
 
 <strong>C.2.5 End of Object Pool response</strong> (VT → ECU, 8바이트)
 
-VT가 어떤 종류든 오류로 응답하는 경우, VT는 풀을 휘발성 메모리에서 삭제하고 Working Set 중단을 알람 방식으로 오퍼레이터에게 알리고 삭제 사유를 표시해야 한다. 이 응답을 받은 책임 ECU는 장치 전체의 안전한 셧다운 절차를 제공하는 fail-safe 운전 모드로 들어가야 한다. VT의 풀 파싱은 오래 걸릴 수 있으며, response는 파싱 완료까지 지연되고 그동안 VT Status message가 파싱 중 상태를 반영한다.
+VT가 어떤 종류든 오류로 응답하는 경우, VT는 풀을 휘발성 메모리에서 삭제하고 Working Set 중단을 알람 방식으로 오퍼레이터에게 알리고 삭제 사유를 표시하는 것이 권고된다(should). 이 응답을 받은 책임 ECU는 장치 전체의 안전한 셧다운 절차를 제공하는 fail-safe 운전 모드로 들어가는 것이 권고된다(should). VT의 풀 파싱은 오래 걸릴 수 있으며, response는 파싱 완료까지 지연되고 그동안 VT Status message가 파싱 중 상태를 반영한다.
 
 | 바이트 | 내용 |
 |---|---|
@@ -2393,8 +2393,8 @@ multisound 미지원 VT에서는 Alarm Mask의 음향이 발생하면 기존 Wor
 | Output Meter / Output Linear Bar Graph / Output Arched Bar Graph | 2바이트 정수 |
 | Object Pointer | 2바이트 Object ID |
 | External Object Pointer(v5+) | Byte 5~6 = External Reference NAME Object ID, Byte 7~8 = 참조 대상 Object ID |
-| Animation(v5+) | 2바이트 Object ID |
-| Scaled Graphic(v6+) | 1바이트 리스트 인덱스 + 2바이트 Object ID |
+| Animation(v5+) | 1바이트 리스트 인덱스 |
+| Scaled Graphic(v6+) | 2바이트 Object ID |
 
 업데이트 빈도는 Working Set 설계 재량이나, 대역폭 한계(4.6.10.1)를 고려해야 한다.
 
@@ -3072,7 +3072,7 @@ v2 메시지의 가시성 유지를 위해서만 존재한다. v3 이상 VT는 �
 
 #### J.7.5 Auxiliary Assignment Type 2 command
 
-VT가 Auxiliary Input을 Auxiliary Function에 할당·재할당·할당 제거할 때 쓴다. VT는 이 명령을 보낸 뒤 그 Working Set의 확인응답을 받기 전에는 같은 기능에 다른 입력을 할당해서는 안 된다. <strong>2 s</strong> 안에 확인응답이 없으면 재전송하고, 3회 실패하면 해당 Auxiliary Function을 쓸 수 없음을 운전자에게 알린다.
+VT가 Auxiliary Input을 Auxiliary Function에 할당·재할당·할당 제거할 때 쓴다. VT는 이 명령을 보낸 뒤 그 Working Set의 확인응답을 받기 전에는 그 Working Set에 다른 Auxiliary Input을 할당해서는 안 된다. <strong>2 s</strong> 안에 확인응답이 없으면 재전송하고, 3회 실패하면 해당 Auxiliary Function을 쓸 수 없음을 운전자에게 알린다.
 
 - 기능의 할당을 한 입력에서 다른 입력으로 바꿀 때 VT는 이전 입력의 할당을 먼저 제거해도 되고 새 입력으로 직접 할당해도 된다.
 - Auxiliary Function 설계는 할당 명령 수신 시점의 입력 초기 상태를 고려해야 한다. 조작구의 상태가 제어 대상 기능의 상태와 동기화되어 있지 않을 수 있으며, 이 충돌 해소는 기능 쪽 책임이다. 예: 주차 브레이크 제어 기능이 할당될 때 입력 신호가 "해제" 상태라면, 할당 전에 "체결" 신호를 본 적이 없으므로 운전자 개입(Alarm Mask 표시, 입력을 체결 상태로 한 번 돌리게 요구 등)을 거친 뒤에야 해제 신호에 반응하도록 할 수 있다.

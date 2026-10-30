@@ -419,7 +419,7 @@ parameter group은 PDU1 또는 PDU2 중 하나의 포맷으로만 할당되며, 
 - 선호 SA는 message priority·갱신 주기·중요도와 무관하게 선형적으로 할당된다.
 - <strong>반복 주기 10 Hz 이상인 메시지는 multi-packet이 허용되지 않는다.</strong>
 
-PGN 템플릿(Table 7)의 구획은 다음과 같다. 데이터 페이지 0·1 각각에 대해 PDU1 고속(100 ms 이하, PF 0부터 증가, multi-packet 불가) → PDU1 저속(100 ms 초과, PF 238까지, multi-packet 허용) → Proprietary A(PF 239) → PDU2 고속(PF 240부터 증가, multi-packet 불가) → PDU2 저속(PF 254까지 감소, multi-packet 허용) → Proprietary B(PF 255) 순으로 배치된다.
+PGN 템플릿(Table 7)의 구획은 다음과 같다. 데이터 페이지 0·1 각각에 대해 PDU1 고속(100 ms 이하, PF 0부터 증가, multi-packet 불가) → PDU1 저속(100 ms 초과, PF 238부터 감소, multi-packet 허용) → Proprietary A(PF 239) → PDU2 고속(PF 240부터 증가, multi-packet 불가) → PDU2 저속(PF 254부터 감소, multi-packet 허용) → Proprietary B(PF 255) 순으로 배치된다. 다만 페이지 1의 PF 255(130 816~131 071)를 Proprietary B로 적은 것은 Table 7뿐이고, 5.4.6.4의 Proprietary B 정의와 Table 2는 페이지 0(65 280~65 535)만 제조사 할당으로 본다.
 
 ### 5.9.2 Address assignment criteria
 
@@ -667,7 +667,7 @@ ETP.CM은 TP.CM과 다른 PGN을 사용한다.
 | Default priority | 7 |
 | PGN | 51 200 (00C800₁₆) |
 
-파라미터 범위: Total message size 1 786~117 440 505 (4 byte), Total number of packets 및 Number of packets that can be sent 256~16 777 215 (3 byte, 0~255 불허), Next packet number 1~16 777 215 (3 byte), Data packet offset 0~16 777 214 (3 byte), Sequence number 1~255 (1 byte, 0 불허).
+파라미터 범위: Total message size 1 786~117 440 505 (4 byte), Total number of packets 및 Number of packets that can be sent 256~16 777 215 (3 byte, 0~255 불허), Next packet number 1~16 777 215 (3 byte), Data packet offset 0~16 777 214 (3 byte), Sequence number 1~255 (1 byte, 0 불허). 단, 아래 메시지 배치에서 ETP.CM_CTS의 패킷 수는 Byte 2 하나(0~255)이고 ETP.CM_RTS에는 총 패킷 수 필드가 없어, 원문의 이 범위 목록과 맞지 않는다. 구현은 메시지 배치를 따른다.
 
 각 메시지의 데이터 필드 배치:
 
@@ -684,17 +684,17 @@ ETP.CM은 TP.CM과 다른 PGN을 사용한다.
 - ETP.CM_DPO: offset 값은 항상 대응하는 ETP.CM_CTS의 Byte 3~5(다음 패킷 번호)보다 1 작다. n + 임의 패킷의 sequence number는 16 777 215를 넘을 수 없다. <strong>DPO의 Byte 2는 CTS의 Byte 2 이하</strong>여야 하며, 더 작으면 수신 측은 DPO가 정의한 데이터 블록과 후속 ETP.DT를 수용하도록 세션을 조정해야 한다.
 - ETP.CM_DPO의 역할: 하나의 CTS 그룹 안에서 패킷 번호가 매겨지는 기준 offset을 설정한다. 실제 확장 메시지 시퀀스 번호 = ETP.DT sequence number + DPO offset.
 - ETP.CM_EOMA: 전체 확장 메시지가 정상 수신·재조립됐음을 알린다.
-- ETP.Conn_Abort: 전송 완료 전 연결 종료. RTS를 받은 CF는 자원 판단 후 패킷 수 0(hold)으로 응답하거나 abort할 수 있다. 표에 없는 사유는 코드 250을 쓴다.
+- ETP.Conn_Abort: 전송 완료 전 연결 종료. RTS를 받은 CF는 자원 판단 후 패킷 수 0(hold)으로 응답하거나 abort할 수 있다. 표에 없는 사유는 코드 250을 쓴다(5.11.5.7 본문은 254라고 적지만 Table 9는 250을 "그 밖의 사유"로 정의한다).
 
-ETP Connection Abort 사유(Table 9)는 TP의 1~9와 동일하고, ETP 고유 코드가 추가된다.
+ETP Connection Abort 사유(Table 9)는 1~8이 TP와 동일하고, 9부터 ETP 고유 코드다. TP의 9("Total message size" 1 785 초과)에 해당하는 코드는 없다.
 
 | 값 | 의미 |
 |---|---|
-| 1~9 | TP와 동일 (Table 8 참조) |
-| 9 | (ETP 문맥) "Total message size" 초과 관련 — TP와 동일 취지 |
-| 10 | 예기치 않은 EDPO 패킷 |
-| 11 | EDPO의 PGN이 잘못됨 |
-| 12 | EDPO 패킷 수가 CTS보다 큼 / 잘못된 EDPO offset |
+| 1~8 | TP와 동일 (Table 8 참조) |
+| 9 | 예기치 않은 EDPO 패킷 |
+| 10 | EDPO의 PGN이 잘못됨 |
+| 11 | EDPO 패킷 수가 CTS보다 큼 |
+| 12 | 잘못된 EDPO offset |
 | 13 | 폐기됨(deprecated) — 250 사용 |
 | 14 | ECTS의 PGN이 잘못됨 |
 | 15 | ECTS가 요구한 패킷이 메시지 크기 초과 |

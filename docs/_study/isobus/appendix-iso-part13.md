@@ -56,7 +56,7 @@ hidden·read-only 속성은 클라이언트가 FS 명령으로 설정한다. pri
 
 - 메시지는 PGN(parameter group number)을 라벨로 하는 파라미터 그룹으로 구성된다(파라미터 정의는 Annex B).
 - 문자열은 왼쪽 문자부터, 수치 파라미터(2바이트 이상)는 <strong>LSB first</strong>로 전송한다.
-- 가변 길이 메시지가 8바이트 이하면 단일 CAN 프레임으로, 9바이트 이상이면 TP(ISO 11783-3) 또는 ETP(ISO 11783-6)로 전송한다.
+- 가변 길이 메시지가 8바이트 이하면 단일 CAN 프레임으로, 9바이트 이상이면 TP(ISO 11783-3) 또는 ETP(ISO 11783-6)로 전송한다. ETP를 Part 6으로 인용한 것은 Part 13:2011 당시의 표기이고, 현행 ETP 규정은 ISO 11783-3:2018 5.11에 있다.
 - 8바이트 미만 메시지의 미사용 바이트는 FF₁₆으로 채운다.
 
 데이터 형식 규칙:
@@ -88,7 +88,7 @@ TAN 규칙:
 
 | 항목 | 값 |
 |------|-----|
-| TP/ETP 타임아웃 | ISO 11783-3(TP), ISO 11783-6(ETP) 규정을 따름 |
+| TP/ETP 타임아웃 | ISO 11783-3(TP), ISO 11783-6(ETP) 규정을 따름 (현행 ETP 규정은 ISO 11783-3:2018 5.11) |
 | FS busy 상태 통지 | 요청 완료가 200 ms를 넘기면 FS는 busy 상태를 나타내는 status 메시지를 전송 |
 | 요청 타임아웃 | FS status가 busy를 표시하지 않으면 600 ms |
 
@@ -226,7 +226,7 @@ FS 명령의 바이트 1은 상위 4비트가 <strong>커맨드 그룹</strong>(
 | 7 | Invalid given destination name |
 | 8 | Volume out of free space |
 | 9 | Failure during a write operation |
-| 10 | Media is not present (Version 2 FS에서는 13번 코드가 이 의미였음) |
+| 10 | Media is not present (원문 주석: 이 값은 Version 2 FS에서 아래 13번 오류의 코드였다. 곧 Version 2 FS가 보내는 10은 지금의 13 "Volume is possibly not initialized"에 해당한다) |
 | 11 | Failure during a read operation |
 | 12 | Function not supported |
 | 13 | Volume is possibly not initialized |
@@ -334,7 +334,7 @@ FS 메시지 프로토콜에는 PGN 2개가 예약되어 있다. 둘 다 destina
 | Client → FS | 170 | 43520 (AA00₁₆) |
 
 - 클라이언트는 연결 유지를 시작하기 전에 이 PGN으로 FS의 능력 정보를 얻을 수 있다.
-- 같은 PGN으로 TP(ISO 11783-3)·ETP(ISO 11783-6)를 통해 데이터를 주고받는다. destination-specific 메시지와 connection management를 사용해야 한다.
+- 같은 PGN으로 TP(ISO 11783-3)·ETP(ISO 11783-6, 현행 규정은 ISO 11783-3:2018 5.11)를 통해 데이터를 주고받는다. destination-specific 메시지와 connection management를 사용해야 한다.
 - 클라이언트는 응답을 받기 전에 다음 명령을 보내면 안 된다. 명령마다 응답 시간이 크게 다르므로 고정 타임아웃 대신 File Server Status 메시지로 처리 상태를 모니터링한다.
 - 모든 FS는 전체 함수 집합을 구현해야 하지만, 이후 개정판에서 추가된 함수를 지원하지 않는 구버전 기반 FS도 있을 수 있다. 지원하지 않는 함수 요청에는 에러 코드 12("Function not supported")로 응답해야 한다.
 
@@ -353,7 +353,7 @@ FS 메시지 프로토콜에는 PGN 2개가 예약되어 있다. 둘 다 destina
 <strong>Get File Server Properties / Response (C.1.4, C.1.5)</strong> — 클라이언트가 FS 속성을 요청. 응답(function 1)의 배치: Byte 2 = Version Number, Byte 3 = Maximum Number of Simultaneously Open Files, Byte 4 = File Server Capabilities.
 
 :::tip Connection Management에는 TAN이 없다
-Get Current Directory 이후의 명령·응답 메시지는 Byte 2에 TAN을 싣지만, File Server Status·Client Connection Maintenance·Get File Server Properties는 상태성 메시지라 TAN을 쓰지 않는다.
+Get Current Directory 이후의 명령·응답 메시지는 Byte 2에 TAN을 싣지만, File Server Status·Client Connection Maintenance·Get File Server Properties·Volume Status는 TAN을 쓰지 않는다. 이 메시지들의 Byte 2에는 상태·Version Number·Volume Mode(또는 Volume Status)가 온다.
 :::
 
 <strong>Volume Status Request / Response (C.1.6, C.1.7)</strong> — Version 3 이후 적용. 이동식 매체의 안전한 제거를 위한 메커니즘이다.
@@ -484,7 +484,7 @@ Close File의 주요 에러 코드: Access denied(1), Invalid Handle(5), Volume 
 
 | 방향 | 배치 |
 |------|------|
-| 요청 | Byte 2 = TAN, Byte 3 = Set Attributes Command(B.16), Byte 4,5 = Path Name Length, Byte 6~n = 경로(와일드카드 가능, B.34) |
+| 요청 | Byte 2 = TAN, Byte 3 = Set Attributes Command(B.16), Byte 4,5 = Path Name Length, Byte 6~n = 경로(B.34. 필드 문법은 와일드카드를 포함하지만 A.2.3.3은 와일드카드를 디렉터리 목록에만 쓰도록 한다) |
 | 응답 | Byte 2 = TAN, Byte 3 = Error Code |
 
 <strong>Get File Date & Time (C.4.6, function 52₁₀)</strong> — 경로로 지정한 파일·디렉터리의 날짜·시간 조회.

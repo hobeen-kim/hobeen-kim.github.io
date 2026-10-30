@@ -226,7 +226,7 @@ field 3개짜리 CF(첫 field에 모듈 4개, 둘째에 2개, 셋째에 1개)라
 
 ### B.3 ISOBUS certification
 
-ISOBUS certification 메시지는 ISO 11783-7의 규정을 따른다.
+ISOBUS certification 메시지는 ISO 11783-7의 규정을 따른다. 해당 메시지는 Part 7 B.27의 ISOBUS compliance certification message(PGN 64834, 0xFD42, On request, 8 bytes)이며, 비트 배치와 2판·3판 형식 차이는 [14장 9절](/study/isobus/14-isobus-network-mgmt)에 정리했다.
 
 ### B.4 ISO 11783 NAME
 
@@ -256,7 +256,7 @@ SAE J1939-73의 DM1과 같은 메시지 기반으로, <strong>현재 활성인 D
 - DTC가 활성 고장이 되는 순간 전송하고, 이후 <strong>1초에 1회</strong> 주기로 전송한다.
 - 1초 이상 활성이었던 고장이 비활성이 되면, 상태 변화를 반영한 DM1을 한 번 더 보내고 그 오류에 대한 DM1은 중단한다.
 - 1초 갱신 주기 내에 다른 DTC의 상태가 바뀌면 새 DM1을 즉시 보낸다.
-- 고빈도 간헐 고장으로 인한 메시지 폭주를 막기 위해 <strong>DTC당 초당 1회 이하의 상태 변화만 전송</strong>해야 한다. 1초 안에 활성/비활성이 두 번 바뀐 DTC는 활성화를 알리는 메시지 한 번, 다음 주기 전송에서 비활성을 알리는 메시지 한 번으로 처리된다.
+- 고빈도 간헐 고장으로 인한 메시지 폭주를 막기 위해 <strong>DTC당 초당 1회 이하의 상태 변화만 전송</strong>하도록 권고한다(should). 1초 안에 활성/비활성이 두 번 바뀐 DTC는 활성화를 알리는 메시지 한 번, 다음 주기 전송에서 비활성을 알리는 메시지 한 번으로 처리된다.
 - 하나 이상의 오류가 활성인 동안 가능하면 매초 전송하고, 요청(request)에도 응답한다. ISO 11783-3 타이밍 제약으로 전송이 불가하면 다음 1초 간격에 전송을 시작한다.
 
 | 항목 | 값 |
@@ -355,7 +355,7 @@ CF가 지원하는 모든 functionality와 그 generation, functionality option�
 - 예시 3 — minimum CF generation 1만 따르는 proprietary CF: `FF 01 00 01 00 FF FF FF` — 8바이트 미만이므로 나머지를 0xFF로 채운다.
 :::
 
-functionality 코드 값 자체(0x00 minimum CF, 0x01 UT 1st gen, 0x02 UT, 0x06 AUX-N, 0x08 TC-BAS, 0x0A TC-GEO, 0x0E TECU 등)와 option 비트 정의는 이 문서가 아니라 <strong>ISOBUS 온라인 데이터베이스(www.ISOBUS.net)의 Functionality/Option list</strong>에서 관리된다. 3판에서 온라인 DB로 이관된 부분이 바로 이것이다.
+functionality 코드 값 자체(원문 예시에 나오는 것: 0x00 minimum CF, 0x01 UT(예시 1의 VT가 보고), 0x02 UT(예시 2의 Working Set Master가 보고), 0x06 AUX-N, 0x08 TC-BAS, 0x0A TC-GEO, 0x0E TECU 등)와 option 비트 정의는 이 문서가 아니라 <strong>ISOBUS 온라인 데이터베이스(www.ISOBUS.net)의 Functionality/Option list</strong>에서 관리된다. 3판에서 온라인 DB로 이관된 부분이 바로 이것이다.
 
 ### B.10 Product identification (PGN 64653)
 
@@ -369,7 +369,7 @@ functionality 코드 값 자체(0x00 minimum CF, 0x01 UT 1st gen, 0x02 UT, 0x06 
 | 기본 우선순위 | 6 |
 | PGN | 64653 (0x00FC8D) |
 
-- 데이터 구성(각 필드 뒤에 `*` 구분자): product identification code (A.14) → product identification brand (A.15) → product identification model (A.16). 예를 들어 Brand B의 모델 1926i, 식별 코드 1234567890ABC라면 `1234567890ABC*Brand B*1962i*` 형태다.
+- 데이터 구성(각 필드 뒤에 `*` 구분자): product identification code (A.14) → product identification brand (A.15) → product identification model (A.16). 예를 들어 Brand B의 모델 1926i, 식별 코드 1234567890ABC라면 `1234567890ABC*Brand B*1962i*` 형태다(원문 그대로 옮겼다 — 설명의 1926i와 바이트열의 1962i가 다른데, 둘 중 하나는 원문 오기다).
 - <strong>한 제품의 모든 CF는 이 PGN 요청에 동일한 product identification 정보로 응답</strong>해야 한다.
 - 향후 버전에서 `*` 구분 필드가 추가될 수 있으며, 이 문서 기준으로 구현된 CF는 최소한 이 문서에 규정된 정보를 인코딩할 수 있어야 한다.
 

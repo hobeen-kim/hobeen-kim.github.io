@@ -265,6 +265,10 @@ implement bus나 트랙터의 고장으로 implement bus 통신 신뢰성이 훼
 
 문서의 Figure 1은 이 경고등 제어 회로의 블록 다이어그램이다. 구성 요소는 CAN bus, twisted quad cable, 과부하 보호, double pole NC(normally closed) 릴레이, implement lighting ECU, 좌/우 amber warning light 등이다. NC 릴레이를 쓰기 때문에 ECU_PWR이 끊긴 상태에서 PWR 점멸이 그대로 경고등 점멸로 이어지는 구조다.
 
+:::info Part 7 Amd1(2018)과 함께 읽기
+이 문서(2012) 뒤에 나온 ISO 11783-7:2015/Amd.1:2018은 B.18 Lighting command에 새 문단을 넣었다. 작업기의 정식 인증(homologated) 조명은 7핀 조명 커넥터로 제어해야 하며 implement 버스의 Lighting command에 의존하면 안 된다. Lighting command는 인증 대상이 아닌 조명의 제어와 진단에 쓸 수 있다. 같은 개정에서 B.18의 "control the state" 표현도 "communicate the state"로 바뀌었다.
+:::
+
 ## Control of ECU_PWR and PWR (4.6)
 
 implement bus 커넥터에는 두 계열의 전원이 있다. <strong>ECU_PWR</strong>은 ECU 전자회로용 전원, <strong>PWR</strong>은 액추에이터 등 부하용 전원이다. version 2 이상에서는 function instance 0 TECU가 두 전원의 분배 제어, 상태 메시지 송신, 제어 메시지 수신·처리를 책임진다.
@@ -338,6 +342,8 @@ CF는 <strong>"Maximum time of tractor power"</strong> 파라미터를 함께 �
 - <strong>Figure 4</strong>: 요청 CF가 maximum time 안에 작업을 끝내는 경우. CF의 "2 s more" 요청이 이어지는 동안 유지하다가, 요청이 멈추면 ≥ 2 s 후 종료 절차로 들어간다
 - <strong>Figure 5</strong>: 요청 CF가 maximum time 안에 못 끝내는 경우. Maximum time이 0 min까지 카운트다운되면 요청과 무관하게 ECU_PWR·PWR을 차단한다
 - <strong>Figure 6</strong>: PWR을 먼저 끝내는 경우. CF가 "Done with PWR"을 알린 뒤 ECU_PWR만 계속 요청하면, TECU는 <strong>PWR을 먼저 끄고</strong> ECU_PWR은 요청이 끝난 뒤에 끈다
+
+그림의 3 min·2 min은 예시 값이다. Maximum time of tractor power는 현재 부하에서 남은 전원 시간의 추정치이고 1 min/bit, 0~250 min이다(ISO 11783-7:2015 A.12). 그림의 요청 간격 표시는 2초 미만이지만 본문(4.6.4.2 b, 4.6.4.3 b)은 1초에 1회 이상을 요구하므로 구현은 본문을 따른다.
 
 ## Safe-mode Operation (4.7)
 

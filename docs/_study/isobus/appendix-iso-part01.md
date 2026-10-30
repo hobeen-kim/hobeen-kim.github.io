@@ -212,6 +212,10 @@ ISO 11783 네트워크(트랙터 네트워크·작업기 네트워크)에서는 
 | 멀티 패킷 | 8바이트 초과 데이터는 multi-packet 메시지로 전송. -3의 transport protocol이 최대 1785바이트, -6의 extended transport protocol(ETP)이 1786바이트~117MB를 담당 |
 | 응용별 정의 | 각 응용 메시지의 전송 주기, 프레임 길이, DP/PF/PS/DA, 기본 우선순위는 해당 응용을 규정하는 파트에서 정의 |
 
+:::info ETP를 규정하는 파트는 판에 따라 다르다
+Part 1(2017) 6.3은 ETP를 -6의 소관으로 적는다. 반면 이 스터디가 근거로 쓴 ISO 11783-3:2018(FDIS)은 5.11에서 ETP를 데이터 링크 계층 기능으로 직접 정의하고, ISO 11783-6:2018도 오브젝트 풀 전송(Annex C)에서 "ISO 11783-3에 규정된 extended transport protocol"을 참조한다. 최신 판 기준으로는 ETP의 규정을 -3에서 찾는다.
+:::
+
 ### 네트워크 계층 (6.4, ISO 11783-4)
 
 서로 다른 네트워크 아키텍처를 가진 두 네트워크를 연결할 때는, 통합자(integrator)가 network interconnect unit을 사용해 세그먼트를 상호 격리해야 한다. 또한 ISO 11783-2가 규정하는 세그먼트당 <strong>30노드 전기적 제한</strong>을 넘는 복잡한 시스템에서는, 작업기 제조사가 network interconnect unit으로 세그먼트를 분할하여 전기 부하 한도를 지켜야 한다.
@@ -224,7 +228,7 @@ ISO 11783 네트워크(트랙터 네트워크·작업기 네트워크)에서는 
 - ISO 11783 네트워크에서 통신하는 모든 CF에는 NAME이 할당되어야 한다. VT와 management gateway를 한 ECU에 담는 경우처럼, 하나의 ECU 안에 여러 NAME·주소가 공존할 수 있다.
 - isobus.net 데이터베이스가 관리하는 항목: NAME 필드용 산업(industry) 코드, 비특정 CF용 preset/preferred address, 농림업 장비용 initial address 할당, CF가 사용할 NAME 목록, ECU 제조사 목록.
 
-전형적 토폴로지(표준 Figure 3의 구조)에서는 트랙터 네트워크의 CF들(주소 예: 0, 3, 7, 30, 31, 35), tractor ECU(트랙터 네트워크 측 240 / 작업기 네트워크 측 7), 작업기 네트워크의 VT(38), management computer gateway(37), task controller(247), 그리고 작업기들의 CF(자기 구성 주소 a1~a4)가 각자 SA를 가지고 연결된다. tractor ECU처럼 두 세그먼트에 걸친 ECU는 세그먼트별로 주소를 가진다.
+전형적 토폴로지(표준 Figure 3의 구조)에서는 트랙터 네트워크의 CF들(주소 예: 0, 3, 7, 30, 31, 35), tractor ECU(ECU 번호 7, 주소 240), 작업기 네트워크의 VT(38), management computer gateway(37), task controller(247), 그리고 작업기들의 CF(자기 구성 주소 a1~a4)가 각자 SA를 가지고 연결된다. 그림의 NOTE 2에 따르면 노드 옆(tractor ECU는 두 노드 사이 위쪽)의 작은 숫자는 CF를 담은 ECU의 번호이고 그 반대편 숫자가 CF의 주소다. 따라서 tractor ECU 위쪽의 7은 주소가 아니라 ECU 번호이고, tractor ECU는 두 세그먼트에 노드를 하나씩 두되 주소는 240 하나로 표시된다.
 
 ### 네트워크 세그먼트 (6.6)
 

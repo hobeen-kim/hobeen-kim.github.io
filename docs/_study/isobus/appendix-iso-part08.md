@@ -87,6 +87,12 @@ ISO 11783-8은 자체 콘텐츠가 거의 없는 대신, 다음과 같은 <stron
 - 같은 PGN·파라미터가 ISO 11783-7에 등장하면 반드시 11783-7 판본을 구현해야 한다. 트럭용 정의와 농업용 정의가 미세하게 다른 경우를 대비한 안전장치다.
 - 결과적으로 J1939 호환 ECU(엔진·변속기 컨트롤러 등)를 농기계 네트워크에 큰 수정 없이 올릴 수 있게 되며, 이것이 이 파트가 존재하는 실질적 이유다.
 
+다른 파트와의 연결도 함께 본다.
+
+- ISO 11783-1:2017 6.6.2: 트랙터 네트워크는 Part 8·Part 7 메시지와 독점 메시지를 쓸 수 있다. 6.6.3: 파워트레인 메시지는 implement 네트워크의 CF도 쓸 수 있다.
+- ISO 11783-9:2012 4.4.2.2: Class 1 TECU가 제공하는 engine speed는 Part 8 소관이고, 송신 주기는 100 ms여야 한다.
+- 트랙터가 implement 버스에 보내는 Wheel-based speed and distance(PGN 65096)는 ISO 11783-7:2015 B.3에 정의된 메시지이므로 Part 7 정의대로 구현한다.
+
 :::details Bibliography (참고 문헌)
 - CAN Specification 2.0 Part B (Robert Bosch GmbH, 1991) — ISO 11783의 기반 프로토콜
 - SAE J1939/81 — Network Management. Part 8이 조화를 이루는 네트워크 관리 문서

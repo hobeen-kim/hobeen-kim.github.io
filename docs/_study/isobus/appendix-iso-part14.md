@@ -123,7 +123,7 @@ SCM과 SCCWS의 working set master는 <strong>function instance 0인 VT</strong>
 - External object pointer 개념은 <strong>NAME 기반</strong>이다. object 참조에서 SCCOP와 SCCWS를 확실히 식별하기 위함이다.
 - SCMOP는 <strong>External Reference NAME Object</strong>를 포함한다. 참조 변경 때마다 완전한 NAME(8바이트)을 통신하는 것을 피하기 위해, SCM–VT 통신에는 External Reference NAME Object의 2바이트 object ID를 대신 쓴다.
 - SCM은 SCD에 담긴 개별 object 참조의 <strong>타입을 검사할 수단이 없고 object ID만 안다</strong>. 따라서 그래픽·텍스트 표현에 적절한 오브젝트를 쓰는 책임은 SCC에 있다. SCM은 VT가 object 참조를 거부하는 경우에 대한 대비책을 갖추어야 한다.
-- 초기 SCMOP 업로드 시 External Reference NAME Object는 disabled 상태여야 하고, External Object Pointer 속성은 NULL Object ID(FFFF16)로 설정해야 한다.
+- 초기 SCMOP 업로드 시 External Reference NAME Object는 disabled 상태여야 하고, External Object Pointer 속성은 NULL Object ID(FFFF₁₆)로 설정해야 한다.
 
 초기화 후 참조가 확립되는 절차는 다음과 같다.
 
@@ -175,8 +175,8 @@ SCM 상태 전이 조건(Figure 4)의 요지는 다음 표와 같다. `*`는 선
 | SCM_B: Ready→Inactive | 오퍼레이터 입력 "Master OFF" |
 | SCM_C: Ready→Recording | 오퍼레이터 입력 "Start Recording" |
 | SCM_D: Recording→Ready | "Stop Recording" 입력 AND 기록된 모든 client function이 function execution state 10(실행 완료) 또는 11(실행 중 오류)을 보냄 |
-| SCM_E*: Recording→Ready | 오퍼레이터 입력 "Cancel Record" |
-| SCM_F*: Recording/Play Back→Ready 계열 | E.4 SCExecutionIndication의 function execution state == 11 (실행 중 오류) |
+| SCM_E*: Recording/Recording Completion→Ready | 오퍼레이터 입력 "Cancel Record" |
+| SCM_F*: Recording/Recording Completion→Ready, Play Back→Abort | E.4 SCExecutionIndication의 function execution state == 11 (실행 중 오류, 재생 중이면 오퍼레이터 개입) |
 | SCM_G: Recording→Recording Completion | "Stop Recording" 입력 AND 최소 하나의 기록된 client function이 state 10/11을 아직 보내지 않음 |
 | SCM_H: Recording Completion→Ready | 포함된 모든 client function이 state 10 또는 11을 보냄 |
 | SCM_I: Recording (Completion)→Ready | SCM 내부 cancel 조건 (예: SCC 메시지 timeout, SCC가 예기치 않게 disabled로 복귀) |
@@ -235,7 +235,7 @@ SCC는 SCMasterStatus timeout(SCC_D)이나 NACK 수신(SCC_G) 시 스스로 Disa
 
 #### SCM 초기화 절차
 
-1. SCM은 function instance 0인 VT에 자신을 식별시키고 object pool을 업로드한다. 기본적으로 모든 external object pointer는 비활성(파라미터 FFFF16)이다.
+1. SCM은 function instance 0인 VT에 자신을 식별시키고 object pool을 업로드한다. 기본적으로 모든 external object pointer는 비활성(파라미터 FFFF₁₆)이다.
 2. 모든 SCM은 오퍼레이터가 UI로 활성화할 때까지 inactive를 유지해야 한다. 오퍼레이터는 언제든 active SCM을 바꿀 수 있어야 한다.
 3. 선택된 SCM은 SCMasterStatus 메시지를 연속 송신하여(active SCM 상태 + 해당 sequence state 표시) 활성화·시동을 알려야 한다.
 4. 시동 후 active SCM은 휘발성 메모리의 SCD 정보를 모두 삭제하고, SCC가 시동 표시를 하기 전까지는 시동 표시 이외의 SCClientStatus 메시지를 모두 NACK해야 한다. (예외: SCMasterStatus 주기 내의 quick reset 직후에는 바로 수신 가능)
@@ -260,7 +260,7 @@ SCC는 SCMasterStatus timeout(SCC_D)이나 NACK 수신(SCC_G) 시 스스로 Disa
 1. 주소 클레임 → SCM·SCC 각자 VT 접속·object pool 로드 → SCM은 SCMasterStatus 1회 송신(initialization 표시)
 2. 오퍼레이터가 SCM 선택 → active SCM이 SCMasterStatus 연속 송신 (state "active", sequence state "Ready")
 3. SCC: SCClientStatus 1회(initialization) → 연속(disabled) → capability 교환(C.2/C.3) → SCD version/configuration label 확인(D.2~D.5) → memory request/response(C.4/C.5) → SCDTransfer(D.6/D.7) 또는 SCDLoadCommand(D.14/D.15) → SCDActivationCommand(D.8) → SCM 파싱(SCMasterStatus busy flag "SCM is parsing") → SCDActivationResponse(D.9)
-4. SCM은 SCD의 참조 정보로 자신의 External Object Pointer들을 Change Numeric Value 명령으로 갱신한다.
+4. SCM은 SCD의 참조 정보로 자신의 External Object Pointer들을 Change Numeric Value 명령으로 갱신한다(Figure 8 기준. 4.2.1 본문은 포인터마다 Change Attribute 두 번으로 설명하며, ISO 11783-6 B.24는 External Object Pointer에 두 명령을 모두 허용한다).
 :::
 
 ### 4.4.3 SCM/SCC 상태 동작
@@ -605,29 +605,29 @@ SC 통신에는 SCM→SCC, SCC→SCM 두 개의 PGN이 예약되어 있다. 기�
 | 데이터 길이 | 가변 (최소 8바이트) | 가변 (최소 8바이트) |
 | 송신 주기 | 필요 시 | 필요 시 |
 
-각 메시지의 종류는 데이터의 Byte 1(message code)로 구분된다.
+각 메시지의 종류는 데이터의 Byte 1(message code)로 구분된다. message code는 원문에서 16진수(예: 30₁₆)로 적혀 있으므로 이 문서도 `0x30`처럼 쓴다. SCD operation 메시지(Annex D)의 01~07은 10진·16진 값이 같다.
 
 ## Annex C: Technical data 메시지
 
 SCM의 특성을 조회하는 메시지들로, SCC의 요청과 SCM의 응답으로 구성된다.
 
-### C.2 SCMasterCapabilityRequest (SCC→SCM, code 90)
+### C.2 SCMasterCapabilityRequest (SCC→SCM, code 0x90)
 
 SCD 업로드 전에 active SCM의 능력을 요청한다. SCC가 자신이 지원하는 SC 표준 버전을 함께 실어 SCM이 교차 확인할 수 있게 한다.
 
 | 바이트 | 내용 |
 | --- | --- |
-| 1 | 90 (message code) |
+| 1 | 0x90 (message code) |
 | 2 | SCC 지원 SC 표준 버전 (00 = DIS, 01 = FDIS, 02 = IS) |
 | 3~8 | 예약 (FF) |
 
-### C.3 SCMasterCapabilityResponse (SCM→SCC, code 90, 10바이트)
+### C.3 SCMasterCapabilityResponse (SCM→SCC, code 0x90, 10바이트)
 
 SCC가 SCD를 업로드하기 전에 SCD를 조정하고, VT에 로드하는 SCCOP를 SCM의 그래픽 크기·폰트 속성에 맞추는 데 쓰인다. 10바이트이므로 ISO 11783-3 transport protocol이 필요하다.
 
 | 바이트 | 내용 |
 | --- | --- |
-| 1 | 90 (message code) |
+| 1 | 0x90 (message code) |
 | 2 | SCM 지원 SC 표준 버전 |
 | 3 | 그래픽 오브젝트 X축 픽셀 수 (최소 32) |
 | 4 | 그래픽 오브젝트 Y축 픽셀 수 (최소 32) |
@@ -639,7 +639,7 @@ SCC가 SCD를 업로드하기 전에 SCD를 조정하고, VT에 로드하는 SCC
 
 SCCOP 오브젝트 재사용을 촉진하기 위해, SCM은 그래픽 오브젝트 크기(byte 3~4)로 사용 중인 VT의 soft key 크기를 보고해야 한다.
 
-### C.4 / C.5 SCMasterMemoryRequest / Response (code 91)
+### C.4 / C.5 SCMasterMemoryRequest / Response (code 0x91)
 
 - Request(SCC→SCM): SCD 업로드 전에 SCM의 휘발성 메모리 여유를 확인한다. Byte 2~5에 업로드할 SCD의 바이트 수를 담는다.
 - Response(SCM→SCC): Byte 2 status — 00 = 메모리가 충분할 수 있음(오브젝트 저장 오버헤드 때문에 확정 예측은 불가), 01 = 휘발성 메모리 부족(SCD 전송·로드 명령 금지).
@@ -653,7 +653,7 @@ SCM은 완전한 SCD의 저장·복원 기능을 제공할 수 있다. 비휘발
 | 메시지 | 방향 | code | 요지 |
 | --- | --- | --- | --- |
 | D.2 SCDVersionRequest | SCC→SCM | 01 | 시동 시 SCM에 자신의 SCD가 저장돼 있는지, 버전이 맞는지 확인 |
-| D.3 SCDVersionResponse | SCM→SCC | 01 | Byte 2 error code: 00 = 버전 문자열 첨부, 01 = 일치하는 SCD 없음, FF = 기타 오류. Byte 3에 문자열 길이, 오류 없을 때 Byte 4~N에 version label (길이에 따라 transport protocol 필요) |
+| D.3 SCDVersionResponse | SCM→SCC | 01 | Byte 2 error code: 00 = 버전 문자열 첨부, 01 = 일치하는 SCD 없음, FF = 기타 오류. Byte 3 Bits 1-6에 문자열 길이(6비트라 최대 63, A.3의 1~64와 어긋남), 오류 없을 때 Byte 4~N에 version label (길이에 따라 transport protocol 필요). 오류면 Byte 4~8을 FF로 채운 8바이트 |
 | D.4 SCDConfigurationLabelRequest | SCC→SCM | 02 | 저장된 SCD의 configuration label 확인 요청 |
 | D.5 SCDConfigurationLabelResponse | SCM→SCC | 02 | 구조는 D.3과 동일 (오류 없으면 configuration label 첨부) |
 | D.6 SCDTransfer | SCC→SCM | 03 | SCD 데이터 전송. ISO 11783-3 transport protocol 필요, 1785바이트 초과 시 ISO 11783-6의 extended transport protocol 사용 |
@@ -680,19 +680,19 @@ SCM은 완전한 SCD의 저장·복원 기능을 제공할 수 있다. 비휘발
 - 이 부속서의 모든 명령·요청에는 상대방의 응답이 따른다. 응답은 전용 response 메시지이거나 Annex F의 status 메시지다.
 - 명령·요청 CF는 응답을 받을 때까지 초당 최대 5회의 반복 주기로 명령을 반복하며, <strong>최소 1.6초</strong>의 timeout까지 응답이 없으면 무응답으로 처리한다. 반복 명령 사이에는 <strong>최소 100 ms</strong>를 보장해야 한다.
 
-### E.2 SCStateCommand (SCM→SCC, code 30)
+### E.2 SCStateCommand (SCM→SCC, code 0x30)
 
 active SCM이 SCC를 특정 상태(enabled/disabled)로 명령한다. 시스템 구성 시, 기록 전, 시퀀스 활성화 후에 선택된 시퀀스 참여 SCC만 enabled로 남겨 구성 복잡도와 버스 부하를 줄이는 데 쓰인다. SCC의 상태는 active SCM 또는 장치 자신(오퍼레이터 입력)만 바꿀 수 있다. 상태 변화는 SCClientStatus의 상태 비트에 반영되므로 전용 response는 없다.
 
 | 바이트 | 내용 |
 | --- | --- |
-| 1 | 30 (message code) |
+| 1 | 0x30 (message code) |
 | 2 | 명령 상태: 00 = Disabled, 01 = Enabled |
 | 3 | FF 예약 (모든 메시지에서 error code 바이트 위치를 통일하기 위함) |
 | 4 | 사유: 01 = 오퍼레이터 명령에 의한 상태 변화, 02 = 선택된 SCS에 불포함, 03 = 선택된 SCS에 포함, FF = 특정 사유 없음 |
 | 5~8 | 예약 (FF) |
 
-### E.3 SCClientAbort (SCC→전역, code 31)
+### E.3 SCClientAbort (SCC→전역, code 0x31)
 
 enabled SCC가 <strong>재생 단계 중에만</strong> 개시할 수 있는, 현재 시퀀스 처리의 즉시 종료를 요구하는 오류 통지다.
 
@@ -702,84 +702,84 @@ enabled SCC가 <strong>재생 단계 중에만</strong> 개시할 수 있는, �
 
 | 바이트 | 내용 |
 | --- | --- |
-| 1 | 31 (message code) |
+| 1 | 0x31 (message code) |
 | 2~3 | 예약 (FF) — 다른 메시지와 sequence number·error code 바이트 위치를 맞추기 위함 |
 | 4 | error code: 01 = status 메시지 timeout, 02 = 오퍼레이터 상호작용, 03 = 기능 실행 중 오류, FF = 기타 |
 | 5~8 | 예약 (FF) |
 
-### E.4 SCExecutionIndication (SCC→SCM, code 32)
+### E.4 SCExecutionIndication (SCC→SCM, code 0x32)
 
 "Recording" 또는 "Play Back" 중 client function 활성화 시에만 송신되며, enabled SCC만 보낼 수 있다.
 
 | 바이트 | 내용 |
 | --- | --- |
-| 1 | 32 (message code) |
+| 1 | 0x32 (message code) |
 | 2 | Function ID (SCD function object 기준) |
 | 3 | Bits 1-6: State ID (SCD state object 기준) / Bits 7-8: function execution state — 00 = 시작·완료 동시, 01 = 실행 시작, 10 = 실행 완료, 11 = 실행 중 오류 또는 재생 중 오퍼레이터 개입 |
 | 4 | TAN |
 | 5~8 | function execution state가 '시작'뿐이면 FFFFFFFF, '완료' 비트가 설정되면 function value (4.4.8) |
 
-### E.5 SCExecutionIndicationResponse (SCM→SCC, code 32)
+### E.5 SCExecutionIndicationResponse (SCM→SCC, code 0x32)
 
 active SCM이 모든 SCExecutionIndication에 대해 해당 SCC로 보내는 응답이다. function ID, state ID, function execution state는 수신한 SCExecutionIndication의 것을 그대로 반영해야 하고, TAN도 응답 대상 메시지의 것과 같아야 한다. 00 이외의 error code는 SCM이 그 client command를 활성 SCS에 저장하지 못했음을 뜻한다.
 
 | 바이트 | 내용 |
 | --- | --- |
-| 1 | 32 (message code) |
+| 1 | 0x32 (message code) |
 | 2 | Function ID |
 | 3 | Bits 1-6: State ID / Bits 7-8: function execution state (E.4와 동일 코드) |
 | 4 | error code: 00 = 무오류(SCS에 저장됨), 01 = Function ID 미정의, 02 = State ID 미정의, 03 = function execution state 불일치, 04 = SCM 메모리 부족, 05 = 재생은 계속되나 이 client function에 더 이상 명령을 보내지 않음(재생 중, execution 비트 둘 다 1일 때만), 06 = 오퍼레이터 개입으로 재생 중단(동일 조건), FF = 기타 |
 | 5 | TAN |
 | 6~8 | 예약 (FF) |
 
-### E.6 SCMasterExecutionCommand (SCM→SCC, code 33)
+### E.6 SCMasterExecutionCommand (SCM→SCC, code 0x33)
 
 재생 단계에서 연관 trigger 조건(시간·거리 등)에 도달했을 때 SCM이 SCC의 client function을 트리거하는 명령이다. SCM은 기능을 소유한 SCC에게 직접 보내고, SCC는 그 client function을 수행해야 하며, 시작·완료를 SCClientExecutionStatus(E.7)로 확인해 준다.
 
 | 바이트 | 내용 |
 | --- | --- |
-| 1 | 33 (message code) |
+| 1 | 0x33 (message code) |
 | 2 | Function ID (기록 시 정의된 값) |
 | 3 | Bits 1-6: State ID / Bits 7-8: 예약(0) |
 | 4 | TAN |
 | 5~8 | 기록 시 정의된 function value (4.4.8) |
 
-### E.7 SCClientExecutionStatus (SCC→SCM, code 34)
+### E.7 SCClientExecutionStatus (SCC→SCM, code 0x34)
 
 SCM에게서 받은 모든 SCMasterExecutionCommand에 대한 SCC의 응답으로, 명령의 수신·실행을 확인한다. TAN은 응답 대상 SCMasterExecutionCommand의 것과 같아야 한다.
 
 | 바이트 | 내용 |
 | --- | --- |
-| 1 | 34 (message code) |
+| 1 | 0x34 (message code) |
 | 2 | Function ID |
 | 3 | Bits 1-6: State ID / Bits 7-8: function execution state — 00 = 시작·완료 동시, 01 = 시작, 10 = 완료, 11 = 실행 중 오류 |
 | 4 | error code: 00 = 무오류, 01 = 기능 내 오류, 02 = 오퍼레이터 개입, 03 = SCC 조건상 실행 불가, FF = 기타 |
 | 5 | TAN |
 | 6~8 | 예약 (FF) |
 
-### E.8 SCClientExecutionAcknowledgement (SCM→SCC, code 34)
+### E.8 SCClientExecutionAcknowledgement (SCM→SCC, code 0x34)
 
 재생 중 client function을 실행하는 SCC의 SCClientExecutionStatus 수신을 SCM이 확인하는 메시지다. TAN은 응답 대상 SCClientExecutionStatus의 것과 같아야 한다.
 
 | 바이트 | 내용 |
 | --- | --- |
-| 1 | 34 (message code) |
+| 1 | 0x34 (message code) |
 | 2 | Function ID |
 | 3 | Bits 1-6: State ID / Bits 7-8: function execution state acknowledgement (00/01/10/11 각각 해당 상태의 확인) |
 | 4 | TAN |
 | 5~8 | 예약 (FF) |
 
-### E.9 SCClientFunctionErrorRequest (SCM→SCC, code 35)
+### E.9 SCClientFunctionErrorRequest (SCM→SCC, code 0x35)
 
-고장 난 client function의 실제 상태를 요청한다. SCC들은 status 메시지로 client function 사용 불가 여부를 알리고, SCM은 이 메시지로 개별 SCC에 상세를 요청한다. SCC는 SCClientFunctionErrorResponse(E.10)로 응답해야 한다. Byte 1 = 35, 나머지는 예약(FF)이다.
+고장 난 client function의 실제 상태를 요청한다. SCC들은 status 메시지로 client function 사용 불가 여부를 알리고, SCM은 이 메시지로 개별 SCC에 상세를 요청한다. SCC는 SCClientFunctionErrorResponse(E.10)로 응답해야 한다. Byte 1 = 0x35, 나머지는 예약(FF)이다.
 
-### E.10 SCClientFunctionErrorResponse (SCC→SCM, code 35)
+### E.10 SCClientFunctionErrorResponse (SCC→SCM, code 0x35)
 
 SCC는 고장 난 client function들의 function ID를 오류 상태 코드와 함께 보고한다(기능당 2바이트). 활성 오류 수에 따라 transport protocol이 필요할 수 있고, 고장 기능이 3개 미만이면 8바이트까지 FF로 패딩한다.
 
 | 바이트 | 내용 |
 | --- | --- |
-| 1 | 35 (message code) |
+| 1 | 0x35 (message code) |
 | 2 | 뒤따르는 function error structure 개수 (0~255) |
 | 3~8 | 개수 0이면 FF 패딩 |
 | 3~N | function error structure 목록 |
@@ -802,7 +802,7 @@ function error structure (2바이트):
 
 status 메시지는 SCC가 SCM의 상태를, 또 그 반대로 SCM이 SCC의 상태를 파악하게 한다.
 
-### F.2 SCMasterStatus (SCM→전체 broadcast, code 95)
+### F.2 SCMasterStatus (SCM→전체 broadcast, code 0x95)
 
 active SCM이 모든 CF에게 broadcast하는 메시지다. 송신 규칙:
 
@@ -815,9 +815,9 @@ active SCM이 모든 CF에게 broadcast하는 메시지다. 송신 규칙:
 
 | 바이트 | 내용 |
 | --- | --- |
-| 1 | 95 (message code) |
+| 1 | 0x95 (message code) |
 | 2 | 송신 SCM 상태: 00 = Inactive, 01 = Active, 02 = Initialization (시동 시 1회) |
-| 3 | sequence number: 00~31 = 선택된 시퀀스 번호, FF = inactive이거나 sequence state가 Ready일 때 |
+| 3 | sequence number: 0x00~0x31(10진 0~49) = 선택된 시퀀스 번호, FF = inactive이거나 sequence state가 Ready일 때 |
 | 4 | sequence state: 01 = Ready, 02 = Recording, 03 = Recording completion, 04 = Play back, 05 = Abort, FF = inactive일 때 (00, 06~FE 예약) |
 | 5 | busy flags: Bit 1 = 비휘발성 메모리 접근 중, Bit 2 = SCD 파싱 중 (나머지 예약 0) |
 | 6~8 | 예약 (FF) |
@@ -826,7 +826,7 @@ timeout: "Recording" / "Recording Completion" / "Play Back" / "Abort" 상태에�
 
 busy flag는 요청 응답이 지연될 수 있음을 SCC에 알리는 수단이다. 플래그가 설정된 동안 SCC는 SCM에 대한 미결 응답의 timeout 측정을 <strong>일시 정지</strong>해야 한다.
 
-### F.3 SCClientStatus (SCC→SCM destination-specific, code 96)
+### F.3 SCClientStatus (SCC→SCM destination-specific, code 0x96)
 
 시퀀스 제어를 지원하는 모든 SCC가 네트워크에서 active SCM을 감지하는 동안 송신한다. 송신 규칙:
 
@@ -839,9 +839,9 @@ busy flag는 요청 응답이 지연될 수 있음을 SCC에 알리는 수단이
 
 | 바이트 | 내용 |
 | --- | --- |
-| 1 | 96 (message code) |
+| 1 | 0x96 (message code) |
 | 2 | 송신 SCC 상태: 00 = Disabled, 01 = Enabled, 02 = Initialization (시동 시 1회) |
-| 3 | sequence number: 00~31 = 활성 시퀀스 번호, FF = disabled이거나 sequence state가 "Ready"일 때 |
+| 3 | sequence number: 0x00~0x31(10진 0~49) = 활성 시퀀스 번호, FF = disabled이거나 sequence state가 "Ready"일 때 |
 | 4 | sequence state: 01 = Ready, 02 = Recording, 04 = Play back, 05 = Abort, FF = disabled 또는 initialization일 때 (00, 03, 06~FE 예약 — SCC에는 "Recording completion"에 해당하는 03이 없음) |
 | 5 | ClientFunctionErrorState (아래 참조) |
 | 6~8 | 예약 (FF) |

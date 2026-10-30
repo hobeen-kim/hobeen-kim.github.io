@@ -19,6 +19,10 @@ tags: [CAN, J1939, ISOBUS, VT, TC]
 - **Virtual Terminal(VT)** — 트랙터 디스플레이에 화면을 그리는 방법
 - **Task Controller(TC)** — 정밀 농업을 위한 작업 데이터 교환 방법
 
+::: info 2026-10 보충
+ISO 11783 원문(Part 1, 3~14)과 대조해 각 챕터에 메시지 바이트 배치, 타이밍, 상태 머신, 오류 코드 같은 구현 세부와 바이트 단위 예제, 확인 문제를 추가했다. 원문과 어긋나던 기존 서술도 함께 바로잡았다.
+:::
+
 ## 학습 로드맵
 
 ```mermaid
@@ -60,51 +64,51 @@ flowchart TD
 |------|------|-----------|
 | 01 | [통신의 기초](/study/isobus/01-communication-basics) | ECU 간 통신이 필요한 이유부터 버스 통신의 기초까지 |
 | 02 | [CAN 통신 입문](/study/isobus/02-can-intro) | CAN의 탄생 배경, 핵심 특징, 다른 통신 방식과의 비교 |
-| 03 | [CAN 물리 계층](/study/isobus/03-can-physical) | 차동 신호, 종단 저항, 통신 속도와 버스 길이 |
-| 04 | [CAN 데이터 프레임](/study/isobus/04-can-data-frame) | 프레임의 구조와 각 필드(SOF, ID, DLC, CRC 등)의 역할 |
-| 05 | [CAN 중재와 우선순위](/study/isobus/05-can-arbitration) | 충돌 없이 중재하는 비파괴적 비트 중재 메커니즘 |
+| 03 | [CAN 물리 계층](/study/isobus/03-can-physical) | 차동 신호, 종단 저항, 통신 속도와 버스 길이, ISOBUS 물리 계층 요구사항 |
+| 04 | [CAN 데이터 프레임](/study/isobus/04-can-data-frame) | 프레임의 구조와 각 필드(SOF, ID, DLC, CRC 등)의 역할, ISO 11783의 프레임 규칙(CEFF·CBFF) |
+| 05 | [CAN 중재와 우선순위](/study/isobus/05-can-arbitration) | 충돌 없이 중재하는 비파괴적 비트 중재 메커니즘, 우선순위 할당 규칙 |
 | 06 | [CAN 에러 처리](/study/isobus/06-can-error) | 오류 감지, 에러 카운터, Bus Off 상태와 복구 |
-| 07 | [CAN FD](/study/isobus/07-can-fd) | 최대 64바이트, 듀얼 비트레이트로 Classic CAN을 넘어서 |
+| 07 | [CAN FD](/study/isobus/07-can-fd) | 최대 64바이트, 듀얼 비트레이트로 Classic CAN을 넘어서 (ISO 11783은 CAN FD 프레임 사용을 금지) |
 
 ### SAE J1939 (08~11)
 
 | 챕터 | 제목 | 한줄 설명 |
 |------|------|-----------|
-| 08 | [SAE J1939 입문](/study/isobus/08-j1939-intro) | 상위 프로토콜의 역할과 29비트 CAN ID 구성 |
-| 09 | [J1939 메시지 구조](/study/isobus/09-j1939-message) | PGN/SPN 개념, PDU1/PDU2 구분, 실제 메시지 디코딩 |
-| 10 | [J1939 주소 체계](/study/isobus/10-j1939-address) | 소스 주소(SA), 64비트 NAME, 주소 클레임 절차 |
-| 11 | [J1939 Transport Protocol](/study/isobus/11-j1939-transport) | 8바이트 초과 데이터를 보내는 BAM, CMDT, ETP |
+| 08 | [SAE J1939 입문](/study/isobus/08-j1939-intro) | 상위 프로토콜의 역할과 29비트 CAN ID 구성, 데이터 페이지·PGN 공간과 버스 대역폭 |
+| 09 | [J1939 메시지 구조](/study/isobus/09-j1939-message) | PGN/SPN 개념, PDU1/PDU2 구분, 메시지 디코딩, Request·ACK·Request2·Transfer와 응답 규칙 |
+| 10 | [J1939 주소 체계](/study/isobus/10-j1939-address) | 소스 주소(SA), 64비트 NAME, 주소 클레임 절차, NAME management와 네트워크 초기화 |
+| 11 | [J1939 Transport Protocol](/study/isobus/11-j1939-transport) | 8바이트 초과 데이터를 보내는 BAM, CMDT, ETP와 타이머·Abort·DPO |
 
 ### ISOBUS (ISO 11783) (12~14)
 
 | 챕터 | 제목 | 한줄 설명 |
 |------|------|-----------|
-| 12 | [ISOBUS 개요](/study/isobus/12-isobus-overview) | 탄생 배경, ISO 11783 파트 구성, J1939과의 관계 |
-| 13 | [ISOBUS 네트워크 아키텍처](/study/isobus/13-isobus-architecture) | TBC 커넥터, ECU 종류, 물리 토폴로지와 메시지 흐름 |
-| 14 | [ISOBUS 네트워크 관리](/study/isobus/14-isobus-network-mgmt) | Working Set, 주소 클레임, 진단 메시지, 초기화 타임라인 |
+| 12 | [ISOBUS 개요](/study/isobus/12-isobus-overview) | 탄생 배경, ISO 11783 파트 구성, J1939과의 관계, 네트워크 구성·공통 서비스·판 정보 |
+| 13 | [ISOBUS 네트워크 아키텍처](/study/isobus/13-isobus-architecture) | TBC 커넥터, ECU 종류, NIU, TECU 클래스·전원·조명, 트랙터-작업기 메시지(Part 7) |
+| 14 | [ISOBUS 네트워크 관리](/study/isobus/14-isobus-network-mgmt) | Working Set, 주소 클레임, 초기화 타임라인, ECU 식별·DM1~DM3·Functionalities 진단 |
 
 ### Virtual Terminal (15~17)
 
 | 챕터 | 제목 | 한줄 설명 |
 |------|------|-----------|
-| 15 | [VT 기초](/study/isobus/15-vt-basics) | Virtual Terminal의 개념, 동작 원리, 버전별 기능 |
-| 16 | [VT 오브젝트 풀](/study/isobus/16-vt-object-pool) | 화면을 정의하는 오브젝트 풀 구조, 타입, 전송 과정 |
-| 17 | VT 명령어 | 화면 전환, 값 갱신, 버튼 이벤트 등 VT 워킹셋 명령어 |
+| 15 | [VT 기초](/study/isobus/15-vt-basics) | Virtual Terminal의 개념, 동작 원리, 버전별 기능, 초기화 상태 머신·기술 데이터·버전 저장 |
+| 16 | [VT 오브젝트 풀](/study/isobus/16-vt-object-pool) | 화면을 정의하는 오브젝트 풀 구조, 타입, 전송 과정, 레코드 바이트·User-Layout·색 |
+| 17 | [VT 명령어](/study/isobus/17-vt-commands) | 화면 전환, 값 갱신, 버튼 이벤트 등 VT 워킹셋 명령어, 매크로·입력 처리·경보·AUX-N |
 
 ### Task Controller (18~20)
 
 | 챕터 | 제목 | 한줄 설명 |
 |------|------|-----------|
-| 18 | [TC 기초](/study/isobus/18-tc-basics) | Task Controller의 역할, Section/Rate Control, GPS 연동 |
-| 19 | [TC 프로세스 데이터](/study/isobus/19-tc-process-data) | DDI, Element, Measurement/Setpoint 교환 과정 |
-| 20 | DDOP | Device Description Object Pool — 장치 능력을 TC에 선언하는 방법 |
+| 18 | [TC 기초](/study/isobus/18-tc-basics) | Task Controller의 역할, Section/Rate Control, GPS 연동, 태스크 상태·연결 메시지·다중 TC |
+| 19 | [TC 프로세스 데이터](/study/isobus/19-tc-process-data) | DDI, Element, Measurement/Setpoint 교환 과정, 명령 0x0~0xF·PDACK·Totals·Peer Control |
+| 20 | [DDOP](/study/isobus/20-tc-ddop) | Device Description Object Pool — 장치 능력을 TC에 선언하는 방법, 레코드 바이트·하위 명령·설계 점검 |
 
 ### 심화 및 실습 (21~22)
 
 | 챕터 | 제목 | 한줄 설명 |
 |------|------|-----------|
-| 21 | [ISOBUS 기타 기능](/study/isobus/21-isobus-misc) | Sequence Control(ISO 11783-14)과 File Server(ISO 11783-13) |
-| 22 | 종합 실습 | 가상 트랙터-작업기 시나리오로 CAN부터 TC까지 전 과정 실습 |
+| 21 | [ISOBUS 기타 기능](/study/isobus/21-isobus-misc) | Sequence Control(ISO 11783-14)과 File Server(ISO 11783-13) — 상태 머신·명령 바이트·볼륨 관리 |
+| 22 | [종합 실습](/study/isobus/22-practice) | 가상 트랙터-작업기 시나리오로 CAN부터 TC까지 전 과정 실습, ISOXML 태스크 파일·grid·TimeLog |
 
 ### 부록
 

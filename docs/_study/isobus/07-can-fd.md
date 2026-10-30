@@ -18,6 +18,7 @@ tags:
 - FDF, BRS, ESI 비트의 역할을 이해하고 CAN FD 프레임 구조를 설명할 수 있다.
 - 듀얼 비트레이트 동작 원리와 BRS 비트의 역할을 이해한다.
 - FD tolerant / FD active 노드의 차이를 구분하고, ISOBUS와의 관계를 설명할 수 있다.
+- ISO 11783-1·-3의 CAN FD 금지 조항을 근거로 FD 지원 CAN 컨트롤러의 설정과 8바이트 초과 데이터의 전송 방식을 결정할 수 있다.
 :::
 
 # 1. CAN FD가 나온 이유
@@ -177,9 +178,9 @@ graph TD
 
 ```
 현재 ISOBUS 스택
-  물리 계층: CAN 2.0B, 250 kbps
-  데이터 링크: ISO 11783-2 (버스 전기 특성 등)
-  상위 계층: ISO 11783-3~14
+  물리 계층: ISO 11783-2 (버스 전기 특성 등), 250 kbps
+  데이터 링크: ISO 11783-3 (CAN 2.0B = Classical Extended Frame Format)
+  상위 계층: ISO 11783-4~14
 
 CAN FD 채택 동향
   - 농기계 데이터량 증가(정밀농업, 자율주행)로 수요 증가
@@ -366,6 +367,44 @@ print((classic_frame - DATA_BITS_CLASSIC) / classic_frame)   # 0.50  (Classic 8B
 print((fd_frame_8b - DATA_BITS_CLASSIC) / fd_frame_8b)        # 0.519 (FD 8B 오버헤드 비율)
 print((fd_frame - DATA_BITS_FD) / fd_frame)                   # 0.125 (FD 64B 오버헤드 비율)
 ```
+:::
+
+# 6. ISO 11783의 CAN FD 금지 조항
+
+§4의 "ISOBUS와 CAN FD"는 ISOBUS가 CAN FD를 "공식 채택하지 않았다"고 적었다. 원문은 이보다 강하다. 채택하지 않은 정도가 아니라 <strong>쓰지 말라고 명시</strong>한다.
+
+## 두 파트의 조항
+
+| 문서 | 조항 |
+|---|---|
+| ISO 11783-1:2017 6.3 | ISO 11783을 따르는 ECU는 ISO 11898-1:2015의 CAN Classical Extended Frame Format을 써야 한다(shall). CAN FD 프레임 형식은 쓰면 안 된다(shall not) |
+| ISO 11783-3:2018 5.1.1 | 어떤 FD 프레임 형식도 ISO 11783 네트워크에서 쓰면 안 된다(shall not). ISO 11783 컨트롤러는 CEFF를 써야 한다 |
+| ISO 11783-3:2018 Table 1 | 프레임 비트 표의 ISO 11783 열에서 FDF 비트를 dominant(d)로 고정한다 |
+| ISO 11783-3:2018 머리말 | 4판의 주요 변경점으로 "ISO 11898-1 관련 문구 갱신(CAN Flexible Data Rate 사용 배제)"을 든다 |
+
+FDF는 §2 표의 FD Format 비트다. FDF가 1이어야 FD 프레임이므로, dominant(0) 고정은 고전 CAN 프레임만 쓴다는 뜻이다. FDF가 프레임의 어디에 있는지는 [CAN 데이터 프레임](/study/isobus/04-can-data-frame) 챕터의 프레임 비트 그림(29비트 ID 기준 프레임 비트 34)에서 볼 수 있다.
+
+## 왜 2018년판에서 문구를 고쳤나
+
+표준은 이유를 직접 적지 않는다. 다만 정황은 있다. Part 1(2017)이 인용하는 ISO 11898-1은 2015판이고, Part 3(2018)은 고전 CAN 형식을 CBFF·CEFF라고 부르면서 "어떤 FD 프레임 형식"도 금지한다. ISO 11898-1이 고전 형식과 FD 형식을 함께 담고 있다면 "ISO 11898-1을 따른다"는 문장만으로는 FD 형식이 배제되지 않는다. 2018년판이 문구를 고쳐 FD를 명시적으로 뺀 것은 이 틈을 막으려는 것으로 보인다(추론).
+
+## 구현할 때 확인할 것
+
+- <strong>FD 지원 CAN 컨트롤러의 모드</strong>: 요즘 SoC의 CAN 컨트롤러는 FD를 지원하는 경우가 많다. ISOBUS 포트는 고전(Classical) 모드로 설정해 FDF가 recessive로 나가는 프레임을 만들지 않게 한다. 위 조항에서 바로 나오는 요구다.
+- <strong>버스에 붙는 진단·로깅 도구</strong>: 도구도 ISOBUS 버스의 노드다. §4 표처럼 고전 CAN 노드는 FD 프레임을 에러로 처리하므로, 도구의 FD 송신 기능은 꺼 둔다.
+- <strong>8바이트를 넘는 데이터</strong>: FD의 64바이트 프레임 대신 TP(최대 1785바이트)와 ETP(최대 117 440 505바이트)로 나눠 보낸다. Part 1 6.3은 1785바이트까지의 TP를 Part 3이, 1786바이트부터 117 MB까지의 두 번째 전송 프로토콜을 Part 6이 정한다고 적는다. 그러나 2018년판 Part 3은 ETP를 5.11에 직접 정의하고, ISO 11783-6:2018 C.2.1도 1785바이트를 넘는 오브젝트 풀은 "ISO 11783-3에 정의된 ETP"로 보내라고 한다. 지금 기준으로 ETP의 정의는 Part 3에서 찾으면 된다. 자세한 내용은 [J1939 Transport Protocol](/study/isobus/11-j1939-transport) 챕터에서 다룬다.
+
+::: info §4의 "CAN FD 채택 동향"에 대해
+§4 코드 블록의 "ISO TC23/SC19 WG1에서 CAN FD 확장 검토 중" 같은 동향은 이 스터디의 원문 묶음(ISO 11783 각 파트)으로는 확인하지 못했다. 이 원문들이 말하는 것은 "현재 판의 ISO 11783 네트워크에서는 FD 형식을 쓰지 않는다"까지다.
+:::
+
+::: details 확인 문제
+1. (설명형) ISO 11783-1과 ISO 11783-3이 각각 CAN FD에 대해 무엇을 규정하는지, 그리고 Part 3 Table 1이 이를 어떤 비트로 표현하는지 설명하라.
+2. (설계형) SeamOS 단말에 쓸 SoC의 CAN 드라이버가 기본으로 FD 모드(데이터 구간 2 Mbps)를 켠다. ISOBUS 포트에 연결하기 전에 무엇을 바꿔야 하고, 4000바이트짜리 오브젝트 풀은 어떤 방식으로 보내야 하는가?
+
+**답 가이드**
+1. Part 1 6.3은 ECU가 ISO 11898-1:2015의 CEFF를 써야 하고 CAN FD 프레임 형식은 쓰면 안 된다고 정한다. Part 3 5.1.1은 어떤 FD 프레임 형식도 ISO 11783 네트워크에서 쓰면 안 된다고 정한다. Table 1은 ISO 11783 열에서 FDF 비트를 dominant로 고정해 고전 프레임만 허용함을 나타낸다.
+2. 드라이버를 고전 CAN 모드로 바꿔 FD 프레임을 송신하지 않게 한다(Part 1 6.3, Part 3 5.1.1). 4000바이트는 TP 한도 1785바이트를 넘으므로 ETP(RTS → CTS → DPO와 ETP.DT 반복 → EOMA)로 보낸다(Part 3 5.11, Part 6 C.2.1).
 :::
 
 ## 다음 챕터

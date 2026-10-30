@@ -86,6 +86,23 @@ Part 11 본문은 짧지만, 이 파트가 고정해 놓은 틀 위에서 ISOBUS
 - <strong>확장 절차</strong>: 표준 개정 없이 VDMA의 MA 절차로 새 DDI가 계속 추가된다. 구현체 입장에서는 isobus.net의 최신 사전 익스포트를 주기적으로 반영하는 운영 습관이 필요하다.
 - <strong>Part 8과의 대비</strong>: Part 8이 파워트레인 메시지 정의를 SAE J1939/71이라는 <strong>외부 표준 문서</strong>에 위임했다면, Part 11은 프로세스 데이터 정의를 <strong>온라인 데이터베이스</strong>에 위임했다. 둘 다 "얇은 규범 + 외부 정의 소스"라는 같은 패턴이지만, 위임 대상의 성격이 다르다.
 
+## Part 10과 맞물리는 부분
+
+Part 11 본문에는 DDI 번호 체계나 예약 범위가 없다. 대신 Part 10(2015)이 사전 항목의 정의와 몇몇 특수 값을 직접 정한다.
+
+- Part 10 3.3은 사전 항목을 <strong>data dictionary entity(DDE)</strong>라 부르고 "식별자·정의·값 범위·분해능·단위를 기술한 것"으로 정의한다. Part 11 4.2의 다섯 속성과 같다.
+- Process Data 메시지에서 DDI는 2바이트(LSB 먼저, SPN 5201), 값은 부호 있는 4바이트(SPN 5202)이고, 분해능과 범위는 DDE를 따른다(Part 10 B.3.3·B.3.4).
+- Part 10은 variable당 초당 10개 상한의 예외(burst) 대상 DDI를 사전에 명시하도록 맡긴다(Part 10 6.8 a).
+
+| 값 | 이름 | 정의한 곳 |
+|---|---|---|
+| DDI DFFE<sub>16</sub>(57342) | ParameterGroupNumberValue — PGN 값 로깅용 | Part 10 6.3, D.17 |
+| DDI DFFF<sub>16</sub>(57343) | RequestDefaultProcessData — default data logging | Part 10 6.8.4 |
+| DDI 0093<sub>16</sub>(147) | Log Count — 로그 묶음 표시 | Part 10 6.8.4 |
+| DDI FFFF<sub>16</sub> / element FFF<sub>16</sub> | not available | Part 10 B.7·B.8 |
+
+Part 10 B.1.1은 "독점(proprietary) DDI 값 범위"를 언급하지만, 그 범위의 숫자는 Part 10·11 본문 어디에도 없다. 온라인 사전에서 확인해야 한다(확인 필요). 메시지·DDE 활용 예는 [TC 프로세스 데이터 챕터](/study/isobus/19-tc-process-data) §17에 있다.
+
 :::details Bibliography (참고 문헌)
 - ISO 11898-1 — CAN Part 1: Data link layer and physical signalling. ISO 11783의 기반 프로토콜
 - SAE J1939 — 트럭·버스용 직렬 제어·통신 네트워크 권고안. ISO 11783 여러 파트의 모태

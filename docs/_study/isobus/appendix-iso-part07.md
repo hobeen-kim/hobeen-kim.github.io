@@ -1102,7 +1102,7 @@ auxiliary valve 0번 유량 제어 명령. 활성 시 100 ms, 8 bytes, priority 
 
 ### B.15 Auxiliary valve 15 estimated flow — PGN 65055 (0x00FE1F)
 
-100 ms, 8 bytes, priority 3. Byte 1: extend port estimated flow (A.21.20), Byte 2: retract port estimated flow (A.21.21), Byte 3: fail safe mode (A.21.29)/valve state (A.21.22), Byte 4 bits 8~6: estimated limit status (A.21.49), Byte 5 bits 6~1: exit/reason code (A.21.32).
+100 ms, 8 bytes, priority 3. Byte 1: extend port estimated flow (A.21.20), Byte 2: retract port estimated flow (A.21.21), Byte 3: fail safe mode (A.21.29)/valve state (A.21.22), Byte 4 bits 8~6: estimated limit status (A.21.31 — 원문은 범용 밸브 파라미터인 A.21.49로 잘못 표기), Byte 5 bits 6~1: exit/reason code (A.21.32).
 
 ### B.16 Auxiliary valve 15 measured flow — PGN 65071 (0x00FE2F)
 
@@ -1294,11 +1294,11 @@ general-purpose valve 메시지는 ISO 11783 네트워크에 연결된 <strong>�
 
 #### B.25.3 General-purpose valve measured flow — PGN 50432 (0x00C500)
 
-100 ms, 8 bytes, priority 3, PF 197(DA). Byte 1: extend port measured flow (A.21.18), Byte 2: retract port measured flow (A.21.34), Bytes 3,4: extend port pressure (A.21.38), Bytes 5,6: retract port pressure (A.21.39), Byte 7: return port pressure (A.21.40), Byte 8 bits 8~6: limit status (A.21.49).
+100 ms, 8 bytes, priority 3, PF 197(DA). Byte 1: extend port measured flow (A.21.33 — 원문은 밸브 15번 파라미터인 A.21.18로 잘못 표기), Byte 2: retract port measured flow (A.21.34), Bytes 3,4: extend port pressure (A.21.38), Bytes 5,6: retract port pressure (A.21.39), Byte 7: return port pressure (A.21.40), Byte 8 bits 8~6: limit status (A.21.49).
 
 #### B.25.4 General-purpose valve command — PGN 50176 (0x00C400)
 
-활성 시 100 ms, 8 bytes, priority 3, PF 196(DA). Byte 1: port flow command (A.21.41), Byte 3: fail safe mode (A.21.44)/valve state (A.21.37).
+활성 시 100 ms, 8 bytes, priority 3, PF 196(DA). Byte 1: port flow command (A.21.41), Byte 3: fail safe mode command (A.21.43)/valve state command (A.21.42). 원문은 측정 파라미터인 A.21.44/A.21.37을 가리킨다.
 
 #### B.25.5 General-purpose valve load sense pressure — PGN 1792 (0x000700)
 
@@ -1324,7 +1324,7 @@ machine steering system이 guidance 제어 시스템에 주는 피드백 메시�
 | Bytes 1,2 | Estimated curvature (A.28.2) |
 | Byte 3 bits 8,7 | Request reset command status (A.28.4) |
 | Byte 3 bits 6,5 | Steering input position status (A.28.5) |
-| Byte 3 bits 4,3 | Steering system readiness (A.28.6) |
+| Byte 3 bits 4,3 | Steering system readiness (A.28.6) — 원문 B.26.2 표에는 이 행이 없다. Byte 3에 남은 자리로 본 추정이다(확인 필요) |
 | Byte 3 bits 2,1 | Mechanical system lockout (A.28.7) |
 | Byte 4 bits 8~6 | Guidance limit status (A.28.8) |
 | Byte 5 bits 6~1 | Guidance system command exit/reason code (A.28.9) |
@@ -1464,7 +1464,7 @@ CF가 송신하는 메시지·파라미터 통신의 무결성 판단에 쓴다.
 | 3 | 현재 값이 254 | Heartbeat Transmission Error State |
 | 4 | 현재 값이 251 | 송신 CF 리셋으로 인식하고 자신의 번호를 송신 값에 동기화 |
 | 5 | 현재 값이 255이고 이전 값이 255가 아님 | Heartbeat Graceful Shutdown Initialization State |
-| 6 | (250 roll-over 고려 시) 증가폭이 3 초과 | Heartbeat Sequence Error State — 즉 최대 3개까지의 heartbeat 유실은 허용된다 |
+| 6 | (250 roll-over 고려 시) 증가폭이 3 초과 | Heartbeat Sequence Error State. 원문 해설은 "최대 3개 유실 허용"이라 적지만, 증가폭 4(3개 유실)부터 오류이므로 규칙 문장대로면 연속 2개 유실까지 허용된다 |
 | 7 | Sequence Error State 진입 후 | <strong>연속 8개</strong>의 올바른 순차 heartbeat를 수신해야 Operational State로 복귀 |
 
 <strong>타이밍 검증(B.33.3.4)</strong> — 소비 CF는 heartbeat의 주기도 검증해야 하며, 반복 주기가 <strong>300 ms를 초과하면</strong> 통신 오류로 판정한다.
@@ -1599,7 +1599,7 @@ ISO 11783-7:2015/Amd.1:2018 (2018-06)은 3판 본문을 수정·확장한다. �
 | A.21.57 | GP valve extend port high resolution estimated flow | A.21.51과 동일 형식 | 9728 |
 | A.21.58 | GP valve retract port high resolution estimated flow | A.21.51과 동일 형식 | 9729 |
 | A.21.59 | GP valve port flow — Extended Resolution Command | A.21.53과 동일 형식 | 9727 |
-| A.21.60 | General-purpose valve exit/reason code | 5 bits, Measured (10001="Valve locked out" 포함) | 9730 |
+| A.21.60 | General-purpose valve exit/reason code | 5 bits, Measured (10001="Valve locked out" 포함). Amd1은 이 값을 싣는 메시지 바이트를 지정하지 않았다 | 9730 |
 
 해석 규칙:
 
@@ -1622,7 +1622,7 @@ Remote Engage Switch의 상태다. 차량이 guidance 시스템용 engage 스위
 
 운전자 재석·주의(awareness) 상태를 네트워크로 방송하기 위한 파라미터 그룹이다.
 
-<strong>A.35.1 Operator status sequence counter</strong> (8 bits, SPN 5141) — operator status PGN 송신 횟수 카운터다(경과 시간 정보 아님). 동작·검증 규칙은 B.33 heartbeat 시퀀스 번호와 같은 골격이다: 초기화 시 251(0xFB), 이후 0~250 순환(modulus 250), 값이 갱신된 operator status PGN 송신마다 +1, 송신자별 독립. 252~253 예약(수신 무시), 254 오류, 255 not available(메시지 내 다른 SPN도 모두 not available임을 의미). 수신자는 첫 수신 값을 초기값으로 삼고, 동일 값 반복(255 제외)·254 수신·roll-over 고려 증가폭 3 초과 시 error state로 판정한다. 최대 3개 유실 허용, error state에서 <strong>연속 8개</strong> 정상 수신 시 operational state 복귀, 251 수신 시 송신자 리셋으로 인식하고 동기화 — heartbeat와 동일한 규칙 세트다. 수신자는 이 카운터로 송신자가 유효한 네트워크 연결을 유지 중인지, 해당 SA에서 이 메시지를 보내는 CF가 유일한지 판단한다.
+<strong>A.35.1 Operator status sequence counter</strong> (8 bits, SPN 5141) — operator status PGN 송신 횟수 카운터다(경과 시간 정보 아님). 동작·검증 규칙은 B.33 heartbeat 시퀀스 번호와 같은 골격이다: 초기화 시 251(0xFB), 이후 0~250 순환(modulus 250), 값이 갱신된 operator status PGN 송신마다 +1, 송신자별 독립. 252~253 예약(수신 무시), 254 오류, 255 not available(메시지 내 다른 SPN도 모두 not available임을 의미). 수신자는 첫 수신 값을 초기값으로 삼고, 동일 값 반복(255 제외)·254 수신·roll-over 고려 증가폭 3 초과 시 error state로 판정한다. 원문 해설은 최대 3개 유실 허용이라 적지만 증가폭 규칙대로면 연속 2개 유실까지다. error state에서 <strong>연속 8개</strong> 정상 수신 시 operational state 복귀, 251 수신 시 송신자 리셋으로 인식하고 동기화 — heartbeat와 동일한 규칙 세트다. 수신자는 이 카운터로 송신자가 유효한 네트워크 연결을 유지 중인지, 해당 SA에서 이 메시지를 보내는 CF가 유일한지 판단한다.
 
 <strong>A.35.2 Operator presence state</strong> (2 bits, SPN 9711) — 운전자 재석 감지 시스템의 현재 상태. 00=Operator Not Present, 01=Operator Present, 10=Error, 11=Not available/Not Installed.
 

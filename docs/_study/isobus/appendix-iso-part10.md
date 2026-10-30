@@ -555,6 +555,7 @@ Device는 "Device" 요소 1개 + "DeviceElement" 1개 이상 + 선택적 DeviceP
 
 - 문자열 속성은 BOM 없는 UTF-8이며, 문자당 최대 4바이트 — 바이트 배열 최대 길이는 XML 정의 문자 수의 4배다.
 - 객체 ID는 DDOP 전체에서 유일해야 한다. 참조가 없을 때는 NULL Object ID = 65535(FFFF<sub>16</sub>)를 쓴다.
+- 모든 객체 레코드는 Table ID(ASCII 3바이트, 예: `DVC`)와 Object ID(2바이트)로 시작한다. 가변 길이 문자열 앞에는 바이트 수 1바이트가 붙고, 뒤 필드의 Record byte 위치는 그 길이만큼 밀린다(Table A.1~A.5). 필드별 배치와 조립 예는 [TC DDOP 챕터](/study/isobus/20-tc-ddop) §7~§8에 있다.
 - TC는 수신한 객체 정의를 XML 요소로 변환해 파일 세트에 저장한다. 현재 태스크 파일에 없는 장치면 추가하고, 같은 장치가 이미 있으면 structure label을 비교해 갱신 또는 새 device 요소로 저장한다.
 
 ### A.2 DeviceObject (Table ID "DVC", Object ID = 0)
@@ -567,7 +568,7 @@ DDOP당 정확히 1개. 주요 속성:
 | Device software version | UTF-8 0~128바이트 | 소프트웨어 버전 (최대 32자) |
 | ClientNAME | 8바이트 | 클라이언트 장치의 NAME(ISO 11783-5 구조). <strong>CF의 address claim과 동일해야 함</strong> |
 | DeviceSerialNumber | UTF-8 0~128바이트 | 장치·제조사별 시리얼 번호 (최대 32자) |
-| Device structure label | 7바이트 배열 | descriptor 구조 버전 식별 라벨 — TC에 있는 pool의 갱신 필요 여부 판단용. 내용은 제조사 정의 |
+| Device structure label | 7바이트 배열 | descriptor 구조 버전 식별 라벨 — TC에 있는 pool의 갱신 필요 여부 판단용. 내용은 제조사 정의, 각 바이트 0~254 |
 | Device localization label | 7바이트 배열 | 로컬라이제이션 식별. 바이트 1~6은 language command PGN(ISO 11783-7) 정의, 바이트 7은 예약(FF<sub>16</sub>) |
 | Extended Structure Label | 0~32바이트 | structure label의 연장(버전 4 도입) |
 

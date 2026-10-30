@@ -110,6 +110,8 @@ NIU는 서브네트워크의 CF를 대신해 address-claim 절차(ISO 11783-5)�
 
 데이터 링크 계층(ISO 11783-3)은 256개의 source address를 제공한다. null 주소와 global 주소를 빼면 네트워크에서 이론상 허용되는 CF 주소는 <strong>254개</strong>다. 실제로는 각 ECU가 버스에 주는 전기 부하 때문에 연결 가능한 노드 수가 제한된다(ISO 11783-2).
 
+같은 문서의 6.9.4 3)은 "세그먼트당 총 253개 CF 주소"라고 적어 이 절의 254개와 수치가 다르다. 원문은 차이를 설명하지 않는다.
+
 ## NIU 기능 (6절)
 
 ### Forwarding (6.1)
@@ -326,6 +328,8 @@ filter database에 등록된 PGN의 필터 모드는 filter mode byte로 식별�
 | N.MFDB_Response | 110 | 0 | 0 | 237 | 249 | 240 | 1 | 12₁₆ | 00₁₆ | 00FEE3₁₆ | FFFF₁₆ |
 
 응답을 해석하면: filter mode 0(block)이고 차단 중인 유일한 메시지는 engine configuration(00FEE3₁₆)이다.
+
+<strong>포트 방향 주의</strong>: ISO 11783-9:2012 4.1.2는 TECU의 port 1을 implement 버스, port 2를 tractor 버스로 정하고, 이 문서의 Figure 1도 TECU의 P1을 implement 쪽, P2를 tractor 쪽에 둔다. 그 규칙대로라면 port pair 12₁₆(From 1 → To 2)은 implement → tractor 방향이고, tractor 데이터를 implement 쪽으로 막는 필터는 21₁₆이다. 원문 예시의 "implement로 가는 방향(port 1 → port 2)"은 이 포트 번호 규칙과 어긋난다.
 :::
 
 ### Network topology information (6.7)
@@ -512,6 +516,8 @@ connection을 연 CF는, 다른 CF가 그 connection을 붙들고 있지 않는 
 1. NIU가 다른 네트워크 세그먼트(port pair)의 NAME·주소 테이블을 보고할 때, 그 세그먼트에서의 자기 자신의 NAME·주소도 함께 보고해야 한다.
 
 virtual CF는 다른 CF들에게 보통 CF처럼 보이므로, connection을 열지 않은 actual CF도 통신을 시도할 수 있다. NIU는 해당 virtual CF에 대한 open connection이 설정되지 않은 CF가 virtual CF로 보낸 메시지를 <strong>NACK해야</strong> 한다. Acknowledge 메시지의 Address Acknowledged(ADD_NACK) 파라미터에 virtual CF의 주소를 담고, control byte는 "access denied"(2)로 설정한다.
+
+ISO 11783-3:2018 5.4.5는 Acknowledgement의 Byte 5(address acknowledge)에 요청을 보낸 CF의 주소(PS 필드의 복사)를 넣는다고 정한다. 이 절의 virtual CF 주소 규정과 다르므로, 수신 측은 Byte 5만으로 판단하지 말고 control byte와 Byte 6~8의 PGN으로 거절 대상을 가리는 편이 안전하다(해석).
 
 #### Connection 메시지 (6.9.5)
 

@@ -1,0 +1,15 @@
+export default {
+  '/study/isobus/10-j1939-address': '/study/isobus/12-j1939-address-name',
+  '/study/isobus/11-j1939-transport': '/study/isobus/15-tp-bam-cmdt',
+  '/study/isobus/12-isobus-overview': '/study/isobus/18-isobus-overview',
+  '/study/isobus/13-isobus-architecture': '/study/isobus/20-isobus-network-topology',
+  '/study/isobus/14-isobus-network-mgmt': '/study/isobus/26-isobus-network-mgmt',
+  '/study/isobus/15-vt-basics': '/study/isobus/29-vt-basics',
+  '/study/isobus/16-vt-object-pool': '/study/isobus/32-vt-object-pool-basics',
+  '/study/isobus/17-vt-commands': '/study/isobus/36-vt-commands-basics',
+  '/study/isobus/18-tc-basics': '/study/isobus/41-tc-basics',
+  '/study/isobus/19-tc-process-data': '/study/isobus/45-tc-process-data-basics',
+  '/study/isobus/20-tc-ddop': '/study/isobus/48-ddop-basics',
+  '/study/isobus/21-isobus-misc': '/study/isobus/51-file-server-basics',
+  '/study/isobus/22-practice': '/study/isobus/55-practice-log-vt-tc',
+}

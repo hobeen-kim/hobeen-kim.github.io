@@ -2,13 +2,15 @@ html, body {
   scroll-behavior: smooth;
 }
 
-/* 스터디 다이어그램 — 라이트/다크 모드별 이미지 전환
-   md에 -light.png / -dark.png 두 장을 나란히 넣으면 현재 테마의 것만 보인다 */
-html.dark img[src*="/images/study-"][src$="-light.png"] {
+/* 스터디 다이어그램: 라이트/다크 모드별 이미지 전환
+   md에 -light.png / -dark.png 두 장을 나란히 넣으면 현재 테마의 것만 보인다.
+   theme-default rc.74는 html[data-theme="dark"]로 다크 모드를 표시한다(.dark 클래스는 쓰지 않는다). */
+html.dark img[src*="/images/study-"][src$="-light.png"],
+html[data-theme="dark"] img[src*="/images/study-"][src$="-light.png"] {
   display: none;
 }
 
-html:not(.dark) img[src*="/images/study-"][src$="-dark.png"] {
+html:not(.dark):not([data-theme="dark"]) img[src*="/images/study-"][src$="-dark.png"] {
   display: none;
 }
 
@@ -77,5 +79,165 @@ body.page-has-title header.vp-navbar {
       text-decoration: none !important;
       color: var(--vp-c-text);
     }
+  }
+}
+
+.gl-term {
+  cursor: pointer;
+  border-radius: 3px;
+  text-decoration: underline dotted var(--vp-c-accent);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 0.22em;
+  transition: background-color var(--vp-t-color);
+
+  &:hover,
+  &[aria-expanded='true'] {
+    background-color: var(--vp-c-accent-soft);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--vp-c-accent);
+    outline-offset: 1px;
+  }
+}
+
+.gl-popover {
+  position: absolute;
+  z-index: 30;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: min(360px, calc(100vw - 16px));
+  padding: 0.7rem 0.9rem 0.75rem;
+  border: 1px solid var(--vp-c-border);
+  border-radius: 8px;
+  background-color: var(--vp-c-bg-elv);
+  box-shadow: 0 8px 24px var(--vp-c-shadow);
+  color: var(--vp-c-text);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+
+  &:focus {
+    outline: none;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  .gl-popover-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .gl-popover-term {
+    font-size: 1rem;
+  }
+
+  .gl-popover-close {
+    flex: none;
+    width: 28px;
+    height: 28px;
+    margin: -0.3rem -0.5rem 0 0;
+    padding: 0;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--vp-c-text-mute);
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--vp-c-control-hover);
+      color: var(--vp-c-text);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--vp-c-accent);
+      outline-offset: 1px;
+    }
+  }
+
+  .gl-popover-names {
+    color: var(--vp-c-text-mute);
+    font-size: 0.82rem;
+  }
+
+  .gl-popover-short {
+    margin-top: 0.4rem;
+  }
+
+  .gl-popover-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    margin-top: 0.6rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--vp-c-gutter);
+    font-size: 0.85rem;
+
+    a:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+@media (max-width: 419px) {
+  .gl-popover {
+    width: calc(100vw - 16px);
+    max-width: none;
+  }
+}
+
+.gl-list {
+  margin: 1rem 0;
+}
+
+.gl-entry {
+  padding: 0.6rem 0.9rem;
+  border-radius: 8px;
+  line-height: 1.6;
+  transition: background-color var(--vp-t-color);
+
+  & + & {
+    margin-top: 0.25rem;
+  }
+
+  &:has(.gl-entry-anchor:target),
+  &.is-target {
+    background-color: var(--vp-c-accent-soft);
+  }
+
+  /* vue-router scrolls hash targets with window.scrollTo and ignores scroll-margin-top */
+  .gl-entry-anchor {
+    position: relative;
+    top: calc(-1 * (var(--navbar-height) + 2rem));
+  }
+
+  dd {
+    margin: 0.2rem 0 0;
+  }
+
+  .gl-entry-term {
+    font-weight: 600;
+  }
+
+  .gl-entry-names {
+    margin-left: 0.4rem;
+    color: var(--vp-c-text-mute);
+    font-size: 0.875em;
+    font-weight: 400;
+  }
+
+  .gl-entry-detail {
+    color: var(--vp-c-text-mute);
+  }
+
+  .gl-entry-see {
+    font-size: 0.9em;
   }
 }

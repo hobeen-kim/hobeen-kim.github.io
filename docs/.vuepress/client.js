@@ -1,4 +1,4 @@
-import { defineClientConfig } from 'vuepress/client'
+import { defineClientConfig, resolveRoute } from 'vuepress/client'
 import PostList from "./components/PostList.vue";
 import CustomLayout from "./theme/layouts/CustomLayout.vue";
 import LogList from "./components/LogList.vue";
@@ -12,6 +12,9 @@ import Header from "./theme/Header.vue";
 import Home from "./components/home/Home.vue";
 import ResumeCover from "./components/resume/ResumeCover.vue";
 import TobeCover from "./components/resume/TobeCover.vue";
+import GlossaryList from "./components/GlossaryList.vue";
+import GlossaryPopover from "./components/GlossaryPopover.vue";
+import redirects from "./data/redirects.js";
 
 export default defineClientConfig({
     enhance({ app, router }) {
@@ -27,6 +30,15 @@ export default defineClientConfig({
         app.component('Header', Header)
         app.component('ResumeCover', ResumeCover)
         app.component('TobeCover', TobeCover)
+        app.component('GlossaryList', GlossaryList)
+
+        router.beforeEach((to) => {
+            const oldPath = to.path.replace(/\.html$/, '').replace(/\/$/, '')
+            const newPath = redirects[oldPath]
+            if (newPath && resolveRoute(oldPath).notFound) {
+                return { path: newPath, hash: to.hash }
+            }
+        })
 
         if (typeof window !== 'undefined') {
             const loadMermaid = () => {
@@ -60,5 +72,5 @@ export default defineClientConfig({
         CustomLayout,
     },
     setup() {},
-    rootComponents: [],
+    rootComponents: [GlossaryPopover],
 })

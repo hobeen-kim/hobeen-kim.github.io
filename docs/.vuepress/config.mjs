@@ -2,11 +2,32 @@ import { viteBundler } from '@vuepress/bundler-vite'
 import { defaultTheme } from '@vuepress/theme-default'
 import { defineUserConfig } from 'vuepress'
 import {getPosts} from "./utils/posts.js";
+import fs from 'fs'
 import path from 'path'
 import {getCategories} from "./utils/categories.js";
 import {getLogs} from "./utils/logs.js";
 import {getBooks} from "./utils/books.js";
 import {getStudies} from "./utils/studies.js";
+import { glossaryPlugin } from './plugins/markdown-glossary.js'
+import { glossaries, glossaryScopes } from './data/glossary/index.js'
+import redirects from './data/redirects.js'
+
+const SITE_URL = 'https://hobeen-kim.github.io'
+
+const redirectPage = (newPath) => `<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>옮긴 글</title>
+<meta http-equiv="refresh" content="0; url=${newPath}.html">
+<link rel="canonical" href="${SITE_URL}${newPath}">
+<script>location.replace(${JSON.stringify(`${newPath}.html`)} + location.hash)</script>
+</head>
+<body>
+<p>이 글은 <a href="${newPath}.html">새 위치</a>로 옮겼다.</p>
+</body>
+</html>
+`
 
 const theme = {
   extends: defaultTheme({
@@ -165,43 +186,96 @@ const theme = {
           children: [
             { text: 'CH8. J1939 입문', link: '/study/isobus/08-j1939-intro' },
             { text: 'CH9. J1939 메시지 구조', link: '/study/isobus/09-j1939-message' },
-            { text: 'CH10. J1939 주소 체계', link: '/study/isobus/10-j1939-address' },
-            { text: 'CH11. J1939 Transport Protocol', link: '/study/isobus/11-j1939-transport' },
+            { text: 'CH10. 요청과 응답', link: '/study/isobus/10-j1939-request-ack' },
+            { text: 'CH11. Request2·Transfer와 응답 규칙', link: '/study/isobus/11-j1939-request2-timing' },
+            { text: 'CH12. 주소와 NAME', link: '/study/isobus/12-j1939-address-name' },
+            { text: 'CH13. 주소 클레임', link: '/study/isobus/13-j1939-address-claim' },
+            { text: 'CH14. NAME 관리와 네트워크 초기화', link: '/study/isobus/14-name-management-init' },
+            { text: 'CH15. TP 기초: BAM과 CMDT', link: '/study/isobus/15-tp-bam-cmdt' },
+            { text: 'CH16. TP 연결 규칙과 타이머', link: '/study/isobus/16-tp-connection-rules' },
+            { text: 'CH17. ETP', link: '/study/isobus/17-etp' },
           ],
         },
         {
-          text: 'ISOBUS (ISO 11783)',
+          text: 'ISOBUS 개요와 네트워크',
           collapsible: false,
           children: [
-            { text: 'CH12. ISOBUS 개요', link: '/study/isobus/12-isobus-overview' },
-            { text: 'CH13. 네트워크 아키텍처', link: '/study/isobus/13-isobus-architecture' },
-            { text: 'CH14. 네트워크 관리', link: '/study/isobus/14-isobus-network-mgmt' },
+            { text: 'CH18. ISOBUS 개요', link: '/study/isobus/18-isobus-overview' },
+            { text: 'CH19. ISO 11783 네트워크 요구사항', link: '/study/isobus/19-isobus-part1-requirements' },
+            { text: 'CH20. ISOBUS 네트워크 구성', link: '/study/isobus/20-isobus-network-topology' },
+            { text: 'CH21. NIU와 네트워크 계층', link: '/study/isobus/21-niu-network-layer' },
+          ],
+        },
+        {
+          text: '트랙터와 작업기 메시지',
+          collapsible: false,
+          children: [
+            { text: 'CH22. 트랙터 ECU(TECU)', link: '/study/isobus/22-tractor-ecu' },
+            { text: 'CH23. 트랙터-작업기 메시지 입문', link: '/study/isobus/23-implement-messages-basics' },
+            { text: 'CH24. 히치·PTO·밸브와 작업기 제어', link: '/study/isobus/24-hitch-pto-valve-control' },
+            { text: 'CH25. 설정·안전 메시지', link: '/study/isobus/25-settings-safety-messages' },
+          ],
+        },
+        {
+          text: '네트워크 관리와 진단',
+          collapsible: false,
+          children: [
+            { text: 'CH26. 네트워크 관리와 Working Set', link: '/study/isobus/26-isobus-network-mgmt' },
+            { text: 'CH27. 진단 (1): ECU 식별', link: '/study/isobus/27-diagnostics-identification' },
+            { text: 'CH28. 진단 (2): DM1·FMI', link: '/study/isobus/28-diagnostics-dm-fmi' },
           ],
         },
         {
           text: 'Virtual Terminal (VT)',
           collapsible: false,
           children: [
-            { text: 'CH15. VT 기초', link: '/study/isobus/15-vt-basics' },
-            { text: 'CH16. VT 오브젝트 풀', link: '/study/isobus/16-vt-object-pool' },
-            { text: 'CH17. VT 명령어', link: '/study/isobus/17-vt-commands' },
+            { text: 'CH29. VT 기초', link: '/study/isobus/29-vt-basics' },
+            { text: 'CH30. VT 화면과 기술 데이터', link: '/study/isobus/30-vt-display-technical-data' },
+            { text: 'CH31. VT 연결 관리', link: '/study/isobus/31-vt-connection' },
+            { text: 'CH32. 오브젝트 풀 기초', link: '/study/isobus/32-vt-object-pool-basics' },
+            { text: 'CH33. 오브젝트 레코드', link: '/study/isobus/33-vt-object-records' },
+            { text: 'CH34. 배치·User-Layout·색', link: '/study/isobus/34-vt-layout-color' },
+            { text: 'CH35. 풀 전송 심화와 문자 집합', link: '/study/isobus/35-vt-pool-transfer-charset' },
+            { text: 'CH36. VT 명령어 기초', link: '/study/isobus/36-vt-commands-basics' },
+            { text: 'CH37. VT 명령 세부', link: '/study/isobus/37-vt-command-details' },
+            { text: 'CH38. 매크로와 입력 처리', link: '/study/isobus/38-vt-macro-input' },
+            { text: 'CH39. 경보와 활성화 메시지', link: '/study/isobus/39-vt-alarm-activation' },
+            { text: 'CH40. 보조 입력(AUX)', link: '/study/isobus/40-vt-aux' },
           ],
         },
         {
           text: 'Task Controller (TC)',
           collapsible: false,
           children: [
-            { text: 'CH18. TC 기초', link: '/study/isobus/18-tc-basics' },
-            { text: 'CH19. TC 프로세스 데이터', link: '/study/isobus/19-tc-process-data' },
-            { text: 'CH20. TC DDOP', link: '/study/isobus/20-tc-ddop' },
+            { text: 'CH41. TC 기초', link: '/study/isobus/41-tc-basics' },
+            { text: 'CH42. 태스크와 시간 기록', link: '/study/isobus/42-tc-task' },
+            { text: 'CH43. TC 연결 관리', link: '/study/isobus/43-tc-connection' },
+            { text: 'CH44. 다중 TC·DL·기능성', link: '/study/isobus/44-tc-multi-dl-functionality' },
+            { text: 'CH45. 프로세스 데이터 기초', link: '/study/isobus/45-tc-process-data-basics' },
+            { text: 'CH46. 명령 니블과 PDACK', link: '/study/isobus/46-tc-commands-pdack' },
+            { text: 'CH47. Totals·로깅·Peer Control', link: '/study/isobus/47-tc-totals-logging-peer' },
+            { text: 'CH48. DDOP 기초', link: '/study/isobus/48-ddop-basics' },
+            { text: 'CH49. DDOP 바이트 구성', link: '/study/isobus/49-ddop-bytes' },
+            { text: 'CH50. DDOP 전송과 설계 점검', link: '/study/isobus/50-ddop-commands-design' },
           ],
         },
         {
-          text: '심화 및 실습',
+          text: 'File Server와 Sequence Control',
           collapsible: false,
           children: [
-            { text: 'CH21. 기타 기능', link: '/study/isobus/21-isobus-misc' },
-            { text: 'CH22. 종합 실습', link: '/study/isobus/22-practice' },
+            { text: 'CH51. File Server 기초', link: '/study/isobus/51-file-server-basics' },
+            { text: 'CH52. File Server 세부', link: '/study/isobus/52-file-server-details' },
+            { text: 'CH53. Sequence Control 기초', link: '/study/isobus/53-sequence-control-basics' },
+            { text: 'CH54. Sequence Control 세부', link: '/study/isobus/54-sequence-control-details' },
+          ],
+        },
+        {
+          text: '종합 실습',
+          collapsible: false,
+          children: [
+            { text: 'CH55. 종합 실습 (1)', link: '/study/isobus/55-practice-log-vt-tc' },
+            { text: 'CH56. 종합 실습 (2): ISOXML', link: '/study/isobus/56-practice-isoxml' },
+            { text: 'CH57. 종합 실습 (3): 바이너리 파일', link: '/study/isobus/57-practice-binary-files' },
           ],
         },
         {
@@ -1287,6 +1361,15 @@ export default defineUserConfig({
         return `<pre class="mermaid">${md.utils.escapeHtml(token.content)}</pre>`
       }
       return origFence(tokens, idx, options, env, self)
+    }
+    md.use(glossaryPlugin, { glossaries, scopes: glossaryScopes })
+  },
+  onGenerated: (app) => {
+    for (const [oldPath, newPath] of Object.entries(redirects)) {
+      const file = app.dir.dest(`${oldPath.slice(1)}.html`)
+      if (fs.existsSync(file)) continue
+      fs.mkdirSync(path.dirname(file), { recursive: true })
+      fs.writeFileSync(file, redirectPage(newPath))
     }
   },
   // 전역 변수로 포스트 데이터 제공

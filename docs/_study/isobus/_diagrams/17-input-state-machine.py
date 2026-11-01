@@ -1,4 +1,4 @@
-"""CH17 §9 운전자 입력 상태 기계 — Navigating / Data input 천이 (ISO 11783-6 4.6.17 Table 5) (light/dark PNG)."""
+"""CH17 §9 운전자 입력 상태 기계: Navigating / Data input 천이 (ISO 11783-6 4.6.17 Table 5) (light/dark PNG)."""
 from _common import diagram
 
 

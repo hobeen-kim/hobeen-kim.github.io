@@ -1,4 +1,4 @@
-"""CH5 §3 29bit ID 중재 비트 비교 — 메시지A(0x0CF00400) vs 메시지B(0x0CFEEE00), PF 필드에서 승부 결정 (light/dark PNG).
+"""CH5 §3 29bit ID 중재 비트 비교: 메시지A(0x0CF00400) vs 메시지B(0x0CFEEE00), PF 필드에서 승부 결정 (light/dark PNG).
 
 검산 (29bit = Priority3 + EDP1 + DP1 + PF8 + PS8 + SA8):
   A 0x0CF00400 -> 011 0 0 11110000 00000100 00000000
@@ -55,7 +55,7 @@ def draw(d):
         d.text(LABEL_X + LABEL_W / 2, y + ROW_H * 0.62, name, size=10, weight="bold")
         d.text(LABEL_X + LABEL_W / 2, y + ROW_H * 0.28, idhex, size=8.3, color=P["dim"])
 
-        # Priority / EDP / DP — 동점 (녹색)
+        # Priority / EDP / DP: 동점 (녹색)
         d.box(P_X, y, P_W, ROW_H, P["green"], ec=P["edge"], lw=1.0)
         d.text(P_X + P_W / 2, y + ROW_H / 2, "011", size=10.5)
 
@@ -65,7 +65,7 @@ def draw(d):
         d.box(DP_X, y, DP_W, ROW_H, P["green"], ec=P["edge"], lw=1.0)
         d.text(DP_X + DP_W / 2, y + ROW_H / 2, "0", size=10.5)
 
-        # PF — 비트별 칸
+        # PF: 비트별 칸
         for i, bit in enumerate(pf_bits):
             cx = pf_cell_x(i)
             if i < DIVERGE_IDX:
@@ -83,7 +83,7 @@ def draw(d):
                 tcolor = P["dim"]
             d.text(cx + PF_CELL_W / 2, y + ROW_H / 2, bit, size=10.5, color=tcolor)
 
-        # PS / SA — 이미 승부가 갈려 비교되지 않음 (옅게)
+        # PS / SA: 이미 승부가 갈려 비교되지 않음 (옅게)
         ps_val = "00000100" if not is_loser else "11101110"
         sa_val = "00000000"
         for gx, gw, val in ((PS_X, PS_W, ps_val), (SA_X, SA_W, sa_val)):

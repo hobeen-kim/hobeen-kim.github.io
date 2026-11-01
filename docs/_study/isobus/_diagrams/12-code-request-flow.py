@@ -1,4 +1,4 @@
-"""CH12 §11 ISO 11783 코드 요청·등록 흐름 — Part 1 Clause 7·Annex A (light/dark PNG)."""
+"""CH12 §11 ISO 11783 코드 요청·등록 흐름: Part 1 Clause 7·Annex A (light/dark PNG)."""
 from _common import diagram
 
 LISTS = ["PGN\n할당", "Industry\ngroup", "IG 0\npreferred 주소", "IG 2\ninitial 주소",

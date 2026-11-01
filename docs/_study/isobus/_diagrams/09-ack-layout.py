@@ -1,4 +1,4 @@
-"""CH09 §8 Acknowledgement(PGN 59392) 데이터 8바이트 — 기본형과 확장 식별자형 (light/dark PNG)."""
+"""CH09 §8 Acknowledgement(PGN 59392) 데이터 8바이트: 기본형과 확장 식별자형 (light/dark PNG)."""
 from _common import diagram
 
 X0, CW, GAP = 17, 9.7, 0.5

@@ -1,4 +1,4 @@
-"""CH13 Part 7 B.21 Language command(PGN 65039) 바이트 배치 — en-US 예 (light/dark PNG)."""
+"""CH13 Part 7 B.21 Language command(PGN 65039) 바이트 배치: en-US 예 (light/dark PNG)."""
 from _common import diagram
 
 BYTES = [

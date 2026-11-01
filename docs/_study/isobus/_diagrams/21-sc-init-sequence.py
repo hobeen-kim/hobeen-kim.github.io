@@ -1,4 +1,4 @@
-"""CH21 §3.3 SC 초기화 메시지 흐름 — ISO 11783-14 4.4.2, Figure 6~8 재구성 (light/dark PNG)."""
+"""CH21 §3.3 SC 초기화 메시지 흐름: ISO 11783-14 4.4.2, Figure 6~8 재구성 (light/dark PNG)."""
 from _common import diagram
 
 VT, SCM, SCC = 10, 42, 86

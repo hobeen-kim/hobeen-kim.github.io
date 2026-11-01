@@ -1,11 +1,11 @@
-"""CH16 §11 색 해석 경로 — 색 속성 → Colour Map → WS 팔레트(ARGB) → 알파 합성 → 픽셀 (light/dark PNG)."""
+"""34장 색 해석 경로: 색 속성 → Colour Map → WS 팔레트(ARGB) → 알파 합성 → 픽셀 (light/dark PNG)."""
 from _common import diagram
 
 STAGES = [
     ("오브젝트 색 속성", "색 인덱스 0~255", "blue"),
-    ("Colour Map", "B.17, 인덱스 → 인덱스", "green"),
-    ("WS 팔레트 (ARGB)", "A.4 표준 또는 B.26", "purple"),
-    ("알파 합성", "4.6.13, v6", "brown"),
+    ("Colour Map", "색 번호 → 다른 색 번호", "green"),
+    ("WS 팔레트 (ARGB)", "표준 팔레트 또는 Colour Palette", "purple"),
+    ("알파 합성", "v6, 아래 색과 섞기", "brown"),
     ("화면 픽셀", "", "gray"),
 ]
 
@@ -29,8 +29,8 @@ def draw(d):
 
     # 초기 선택(로드 직후)과 런타임 전환
     top_y, bot_y = 33, 2
-    for label, yy in [("Working Set Special Controls (B.29) - 로드 직후 초기 선택", top_y),
-                      ("Select Colour Map or Palette (F.60) - 런타임 전환", bot_y)]:
+    for label, yy in [("Working Set Special Controls: 로드 직후 처음 쓸 표 선택", top_y),
+                      ("Select Colour Map or Palette 명령: 운영 중 전환", bot_y)]:
         bx0, bx1 = centers[1] - w / 2, centers[2] + w / 2
         d.box(bx0, yy, bx1 - bx0, 6, P["chip"], ec=P["accent"])
         d.text((bx0 + bx1) / 2, yy + 3, label, size=8.5)
@@ -42,7 +42,7 @@ def draw(d):
 
     # 색 깊이 칩
     d.box(centers[0] - w / 2, top_y, w, 6, P["chip"], ec=P["edge"])
-    d.text(centers[0], top_y + 3, "모노 0~1 / 16색 0~15\n256색 0~255", size=7.5, color=P["dim"])
+    d.text(centers[0], top_y + 3, "단색 0~1 / 16색 0~15\n256색 0~255", size=7.5, color=P["dim"])
     d.arrow(centers[0], top_y, centers[0], y + h, color=P["dim"], lw=1.2, style="-")
 
 

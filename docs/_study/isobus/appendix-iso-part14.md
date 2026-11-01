@@ -1,8 +1,10 @@
 ---
-title: "표준 정리: Part 14 — Sequence control"
-description: "ISO 11783-14(Sequence control) — SCM/SCC 상태 머신, 오브젝트 풀, 메시지 정의를 정리한 표준 요약이다."
+title: "표준 정리: Part 14(Sequence control)"
+description: "ISO 11783-14(Sequence control)에서 SCM/SCC 상태 머신, 오브젝트 풀, 메시지 정의를 정리한 표준 요약이다."
 date: 2026-08-21
 tags: [ISOBUS, ISO11783, 표준정리]
+prev: /study/isobus/appendix-iso-part13
+next: null
 ---
 
 # ISO 11783-14: Sequence control 정리
@@ -11,9 +13,13 @@ tags: [ISOBUS, ISO11783, 표준정리]
 ISO 11783-14 표준 원문을 학습 목적으로 재구성한 <strong>비공식 요약·해설</strong>이다. 규범적 판단이 필요할 때는 반드시 원문 표준을 확인해야 한다.
 :::
 
+::: tip 처음 읽는다면
+이 페이지는 Sequence Control(Part 14: 두렁에서 반복하는 조작을 기록했다가 재생하는 기능)을 원문의 절 구조대로 요약한 참고 자료다. 상태 머신이나 메시지 바이트를 원문 순서로 확인할 때 펼쳐 본다. 처음이라면 [53장 Sequence Control(SC) 기초](/study/isobus/53-sequence-control-basics)를 먼저 읽는다.
+:::
+
 ## 개요
 
-ISO 11783-14:2013은 ISO 11783 시리즈의 열네 번째 파트로, <strong>Sequence Control(시퀀스 제어)</strong> 시스템을 정의한다. 대표적인 적용 예가 headland management system(두렁 관리 시스템)이다. 트랙터가 두렁(headland)에 도달해 선회할 때마다 오퍼레이터가 매번 수동으로 반복하는 일련의 조작 — PTO 정지, 히치 상승, 밸브 전환 등 — 을 한 번 기록(recording)해 두고, 이후 오퍼레이터의 명령 한 번으로 재생(play back)할 수 있게 하는 것이 이 파트의 목적이다.
+ISO 11783-14:2013은 ISO 11783 시리즈의 열네 번째 파트로, <strong>Sequence Control(시퀀스 제어)</strong> 시스템을 정의한다. 대표적인 적용 예가 headland management system(두렁 관리 시스템)이다. 트랙터가 두렁(headland)에 도달해 선회할 때마다 오퍼레이터가 매번 수동으로 반복하는 일련의 조작(PTO 정지, 히치 상승, 밸브 전환 등)을 한 번 기록(recording)해 두고, 이후 오퍼레이터의 명령 한 번으로 재생(play back)할 수 있게 하는 것이 이 파트의 목적이다.
 
 핵심 아이디어는 다음과 같다.
 
@@ -53,30 +59,30 @@ normative reference는 다음 네 개다.
 | --- | --- | --- |
 | sequence control system | SC | SCM 1개와 SCC 1개 이상으로 구성되어 시퀀스 제어 기능을 수행하는 시스템 |
 | sequence control master | SCM | 시퀀스 제어 시스템의 컨트롤러. 기록·재생 단계를 개시하고, 기록 중 수신한 client command를 trigger point와 함께 저장한다 |
-| active sequence control master | — | 오퍼레이터가 선택하여 현재 시스템을 제어 중인 SCM. 동시에 하나만 활성화될 수 있다 |
-| inactive sequence control master | — | 네트워크에 연결되어 있으나 시스템을 제어하지 않는 SCM |
+| active sequence control master | - | 오퍼레이터가 선택하여 현재 시스템을 제어 중인 SCM. 동시에 하나만 활성화될 수 있다 |
+| inactive sequence control master | - | 네트워크에 연결되어 있으나 시스템을 제어하지 않는 SCM |
 | sequence control client | SCC | 시퀀스 제어에 사용할 수 있는 client function을 제공하는, 네트워크에 연결된 제어 기능(CF). 트랙터도 SCC이자 SCM으로 동작할 수 있다 |
-| enabled / disabled SCC | — | active SCM이 참여 대상으로 선택한 SCC가 enabled. disabled SCC는 상태 변화에 응답하지 않고 기록·재생에 참여하지 않는다 |
-| client function | — | 트랙터·작업기의 기계·유압·전기 기능 중 오퍼레이터 조작으로 상태가 바뀌고 재생 중 SCM 명령을 받을 수 있는 것. 예: PTO, hitch, aux valve, 베일러 후방 게이트, 스프레이어 마스터 밸브 |
-| client command | — | 기록 중 SCC가 알리는(그리고 재생 중 수신하면 실행하는) 동작. 예: PTO 시작/정지, 게이트 열기/닫기 |
+| enabled / disabled SCC | - | active SCM이 참여 대상으로 선택한 SCC가 enabled. disabled SCC는 상태 변화에 응답하지 않고 기록·재생에 참여하지 않는다 |
+| client function | - | 트랙터·작업기의 기계·유압·전기 기능 중 오퍼레이터 조작으로 상태가 바뀌고 재생 중 SCM 명령을 받을 수 있는 것. 예: PTO, hitch, aux valve, 베일러 후방 게이트, 스프레이어 마스터 밸브 |
+| client command | - | 기록 중 SCC가 알리는(그리고 재생 중 수신하면 실행하는) 동작. 예: PTO 시작/정지, 게이트 열기/닫기 |
 | sequence control sequence | SCS | 기록 단계에서 하나 이상의 SCC가 수행한 기능·동작의 집합과 그 활성화 trigger 정보 |
-| sequence control trigger | — | 시퀀스 내 SCC 기능을 활성화하는 방법. 시간 기반(두 기능 활성화 사이의 시간) 또는 거리 기반(두 기능 활성화 사이의 주행 거리) 등 |
-| sequence number | — | SC 통신에서 시퀀스를 유일하게 식별하는 번호. 예: 두렁 진입용 시퀀스 = 1, 두렁 이탈용 시퀀스 = 2 |
+| sequence control trigger | - | 시퀀스 내 SCC 기능을 활성화하는 방법. 시간 기반(두 기능 활성화 사이의 시간) 또는 거리 기반(두 기능 활성화 사이의 주행 거리) 등 |
+| sequence number | - | SC 통신에서 시퀀스를 유일하게 식별하는 번호. 예: 두렁 진입용 시퀀스 = 1, 두렁 이탈용 시퀀스 = 2 |
 | sequence control data definition | SCD | SCC가 SCM에 전달하는 "기록 가능한 기능" 기술 데이터 집합. function ID, state ID, 선호 trigger 방식, 시각화용 아이콘, 기능 이름을 포함한다 (상세는 Annex A) |
 | sequence control client working set | SCCWS | ISO 11783-6의 working set 중 master 또는 member가 SCC로 동작하는 것 |
 | sequence control master object pool | SCMOP | SCM이 VT에 올리는 object pool. 오퍼레이터와 SCM의 상호작용 UI를 제공한다 |
 | sequence control client object pool | SCCOP | SCCWS가 VT에 올리는 object pool. SCM이 SCC의 SCD 정보를 VT에 표시하는 데 필요한 오브젝트를 최소한 포함한다 |
-| graphical / textual representation object | — | SCD 오브젝트가 참조할 수 있는 SCCOP 내 오브젝트. SCM이 SCC·기능·상태를 그림(예: Picture Graphic)이나 텍스트(예: Output String)로 표시할 때 쓰인다 |
+| graphical / textual representation object | - | SCD 오브젝트가 참조할 수 있는 SCCOP 내 오브젝트. SCM이 SCC·기능·상태를 그림(예: Picture Graphic)이나 텍스트(예: Output String)로 표시할 때 쓰인다 |
 | transaction number | TAN | command–response 메시지를 동기화(짝 맞춤)하는 방법 (4.6 참조) |
-| abort | — | 시퀀스 재생을 중단하고 시퀀스로 개시된 모든 동작을 즉시 정지시키는 것. 예: 히치가 현재 위치에서 멈춘다 |
-| cancel | — | 시퀀스 기록을 도중에 중단하는 것 |
-| safe state | — | 제어 시스템이 (부분) 고장 나도 오퍼레이터·주변인 위험이 허용 수준인 운전 모드 |
+| abort | - | 시퀀스 재생을 중단하고 시퀀스로 개시된 모든 동작을 즉시 정지시키는 것. 예: 히치가 현재 위치에서 멈춘다 |
+| cancel | - | 시퀀스 기록을 도중에 중단하는 것 |
+| safe state | - | 제어 시스템이 (부분) 고장 나도 오퍼레이터·주변인 위험이 허용 수준인 운전 모드 |
 
 :::tip abort와 cancel의 구분
 abort는 <strong>재생(play back)</strong> 중단, cancel은 <strong>기록(recording)</strong> 중단이다. abort는 안전과 직결되므로 별도 상태와 전용 메시지(SCClientAbort)까지 정의된다.
 :::
 
-## 4.1 기술 요구사항 — 일반
+## 4.1 기술 요구사항: 일반
 
 시퀀스 제어 시스템은 headland turn이나 waterway 횡단 제어처럼 반복 구간에서 기계가 자동 기능을 수행하게 한다. 동작 개요는 다음과 같다.
 
@@ -129,7 +135,7 @@ SCM과 SCCWS의 working set master는 <strong>function instance 0인 VT</strong>
 
 1. SCCWS는 active SCM의 NAME을 검증한 뒤, Change Attribute 명령으로 자신의 <strong>External Object Definition object</strong>의 NAME 필드를 갱신·활성화한다(Option = enabled). 이로써 VT가 SCMOP에서 SCCOP 내 정의된 오브젝트로의 참조를 확립할 수 있다.
 2. SCM도 참조하는 SCC들의 NAME을 검증하고, 자신의 <strong>External Reference NAME object</strong>의 NAME 필드를 갱신·활성화한다. 이것이 SCCOP로의 일반 연결을 확립한다.
-3. SCM은 SCD로 받은 참조 데이터로 자신의 External Object Pointer 오브젝트를 구성한다. 보통 포인터 하나당 Change Attribute 두 번이 필요하다 — 하나는 External Reference NAME object ID 설정, 하나는 원하는 External Object ID 설정.
+3. SCM은 SCD로 받은 참조 데이터로 자신의 External Object Pointer 오브젝트를 구성한다. 보통 포인터 하나당 Change Attribute 두 번이 필요하다. 하나는 External Reference NAME object ID 설정, 하나는 원하는 External Object ID 설정.
 
 External Object Definition object는 접근 허가 검사 역할도 한다. <strong>그 목록에 등재된 오브젝트만</strong> SCM이 참조할 수 있다.
 
@@ -391,7 +397,7 @@ SCM은 오퍼레이터가 검증 요건을 맞추도록 SCS를 적절히 수정�
 - 단, 빠른 반응을 위해 SCM은 이전 재생이 완전히 끝나기 전에 다음 재생을 시작하는 수단을 제공할 수 있다. 이 경우 SCM은 첫 시퀀스의 명령 송신을 멈추고 SCMasterStatus의 시퀀스 번호를 먼저 바꿔 SCC들에게 변경을 알린 뒤 다음 시퀀스의 명령을 보내야 한다(활성 시퀀스는 한 번에 하나만 허용). 이전 시퀀스의 명령을 아직 수행 중인 SCC가 그 활동에 대한 피드백을 보낼 수 있는데, 이는 fault로 간주하면 안 된다.
 - SCM은 SCMasterStatus 상태를 "Play Back"으로 바꿔 재생 시작을 알리고, enabled SCC들은 SCClientStatus에서 이를 따른다. SCM은 아직 "Ready"를 보고 중인 SCC에게도 즉시 시작을 위해 client command를 보낼 수 있다. SCM 상태 변화를 놓치고 첫 client command를 받은 SCC는 이를 "Play Back" 전이 트리거로 해석하고 명령을 실행해야 한다. SCC는 항상 SCM의 최신 명령을 따라야 하며, timeout 내에 따르지 않으면 SCM은 4.5.3.4대로 처리한다.
 
-재생 중 SCM·SCC 동기 유지 규칙 — 저장된 trigger 이벤트에 도달할 때마다:
+재생 중 SCM·SCC 동기 유지 규칙. 저장된 trigger 이벤트에 도달할 때마다:
 
 1. SCM은 해당 기능을 소유한 SCC에 function ID, state ID, function value를 담은 SCMasterExecutionCommand(E.6)를 보낸다. TAN은 SCM의 직전 TAN + 1.
 2. SCM은 SCC가 SCClientExecutionStatus(E.7)로 응답하거나 timeout 될 때까지 같은 TAN으로 100 ms 간격 반복한다.
@@ -417,7 +423,7 @@ SCM은 오퍼레이터가 검증 요건을 맞추도록 SCS를 적절히 수정�
 - 재생 중 오퍼레이터가 client function을 수동 조작하면 SCC는 SCExecutionIndication의 function execution state 11로 SCM에 알린다. 조작된 기능이 실행 중인 SCS에 속하면 SCM은 전체 재생을 멈추거나, 이번 재생 동안 그 기능에 새 명령을 보내지 않기로 하거나, 그냥 무시할 수 있다(단 메시지 통신 자체는 무시 불가). SCC는 이 SCExecutionIndication을 SCM이 "Ready"로 돌아가거나 timeout 되거나 SCExecutionIndicationResponse로 확인할 때까지 100 ms 간격으로 반복한다.
 - 재생은 보통 마지막 기능 실행 완료 표시로 끝난다. 미결 function execution state를 모두 완료로 수신했거나 내부 조건에 따라, SCM은 "Ready"로 진입하고 SCC들이 이를 반영한다. 모든 완료를 받지 못했어도(예: 재생 단계 내부 timeout) "Ready"로 갈 수 있다.
 
-#### 재생 중단 — Abort (4.4.7.3)
+#### 재생 중단: Abort (4.4.7.3)
 
 - active SCM은 오퍼레이터가 재생을 중단시킬 수단을 제공해야 하며, 내부 조건 발생 시 오퍼레이터 입력 없이 "Abort"를 개시할 수도 있다.
 - SCC가 재생을 중단시켜야 하면 전역 SCClientAbort(E.3)를 active SCM에게서 "Abort" 상태를 받을 때까지 반복 송신하고, SCClientStatus에 "Abort" 상태를 보고해야 한다.
@@ -435,7 +441,7 @@ SCS의 각 스텝에는 4바이트 function value(process variable)를 연결할
 - function value는 각 스텝의 trigger 타이밍·ID와 함께 저장되고, 재생 시 SCMasterExecutionCommand의 일부로 SCC에 돌아간다.
 - SCM은 하나 또는 여러 시퀀스 안에서 특정 client function의 다중 활성화를 서로 독립적으로 허용해야 하며 각 스텝을 개별 취급해야 한다(예: 히치 최고 높이에 여러 스텝에 걸쳐 도달).
 
-:::tip function value 활용 예 — 히치 위치
+:::tip function value 활용 예: 히치 위치
 기록 중 오퍼레이터가 3점 히치를 특정 위치까지 올리면, SCC는 조작 시작 시 SCExecutionIndication을 보내고, 히치가 목표 위치에 도달해 조작을 멈추면 도달 위치를 function value로 담아 완료를 보고한다. SCM은 이 값을 스텝과 함께 저장했다가 재생 시 SCMasterExecutionCommand에 실어 돌려주고, SCC는 기록 때와 똑같은 히치 위치에서 멈춘다.
 :::
 
@@ -478,7 +484,7 @@ SCM 메뉴는 저장된 시퀀스의 검토·저장·로드·교체와 재생 �
 | 잘못된 SCC 동작 (4.5.3.5) | enable/disable 명령 후 timeout(E.1) 내에 상태를 안 바꾸면 SCM은 SCD 삭제, SCClientStatus 포함 모든 SC 메시지 NACK, 그리고 SCC가 명령된 상태를 보고할 때까지 어떤 메시지도 보내지 않는다 |
 | 예기치 않은 disabled 전환 (4.5.3.6) | SCM은 그 SCC의 SCD를 삭제하고 메시지를 NACK해 재연결을 유도한다. 그 SCC가 선택된 시퀀스에 속하면 시퀀스 무결성을 책임지는 active SCM이 관련 기능을 시퀀스에서 제거하는 등의 조치를 해야 하며, 오퍼레이터 상호작용이 필요할 수 있다 |
 
-## 4.6 통신 전략 — TAN
+## 4.6 통신 전략: TAN
 
 SCM–SCC 통신에서는 일시적 통신 문제로 명령에 대한 응답이 유실될 수 있다. 유실이 명령 쪽(SCM이 client command를 못 받음)인지 응답 쪽(SCC가 SCM의 응답을 못 받음)인지 명령의 개시자는 구분할 수 없고, 필요한 동작을 얻기 위해 명령을 반복하게 된다.
 
@@ -642,11 +648,11 @@ SCCOP 오브젝트 재사용을 촉진하기 위해, SCM은 그래픽 오브젝�
 ### C.4 / C.5 SCMasterMemoryRequest / Response (code 0x91)
 
 - Request(SCC→SCM): SCD 업로드 전에 SCM의 휘발성 메모리 여유를 확인한다. Byte 2~5에 업로드할 SCD의 바이트 수를 담는다.
-- Response(SCM→SCC): Byte 2 status — 00 = 메모리가 충분할 수 있음(오브젝트 저장 오버헤드 때문에 확정 예측은 불가), 01 = 휘발성 메모리 부족(SCD 전송·로드 명령 금지).
+- Response(SCM→SCC): Byte 2 status: 00 = 메모리가 충분할 수 있음(오브젝트 저장 오버헤드 때문에 확정 예측은 불가), 01 = 휘발성 메모리 부족(SCD 전송·로드 명령 금지).
 
 ## Annex D: SCD operation 메시지
 
-시스템 구성 중 사용되는 SCC 요청·SCM 응답 메시지들이다. 응답별 특정 timeout은 정의되지 않는다 — SCM의 메모리 처리 시간이 SCD 크기 등에 크게 좌우되기 때문이다. 대신 SCC는 timeout 판정 시 SCMasterStatus의 busy flag를 존중해야 한다.
+시스템 구성 중 사용되는 SCC 요청·SCM 응답 메시지들이다. 응답별 특정 timeout은 정의되지 않는다. SCM의 메모리 처리 시간이 SCD 크기 등에 크게 좌우되기 때문이다. 대신 SCC는 timeout 판정 시 SCMasterStatus의 busy flag를 존중해야 한다.
 
 SCM은 완전한 SCD의 저장·복원 기능을 제공할 수 있다. 비휘발성 저장 영역의 구성은 SCM 고유이며, SCD 저장·복원은 모든 오브젝트 정의를 포함한다. 저장 기능 제공 시 저장된 SCD를 SCC에 유일하게 배정하는 방법이 SCM 내부에 있어야 하고, SCC당 SCD 하나만 비휘발성 저장이 허용된다.
 
@@ -703,7 +709,7 @@ enabled SCC가 <strong>재생 단계 중에만</strong> 개시할 수 있는, �
 | 바이트 | 내용 |
 | --- | --- |
 | 1 | 0x31 (message code) |
-| 2~3 | 예약 (FF) — 다른 메시지와 sequence number·error code 바이트 위치를 맞추기 위함 |
+| 2~3 | 예약 (FF). 다른 메시지와 sequence number·error code 바이트 위치를 맞추기 위함 |
 | 4 | error code: 01 = status 메시지 timeout, 02 = 오퍼레이터 상호작용, 03 = 기능 실행 중 오류, FF = 기타 |
 | 5~8 | 예약 (FF) |
 
@@ -715,7 +721,7 @@ enabled SCC가 <strong>재생 단계 중에만</strong> 개시할 수 있는, �
 | --- | --- |
 | 1 | 0x32 (message code) |
 | 2 | Function ID (SCD function object 기준) |
-| 3 | Bits 1-6: State ID (SCD state object 기준) / Bits 7-8: function execution state — 00 = 시작·완료 동시, 01 = 실행 시작, 10 = 실행 완료, 11 = 실행 중 오류 또는 재생 중 오퍼레이터 개입 |
+| 3 | Bits 1-6: State ID (SCD state object 기준) / Bits 7-8: function execution state. 00 = 시작·완료 동시, 01 = 실행 시작, 10 = 실행 완료, 11 = 실행 중 오류 또는 재생 중 오퍼레이터 개입 |
 | 4 | TAN |
 | 5~8 | function execution state가 '시작'뿐이면 FFFFFFFF, '완료' 비트가 설정되면 function value (4.4.8) |
 
@@ -752,7 +758,7 @@ SCM에게서 받은 모든 SCMasterExecutionCommand에 대한 SCC의 응답으�
 | --- | --- |
 | 1 | 0x34 (message code) |
 | 2 | Function ID |
-| 3 | Bits 1-6: State ID / Bits 7-8: function execution state — 00 = 시작·완료 동시, 01 = 시작, 10 = 완료, 11 = 실행 중 오류 |
+| 3 | Bits 1-6: State ID / Bits 7-8: function execution state. 00 = 시작·완료 동시, 01 = 시작, 10 = 완료, 11 = 실행 중 오류 |
 | 4 | error code: 00 = 무오류, 01 = 기능 내 오류, 02 = 오퍼레이터 개입, 03 = SCC 조건상 실행 불가, FF = 기타 |
 | 5 | TAN |
 | 6~8 | 예약 (FF) |
@@ -789,7 +795,7 @@ function error structure (2바이트):
 | 필드 | 내용 |
 | --- | --- |
 | Byte a | 고장 기능의 function ID |
-| Byte b Bits 1-4 | 오류 상태: 01 = 일회성 오류, 02 = 영구 오류, 03 = 기능 잠김(locked), 04 = 오퍼레이터가 SCC에서 기능 비활성화, 0F = 기타 (00은 예약 — 오류 없는 기능은 보고하지 않음) |
+| Byte b Bits 1-4 | 오류 상태: 01 = 일회성 오류, 02 = 영구 오류, 03 = 기능 잠김(locked), 04 = 오퍼레이터가 SCC에서 기능 비활성화, 0F = 기타 (00은 예약, 오류 없는 기능은 보고하지 않음) |
 | Byte b Bits 5-7 | 예약 (0) |
 | Byte b Bit 8 | 1 = 오퍼레이터 확인 필요 |
 
@@ -842,7 +848,7 @@ busy flag는 요청 응답이 지연될 수 있음을 SCC에 알리는 수단이
 | 1 | 0x96 (message code) |
 | 2 | 송신 SCC 상태: 00 = Disabled, 01 = Enabled, 02 = Initialization (시동 시 1회) |
 | 3 | sequence number: 0x00~0x31(10진 0~49) = 활성 시퀀스 번호, FF = disabled이거나 sequence state가 "Ready"일 때 |
-| 4 | sequence state: 01 = Ready, 02 = Recording, 04 = Play back, 05 = Abort, FF = disabled 또는 initialization일 때 (00, 03, 06~FE 예약 — SCC에는 "Recording completion"에 해당하는 03이 없음) |
+| 4 | sequence state: 01 = Ready, 02 = Recording, 04 = Play back, 05 = Abort, FF = disabled 또는 initialization일 때 (00, 03, 06~FE 예약. SCC에는 "Recording completion"에 해당하는 03이 없음) |
 | 5 | ClientFunctionErrorState (아래 참조) |
 | 6~8 | 예약 (FF) |
 
@@ -871,9 +877,9 @@ timeout: "Recording" / "Play Back" / "Abort" 상태에서는 <strong>600 ms</str
 
 ## 참고 문헌 (Bibliography)
 
-- SAE J1939 — Recommended Practice for a Serial Control and Communications Vehicle Network
+- SAE J1939: Recommended Practice for a Serial Control and Communications Vehicle Network
 - AEF(Ag Industry Electronics Foundation)의 ISO 11783 구현 가이드라인(안전 측면 고려)
-- ISO/IEC 8859-1 — Latin alphabet No. 1 문자셋
+- ISO/IEC 8859-1: Latin alphabet No. 1 문자셋
 
 ## 전체 정리
 

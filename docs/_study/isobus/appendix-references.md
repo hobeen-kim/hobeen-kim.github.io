@@ -1,11 +1,17 @@
 ---
 title: "참고 자료 / 링크"
-description: "ISOBUS/CAN 스터디에 유용한 표준 문서, 도구, 오픈소스, 학습 자료를 정리한 참조 자료입니다."
+description: "ISOBUS와 CAN 공부에 쓸모 있는 표준 문서, 도구, 오픈소스, 학습 자료를 정리한 참조 자료다."
 date: 2026-04-13
 tags: [ISOBUS, 부록]
+prev: /study/isobus/appendix-troubleshooting
+next: /study/isobus/appendix-iso-part01
 ---
 
 # 참고 자료 / 링크
+
+::: tip 처음 읽는다면
+이 부록은 표준 문서, 분석 도구, 오픈소스 ISOBUS 스택, 학습 자료를 모은 목록이다. 본문을 읽다가 원문 표준을 찾거나, 직접 버스를 들여다볼 도구가 필요할 때 펼쳐 본다. ISO 11783이 여러 파트로 어떻게 나뉘는지는 [18장 ISOBUS 개요](/study/isobus/18-isobus-overview)에서 먼저 보면 아래 표가 쉽게 읽힌다.
+:::
 
 ## ISO 표준 (ISO 11783 시리즈)
 
@@ -16,14 +22,14 @@ ISO 11783은 ISOBUS의 공식 표준으로, 농업 기계의 전자 통신을 �
 | ISO 11783-1 | General Standard for Mobile Data Communication | 전체 시리즈 개요 및 용어 정의 |
 | ISO 11783-2 | Physical Layer | 버스 전기적 특성, 커넥터, 케이블 규격 (250 kbps, 차동 신호) |
 | ISO 11783-3 | Data Link Layer | CAN 2.0B 29비트 ID 기반 데이터 링크 계층 |
-| ISO 11783-4 | Network Layer | 주소 할당, 네트워크 관리 |
-| ISO 11783-5 | Network Management | 주소 획득 절차, Working Set 관리 |
+| ISO 11783-4 | Network Layer | 서로 다른 네트워크 세그먼트 사이의 통신, 세그먼트를 잇는 NIU의 종류 |
+| ISO 11783-5 | Network Management | 소스 주소 관리(주소 클레임), NAME, 네트워크 오류 감지, 초기화 절차 |
 | ISO 11783-6 | Virtual Terminal | VT 오브젝트 풀, UI 표시, 입력 처리 규격 |
 | ISO 11783-7 | Implement Messages Application Layer | TECU 메시지 정의 (차속, PTO 등) |
 | ISO 11783-8 | Power Train Messages | 엔진, 변속기 메시지 (J1939 연계) |
 | ISO 11783-9 | Tractor ECU | 트랙터 ECU 기능 요구사항 |
 | ISO 11783-10 | Task Controller and Management Computer | TC, FMIS, DDOP, Section Control 정의 |
-| ISO 11783-11 | Mobile Data Element Dictionary | DDI 데이터 사전 전체 목록 |
+| ISO 11783-11 | Mobile Data Element Dictionary | Process Data 메시지에 쓰는 데이터 요소 식별자(DDI). 목록 자체는 isobus.net 온라인 사전에 있다 |
 | ISO 11783-12 | Diagnostics Services | 진단 서비스, DM 메시지 |
 | ISO 11783-13 | File Server | 파일 서버 서비스 (SD 카드 접근 등) |
 | ISO 11783-14 | Sequence Control | 시퀀스 제어 서비스 |

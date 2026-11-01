@@ -1,8 +1,10 @@
 ---
-title: "표준 정리: Part 12 — Diagnostics services"
-description: "ISO 11783-12(Diagnostics services) — ECU 식별, DM 메시지, FMI 코드를 정리한 표준 요약이다."
+title: "표준 정리: Part 12(Diagnostics services)"
+description: "ISO 11783-12(Diagnostics services)에서 ECU 식별, DM 메시지, FMI 코드를 정리한 표준 요약이다."
 date: 2026-08-21
 tags: [ISOBUS, ISO11783, 표준정리]
+prev: /study/isobus/appendix-iso-part11
+next: /study/isobus/appendix-iso-part13
 ---
 
 # ISO 11783-12: Diagnostics services 정리
@@ -11,11 +13,15 @@ tags: [ISOBUS, ISO11783, 표준정리]
 ISO 11783-12 표준 원문을 학습 목적으로 재구성한 <strong>비공식 요약·해설</strong>이다. 규범적 판단이 필요할 때는 반드시 원문 표준을 확인해야 한다.
 :::
 
+::: tip 처음 읽는다면
+이 페이지는 진단 서비스(Part 12: ECU 식별 정보와 고장 코드를 주고받는 메시지)를 원문의 절 구조대로 요약한 참고 자료다. 진단 메시지의 바이트 배치나 FMI 정의를 확인할 때 펼쳐 본다. 처음이라면 [27장 진단 (1): 진단 개요, ECU 식별, 인증 정보](/study/isobus/27-diagnostics-identification)와 [28장 진단 (2): DM1·DM2·DM3, FMI, Functionalities](/study/isobus/28-diagnostics-dm-fmi)를 먼저 읽는다.
+:::
+
 ## 개요
 
 ISO 11783-12(3판, 2019-01)는 ISO 11783(ISOBUS) 네트워크의 <strong>진단 시스템</strong>을 정의하는 파트다. 트랙터와 작업기(implement)에 연결된 모든 ECU가 어떤 진단 정보를 제공해야 하는지, 그 정보를 어떤 메시지로 주고받는지를 규정한다. 목적은 명확하다. 운전자나 서비스 기술자가 네트워크에 연결된 장치 중 <strong>어느 유닛이 고장 났는지, 어떤 상태로 오동작 중인지</strong>를 식별할 수 있게 하는 것이다.
 
-ISO 11783 자체는 ISO 11898(CAN) 기반 통신 시스템이며, 상당 부분이 트럭·버스용으로 개발된 SAE J1939 문서에 기반한다. Part 12의 진단 메시지도 SAE J1939-73(Application layer — Diagnostics)의 DM 메시지 체계를 그대로 가져와 농기계 환경에 맞게 요구사항을 좁힌 구조다.
+ISO 11783 자체는 ISO 11898(CAN) 기반 통신 시스템이며, 상당 부분이 트럭·버스용으로 개발된 SAE J1939 문서에 기반한다. Part 12의 진단 메시지도 SAE J1939-73(Application layer: Diagnostics)의 DM 메시지 체계를 그대로 가져와 농기계 환경에 맞게 요구사항을 좁힌 구조다.
 
 :::info 3판(2019)의 주요 변경점
 2판(ISO 11783-12:2014) 대비 변경 사항은 다음과 같다.
@@ -51,7 +57,7 @@ Part 12의 적용 범위는 ISO 11783 네트워크의 진단 시스템이다. IS
 | ISO 11783-5 | Network management (NAME, address claim) |
 | ISO 11783-7 | Implement messages application layer |
 | ISO 14229-1 | UDS (Unified Diagnostic Services) Part 1 |
-| SAE J1939-73 | Application layer — Diagnostics |
+| SAE J1939-73 | Application layer: Diagnostics |
 
 ## 3~4. 용어와 약어
 
@@ -134,8 +140,8 @@ Part 12의 적용 범위는 ISO 11783 네트워크의 진단 시스템이다. IS
 - ECU에 존재하지만 <strong>CF에서 현재 비활성화</strong>된 functionality → 보고하지 않는다
 
 :::details 보고 범위 예시
-- 예시 1 — 시스템에서 사용 불가한 경우: 작업기 ECU의 CF1이 minimum CF, TC-GEO, TC-SC functionality를 가진다. 이 작업기가 TC-SC 서버가 없는 트랙터에 연결되면 TC-SC는 "존재하지만 시스템에서 사용 불가"다. 이때 CF1은 minimum CF, TC-GEO, <strong>TC-SC까지 모두</strong> functionality 정보 메시지로 보고한다.
-- 예시 2 — CF에서 비활성화된 경우: 같은 구성에서 고객이 TC-GEO만 구매해 TC-SC가 ECU에서 disabled 상태라면, CF1은 minimum CF와 TC-GEO만 보고한다.
+- 예시 1: 시스템에서 사용 불가한 경우: 작업기 ECU의 CF1이 minimum CF, TC-GEO, TC-SC functionality를 가진다. 이 작업기가 TC-SC 서버가 없는 트랙터에 연결되면 TC-SC는 "존재하지만 시스템에서 사용 불가"다. 이때 CF1은 minimum CF, TC-GEO, <strong>TC-SC까지 모두</strong> functionality 정보 메시지로 보고한다.
+- 예시 2: CF에서 비활성화된 경우: 같은 구성에서 고객이 TC-GEO만 구매해 TC-SC가 ECU에서 disabled 상태라면, CF1은 minimum CF와 TC-GEO만 보고한다.
 :::
 
 진단 UI는 Annex B의 control function functionalities 메시지로 functionality·generation·option 정보를 요청한다. <strong>diagnostic protocol 메시지는 진단 목적 전용이며, CF가 런타임 동작 구성에 사용해서는 안 된다.</strong>
@@ -148,7 +154,7 @@ Part 12의 적용 범위는 ISO 11783 네트워크의 진단 시스템이다. IS
 
 ISO/IEC 8859-1(Latin 1)에는 191개의 그래픽 문자와 65개의 제어 문자(0~31, 127~159)가 있다. 이 문서에서 "ASCII", "printable ASCII"는 이 <strong>191개 그래픽 문자 집합</strong>을 가리키며, 별도 명시가 없으면 ASCII 파라미터에는 이 191개 문자만 허용된다.
 
-## Annex A — 진단 정보 파라미터 정의 (normative)
+## Annex A: 진단 정보 파라미터 정의 (normative)
 
 Annex B 메시지들에 실리는 파라미터의 정의다. 문자열 파라미터의 공통 형식은 "가변 길이, ASCII(1 byte), 문자당 32~126·160~255 범위(비인쇄 문자 제외)"이며, 구분자로 쓰이는 문자는 값에 사용할 수 없다.
 
@@ -173,8 +179,8 @@ Annex B 메시지들에 실리는 파라미터의 정의다. 문자열 파라미
 
 주요 파라미터 해설:
 
-- <strong>Software identification (A.4)</strong> — CF의 소프트웨어와, CF가 요구하는 ECU 관련 소프트웨어 버전들의 식별 문자열이다. software identification field 사이의 구분자는 `*`이며, <strong>필드가 하나뿐이어도 마지막 필드 끝에 `*`가 필요하다</strong>. 한 field 안의 개별 소프트웨어 모듈은 `#`으로 구분하고, 마지막 모듈 뒤 `#`은 선택이다.
-- <strong>Diagnostic protocol identification (A.6)</strong> — CF가 ISO 11783 외에 추가로 지원하는 진단 프로토콜을 나타내는 비트필드다.
+- <strong>Software identification (A.4)</strong>: CF의 소프트웨어와, CF가 요구하는 ECU 관련 소프트웨어 버전들의 식별 문자열이다. software identification field 사이의 구분자는 `*`이며, <strong>필드가 하나뿐이어도 마지막 필드 끝에 `*`가 필요하다</strong>. 한 field 안의 개별 소프트웨어 모듈은 `#`으로 구분하고, 마지막 모듈 뒤 `#`은 선택이다.
+- <strong>Diagnostic protocol identification (A.6)</strong>: CF가 ISO 11783 외에 추가로 지원하는 진단 프로토콜을 나타내는 비트필드다.
 
 | 값 (비트) | 의미 |
 |---|---|
@@ -184,10 +190,10 @@ Annex B 메시지들에 실리는 파라미터의 정의다. 문자열 파라미
 | 00000100 | ISO 14229-3 (UDS on CAN) |
 | 그 외 비트 | ISO 할당 예약 |
 
-- <strong>Number of option bytes (A.12)</strong> — 한 functionality가 지원하는 option을 나타내는 후속 바이트 수다. option byte 뒤쪽의 0인 바이트(trailing zero)는 모두 생략하고 개수에도 세지 않는다. option byte가 없는 functionality는 0으로 설정한다.
-- <strong>Product identification (A.14~A.16)</strong> — 제조사가 부여하는 제품 식별로, 제품 명판의 번호에 해당한다. 차량이면 VIN과 같을 수 있고, VT 같은 독립 시스템이면 ECU 식별 번호와 같을 수 있다. <strong>code + brand 조합은 전 세계에서 유일해야 하고</strong>, model은 brand 내에서 제품을 유일하게 식별한다.
+- <strong>Number of option bytes (A.12)</strong>: 한 functionality가 지원하는 option을 나타내는 후속 바이트 수다. option byte 뒤쪽의 0인 바이트(trailing zero)는 모두 생략하고 개수에도 세지 않는다. option byte가 없는 functionality는 0으로 설정한다.
+- <strong>Product identification (A.14~A.16)</strong>: 제조사가 부여하는 제품 식별로, 제품 명판의 번호에 해당한다. 차량이면 VIN과 같을 수 있고, VT 같은 독립 시스템이면 ECU 식별 번호와 같을 수 있다. <strong>code + brand 조합은 전 세계에서 유일해야 하고</strong>, model은 brand 내에서 제품을 유일하게 식별한다.
 
-## Annex B — 진단 정보 메시지 정의 (normative)
+## Annex B: 진단 정보 메시지 정의 (normative)
 
 CF가 지원해야 하는 진단 메시지들의 PGN·형식 정의다. 상당수가 SAE J1939 / J1939-73에 정의된 메시지를 기반으로 하되, ISO 11783에서 요구하는 파라미터를 지정한 것이다.
 
@@ -226,7 +232,7 @@ field 3개짜리 CF(첫 field에 모듈 4개, 둘째에 2개, 셋째에 1개)라
 
 ### B.3 ISOBUS certification
 
-ISOBUS certification 메시지는 ISO 11783-7의 규정을 따른다. 해당 메시지는 Part 7 B.27의 ISOBUS compliance certification message(PGN 64834, 0xFD42, On request, 8 bytes)이며, 비트 배치와 2판·3판 형식 차이는 [14장 9절](/study/isobus/14-isobus-network-mgmt)에 정리했다.
+ISOBUS certification 메시지는 ISO 11783-7의 규정을 따른다. 해당 메시지는 Part 7 B.27의 ISOBUS compliance certification message(PGN 64834, 0xFD42, On request, 8 bytes)이며, 비트 배치와 2판·3판 형식 차이는 [27장 진단 (1): 진단 개요, ECU 식별, 인증 정보](/study/isobus/27-diagnostics-identification)에 정리했다.
 
 ### B.4 ISO 11783 NAME
 
@@ -247,7 +253,7 @@ ISO 11783-5의 규정을 따른다. industry, device class, function 코드는 �
 - Byte 1: diagnostic protocol identification (A.6)
 - Byte 2~8: ISO 할당 예약
 
-### B.6 Active diagnostic trouble codes — DM1 (PGN 65226)
+### B.6 Active diagnostic trouble codes: DM1 (PGN 65226)
 
 SAE J1939-73의 DM1과 같은 메시지 기반으로, <strong>현재 활성인 DTC</strong>만을 전달한다.
 
@@ -282,7 +288,7 @@ SAE J1939-73의 DM1과 같은 메시지 기반으로, <strong>현재 활성인 D
 - <strong>활성 고장이 없으면 Byte 3~6을 0으로</strong> 설정해 보낸다.
 - 활성 DTC가 2개 이상이면 ISO 11783-3의 transport protocol을 사용해야 한다. 이때 Byte 1~2(reserved)는 반복하지 않고, DTC마다 Byte 3~6 형식이 반복된다.
 
-### B.7 Previously active diagnostic trouble codes — DM2 (PGN 65227)
+### B.7 Previously active diagnostic trouble codes: DM2 (PGN 65227)
 
 SAE J1939-73의 DM2와 같은 메시지 기반으로, <strong>과거에 활성이었던(previously active) DTC</strong>만을 전달한다. 송신 컴포넌트의 진단 이력을 네트워크의 다른 컴포넌트에 알리는 용도이며, 데이터에는 과거 활성 DTC 목록과 각각의 occurrence count가 담긴다. 이 메시지를 보낼 때는 <strong>occurrence count가 0이 아닌 모든 previously active DTC를 전부 포함</strong>해야 한다.
 
@@ -298,7 +304,7 @@ SAE J1939-73의 DM2와 같은 메시지 기반으로, <strong>과거에 활성�
 - 바이트 배치는 DM1과 동일하다: Byte 1~2 reserved(0xFF), Byte 3~5에 19비트 SPN + 5비트 FMI, Byte 6에 conversion method(0) + occurrence count. occurrence count 미상 시 0x7F, 고장 없음 시 Byte 3~6을 0으로 설정한다.
 - DM1과 달리 transport protocol은 "DTC 2개 이상"이 아니라 <strong>단일 프레임으로 보낼 수 없을 때만</strong> 사용한다. transport protocol에서 Byte 1~2는 반복하지 않고 DTC마다 Byte 3~6이 반복된다.
 
-### B.8 Diagnostic data clear/reset previously active DTCs — DM3 (PGN 65228)
+### B.8 Diagnostic data clear/reset previously active DTCs: DM3 (PGN 65228)
 
 DM3는 별도 데이터가 아니라 <strong>요청(request)에 의해 동작하는 클리어 명령</strong>이다. 이 PG가 요청되면 previously active DTC(DM2)에 관한 진단 정보가 모두 삭제된다. <strong>active DTC 관련 데이터는 영향받지 않는다.</strong>
 
@@ -313,9 +319,9 @@ DM3는 별도 데이터가 아니라 <strong>요청(request)에 의해 동작하
 - 요청이 <strong>global address로 전송된 경우 → 어떤 ACK/NACK도 보내지 않는다</strong> (설계자 주의사항)
 
 :::details DM3 요청 흐름 예시
-- 예시 1 — 정상 클리어: 진단 UI 또는 서비스 툴이 특정 ECU에 Request PGN 59904로 PGN 65228을 요청 → ECU가 클리어를 수행하고 PGN 65228에 대한 positive Acknowledgement(PGN 59392)로 응답한다.
-- 예시 2 — 수행 불가: ECU가 클리어 요청 자체는 지원하지만 지금 수행할 수 없는 상태 → negative Acknowledgement로 응답한다.
-- 예시 3 — 전체 클리어: 진단 UI가 global address로 PGN 65228을 요청 → 가능한 모든 ECU가 진단 데이터를 지우지만, global 요청이므로 <strong>아무도 ACK/NACK을 보내지 않는다</strong>.
+- 예시 1: 정상 클리어: 진단 UI 또는 서비스 툴이 특정 ECU에 Request PGN 59904로 PGN 65228을 요청 → ECU가 클리어를 수행하고 PGN 65228에 대한 positive Acknowledgement(PGN 59392)로 응답한다.
+- 예시 2: 수행 불가: ECU가 클리어 요청 자체는 지원하지만 지금 수행할 수 없는 상태 → negative Acknowledgement로 응답한다.
+- 예시 3: 전체 클리어: 진단 UI가 global address로 PGN 65228을 요청 → 가능한 모든 ECU가 진단 데이터를 지우지만, global 요청이므로 <strong>아무도 ACK/NACK을 보내지 않는다</strong>.
 :::
 
 ### B.9 Control function functionalities (PGN 64654)
@@ -330,7 +336,7 @@ CF가 지원하는 모든 functionality와 그 generation, functionality option�
 | 기본 우선순위 | 6 |
 | PGN | 64654 (0x00FC8E) |
 
-<strong>하위 호환성 규칙</strong> — 이 메시지는 향후 업데이트로 functionality의 option byte 수가 늘어날 수 있으므로, 수신자는 다음 규칙으로 파싱해야 한다.
+<strong>하위 호환성 규칙</strong>: 이 메시지는 향후 업데이트로 functionality의 option byte 수가 늘어날 수 있으므로, 수신자는 다음 규칙으로 파싱해야 한다.
 
 - ISO 할당 예약(reserved) functionality 특성 값은 오류 없이 파싱해야 한다.
 - 이 문서에 규정된 것보다 option byte 수가 크면, 수신 CF는 정의되지 않은 option byte를 무시하고 아는 option byte만 파싱한다.
@@ -339,20 +345,20 @@ CF가 지원하는 모든 functionality와 그 generation, functionality option�
 
 | 바이트 | 내용 | 참조 |
 |---|---|---|
-| 1 | 0xFF 고정. 수신자는 Byte 1이 0xFF가 아니면 메시지를 처리하지 않아야 한다 | — |
+| 1 | 0xFF 고정. 수신자는 Byte 1이 0xFF가 아니면 메시지를 처리하지 않아야 한다 | - |
 | 2 | 이 메시지에 보고되는 functionality 수 | A.9 |
 | 3 | 첫 번째 functionality | A.10 |
 | 4 | 첫 번째 functionality의 generation | A.11 |
 | 5 | 첫 번째 functionality의 option byte 수 | A.12 |
 | 6 … n | 첫 번째 functionality의 option (제공 시). 비트로 지원 option 표시 | ISOBUS.net의 Functionality/Option list |
-| n+1 이후 | 두 번째 이후 functionality마다 (functionality, generation, option byte 수, option byte들) 반복 | — |
+| n+1 이후 | 두 번째 이후 functionality마다 (functionality, generation, option byte 수, option byte들) 반복 | - |
 
 - 8바이트를 초과하면 transport protocol로 전송하고, 8바이트 미만이면 남는 바이트를 0xFF로 채운다.
 
 :::details functionality 메시지 인코딩 예시
-- 예시 1 — UT generation 2 + minimum CF generation 1인 VT: `FF 02 00 01 00 01 02 00` — Byte 2=0x02(functionality 2개), (0x00 minimum CF, gen 1, option 0개), (0x01 UT, gen 2, option 0개).
-- 예시 2 — UT gen 3, AUX-N gen 1(function type 0·2), TC-BAS gen 1, TC-GEO gen 1(control channel 4개), TECU gen 1(Class 1·Navigation), minimum CF gen 1을 갖춘 Working Set Master: functionality 6개가 위 반복 구조로 23바이트에 걸쳐 인코딩된다 (transport protocol 사용). AUX-N은 option byte 1개(00000101 = function type 0, 2), TC-GEO는 option byte 1개(0x04 = control channel 수), TECU는 option byte 1개(00001001 = Class 1, Navigation)를 가진다.
-- 예시 3 — minimum CF generation 1만 따르는 proprietary CF: `FF 01 00 01 00 FF FF FF` — 8바이트 미만이므로 나머지를 0xFF로 채운다.
+- 예시 1: UT generation 2 + minimum CF generation 1인 VT: `FF 02 00 01 00 01 02 00`. Byte 2=0x02(functionality 2개), (0x00 minimum CF, gen 1, option 0개), (0x01 UT, gen 2, option 0개).
+- 예시 2: UT gen 3, AUX-N gen 1(function type 0·2), TC-BAS gen 1, TC-GEO gen 1(control channel 4개), TECU gen 1(Class 1·Navigation), minimum CF gen 1을 갖춘 Working Set Master: functionality 6개가 위 반복 구조로 23바이트에 걸쳐 인코딩된다 (transport protocol 사용). AUX-N은 option byte 1개(00000101 = function type 0, 2), TC-GEO는 option byte 1개(0x04 = control channel 수), TECU는 option byte 1개(00001001 = Class 1, Navigation)를 가진다.
+- 예시 3: minimum CF generation 1만 따르는 proprietary CF: `FF 01 00 01 00 FF FF FF`. 8바이트 미만이므로 나머지를 0xFF로 채운다.
 :::
 
 functionality 코드 값 자체(원문 예시에 나오는 것: 0x00 minimum CF, 0x01 UT(예시 1의 VT가 보고), 0x02 UT(예시 2의 Working Set Master가 보고), 0x06 AUX-N, 0x08 TC-BAS, 0x0A TC-GEO, 0x0E TECU 등)와 option 비트 정의는 이 문서가 아니라 <strong>ISOBUS 온라인 데이터베이스(www.ISOBUS.net)의 Functionality/Option list</strong>에서 관리된다. 3판에서 온라인 DB로 이관된 부분이 바로 이것이다.
@@ -369,20 +375,20 @@ functionality 코드 값 자체(원문 예시에 나오는 것: 0x00 minimum CF,
 | 기본 우선순위 | 6 |
 | PGN | 64653 (0x00FC8D) |
 
-- 데이터 구성(각 필드 뒤에 `*` 구분자): product identification code (A.14) → product identification brand (A.15) → product identification model (A.16). 예를 들어 Brand B의 모델 1926i, 식별 코드 1234567890ABC라면 `1234567890ABC*Brand B*1962i*` 형태다(원문 그대로 옮겼다 — 설명의 1926i와 바이트열의 1962i가 다른데, 둘 중 하나는 원문 오기다).
+- 데이터 구성(각 필드 뒤에 `*` 구분자): product identification code (A.14) → product identification brand (A.15) → product identification model (A.16). 예를 들어 Brand B의 모델 1926i, 식별 코드 1234567890ABC라면 `1234567890ABC*Brand B*1962i*` 형태다(원문 그대로 옮겼다. 설명의 1926i와 바이트열의 1962i가 다른데, 둘 중 하나는 원문 오기다).
 - <strong>한 제품의 모든 CF는 이 PGN 요청에 동일한 product identification 정보로 응답</strong>해야 한다.
 - 향후 버전에서 `*` 구분 필드가 추가될 수 있으며, 이 문서 기준으로 구현된 CF는 최소한 이 문서에 규정된 정보를 인코딩할 수 있어야 한다.
 
-## Annex C — Network configuration (normative)
+## Annex C: Network configuration (normative)
 
 ### C.1 네트워크 구성
 
 Figure C.1은 진단 시스템과 ISO 11783 진단 커넥터 연결을 지원해야 하는 네트워크 구성 예를 보여준다. 구성 요소를 텍스트로 정리하면 다음과 같다.
 
-- <strong>Product 1</strong> — 트랙터 또는 자주식 작업기. 내부에 tractor ECU CF, OEM 설치 ECU(CF1·CF2 포함), tractor bus의 ECU 1~n, ISO 11783 bus가 있다.
-- <strong>Product 2</strong> — ISO 11783 aftermarket ECU (CF n 포함). ISO 11783 bus에 연결된다.
-- <strong>implement CF</strong> — breakaway connector 너머 작업기 측에서 ISO 11783 bus에 연결된다.
-- <strong>진단 툴</strong> — diagnostic tool interface를 거쳐 <strong>ISO 11783 diagnostic connector</strong>로 네트워크에 접속한다. 진단 커넥터는 tractor bus와 ISO 11783 bus 양쪽에 접근할 수 있는 지점에 위치한다.
+- <strong>Product 1</strong>: 트랙터 또는 자주식 작업기. 내부에 tractor ECU CF, OEM 설치 ECU(CF1·CF2 포함), tractor bus의 ECU 1~n, ISO 11783 bus가 있다.
+- <strong>Product 2</strong>: ISO 11783 aftermarket ECU (CF n 포함). ISO 11783 bus에 연결된다.
+- <strong>implement CF</strong>: breakaway connector 너머 작업기 측에서 ISO 11783 bus에 연결된다.
+- <strong>진단 툴</strong>: diagnostic tool interface를 거쳐 <strong>ISO 11783 diagnostic connector</strong>로 네트워크에 접속한다. 진단 커넥터는 tractor bus와 ISO 11783 bus 양쪽에 접근할 수 있는 지점에 위치한다.
 
 요지는 OEM ECU든 애프터마켓 ECU든 작업기 ECU든, 모두 진단 커넥터를 통해 접근 가능한 하나의 진단 체계 안에 있어야 한다는 것이다.
 
@@ -390,7 +396,7 @@ Figure C.1은 진단 시스템과 ISO 11783 진단 커넥터 연결을 지원해
 
 진단 커넥터와 그 설치는 ISO 11783-2를 따라야 한다.
 
-## Annex D — 네트워크 설정 화면 예시 (informative)
+## Annex D: 네트워크 설정 화면 예시 (informative)
 
 진단 UI가 어떤 화면을 제공해야 하는지 감을 주는 예시 모음이다. informative이므로 화면 구성 자체는 강제가 아니다.
 
@@ -403,7 +409,7 @@ Figure C.1은 진단 시스템과 ISO 11783 진단 커넥터 연결을 지원해
 | D.5 | Implement capable functionalities screen | functionality별로 트랙터 측 실제 지원 generation과 작업기 측 실제 지원 generation을 나란히 비교 표시 (6.5 대응) |
 | D.6 | Functionality alarm mask | 비호환 경고 화면. 요구 functionality(예: AUX-N type 2 입력)와 실제 가용 functionality(예: AUX-O type 0 입력)를 대비해 "Functionality Not Compatible" 알람을 띄우는 예 |
 
-## Annex E — Failure mode indicator 정의 (normative)
+## Annex E: Failure mode indicator 정의 (normative)
 
 ### E.1~E.2 개요와 신호 범위 모델
 
@@ -411,9 +417,9 @@ FMI 사용 시 일관성을 위해 각 FMI의 의미를 정의한다. <strong>�
 
 FMI 설명에 쓰이는 기본 용어는 다음과 같다.
 
-- <strong>Data</strong> — 전압·전류·PWM·데이터 스트림 형태로 전자 모듈에 전달되는, 물리적 상태에 관한 정보
-- <strong>Real world</strong> — 전압·전류·PWM·데이터 스트림으로 측정 가능한 기계적 파라미터 또는 운전 조건
-- <strong>Signal range</strong> — 신호 값 축을 영역(region)으로 나눈 모델. FMI가 어느 영역의 이상인지를 가리키는 기준이 된다.
+- <strong>Data</strong>: 전압·전류·PWM·데이터 스트림 형태로 전자 모듈에 전달되는, 물리적 상태에 관한 정보
+- <strong>Real world</strong>: 전압·전류·PWM·데이터 스트림으로 측정 가능한 기계적 파라미터 또는 운전 조건
+- <strong>Signal range</strong>: 신호 값 축을 영역(region)으로 나눈 모델. FMI가 어느 영역의 이상인지를 가리키는 기준이 된다.
 
 신호 범위 영역 모델(Figure E.1)은 값 축을 낮은 쪽부터 f–d–j–h–c–i–k–e–g 순으로 배치한다.
 
@@ -422,9 +428,9 @@ FMI 설명에 쓰이는 기본 용어는 다음과 같다.
 | a | 전자 모듈이 측정 가능한 전체 신호 입력 범위 |
 | b | 애플리케이션이 정의한, 물리적으로 가능한 전체 신호 범위 |
 | c | 해당 실측정의 정상(normal) 범위 |
-| d / e | 정상 미만 / 초과 — <strong>most severe</strong> 수준 |
-| j / k | 정상 미만 / 초과 — moderately severe 수준 |
-| h / i | 정상 미만 / 초과 — least severe 수준 |
+| d / e | 정상 미만 / 초과, <strong>most severe</strong> 수준 |
+| j / k | 정상 미만 / 초과, moderately severe 수준 |
+| h / i | 정상 미만 / 초과, least severe 수준 |
 | f | 물리적으로 가능한 범위보다도 낮음 → low source로의 단락(short) 시사 |
 | g | 물리적으로 가능한 범위보다도 높음 → high source로의 단락 시사 |
 
@@ -432,8 +438,8 @@ FMI 설명에 쓰이는 기본 용어는 다음과 같다.
 
 | FMI | 의미 | Region / 비고 |
 |---|---|---|
-| 0 | Data valid but above normal — most severe | Region e. 데이터 방송은 정상 지속 |
-| 1 | Data valid but below normal — most severe | Region d. 데이터 방송은 정상 지속 |
+| 0 | Data valid but above normal, most severe | Region e. 데이터 방송은 정상 지속 |
+| 1 | Data valid but below normal, most severe | Region d. 데이터 방송은 정상 지속 |
 | 2 | Data erratic, intermittent or incorrect | 값이 error indicator로 대체됨. rationality 계열 |
 | 3 | Voltage above normal or shorted to high source | Region g. error indicator로 대체 |
 | 4 | Voltage below normal or shorted to low source | Region f. error indicator로 대체 |
@@ -447,19 +453,19 @@ FMI 설명에 쓰이는 기본 용어는 다음과 같다.
 | 12 | Bad intelligent unit or component | ECU 교체가 필요한 내부 고장. rationality 계열 |
 | 13 | Out of calibration | 캘리브레이션 불량(SW 캘리브레이션 구버전 또는 기계 서브시스템 캘리브레이션 이탈). 신호 범위 모델과 무관 |
 | 14 | Special instructions | 고장을 소수 후보로만 좁힐 수 있는 경우. 제조사 절차 참조 필요 (아래 참조) |
-| 15 | Data valid but above normal — least severe | Region i. 방송 정상 지속 |
-| 16 | Data valid but above normal — moderately severe | Region k. 방송 정상 지속 |
-| 17 | Data valid but below normal — least severe | Region h. 방송 정상 지속 |
-| 18 | Data valid but below normal — moderately severe | Region j. 방송 정상 지속 |
+| 15 | Data valid but above normal, least severe | Region i. 방송 정상 지속 |
+| 16 | Data valid but above normal, moderately severe | Region k. 방송 정상 지속 |
+| 17 | Data valid but below normal, least severe | Region h. 방송 정상 지속 |
+| 18 | Data valid but below normal, moderately severe | Region j. 방송 정상 지속 |
 | 19 | Received network data in error | 네트워크로 받은 값이 error indicator(0xFE, ISO 11783-3 참조)로 대체되어 있음. 고장 위치는 데이터를 <strong>송신한 모듈 쪽</strong>(센서 직결 모듈)이지 수신 모듈이 아님 |
 | 20–30 | Reserved | 향후 할당 예약 |
 | 31 | Condition exists | SPN이 가리키는 상태가 존재함. 적용할 FMI가 없거나 SPN 이름 자체가 컴포넌트+고장 모드를 설명하는 경우. SPN도 not available이면 "not available" 의미 |
 
 주요 FMI 해설:
 
-- <strong>FMI 2 (erratic/incorrect)</strong> — erratic·intermittent는 현실 세계에서 불가능한 속도로 변하는 측정값으로, 측정 장치나 그 연결의 이상이 원인이다. incorrect는 수신되지 않은 데이터와 FMI 3~6 상황에 해당하지 않는 모든 잘못된 데이터를 포함하며, 시스템의 다른 정보와 모순되는 데이터도 포함한다(rationality 고장).
-- <strong>FMI 3~6 (전압·전류 계열)</strong> — 각각 (a) 신호가 사전 정의된 한계 밖(Region f/g)인 경우와, (b) CF가 명령한 상태와 반대로 유지되는 외부 신호(예: low로 명령했는데 high 유지, on으로 명령했는데 전류 off 유지)인 경우 모두를 포함한다.
-- <strong>FMI 14 (Special instructions)</strong> — 온보드 시스템이 고장을 단일 지점이 아닌 소수 후보로만 격리할 수 있을 때 사용한다. 서비스 기술자의 추가 진단 작업이 필요하며 보통 제조사가 그 절차를 제공한다. 용례는 (a) 배출가스 관련 진단에서 센서 범위 이탈인지 실제 값의 경계 상황인지 구분 불가한 경우, (b) 구형 SPN 611~615에서 상호작용하는 복수 회로 중 수리 대상 특정이 필요한 경우다.
+- <strong>FMI 2 (erratic/incorrect)</strong>: erratic·intermittent는 현실 세계에서 불가능한 속도로 변하는 측정값으로, 측정 장치나 그 연결의 이상이 원인이다. incorrect는 수신되지 않은 데이터와 FMI 3~6 상황에 해당하지 않는 모든 잘못된 데이터를 포함하며, 시스템의 다른 정보와 모순되는 데이터도 포함한다(rationality 고장).
+- <strong>FMI 3~6 (전압·전류 계열)</strong>: 각각 (a) 신호가 사전 정의된 한계 밖(Region f/g)인 경우와, (b) CF가 명령한 상태와 반대로 유지되는 외부 신호(예: low로 명령했는데 high 유지, on으로 명령했는데 전류 off 유지)인 경우 모두를 포함한다.
+- <strong>FMI 14 (Special instructions)</strong>: 온보드 시스템이 고장을 단일 지점이 아닌 소수 후보로만 격리할 수 있을 때 사용한다. 서비스 기술자의 추가 진단 작업이 필요하며 보통 제조사가 그 절차를 제공한다. 용례는 (a) 배출가스 관련 진단에서 센서 범위 이탈인지 실제 값의 경계 상황인지 구분 불가한 경우, (b) 구형 SPN 611~615에서 상호작용하는 복수 회로 중 수리 대상 특정이 필요한 경우다.
 
 :::info System Diagnostic Codes (SPN 611~615)
 SPN 611~615는 특정 현장 교체 부품(field-replaceable component)에 귀속시킬 수 없는 고장을 나타내는 "System Diagnostic Code"다. 진단 정보를 특정 컴포넌트+고장 모드로 표현할 수 없을 때만 사용해야 하며(제조사 정의 코드는 표준화 관점에서 바람직하지 않으므로), 표준 SPN/FMI 형식을 유지하기 때문에 표준 진단 툴·전자 대시보드 등이 그대로 읽을 수 있다는 장점이 있다. 사용 사유로는 컴포넌트 단위 고장 격리 비용이 정당화되지 않는 경우, 새로운 차량 전체 진단 개념·전략 개발 중인 경우가 있다. 이들 SPN은 컴포넌트 특정적이지 않아 FMI 0~13, 15~31이 의미를 갖기 어려우므로 <strong>보통 FMI 14와 함께</strong> 쓰고, 기술자를 제조사 트러블슈팅 매뉴얼로 안내하는 것이 목적이다.
@@ -469,7 +475,7 @@ SPN 611~615는 특정 현장 교체 부품(field-replaceable component)에 귀�
 
 참고 문헌(informative)으로 ISO/IEC 7498(OSI 참조 모델), ISO/IEC 8859-1(Latin 1), ISO 11783-9(Tractor ECU), ISO 11898(CAN), ISO 14229-3(UDSonCAN), ISO 14230(KWP, DoK-Line), SAE J1939, SAE J1939DA(Digital Annex)가 열거된다.
 
-## 정리 — Part 12 진단 메시지 한눈에 보기
+## 정리: Part 12 진단 메시지 한눈에 보기
 
 | 메시지 | PGN | 전송 | 내용 |
 |---|---|---|---|

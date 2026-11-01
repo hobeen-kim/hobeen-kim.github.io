@@ -29,7 +29,7 @@ tags: [AgIsoStack, ISOBUS, CAN, PGN, J1939]
 속도가 250kbit/s로 고정돼 있다는 점은 실무에서 자주 체감하게 된다. 초당 올릴 수 있는 프레임 수가 정해져 있으므로, 큰 데이터를 자주 보내는 설계는 버스를 금방 포화시킨다.
 
 ::: info 관련 스터디
-CAN 물리 계층과 비트레이트가 어떻게 정해지는지는 [ISOBUS CH3. CAN 물리 계층](/study/isobus/03-can-physical)에서, ISOBUS가 J1939와 어떻게 다른지는 [CH12. ISOBUS 개요](/study/isobus/12-isobus-overview)에서 다룬다.
+CAN 물리 계층과 비트레이트가 어떻게 정해지는지는 [ISOBUS CH3. CAN 물리 계층](/study/isobus/03-can-physical)에서, ISOBUS가 J1939와 어떻게 다른지는 [CH18. ISOBUS 개요](/study/isobus/18-isobus-overview)에서 다룬다.
 :::
 
 ## CAN 프레임에 무엇이 담기는가

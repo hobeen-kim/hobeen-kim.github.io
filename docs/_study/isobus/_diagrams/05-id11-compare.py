@@ -1,9 +1,9 @@
-"""CH5 §2 11bit ID 이진수 비교 — 노드A(0x100) vs 노드B(0x200) (light/dark PNG)."""
+"""CH5 §2 11bit ID 이진수 비교: 노드A(0x100) vs 노드B(0x200) (light/dark PNG)."""
 from _common import diagram
 
 ROWS = [
-    ("노드A", "0x100", "00010000000"),
-    ("노드B", "0x200", "00100000000"),
+    ("노드A", "0x100", "00100000000"),
+    ("노드B", "0x200", "01000000000"),
 ]
 
 LABEL_X, LABEL_W = 2, 16

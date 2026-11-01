@@ -1,4 +1,4 @@
-"""CH06 §7 확인 응답의 두 형식 — CAN 수준(ACK 슬롯·에러 프레임)과 응용 수준(PGN 59392) (light/dark PNG)."""
+"""CH06 §7 확인 응답의 두 형식: CAN 수준(ACK 슬롯·에러 프레임)과 응용 수준(PGN 59392) (light/dark PNG)."""
 from _common import diagram
 
 XS, XO, XD = 20, 52, 84     # 송신 CF, 다른 노드들, 목적지 CF

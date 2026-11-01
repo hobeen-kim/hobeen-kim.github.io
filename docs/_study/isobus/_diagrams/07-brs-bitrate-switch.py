@@ -1,4 +1,4 @@
-"""CH7 §3 BRS 비트 기준 CAN FD 비트레이트 전환 — Arbitration(500kbps) -> BRS -> Data(2~8Mbps) -> EOF(500kbps 복귀) (light/dark PNG)."""
+"""CH7 §3 BRS 비트 기준 CAN FD 비트레이트 전환: Arbitration(500kbps) -> BRS -> Data(2~8Mbps) -> EOF(500kbps 복귀) (light/dark PNG)."""
 from _common import diagram
 
 # 구간 x 범위 (원본 gantt 비율 4:6:2 반영)

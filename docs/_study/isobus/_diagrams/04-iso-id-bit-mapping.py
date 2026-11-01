@@ -1,4 +1,4 @@
-"""CH04 §8 ISO 11783 식별자 필드가 CEFF·CBFF 프레임 비트에 놓이는 위치 — Part 3 Table 1 (light/dark PNG)."""
+"""CH04 §8 ISO 11783 식별자 필드가 CEFF·CBFF 프레임 비트에 놓이는 위치: Part 3 Table 1 (light/dark PNG)."""
 from _common import diagram
 
 X0, BW = 10, 2.2          # 프레임 비트 1의 x, 비트 하나 폭

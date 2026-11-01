@@ -1,4 +1,4 @@
-"""CH11 §8 RTS/CTS 세션의 타이머 배치 — Part 3 Figure B.1 재구성 (light/dark PNG)."""
+"""CH11 §8 RTS/CTS 세션의 타이머 배치: Part 3 Figure B.1 재구성 (light/dark PNG)."""
 from _common import diagram
 
 XO, XR = 34, 70          # 송신 측 / 수신 측 생명선 x

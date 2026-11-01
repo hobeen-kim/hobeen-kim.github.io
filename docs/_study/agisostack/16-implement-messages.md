@@ -28,7 +28,7 @@ AgIsoStack++에는 트랙터와 작업기 사이의 통신을 정의한 <strong>
 ![작업기 메시지 인터페이스](/images/study-agisostack/16-implement-interfaces-dark.png)
 
 ::: info 관련 스터디
-ISOBUS 표준 관점에서의 부가 기능들은 [ISOBUS CH21. 기타 기능](/study/isobus/21-isobus-misc)에서 다룬다.
+ISOBUS 표준 관점에서의 부가 기능들은 [ISOBUS CH51~54. File Server와 Sequence Control](/study/isobus/51-file-server-basics)에서 다룬다.
 :::
 
 ## Guidance 인터페이스

@@ -21,7 +21,7 @@ tags: [AgIsoStack, ISOBUS, TransportProtocol, ETP, FastPacket]
 <strong>전송 계층(Transport Layer)이 바로 이걸 위한 것</strong>이다. 큰 데이터를 8바이트 조각으로 쪼개 보내고, 받는 쪽에서 다시 이어 붙인다. 이 라이브러리를 쓸 때는 <strong>대부분의 경우 이 과정이 투명하게 처리</strong>되며, 거의 모든 크기의 메시지를 보낼 수 있다.
 
 ::: info 관련 스터디
-J1939의 TP.CM / TP.DT 메시지 형식과 RTS·CTS 핸드셰이크의 실제 바이트 배치는 [ISOBUS CH11. J1939 Transport Protocol](/study/isobus/11-j1939-transport)에서 다룬다.
+J1939의 TP.CM / TP.DT 메시지 형식과 RTS·CTS 핸드셰이크의 실제 바이트 배치는 [ISOBUS CH15~17. J1939 Transport Protocol](/study/isobus/15-tp-bam-cmdt)에서 다룬다.
 :::
 
 ## 네 가지 전송 프로토콜

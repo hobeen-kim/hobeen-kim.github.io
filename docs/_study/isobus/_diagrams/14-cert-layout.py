@@ -1,4 +1,4 @@
-"""CH14 §12 ISOBUS compliance certification 메시지(PGN 64834) 비트 배치 — 3판 형식 (light/dark PNG)."""
+"""CH14 §12 ISOBUS compliance certification 메시지(PGN 64834) 비트 배치: 3판 형식 (light/dark PNG)."""
 from _common import diagram
 
 COLOR = {"Y": "green", "R": "purple", "T": "brown", "L": "blue", "V": "chip", "0": "gray"}

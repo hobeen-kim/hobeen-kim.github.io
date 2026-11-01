@@ -1,4 +1,4 @@
-"""CH19 §16 Peer control assignment 절차 — 할당, 응답, 직접 setpoint 전송, 해제 (light/dark PNG)."""
+"""CH19 §16 Peer control assignment 절차: 할당, 응답, 직접 setpoint 전송, 해제 (light/dark PNG)."""
 from _common import diagram
 
 X = {"user": 13, "src": 47, "tc": 87}
@@ -8,7 +8,7 @@ NAMES = {"user": "setpoint value user\n(rate controller)",
 TOP = 42.6
 STEP = 4.3
 
-# (종류, 시작, 끝, 라벨) — note는 (종류, 위치, None, 라벨)
+# (종류, 시작, 끝, 라벨): note는 (종류, 위치, None, 라벨)
 ROWS = [
     ("note", "tc", None, "태스크 active"),
     ("msg", "tc", "src", "9 / mode 3  Assign Transmitter\nDETx·DDI, 목적지 DETy, user NAME"),

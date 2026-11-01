@@ -1,4 +1,4 @@
-"""CH22 §5 TASKDATA.XML 주요 요소 계층 — coding data와 task data (light/dark PNG)."""
+"""CH22 §5 TASKDATA.XML 주요 요소 계층: coding data와 task data (light/dark PNG)."""
 from _common import diagram
 
 IDREFS = [
@@ -27,7 +27,7 @@ def draw(d):
     d.box(52.5, 1.5, 46, 46, P["gray"], ec=P["accent"])
     d.text(54.5, 45.2, "TSK와 그 아래", size=10, weight="bold", ha="left", color=P["accent"])
     d.box(29, 7.6, 3, 2.2, P["blue"], r=0.005)
-    d.text(33, 8.7, "coding data (Table 2)", size=8.5, ha="left", color=P["dim"])
+    d.text(33, 8.7, "coding data", size=8.5, ha="left", color=P["dim"])
     d.box(29, 3.9, 3, 2.2, P["chip"], r=0.005)
     d.text(33, 5.0, "그 밖 (task data)", size=8.5, ha="left", color=P["dim"])
     link(d, 44, 51.1, 24.5, 47.5)

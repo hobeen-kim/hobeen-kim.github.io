@@ -1,14 +1,20 @@
 ---
-title: "표준 정리: Part 6 — Virtual terminal"
-description: "ISO 11783-6(Virtual terminal) — VT 동작 원리, 오브젝트 정의, 명령 메시지, Auxiliary control을 정리한 표준 요약이다."
+title: "표준 정리: Part 6(Virtual terminal)"
+description: "ISO 11783-6(Virtual terminal)에서 VT 동작 원리, 오브젝트 정의, 명령 메시지, Auxiliary control을 정리한 표준 요약이다."
 date: 2026-08-21
 tags: [ISOBUS, ISO11783, 표준정리]
+prev: /study/isobus/appendix-iso-part05
+next: /study/isobus/appendix-iso-part07
 ---
 
 # ISO 11783-6: Virtual terminal 정리
 
 ::: info 이 문서에 대해
 ISO 11783-6 표준 원문을 학습 목적으로 재구성한 <strong>비공식 요약·해설</strong>이다. 규범적 판단이 필요할 때는 반드시 원문 표준을 확인해야 한다.
+:::
+
+::: tip 처음 읽는다면
+이 페이지는 Virtual Terminal(Part 6: 트랙터 화면에 작업기 조작 화면을 띄우는 규칙)을 원문의 절 구조대로 요약한 참고 자료다. 분량이 매우 커서 처음부터 읽기보다, 특정 오브젝트의 속성 바이트나 명령 형식을 찾아볼 때 펼쳐 본다. 처음이라면 [29장 Virtual Terminal(VT) 기초](/study/isobus/29-vt-basics), [32장 VT 오브젝트 풀 기초](/study/isobus/32-vt-object-pool-basics), [36장 VT 명령어 기초](/study/isobus/36-vt-commands-basics)를 먼저 읽는다.
 :::
 
 ## 개요
@@ -128,8 +134,8 @@ VT는 다섯 가지 입력·제어 수단을 제공해야 한다(Figure 2).
 
 <strong>Data Input의 두 방식</strong>
 
-- <strong>Editing</strong> — 새 값을 VT 고유의 방식으로 조합해 입력한다. 조합 중에는 변경이 Working Set에 전달되지 않는다. ENTER(입력 완료·새 값 전달)와 ESC(입력 중단) 수단이 반드시 제공되어야 하며, 상시 키이거나 입력 중에만 나타나는 키여도 된다. 운전자가 ESC를 누르면 VT는 VT ESC message를, Working Set이 ESC command를 보내면 그 응답을 전송한다.
-- <strong>Real-time editing</strong> — Input Number·Input List object가 포커스를 갖고 열린 상태에서 값 변경이 주기적으로 Working Set에 전달된다. VT Change Numeric Value message는 <strong>5 Hz</strong> 업데이트 레이트로 제한된다. 전송된 각 값 변경은 ENTER가 눌린 것과 같은 완결 트랜잭션이며 ESC로 되돌릴 수 없다. 값 증분이 균일할 필요는 없으나 어떤 값이든 설정 가능해야 한다(빠른 스크롤 + 미세 조정 조합 허용). real-time editing 중 ESC가 활성화되면 VT는 화면 값이 마지막으로 WS에 보낸 값과 같도록 보장해야 하고, 동기화를 위해 ESC 응답 전에 최종 값을 보낼 수 있다. real-time editing은 ISO 15077의 조작 장치 요구사항을 만족해야 한다.
+- <strong>Editing</strong>: 새 값을 VT 고유의 방식으로 조합해 입력한다. 조합 중에는 변경이 Working Set에 전달되지 않는다. ENTER(입력 완료·새 값 전달)와 ESC(입력 중단) 수단이 반드시 제공되어야 하며, 상시 키이거나 입력 중에만 나타나는 키여도 된다. 운전자가 ESC를 누르면 VT는 VT ESC message를, Working Set이 ESC command를 보내면 그 응답을 전송한다.
+- <strong>Real-time editing</strong>: Input Number·Input List object가 포커스를 갖고 열린 상태에서 값 변경이 주기적으로 Working Set에 전달된다. VT Change Numeric Value message는 <strong>5 Hz</strong> 업데이트 레이트로 제한된다. 전송된 각 값 변경은 ENTER가 눌린 것과 같은 완결 트랜잭션이며 ESC로 되돌릴 수 없다. 값 증분이 균일할 필요는 없으나 어떤 값이든 설정 가능해야 한다(빠른 스크롤 + 미세 조정 조합 허용). real-time editing 중 ESC가 활성화되면 VT는 화면 값이 마지막으로 WS에 보낸 값과 같도록 보장해야 하고, 동기화를 위해 ESC 응답 전에 최종 값을 보낼 수 있다. real-time editing은 ISO 15077의 조작 장치 요구사항을 만족해야 한다.
 
 data input 동작 중에도 VT Status message는 active Working Set과 입력 대상 오브젝트가 속한 active mask를 계속 가리킨다.
 
@@ -213,7 +219,7 @@ Working Set Master가 공급한 object pool은 그 Working Set의 모든 멤버�
 - 운전자가 입력 필드에 넣은 데이터는 항상 <strong>Working Set Master에게</strong> 전송된다.
 - VT 자신은 Working Set Member를 가질 수 없고 Working Set Master/Member 메시지를 전송해서는 안 된다.
 
-<strong>VT Response 메시지의 수신자(Table 1)</strong> — 이 문서의 VT Response 처리 규정은 "응답은 WS Master에게만" 이라는 ISO 11783-1 규정보다 우선한다.
+<strong>VT Response 메시지의 수신자(Table 1)</strong>: 이 문서의 VT Response 처리 규정은 "응답은 WS Master에게만" 이라는 ISO 11783-1 규정보다 우선한다.
 
 | 구성 | WS Version | VT Version | 동작 |
 | --- | --- | --- | --- |
@@ -249,7 +255,7 @@ Working Set Master가 공급한 object pool은 그 Working Set의 모든 멤버�
 - 지원 언어의 <strong>superset 목록</strong>을 구성해 운전자에게 제시해야 한다. superset = 모든 Working Set이 VT에 알려온 언어 + VT가 지원하는 관련 언어. VT가 지원하는 언어가 훨씬 많으면 무관한 언어는 생략 가능
 - Working Set 연결 해제 시 더 이상 필요 없는 언어를 목록에서 줄일 수 있다. superset 목록은 비휘발성 메모리에 저장해서는 안 된다
 - 운전자가 superset 목록을 보고 선택할 수단을 제공해야 하며, VT 자신이 그 언어를 지원하지 않으면 적절한(또는 기본) 언어로 전환하는 고유 방법을 제공해야 한다
-- 형식(시간·날짜 등)과 측정 단위 선택 수단도 제공해야 한다. 전원 인가 시와 변경 시마다 운전자 선택값을 보고해야 한다 — Working Set은 이 메시지로 자기 pool을 선택 언어에 맞게 수정한다(문자열 갱신, 단위 선택, 오프셋·스케일 변경 등)
+- 형식(시간·날짜 등)과 측정 단위 선택 수단도 제공해야 한다. 전원 인가 시와 변경 시마다 운전자 선택값을 보고해야 한다. Working Set은 이 메시지로 자기 pool을 선택 언어에 맞게 수정한다(문자열 갱신, 단위 선택, 오프셋·스케일 변경 등)
 - standard setups는 비휘발성 저장소에 저장하고 초기화 시 복원해야 한다
 - 글로벌 주소 및 자기 앞으로 온 ISO 11783-7 Language Command 요청에 응답해야 한다
 - Language Command는 언어 코드(ISO 639-1)와 국가 코드(ISO 3166-1)를 함께 싣는 것이 권장된다
@@ -257,7 +263,7 @@ Working Set Master가 공급한 object pool은 그 Working Set의 모든 멤버�
 <strong>Working Set 측</strong>
 
 - 초기 지원 언어 목록은 Working Set object로 알린다. Working Set Special Controls object를 보내 이 목록을 대체할 수 있다(언어+국가 코드 포함 가능)
-- pool을 게시하는 VT에 맞춰 standard setups를 구성해야 한다(VT마다 다른 setups 게시 가능 — 예: auxiliary 오브젝트는 Function instance 0인 VT에, 나머지는 다른 VT에)
+- pool을 게시하는 VT에 맞춰 standard setups를 구성해야 한다(VT마다 다른 setups 게시 가능, 예: auxiliary 오브젝트는 Function instance 0인 VT에, 나머지는 다른 VT에)
 - 선택된 언어·형식·단위를 지원하지 않으면 고유 방법으로 적절한(기본) 설정을 선택해야 한다
 
 #### 4.6.6 초기화
@@ -282,7 +288,7 @@ Working Set Master가 공급한 object pool은 그 Working Set의 모든 멤버�
 9. object pool 전송을 시작·완료해야 한다. 비휘발성 메모리에서의 전송(Annex E) 또는 Annex C의 프로토콜을 쓴다
 10. pool이 지원하는 언어들을 알릴 수 있다
 
-<strong>다중 VT 네트워크에서의 초기화</strong> — Master는 "Move to another VT" 기능을 제공해야 한다(예: "Next VT" Soft Key/Button, Identify VT message와 조합 가능). 동작은 다음과 같다.
+<strong>다중 VT 네트워크에서의 초기화</strong>: Master는 "Move to another VT" 기능을 제공해야 한다(예: "Next VT" Soft Key/Button, Identify VT message와 조합 가능). 동작은 다음과 같다.
 
 1. 네트워크에서 VT를 2대 이상 감지했을 때만 활성화된다
 2. 활성화되면 Master는 (I) 안전 상태로 전환(또는 안전 상태가 아니면 기능 활성화 차단), (II) Delete Object Pool command를 보내고 응답 대기, (III) Working Set Maintenance 송신 중단, (IV) 다른 VT와 초기화 시작, (V) 새 VT를 다음 전원 사이클의 <strong>preferred VT</strong>로 저장한다. 시동 후 일정 시간 내 preferred VT가 없으면 다른 VT로 초기화할 수 있다. 최대 대기 시간은 운전자 설정 수단을 제공하거나 preferred VT의 Get Hardware response의 부팅 시간 사양에서 얻을 수 있다
@@ -291,7 +297,7 @@ Working Set Master가 공급한 object pool은 그 Working Set의 모든 멤버�
 
 "System Shutdown"은 Key Switch가 off인데 ECU Power는 유지되는 기간이다(Actuator Power 유지 여부는 무관, ISO 11783-7 참조). 키 off 전환 시 어떤 장치는 즉시 모든 통신을 끊고, 어떤 장치는 정돈된 셧다운을 위해 전원 유지를 요청하며, 어떤 장치는 키 상태를 무시하고 계속 동작한다. Key Switch 상태 판단은 Wheel-based speed and distance(PGN 65096), 전원 유지 요청은 Maintain Power(PGN 65095)를 쓴다. 아래는 권장 관행이다.
 
-<strong>VT 권장 동작</strong> — "Key switch not Off" → "Key switch Off" 전환 시:
+<strong>VT 권장 동작</strong>: "Key switch not Off" → "Key switch Off" 전환 시:
 
 1. 불필요한 셧다운 경보를 피하기 위해 unexpected shutdown 감지 로직을 비활성화한다(한 애플리케이션은 즉시 꺼지고 다른 애플리케이션이 3초 타임아웃 이상 ECU Power를 유지하는 경우 대비)
 2. Key Switch Off 동안, 그리고 pool을 VT 휘발성 메모리에 올린 ECU들의 마지막 "Maintain ECU Power" 요청 후 최소 2초간 서비스를 유지한다
@@ -299,7 +305,7 @@ Working Set Master가 공급한 object pool은 그 Working Set의 모든 멤버�
 
 NOTE: VT version 3 이하는 셧다운 동작 미규정이라 VT Status message 중단을 포함한 전 통신 중단이 있을 수 있다.
 
-<strong>Working Set 권장 동작</strong> — 키 off 전환 시:
+<strong>Working Set 권장 동작</strong>: 키 off 전환 시:
 
 1. "Maintain Power" message로 자기 상태를 알리고, 선택적으로 전원 유지를 요청할 수 있다
 2. "Maximum time of tractor power" 파라미터를 모니터링해 전원 관리에 활용할 수 있다
@@ -332,7 +338,7 @@ Active mask만 지원하는 VT(Table 2):
 | 전이 | VT 동작 |
 | --- | --- |
 | Active → Inactive+Visible | active 표시 제거, VT Status 글로벌 전송, VT On User-Layout Hide/Show(Shown) 전송 |
-| Inactive+Visible → Active | Hide/Show(Hidden — 특수 케이스, H.20 참조) 전송, active Data/Alarm Mask·Soft Key Mask 표시, active임을 시각 표시, VT Status 글로벌 전송 |
+| Inactive+Visible → Active | Hide/Show(Hidden, 특수 케이스, H.20 참조) 전송, active Data/Alarm Mask·Soft Key Mask 표시, active임을 시각 표시, VT Status 글로벌 전송 |
 | Hidden → Active | active mask·Soft Key Mask 표시, active 시각 표시, VT Status 글로벌 전송 |
 | Active → Hidden | mask 숨김, VT Status 글로벌 전송 |
 | Inactive+Visible → Hidden | Hide/Show(Hidden) 전송 |
@@ -340,20 +346,20 @@ Active mask만 지원하는 VT(Table 2):
 
 공통 규칙: 한 WS의 inactive→active 전이가 다른 WS의 active→inactive를 유발하면 VT Status message는 <strong>한 번만</strong>(새 active WS를 명시) 보낸다.
 
-Working Set은 Change Active Mask command로 Working Set object의 active mask 속성을 바꿔 다른 Data Mask를 선택하거나 Alarm Mask를 활성화할 수 있다. inactive 상태에서도 active mask 변경은 가능하다 — 나중에 보이게 될 때 적절한 mask가 표시되도록 하기 위함이다. inactive Working Set의 active mask는 보이지 않아도 그 Working Set의 active mask로 유지된다.
+Working Set은 Change Active Mask command로 Working Set object의 active mask 속성을 바꿔 다른 Data Mask를 선택하거나 Alarm Mask를 활성화할 수 있다. inactive 상태에서도 active mask 변경은 가능하다. 나중에 보이게 될 때 적절한 mask가 표시되도록 하기 위함이다. inactive Working Set의 active mask는 보이지 않아도 그 Working Set의 active mask로 유지된다.
 
 #### 4.6.9 연결 관리
 
-<strong>VT Status message — 1초 주기.</strong> Working Set은 이 메시지로 VT 존재·상태를 확인한다. <strong>3초간</strong> 못 받으면 VT 셧다운으로 판정하고 <strong>안전 상태(safe state)</strong>로 진입해야 한다. 안전 상태란 VT 인터페이스에 의존하는 모든 기능이 운전자·기계를 위험에 빠뜨리지 않는 기지(known) 상태다. 재연결하도록 설계된 Working Set은 초기화 절차를 재시작한다.
+<strong>VT Status message: 1초 주기.</strong> Working Set은 이 메시지로 VT 존재·상태를 확인한다. <strong>3초간</strong> 못 받으면 VT 셧다운으로 판정하고 <strong>안전 상태(safe state)</strong>로 진입해야 한다. 안전 상태란 VT 인터페이스에 의존하는 모든 기능이 운전자·기계를 위험에 빠뜨리지 않는 기지(known) 상태다. 재연결하도록 설계된 Working Set은 초기화 절차를 재시작한다.
 
-<strong>Working Set Maintenance message — 1초 주기.</strong> VT는 이 메시지로 각 Working Set의 존재를 확인한다. 3초간 못 받거나 initiating bit가 설정된 메시지를 다시 받으면 Master의 unexpected shutdown으로 판정한다.
+<strong>Working Set Maintenance message: 1초 주기.</strong> VT는 이 메시지로 각 Working Set의 존재를 확인한다. 3초간 못 받거나 initiating bit가 설정된 메시지를 다시 받으면 Master의 unexpected shutdown으로 판정한다.
 
 | 상황 | VT의 운전자 경보 |
 | --- | --- |
 | pool 삭제를 명령한 뒤 Maintenance 중단(자발적 이탈) | 경보 안 함 |
 | 점화 키 off 감지 가능 + off로 보고됨 | 경보 안 함 |
 | 해당 WS의 pool이 휘발성 메모리에 없음 | 경보 안 함 |
-| pool 삭제 명령 없음 + 키 off 아님 + pool 존재 | <strong>unexpected shutdown</strong> — 운전자에게 경보 후 휘발성 메모리에서 pool 삭제(경보 수단은 VT 고유) |
+| pool 삭제 명령 없음 + 키 off 아님 + pool 존재 | <strong>unexpected shutdown</strong>: 운전자에게 경보 후 휘발성 메모리에서 pool 삭제(경보 수단은 VT 고유) |
 
 보이는 Working Set의 pool이 삭제되면 그 WS의 모든 표시(Data Mask, Window Mask 등)가 제거된다. active Alarm Mask가 있었으면 VT가 자동 해제한다. VT는 다른 연결된 Working Set이나 VT 고유 화면에 제어를 넘길 수 있고 VT Status message를 갱신해야 한다. 삭제된 WS에 매핑된 auxiliary assignment도 제거해야 한다.
 
@@ -366,7 +372,7 @@ unexpected shutdown을 감지한 상태에서 initiating bit 없는 Maintenance�
 <strong>속성·값 변경(4.6.10.2)</strong>
 
 - 오브젝트 속성은 attribute ID(AID)가 부여되어 있고, read-only가 아니면 Change Attribute command로 변경할 수 있다. 효율을 위해 여러 속성을 묶은 change 커맨드도 있다(예: Change Font Attributes)
-- 연관 Data Mask가 보이지 않아도 속성·값 변경은 가능하다 — 나중에 활성·표시될 때 최신 데이터가 준비되도록
+- 연관 Data Mask가 보이지 않아도 속성·값 변경은 가능하다. 나중에 활성·표시될 때 최신 데이터가 준비되도록
 - Working Set과 운전자가 동시에 같은 오브젝트를 바꾸면 <strong>race condition</strong>이 생길 수 있다. 오브젝트가 입력용으로 열렸는지 알 수 있어도(H.8) 처리 지연(FIFO) 때문에 운전자 상호작용 시작 직후 커맨드가 도착할 수 있다. VT발 커맨드 검증은 Working Set 책임이다
 - VT version 5 이하는 요구가 일관되지 않아 일부 커맨드가 "object in use" 오류를 반환했다. 이 오류 코드는 <strong>v6부터 deprecated</strong>다. v6 이상에서는 오브젝트가 "in use"여도 속성 변경이 가능하며, VT는 즉시 적용하거나 적용 가능 시점까지 캐시할 수 있다
 - 허용은 되지만 "in use" 중 변경을 피해야 하는 속성: Key/Button의 Key code, 입력 필드의 Value·Variable 참조, Input String의 Input attributes·Extended Input attributes, Input String이 참조하는 String Variable, Input Number의 Minimum·Maximum·Offset·Scale, Input object가 참조하는 Font Attributes의 font type, Input Number·Input List가 참조하는 Number Variable
@@ -376,37 +382,37 @@ unexpected shutdown을 감지한 상태에서 initiating bit 없는 Maintenance�
 
 - 런타임에 오브젝트 교체 가능. 단 교체 오브젝트는 <strong>같은 타입</strong>이어야 한다
 - 추가는 transport protocol 세션으로 오브젝트를 보내면 된다. 기존 Object ID로 오브젝트가 오면 기존 것이 교체된다(소유자는 소스 주소로 판별). 크기 변경은 허용되나 VT 메모리 고갈을 유발할 수 있다
-- <strong>개별 오브젝트 삭제는 불가</strong> — pool 전체를 Delete Object Pool command로 삭제한 뒤 해당 오브젝트를 뺀 pool을 다시 업로드해야 한다
+- <strong>개별 오브젝트 삭제는 불가</strong>: pool 전체를 Delete Object Pool command로 삭제한 뒤 해당 오브젝트를 뺀 pool을 다시 업로드해야 한다
 
 #### 4.6.11 특수 오브젝트
 
-<strong>Container object</strong> — 두 용도로 쓴다: (1) 오브젝트들을 논리적으로 묶어 컨테이너 단위로 재사용(여러 mask에 같은 컨테이너를 Object ID로 삽입), (2) 오브젝트 그룹의 hide/show. 예: 특정 기능이 있는 작업기에서만 보여야 할 텍스트들을 컨테이너에 넣고, 런타임에 기능 유무에 따라 컨테이너를 숨긴다.
+<strong>Container object</strong>: 두 용도로 쓴다: (1) 오브젝트들을 논리적으로 묶어 컨테이너 단위로 재사용(여러 mask에 같은 컨테이너를 Object ID로 삽입), (2) 오브젝트 그룹의 hide/show. 예: 특정 기능이 있는 작업기에서만 보여야 할 텍스트들을 컨테이너에 넣고, 런타임에 기능 유무에 따라 컨테이너를 숨긴다.
 
-<strong>Attribute object</strong> — font, line, fill, input, extended input의 5종. 다른 오브젝트들이 참조하는 공유 속성 집합으로, 하나를 바꾸면 참조하는 모든 오브젝트가 갱신되어 일관된 look 유지가 쉽다.
+<strong>Attribute object</strong>: font, line, fill, input, extended input의 5종. 다른 오브젝트들이 참조하는 공유 속성 집합으로, 하나를 바꾸면 참조하는 모든 오브젝트가 갱신되어 일관된 look 유지가 쉽다.
 
-<strong>Variable object</strong> — 둘 이상의 오브젝트가 데이터를 공유하게 한다. 예: Meter object와 Output Number object가 같은 Number Variable을 참조하면 Change Numeric Value command 한 번으로 둘 다 갱신되어 버스 트래픽이 준다.
+<strong>Variable object</strong>: 둘 이상의 오브젝트가 데이터를 공유하게 한다. 예: Meter object와 Output Number object가 같은 Number Variable을 참조하면 Change Numeric Value command 한 번으로 둘 다 갱신되어 버스 트래픽이 준다.
 
-<strong>Macro(4.6.11.4)</strong> — 인터페이스 성능 향상용. 규칙:
+<strong>Macro(4.6.11.4)</strong>: 인터페이스 성능 향상용. 규칙:
 
 - Macro에는 Annex F의 커맨드만 담을 수 있다
 - Macro가 다른 Macro를 유발하는 이벤트를 트리거하면 현재 Macro를 먼저 완료한다. Macro는 트리거된 순서로 실행된다
 - Macro 안에서 Execute (Extended) Macro command를 실행하면 그 Macro가 <strong>즉시 함수 호출처럼</strong> 실행된 뒤 현재 Macro의 남은 커맨드가 이어진다(이벤트 큐에 뒤로 붙이는 방식은 잘못된 동작)
 - 커맨드 실행으로 트리거된 Macro는 다음 버스 커맨드 시작 전에 완료되어야 한다
 - Macro Object ID 범위: v4 이하 0~255, v5 이상 0~65534
-- Macro는 응답 메시지를 트리거하지 않는다. Macro 내 커맨드에 대해 VT는 CAN 버스에 응답을 보내지 않는다(예: Macro의 Change Active Mask는 VT Status message는 유발하지만 Change Active Mask response는 없음) — 따라서 CAN 트래픽이 감소한다
-- Working Set과 Macro가 같은 오브젝트를 바꾸면 race condition 가능 — 예측 가능한 동작인지 평가해야 한다(비동기 TP 전송과 Macro의 값 변경이 겹치는 경우 등)
-- <strong>순환 참조 금지</strong> — 무한 Macro 루프는 VT를 모든 Working Set에 대해 동작 불능으로 만들 수 있다
+- Macro는 응답 메시지를 트리거하지 않는다. Macro 내 커맨드에 대해 VT는 CAN 버스에 응답을 보내지 않는다(예: Macro의 Change Active Mask는 VT Status message는 유발하지만 Change Active Mask response는 없음). 따라서 CAN 트래픽이 감소한다
+- Working Set과 Macro가 같은 오브젝트를 바꾸면 race condition 가능. 예측 가능한 동작인지 평가해야 한다(비동기 TP 전송과 Macro의 값 변경이 겹치는 경우 등)
+- <strong>순환 참조 금지</strong>: 무한 Macro 루프는 VT를 모든 Working Set에 대해 동작 불능으로 만들 수 있다
 
-<strong>Object Pointer(4.6.11.5)</strong> — 포함된 오브젝트의 런타임 교체를 가능하게 한다. Pointer 값을 바꾸면 같은 위치에 다른 오브젝트가 그려진다. 참조 가능한 오브젝트 타입은 부모 오브젝트에 따라 제한된다. Object Pointer는 항상 다른 Object Pointer를 가리킬 수 있다. NULL Object ID를 가리키면 아무것도 그리지 않는다. 런타임 변경으로 잘못된 참조가 생기면 VT는 즉시 검출하지 않아도 되고, 해당 Pointer를 담은 Data/Alarm Mask 활성화 시점까지 지연할 수 있다 — 이때 Change Active Mask response(F.35) 또는 VT Change Active Mask message(H.14)로 알리고 pool을 삭제할 수 있다. 즉시 검출하는 경우 Change Numeric Value response에 "invalid value" 오류를 실어 보낸다.
+<strong>Object Pointer(4.6.11.5)</strong>: 포함된 오브젝트의 런타임 교체를 가능하게 한다. Pointer 값을 바꾸면 같은 위치에 다른 오브젝트가 그려진다. 참조 가능한 오브젝트 타입은 부모 오브젝트에 따라 제한된다. Object Pointer는 항상 다른 Object Pointer를 가리킬 수 있다. NULL Object ID를 가리키면 아무것도 그리지 않는다. 런타임 변경으로 잘못된 참조가 생기면 VT는 즉시 검출하지 않아도 되고, 해당 Pointer를 담은 Data/Alarm Mask 활성화 시점까지 지연할 수 있다. 이때 Change Active Mask response(F.35) 또는 VT Change Active Mask message(H.14)로 알리고 pool을 삭제할 수 있다. 즉시 검출하는 경우 Change Numeric Value response에 "invalid value" 오류를 실어 보낸다.
 
-<strong>External Object Pointer(4.6.11.6)</strong> — 한 WS가 다른 WS pool의 오브젝트를 표시할 수 있게 한다.
+<strong>External Object Pointer(4.6.11.6)</strong>: 한 WS가 다른 WS pool의 오브젝트를 표시할 수 있게 한다.
 
 - 참여 WS의 소프트웨어 업데이트 후에도 참조가 유효하도록, referenced WS와 referencing WS는 외부 참조 활성화 전에 참조 오브젝트 정보를 교환해야 한다(최소한 Object ID 전달). 어느 쪽이든 재시작하면 교환을 반복한다. SCC/SCM(ISO 11783-14)처럼 표준화된 교환 방법이 없으면 제조사 간 합의된 고유 방법을 쓴다
 - 무단 참조 방지를 위해 referenced WS는 <strong>External Object Definition object</strong>에 참조 허용 오브젝트를 나열한다. 이 오브젝트는 정확히 하나의 referencing WS에 할당되며, 여러 WS에 참조를 허용하려면 여러 개를 둔다
 - referencing WS는 <strong>External Reference NAME object</strong>로 참조할 WS를 식별한다
 - 세 오브젝트(External Object Definition, External Object Pointer, External Reference NAME)의 속성이 모두 유효해야 외부 오브젝트를 표시할 수 있다. 정보 교환 완료 전에는 <strong>reset state</strong>여야 한다: External Object Pointer는 External Object Id 속성 = NULL, External Object Definition·External Reference NAME은 Options의 Enable bit = 0
-- pool을 VT 비휘발성 저장소에서 로드하면 속성 유효성이 보장되지 않으므로 VT가 이 세 오브젝트 전부를 reset state로 설정해야 한다. WS master가 pool을 업로드하는 경우에는 VT가 reset하지 않는다 — 교환이 미완이면 master가 업로드 전에 reset state로 만들어야 한다
-- 표시 전 VT의 유효성 검사 — 다음 전부 충족 시 유효: External Object Pointer의 External Reference NAME ID 속성이 활성화된(enabled) External Reference NAME object를 가리킴, referenced WS의 pool이 VT 휘발성 메모리에 존재, 그 pool에 NAME이 referencing WS를 가리키는 활성화된 External Object Definition이 있음, External Object Id가 그 Definition의 오브젝트 목록에 포함됨
+- pool을 VT 비휘발성 저장소에서 로드하면 속성 유효성이 보장되지 않으므로 VT가 이 세 오브젝트 전부를 reset state로 설정해야 한다. WS master가 pool을 업로드하는 경우에는 VT가 reset하지 않는다. 교환이 미완이면 master가 업로드 전에 reset state로 만들어야 한다
+- 표시 전 VT의 유효성 검사: 다음 전부 충족 시 유효: External Object Pointer의 External Reference NAME ID 속성이 활성화된(enabled) External Reference NAME object를 가리킴, referenced WS의 pool이 VT 휘발성 메모리에 존재, 그 pool에 NAME이 referencing WS를 가리키는 활성화된 External Object Definition이 있음, External Object Id가 그 Definition의 오브젝트 목록에 포함됨
 - 참조 오브젝트가 NULL이거나 무효면 External Object Pointer의 Default Object ID 속성이 가리키는 오브젝트를 그린다
 - 같은 NAME의 External Object Definition이 여러 개면, 하나 이상에서 유효하면 유효한 참조다
 
@@ -442,7 +448,7 @@ Working Set은 언제든 Alarm Mask로 알람 정보를 표시할 수 있다. �
 6. ACK가 허용되지 않으면 Working Set은 ACK 수단을 무시할 수 있고, Change Active Mask로 Alarm/Data Mask 전환도 가능하다
 7. VT가 Change Active Mask response로 응답하고 새 mask를 표시한다
 
-<strong>mask 전환 시 VT 동작(Table 4)</strong> — 요청자가 현재 active Working Set인지에 따라:
+<strong>mask 전환 시 VT 동작(Table 4)</strong>: 요청자가 현재 active Working Set인지에 따라:
 
 | 전환 | 요청자 = active WS? | VT 동작 |
 | --- | --- | --- |
@@ -457,32 +463,32 @@ Working Set은 언제든 Alarm Mask로 알람 정보를 표시할 수 있다. �
 
 #### 4.6.15 클리핑
 
-대부분의 오브젝트는 명시적·암시적 크기를 갖는다. VT는 오브젝트 정의 크기 밖에 그려지는 모든 것을 클리핑해야 하며, 클리핑은 항상 <strong>픽셀 단위(그래픽 기준)</strong>다. 텍스트·숫자 오브젝트에도 같은 규칙이 적용된다 — 줄바꿈(wrapping) 여부와 무관하게 영역에 다 들어가지 않는 텍스트는 픽셀 단위로 잘린다(문자 단위가 아님).
+대부분의 오브젝트는 명시적·암시적 크기를 갖는다. VT는 오브젝트 정의 크기 밖에 그려지는 모든 것을 클리핑해야 하며, 클리핑은 항상 <strong>픽셀 단위(그래픽 기준)</strong>다. 텍스트·숫자 오브젝트에도 같은 규칙이 적용된다. 줄바꿈(wrapping) 여부와 무관하게 영역에 다 들어가지 않는 텍스트는 픽셀 단위로 잘린다(문자 단위가 아님).
 
 #### 4.6.16 스케일링
 
-Working Set은 VT의 Data Mask 영역·Soft Key designator 크기를 파악해 자기 오브젝트 정의를 그에 맞게 조정해야 한다. 조정은 pool 전송 전이든 후든 가능하다(단, 전송된 pool이 그 VT에서 무효가 되면 안 됨 — 예: 흑백 VT에 컬러 오브젝트를 보낸 뒤 흑백으로 바꾸는 것은 불가). 즉 mask 외관의 완전한 제어권은 Working Set에 있다.
+Working Set은 VT의 Data Mask 영역·Soft Key designator 크기를 파악해 자기 오브젝트 정의를 그에 맞게 조정해야 한다. 조정은 pool 전송 전이든 후든 가능하다(단, 전송된 pool이 그 VT에서 무효가 되면 안 됨. 예: 흑백 VT에 컬러 오브젝트를 보낸 뒤 흑백으로 바꾸는 것은 불가). 즉 mask 외관의 완전한 제어권은 Working Set에 있다.
 
 - <strong>위치·크기</strong>: Working Set이 VT의 Data Mask 영역과 designator에 맞춰 위치·크기를 스케일해야 한다
-- <strong>폰트</strong>: Working Set이 정의된 영역에 대해 best-fit 알고리즘으로 최적 폰트를 선택해야 하고, 선택한 폰트·스타일을 VT가 지원하는지 확인해야 한다. 최소 폰트는 6 × 8이며, 스케일 결과가 6 × 8 미만이면 6 × 8을 쓴다. 이로 인해 필드 경계 근처 텍스트가 잘리거나, 오브젝트 크기와 무관하게 폰트가 스케일되어 인접 텍스트가 겹칠 수 있다 — Working Set 설계자가 대비해야 한다
+- <strong>폰트</strong>: Working Set이 정의된 영역에 대해 best-fit 알고리즘으로 최적 폰트를 선택해야 하고, 선택한 폰트·스타일을 VT가 지원하는지 확인해야 한다. 최소 폰트는 6 × 8이며, 스케일 결과가 6 × 8 미만이면 6 × 8을 쓴다. 이로 인해 필드 경계 근처 텍스트가 잘리거나, 오브젝트 크기와 무관하게 폰트가 스케일되어 인접 텍스트가 겹칠 수 있다. Working Set 설계자가 대비해야 한다
 - <strong>Picture Graphic object</strong>: VT가 오브젝트의 width 속성에 따라 자동 스케일한다
 
 #### 4.6.17 운전자 입력(내비게이션·데이터 입력 상태 기계)
 
 활성화된 visible 입력 오브젝트나 Button이 있는 Data Mask를 표시 중인 VT는 항상 <strong>Navigating</strong> 또는 <strong>Data input</strong> 상태 중 하나다(Button이 포커스를 가진 동안은 Data input 상태가 될 수 없음).
 
-<strong>입력 오브젝트의 가시성 판정</strong> — 다음 경우에도 오브젝트는 visible로 간주된다: 폭·높이가 0, 다른 오브젝트에 완전히 덮임, 부모 계층의 클리핑 한계 밖에 완전히 위치. 다만 이런 오브젝트는 터치스크린에서 활성화가 불가능할 수 있으므로 권장되지 않으며, 필요에 따라 enable/disable하는 편이 내비게이션 동작을 예측 가능하게 한다.
+<strong>입력 오브젝트의 가시성 판정</strong>: 다음 경우에도 오브젝트는 visible로 간주된다: 폭·높이가 0, 다른 오브젝트에 완전히 덮임, 부모 계층의 클리핑 한계 밖에 완전히 위치. 다만 이런 오브젝트는 터치스크린에서 활성화가 불가능할 수 있으므로 권장되지 않으며, 필요에 따라 enable/disable하는 편이 내비게이션 동작을 예측 가능하게 한다.
 
 - 새 active Data Mask가 선택되면 상태는 Navigating으로 리셋된다. Alarm Mask가 선택된 경우 VT는 상태를 기억했다가 알람 표시 후 같은 Data Mask로 복귀하면 복원할 수 있다. 이 방식을 구현했는데 다른 Data Mask로 복귀하면 일반적인 Data Mask 변경으로 간주해 해당 메시지를 보내야 한다
 - 초기 포커스 지점과 탭 순서는 VT 고유이나, 부모 오브젝트 내 입력 오브젝트 정의 순서가 탭 순서를 결정할 수 있음을 Working Set은 알아야 한다
 - VT는 내비게이션 중 지나치는 모든 오브젝트마다 VT Select Input Object message를 보내지 않아도 된다(로터리 컨트롤을 빠르게 돌릴 때는 포커스를 잃는 오브젝트와 최종 획득 오브젝트에만 보내도 됨)
-- Navigating 상태에서 VT는 어떤 input·Button·Key가 선택(포커스)됐는지 운전자에게 표시해야 한다(방법은 VT 고유 — 프레임, 배경색 변경, 터치 시 순간 하이라이트 등). 터치스크린은 포커스 획득 즉시 입력을 열고 입력 완료 시 포커스를 제거하는 동작이 흔하다(필수는 아님)
-- Working Set의 Select Input Object command는 운전자 주의를 특정 필드로 끌기 위한 수단일 수 있다(설정 마법사 등) — VT 설계자는 이를 인지해야 한다
+- Navigating 상태에서 VT는 어떤 input·Button·Key가 선택(포커스)됐는지 운전자에게 표시해야 한다(방법은 VT 고유: 프레임, 배경색 변경, 터치 시 순간 하이라이트 등). 터치스크린은 포커스 획득 즉시 입력을 열고 입력 완료 시 포커스를 제거하는 동작이 흔하다(필수는 아님)
+- Working Set의 Select Input Object command는 운전자 주의를 특정 필드로 끌기 위한 수단일 수 있다(설정 마법사 등). VT 설계자는 이를 인지해야 한다
 - VT는 disabled 입력 오브젝트를 표시해야 한다(방법은 VT 고유). disabled 표시를 위한 시각 변화는 오브젝트의 폭/높이를 벗어나면 안 되고 오브젝트는 읽을 수 있어야 한다
 - Data input 상태의 VT 동작은 고유 영역이며 입력 중 Data Mask 일부/전부를 덮을 수 있다. 입력 중 해당 오브젝트의 속성 변경은 현재 입력 중인 값에 영향을 주지 않아야 한다(예: Input Number Scale 변경이 입력 중 표시 값을 바꾸면 안 됨)
 - VT version 3 이하는 VT Select Input Object message로 Button·Key 선택을 지원하지 않는다
 
-<strong>내비게이션·입력 이벤트에 대한 VT 반응(Table 5 요약)</strong> — 응답 메시지 순서는 규정이 아니므로 Master는 어떤 순서로 와도 처리하도록 설계해야 한다.
+<strong>내비게이션·입력 이벤트에 대한 VT 반응(Table 5 요약)</strong>: 응답 메시지 순서는 규정이 아니므로 Master는 어떤 순서로 와도 처리하도록 설계해야 한다.
 
 | 현재 상태 | 커맨드/이벤트 | 새 상태 | 주요 응답 |
 | --- | --- | --- | --- |
@@ -514,14 +520,14 @@ Change Active Mask·Select Active Working Set의 상태 전이는 새 mask가 �
 
 #### 4.6.18 Soft Key·Button 활성화
 
-Key object·Button object·ACK 키가 눌리거나(pressed), 떼지거나(released), 래치(latched)될 때마다 VT는 Soft Key Activation message 또는 Button Activation message를 <strong>Working Set Master에게</strong> 보낸다. 키 눌림에 Macro가 연관돼 있으면 VT가 실행한다 — 키 이벤트에 mask 전환 같은 Macro를 연관시키면 인터페이스 반응성이 좋아진다.
+Key object·Button object·ACK 키가 눌리거나(pressed), 떼지거나(released), 래치(latched)될 때마다 VT는 Soft Key Activation message 또는 Button Activation message를 <strong>Working Set Master에게</strong> 보낸다. 키 눌림에 Macro가 연관돼 있으면 VT가 실행한다. 키 이벤트에 mask 전환 같은 Macro를 연관시키면 인터페이스 반응성이 좋아진다.
 
 - v5 이상에서 ACK 키는 Key·Button과 일관된 메시지(pressed, held, released)를 보낸다(v4 이하는 미정의라 구현 편차가 있었음)
 - 활성화된 상태에서 Key·비래치 Button이 화면에서 지워지면(Change Active Mask, Change Soft Key Mask, Hide/Show 등) VT는 그 부모 Data Mask 상의 오브젝트에 대해 released를 보내고, 운전자가 물리적으로 뗄 때까지 그 키를 무시해야 한다
 - 눌린 채 Button이 active mask의 다른 위치로 이동하면: 물리 키로 활성화된 경우 pressed 유지, 터치·포인팅으로 활성화됐고 터치 지점을 벗어난 위치로 이동한 경우 released 전송 후 물리적으로 뗄 때까지 무시
 - 터치스크린에서 운전자가 누른 채 손가락을 오브젝트 밖으로 미끄러뜨리면, 추적 가능한 VT는 <strong>abort</strong>를 나타내는 Activation message를 보내야 한다. 이동과 슬라이드가 겹치면 먼저 발생한 이벤트가 우선한다
 - visible Data Mask 변경 시: 이전 mask의 활성화된 오브젝트에 released를 보내고, 새 mask에 대한 Activation message는 보내지 않는다
-- Soft Key Mask는 Data/Alarm Mask의 자식으로 간주된다. active Data/Alarm Mask가 바뀌면 <strong>같은 Soft Key Mask를 쓰더라도</strong> Soft Key Mask도 바뀐 것으로 처리된다 — 눌린 Soft Key에 released를 보내고 뗄 때까지 무시하며, Soft Key Mask의 On Hide·On Show Macro도 실행한다
+- Soft Key Mask는 Data/Alarm Mask의 자식으로 간주된다. active Data/Alarm Mask가 바뀌면 <strong>같은 Soft Key Mask를 쓰더라도</strong> Soft Key Mask도 바뀐 것으로 처리된다. 눌린 Soft Key에 released를 보내고 뗄 때까지 무시하며, Soft Key Mask의 On Hide·On Show Macro도 실행한다
 - Change Active Mask·Change Soft Key Mask가 결과적으로 현재 mask를 바꾸지 않으면 pressed/held/released 상태 변화도, On Hide/On Show Macro 실행도 없다
 - <strong>동시 활성화</strong>: Technical data의 "동시 활성화 지원" 비트(D.9)가 0이면 VT는 한 번에 하나의 Soft Key(또는 Button)만, 정해진 시퀀스(no Keys pressed → pressed → [held] → released → no Keys pressed)로만 지원한다. 첫 키가 pressed/held로 감지된 상태에서 두 번째 키가 눌리면 무시한다. 지원하면 겹치는 메시지 시퀀스를 보낸다
 - 전원 인가 시 이미 눌려 있는 Key·Button은 held로 보고하지 않는다(운전자 진단 메시지 사유는 될 수 있음)
@@ -559,7 +565,7 @@ VT가 지원해야 하는 필수·선택 문자 집합은 Annex K에 있고, 여
 <strong>Proportional 폰트(4.6.19.4)</strong>
 
 - v4 이상 VT의 선택 기능. 문자 폭이 가변이고 height 속성은 8부터 Get Text Font Data response가 알린 최대 지원 폰트 높이까지 완전 스케일 가능. 폰트 크기의 height 속성만 적용되고 width는 무시된다. 렌더된 문자는 선택된 폰트 높이를 초과하면 안 된다
-- proportional 지원을 표명한 VT는 8부터 최대 크기까지 전 높이 범위를 지원해야 한다(1픽셀 해상도 — 단 렌더링 엔진·글자 모양 특성상 모든 문자에서 1픽셀 차이가 감지되지 않을 수 있음)
+- proportional 지원을 표명한 VT는 8부터 최대 크기까지 전 높이 범위를 지원해야 한다(1픽셀 해상도, 단 렌더링 엔진·글자 모양 특성상 모든 문자에서 1픽셀 차이가 감지되지 않을 수 있음)
 - 일반 클리핑 규칙이 그대로 적용되므로 Working Set 설계자는 가변 폭을 감안해 충분한 필드 폭을 잡아야 한다
 - Working Set은 사용 전에 VT의 proportional 지원 여부를 질의해야 하며, 미지원이면 pool 업로드·이후 Change Font Attributes에서 non-proportional만 써야 한다. 미지원 VT가 proportional 요청을 받으면: pool 검증 중 Font Attributes object가 proportional을 가리키면 pool 거부, Change Font Attributes command가 무효 크기·타입이면 오류 응답
 
@@ -568,14 +574,14 @@ VT가 지원해야 하는 필수·선택 문자 집합은 Annex K에 있고, 여
 표시할 텍스트가 오브젝트 폭보다 길고 auto-wrap이 활성화되면 VT는 다음 조건에서 다음 줄로 개행한다(proportional 여부 무관, 텍스트는 오브젝트 폭 경계를 넘지 않아야 함).
 
 - 단어 사이 Space(20₁₆)
-- Soft Hyphen(AD₁₆) — 개행이 일어나면 줄 끝에 soft hyphen을 표시하고, 아니면 표시하지 않음
-- Hyphen(2D₁₆) — 텍스트 오브젝트의 Wrap on Hyphen 옵션 비트가 TRUE일 때 하이픈과 다음 문자 사이에서 개행 가능
+- Soft Hyphen(AD₁₆): 개행이 일어나면 줄 끝에 soft hyphen을 표시하고, 아니면 표시하지 않음
+- Hyphen(2D₁₆): 텍스트 오브젝트의 Wrap on Hyphen 옵션 비트가 TRUE일 때 하이픈과 다음 문자 사이에서 개행 가능
 - 위 규칙으로 줄 안에 개행점이 없으면 줄에서 완전히 보이는 마지막 문자에서 개행
 - Line End에서(4.6.19.6)
 
 다음 줄의 선행 공백은 억제되며 추가 auto-wrap 판단에서도 제외된다. auto-wrap이 `<CR>` 같은 forced wrap 위치와 겹치면 하나의 line end로 해석되고, 겹치지 않으면 별개로 처리된다.
 
-<strong>문자열 내 비인쇄 문자(4.6.19.6)</strong> — v4 이상 기준:
+<strong>문자열 내 비인쇄 문자(4.6.19.6)</strong>: v4 이상 기준:
 
 - BS(Back Space)는 무시된다(Annex K에서 가위 표시된 문자들도 동일)
 - 단일 CR, 단일 LF, 시퀀스 CRLF는 각각 <strong>line end 1개</strong>로 해석된다. 따라서 LFCR은 line end 2개다
@@ -588,7 +594,7 @@ VT가 지원해야 하는 필수·선택 문자 집합은 Annex K에 있고, 여
 - WideString은 UTF-16 리틀 엔디안이며 항상 BOM(FEFF₁₆)으로 시작한다. BOM은 표시 문자가 아니고 텍스트에 포함되지 않는다. 첫 2바이트가 FF₁₆ FE₁₆이면 WideString, 아니면 8-bit string이다
 - length 속성은 항상 <strong>바이트 수</strong>다. WideChar 문자 수 = length/2 − (surrogate pair 수) − 1. length가 홀수 바이트를 가리키면 마지막 바이트는 무시된다
 - VT는 Unicode의 어떤 문자든 지원할 수 있으나 최소한 Table K.8의 문자들을 지원해야 한다. 미지원 문자가 포함된 WideString도 표시해야 하며, 미지원 문자는 표시 가능한 문자(예: "□", VT 고유)로 대체한다
-- VT는 Input String 오브젝트 값의 인코딩을 바꾸면 안 된다 — WideString을 담은 오브젝트에 대한 VT Change String Value message도 WideString이어야 한다
+- VT는 Input String 오브젝트 값의 인코딩을 바꾸면 안 된다. WideString을 담은 오브젝트에 대한 VT Change String Value message도 WideString이어야 한다
 - FFFF₁₆ 초과 문자는 surrogate pair로 표현한다: S = 문자코드 − 10000₁₆, high surrogate = D800₁₆ + (S >> 10), low surrogate = DC00₁₆ + (S의 하위 10비트). 최대 문자 10FFFF₁₆ = pair DBFF₁₆, DFFF₁₆
 
 #### 4.6.20 렌더링 정확도와 VT 설계 자유도
@@ -599,7 +605,7 @@ VT가 지원해야 하는 필수·선택 문자 집합은 Annex K에 있고, 여
 
 - VT는 line art(선 패턴)를 continuous 방식(도형 전체에 패턴 연속 적용) 또는 restarting 방식(변마다 패턴 재시작)으로 렌더할 수 있다. 시작점은 일관되게 적용해야 한다(polygon은 첫 점, rectangle은 좌상단, ellipse는 시작 각도). 굵은 선·line suppression 조합의 정확한 표현은 VT 설계에 달렸다
 - <strong>솔리드 채우기는 scan-line 방식</strong>으로 구현해야 한다. flood-fill·boundary-fill은 오브젝트 겹침으로 채우기가 끊길 수 있고 성능 문제도 있어 부적합하다. 채우기는 오브젝트 내부만 포함하며 <strong>테두리에 해당하는 픽셀은 제외</strong>한다(테두리 line art 사용·억제 시 잘못된 채우기가 특히 눈에 띔)
-- <strong>패턴 채우기 규칙</strong>: 패턴은 Table B.50 폭 제한을 만족하는 Picture Graphic object여야 하고, raw data를 그대로 쓰며 오브젝트 속성과 무관하게 스케일하지 않는다. 패턴 버퍼 좌상단은 VT의 물리 Data Mask(또는 개별 designator, user-layout window mask)의 좌상단에 앵커되어 가로·세로로 반복된다 — 이래야 Data Mask 영역 내 오브젝트 간 패턴이 이어지고 모든 VT에서 같아 보인다. 채우기 패턴에서는 투명·점멸 옵션 속성이 무시된다
+- <strong>패턴 채우기 규칙</strong>: 패턴은 폭 제한(Format 0 모노크롬이면 폭이 8의 배수, Format 1 16색이면 2의 배수. 아래 Fill Attributes 오브젝트 절 참고)을 만족하는 Picture Graphic object여야 하고, raw data를 그대로 쓰며 오브젝트 속성과 무관하게 스케일하지 않는다. 패턴 버퍼 좌상단은 VT의 물리 Data Mask(또는 개별 designator, user-layout window mask)의 좌상단에 앵커되어 가로·세로로 반복된다. 이래야 Data Mask 영역 내 오브젝트 간 패턴이 이어지고 모든 VT에서 같아 보인다. 채우기 패턴에서는 투명·점멸 옵션 속성이 무시된다
 
 #### 4.6.22 이벤트
 
@@ -610,7 +616,7 @@ VT가 지원해야 하는 필수·선택 문자 집합은 Annex K에 있고, 여
 
 <strong>Macro 참조 인코딩</strong>
 
-- v4 이하: 오브젝트 정의 내 그룹당 2바이트 — Event ID(0~254) 1바이트 + Macro ID(0~255) 1바이트. Macro Object ID가 0~255로 제한됨
+- v4 이하: 오브젝트 정의 내 그룹당 2바이트: Event ID(0~254) 1바이트 + Macro ID(0~255) 1바이트. Macro Object ID가 0~255로 제한됨
 - v5 이상: 16bit Macro Object ID(0~65534)도 지원해야 한다. 하위 호환을 위해 같은 2바이트 그룹 구조를 쓰되, <strong>첫 바이트 Event ID = 255</strong>(Use Extended Macro Reference)면 그룹 2개를 연결해 하나의 16bit 참조로 해석한다: 1바이트 = FF₁₆, 2바이트 = Macro ID 하위 바이트, 3바이트 = 실제 Event ID(0~254), 4바이트 = Macro ID 상위 바이트
 
 #### 4.6.23 터치스크린과 포인팅 디바이스
@@ -619,16 +625,16 @@ VT는 터치스크린이나 포인팅 방식(마우스·조이스틱)을 선택�
 
 #### 4.6.24 고유(Proprietary) 수단
 
-VT는 다양한 고유 수단(Proprietary Objects·Events·Colours·Commands·Fonts)을 지원할 수 있다. VT 제조사와 다른 제조사의 Working Set이 고유 수단을 쓰는 것은 최대한의 ISO 호환성을 위해 권장되지 않는다 — 고유 항목은 제조사가 공지 없이 바꿀 수 있고, 정의를 모르는 Proprietary Object는 파싱이 불가능해 VT가 pool을 거부할 수 있다.
+VT는 다양한 고유 수단(Proprietary Objects·Events·Colours·Commands·Fonts)을 지원할 수 있다. VT 제조사와 다른 제조사의 Working Set이 고유 수단을 쓰는 것은 최대한의 ISO 호환성을 위해 권장되지 않는다. 고유 항목은 제조사가 공지 없이 바꿀 수 있고, 정의를 모르는 Proprietary Object는 파싱이 불가능해 VT가 pool을 거부할 수 있다.
 
-또한 Working Set과 VT는 낮은 버전 요구사항과 모순되지 않는 한 <strong>더 높은 버전의 메시지·오브젝트</strong>를 교환·지원할 수 있다(예: version 2 VT가 v4에서 표준화된 Font type 5 Cyrillic 지원). 이는 표준을 활용하지만 낮은 버전에는 정의가 없으므로 고유 수단으로 간주된다 — 상대가 신기능을 지원하는지 고유 수단으로 확인해야 하고, 지원을 가정해서는 안 된다. VT는 pool에 미지원 기능이 있으면 거부해야 하고, 표시·메시징 동작 모두 완전 지원되는 경우에만 수용할 수 있다.
+또한 Working Set과 VT는 낮은 버전 요구사항과 모순되지 않는 한 <strong>더 높은 버전의 메시지·오브젝트</strong>를 교환·지원할 수 있다(예: version 2 VT가 v4에서 표준화된 Font type 5 Cyrillic 지원). 이는 표준을 활용하지만 낮은 버전에는 정의가 없으므로 고유 수단으로 간주된다. 상대가 신기능을 지원하는지 고유 수단으로 확인해야 하고, 지원을 가정해서는 안 된다. VT는 pool에 미지원 기능이 있으면 거부해야 하고, 표시·메시징 동작 모두 완전 지원되는 경우에만 수용할 수 있다.
 
 #### 4.6.25 VT Number
 
 - VT는 공장 출하 시 function instance 0으로 설정되지만 운전자가 구성한 function instance를 유지한다
 - 같은 function instance의 VT가 여럿이거나 instance 0인 VT가 없는 충돌을 해소하기 위해, VT는 <strong>디스플레이 자체에서 function instance를 설정하는 고유 수단</strong>을 제공해야 한다. 이 수단은 VT 간 중복 instance가 생기지 않도록 보장해야 하며, 새 instance는 VT 재초기화 후에만 사용된다
 - function instance 0인 VT가 <strong>primary VT</strong>다
-- 설정 수단은 운전자에게 <strong>VT Number</strong>로 표현되어야 한다 — 모든 제조사의 VT가 일관된 번호 체계로 primary/secondary VT 선택을 제공하기 위함이다. Identify VT message(D.18)로 모든 VT가 자기 설정을 화면에 표시하게 할 수 있다
+- 설정 수단은 운전자에게 <strong>VT Number</strong>로 표현되어야 한다. 모든 제조사의 VT가 일관된 번호 체계로 primary/secondary VT 선택을 제공하기 위함이다. Identify VT message(D.18)로 모든 VT가 자기 설정을 화면에 표시하게 할 수 있다
 
 #### 4.6.26 패킷 패딩
 
@@ -648,7 +654,7 @@ Momentary 수단은 운전자가 활성화하는 동안 ON이고 놓으면 자�
 v4 이상은 일부 오브젝트의 선택적 지원을 정의한다. Working Set은 Get Supported Objects message(D.14)로 지원 오브젝트를 질의할 수 있다. 이 선택성에도 VT에는 다음 요구가 부과된다.
 
 - Working Set은 Get Memory response가 보고한 VT 버전과 호환되게 정의된 <strong>모든 비고유 오브젝트</strong>를 담은 pool을 전송할 수 있다
-- VT는 지원 목록에 없는 비고유 오브젝트도 <strong>파싱은 해야 한다</strong>(기능 지원은 안 해도 됨) — 덕분에 Working Set이 같은 pool을 여러 VT에 쓸 수 있다
+- VT는 지원 목록에 없는 비고유 오브젝트도 <strong>파싱은 해야 한다</strong>(기능 지원은 안 해도 됨). 덕분에 Working Set이 같은 pool을 여러 VT에 쓸 수 있다
 - Working Set은 대상 VT가 지원하지 않는 오브젝트로 커맨드를 보내지 않는 것이 권장된다. 보내면 VT는 0이 아닌 Error Code를 실은 응답을 보낸다(구체적 코드 값은 VT 설계에 따름)
 
 #### 4.6.29 오류 코드
@@ -659,7 +665,7 @@ v4 이상은 일부 오브젝트의 선택적 지원을 정의한다. Working Se
 
 4.7 전체는 <strong>VT version 4 이상</strong>에 적용된다. VT는 여러 Working Set의 데이터를 한 화면에 제공할 수 있고, 설계에 따라 표준 Data Mask·Soft Key Mask와 동시에 제공할 수도 있다.
 
-<strong>최소 요구(4.7.1.2)</strong> — 이 기능은 선택 사항이지만, VT는 미지원이어도 Window Mask·Key Group object를 <strong>파싱은 해야 한다</strong>. 그래서 Working Set은 pool 수정 없이 이 오브젝트들을 모든 v4 이상 VT에 업로드할 수 있다. 지원하는 경우 최소한 Window Mask object의 "free form"(type 0)을 지원해야 하고, 다른 non-zero window mask type들도 원하는 만큼 지원할 수 있다(전 타입 구현 권장). 미지원 window mask type의 Window Mask object가 업로드되면 파싱 후 무시하며 오류를 내지 않는다. 미지원 타입은 운전자 선택 목록에 나타나지 않는다.
+<strong>최소 요구(4.7.1.2)</strong>: 이 기능은 선택 사항이지만, VT는 미지원이어도 Window Mask·Key Group object를 <strong>파싱은 해야 한다</strong>. 그래서 Working Set은 pool 수정 없이 이 오브젝트들을 모든 v4 이상 VT에 업로드할 수 있다. 지원하는 경우 최소한 Window Mask object의 "free form"(type 0)을 지원해야 하고, 다른 non-zero window mask type들도 원하는 만큼 지원할 수 있다(전 타입 구현 권장). 미지원 window mask type의 Window Mask object가 업로드되면 파싱 후 무시하며 오류를 내지 않는다. 미지원 타입은 운전자 선택 목록에 나타나지 않는다.
 
 #### 4.7.2 User-Layout Data Mask
 
@@ -669,7 +675,7 @@ v4 이상은 일부 오브젝트의 선택적 지원을 정의한다. Working Se
 #### 4.7.3~4.7.6 Window Mask object
 
 - Working Set pool에 선택적으로 포함되는 Window Mask object를 <strong>운전자가</strong> User-Layout Data Mask 격자의 원하는 위치에 배치한다. 하나의 Window Mask는 여러 Window Cell(최대 2 × 6 전체)을 차지할 수 있다. 폭넓은 선택지를 위해 가능하면 1 × 1이 권장된다
-- <strong>표현 방식(Window Type 속성)</strong>: type 0(free form)이면 Data Mask처럼 동작한다 — 콘텐츠·표현 모두 Working Set이 정의. non-zero type이면 Working Set은 특정 오브젝트 집합의 참조만 제공하고 <strong>VT가 표현을 제어</strong>한다(참조 오브젝트의 시각 서식 속성을 무시할 수 있음). 후자는 여러 제조사의 정보를 VT 안에서 일관된 look and feel로 합치기 위한 것이다
+- <strong>표현 방식(Window Type 속성)</strong>: type 0(free form)이면 Data Mask처럼 동작한다. 콘텐츠·표현 모두 Working Set이 정의. non-zero type이면 Working Set은 특정 오브젝트 집합의 참조만 제공하고 <strong>VT가 표현을 제어</strong>한다(참조 오브젝트의 시각 서식 속성을 무시할 수 있음). 후자는 여러 제조사의 정보를 VT 안에서 일관된 look and feel로 합치기 위한 것이다
 - VT는 어느 Window Mask object를 어느 Window Cell에 놓을지 선택하는 <strong>고유 매핑 수단</strong>을 제공해야 한다. 선택된 Cell에 맞지 않는 오브젝트는 선택하지 못하게 해야 하고, Cell 선택 시 그 Cell(들)에 맞는 모든 Window Mask object 목록을 제시해야 한다(단 options 속성상 available인 것만). 운전자가 정한 레이아웃은 <strong>비휘발성 메모리에 저장</strong>해 다음 전원 인가 시 복원한다. 해당 Working Set이 없으면 그 Cell은 배경색으로 블랭크 처리한다
 - Window Mask의 options가 not available을 가리키면 연관 Cell을 블랭크한다. available 상태는 런타임에 바뀔 수 있다
 - v4 이상이지만 User-Layout Data Mask 미지원 VT는 Window Mask object를 파싱 후 폐기하면 된다
@@ -692,7 +698,7 @@ VT는 제조사 설계가 지원하면 Non-VT Screen·Non-VT Area에서도 Windo
 - Key는 있을 수도 없을 수도 있고 배치는 운전자 소관이므로 <strong>Window Mask object는 특정 Key Group의 존재에 의존해서는 안 된다</strong>
 - Key가 어느 Working Set 소속인지 인식되도록 설계해야 한다(예: "STOP" 텍스트만 있는 Key가 3개 겹치면 혼동). 권장 레이아웃: designator 좌하단에 작업기 식별자(표준 designator 높이의 60%를 내림한 정사각형), 나머지 픽셀 전체를 Key object가 사용
 - Key Cell 크기·테두리는 Soft Key Mask object와 같은 그리기 규칙을 따른다. Key Group 자식의 스케일링은 Working Set 책임이다
-- VT는 User-Layout Soft Key Mask 밖(Non-VT 영역)에서도 Key Group을 쓸 수 있다 — Working Set은 VT Status의 소스 주소와 무관하게 VT On User-Layout Hide/Show message를 모니터링해 보이는 키를 갱신해야 한다
+- VT는 User-Layout Soft Key Mask 밖(Non-VT 영역)에서도 Key Group을 쓸 수 있다. Working Set은 VT Status의 소스 주소와 무관하게 VT On User-Layout Hide/Show message를 모니터링해 보이는 키를 갱신해야 한다
 
 #### 4.7.13 운전자 입력(User-Layout 환경)
 
@@ -715,7 +721,7 @@ VT는 제조사 설계가 지원하면 Non-VT Screen·Non-VT Area에서도 Windo
 - type 0이 아니면 창의 배경색·투명도는 VT가 결정한다. 필요하면 Working Set은 Get Window Mask Data message로 VT 배경색을 질의할 수 있다
 - VT는 type 0이 아닌 창에서 Working Set이 공급한 오브젝트 참조의 시각 서식 속성을 무시할 수 있다
 - <strong>Window Title·Window Icon</strong>: VT는 title 문자열을 창 제목으로 쓸 수 있다(서식은 VT 고유). Title과 Icon은 기능적으로 동등한 창 설명 요소로 간주되어 VT는 <strong>둘 중 하나 이상을 항상 표시</strong>해야 한다
-- <strong>Window Icon 크기</strong>: Icon Area는 정사각형이고 한 변 = Window Cell 높이의 90%(내림). 예: 200 × 200 Data Mask → Cell 100 × 33 → Icon Area 29 × 29. 테두리·여백 공간이 확보된다. Working Set은 Icon Picture Graphic을 설계 시 미리 스케일하거나 런타임에 width 속성으로 스케일할 수 있다. Icon Area보다 작거나 큰 아이콘, 비정사각형 종횡비도 허용된다 — 작으면 VT가 원하는 위치에 배치 가능, 크면 중앙 정렬 후 클리핑(X·Y 각각 독립 적용). 아이콘은 표시 기능뿐 아니라 데이터 출처(Working Set)를 운전자가 알 수 있게 디자인하는 것이 권장된다
+- <strong>Window Icon 크기</strong>: Icon Area는 정사각형이고 한 변 = Window Cell 높이의 90%(내림). 예: 200 × 200 Data Mask → Cell 100 × 33 → Icon Area 29 × 29. 테두리·여백 공간이 확보된다. Working Set은 Icon Picture Graphic을 설계 시 미리 스케일하거나 런타임에 width 속성으로 스케일할 수 있다. Icon Area보다 작거나 큰 아이콘, 비정사각형 종횡비도 허용된다. 작으면 VT가 원하는 위치에 배치 가능, 크면 중앙 정렬 후 클리핑(X·Y 각각 독립 적용). 아이콘은 표시 기능뿐 아니라 데이터 출처(Working Set)를 운전자가 알 수 있게 디자인하는 것이 권장된다
 - <strong>서식(4.7.15.4)</strong>: type > 0에서 VT는 숫자·문자열 값 필드에 최소 문자 수 표시를 보장해야 하고, Working Set이 공급한 숫자 스케일링·서식 속성(options bit 1·2·3, variable reference, value, offset, scale, number of decimals, format)을 지켜야 한다. justification·색상 같은 look and feel 속성은 VT가 무시할 수 있다
 
 #### 4.7.16 새 Window Mask·Key Group 업로드(Table 7)
@@ -738,14 +744,14 @@ VT는 제조사 설계가 지원하면 Non-VT Screen·Non-VT Area에서도 Windo
 
 Working Set은 자기 pool에 적용되는 색상 팔레트를 조작해 화면 표현을 제어할 수 있다.
 
-- 기본적으로 VT는 <strong>VT 표준 색상 팔레트</strong>(A.3)를 쓴다 — 256색이며 그중 24색은 proprietary다
+- 기본적으로 VT는 <strong>VT 표준 색상 팔레트</strong>(A.3)를 쓴다. 256색이며 그중 24색은 proprietary다
 - <strong>Colour Map object</strong>(v4 이상, B.17): 오브젝트의 colour 속성값 → 표준 팔레트 인덱스의 대응 관계를 바꾼다(예: 색 0과 1을 맞바꿈)
 - <strong>Colour Palette object</strong>(v6 이상, B.26): 팔레트의 색 자체를 재정의한다(ARGB)
 - 둘 다 <strong>그 오브젝트를 담은 object pool에만 개별 적용</strong>되며 다른 pool의 표현을 바꾸지 않는다
 - VT 표준 팔레트가 정의한 초기 색상 매핑은 Working Set Special Controls object(B.29)로 오버라이드할 수 있다
 - 초기화 이후 런타임의 표현 색상 변경은 Select Colour Map or Palette command(F.60)로 수행한다
 
-## Annex A — 오브젝트·이벤트·컬러·커맨드 코드
+## Annex A: 오브젝트·이벤트·컬러·커맨드 코드
 
 ### A.1 오브젝트 타입
 
@@ -803,9 +809,9 @@ VT는 Table A.1의 오브젝트 집합을 관리할 수 있어야 한다(기능�
 | Auxiliary | Auxiliary Input Type 2 object | 32 | Auxiliary Input의 designator·키 번호·기능 타입 (v3+) |
 | Auxiliary | Auxiliary Control Designator Type 2 Object Pointer | 33 | Auxiliary Input/Function Type 2 참조 (v3+) |
 | Proprietary | Manufacturer Defined Objects | 240~254 | 타 벤더 VT에 보내지 말 것 |
-| Reserved | — | 49~239, 255 | 향후 예약 |
+| Reserved | - | 49~239, 255 | 향후 예약 |
 
-<strong>표기 관례(A.1.2)</strong> — Annex B 오브젝트 정의에서 쓰는 데이터 타입:
+<strong>표기 관례(A.1.2)</strong>: Annex B 오브젝트 정의에서 쓰는 데이터 타입:
 
 | 표기 | 의미 |
 | --- | --- |
@@ -819,7 +825,7 @@ VT는 Table A.1의 오브젝트 집합을 관리할 수 있어야 한다(기능�
 | String | Char 또는 WideChar로 구성된 가변 길이 문자열 |
 | Length | 오브젝트 크기. 항상 바이트 수 |
 
-<strong>오브젝트 포함 관계(A.1.3, Table A.2)</strong> — pool의 오브젝트는 부모-자식 계층을 이루며, Table A.2가 부모별 허용 자식 타입과 그 조합이 허용되는 최소 VT 버전을 정의한다(이후 버전 포함). 요지:
+<strong>오브젝트 포함 관계(A.1.3, Table A.2)</strong>: pool의 오브젝트는 부모-자식 계층을 이루며, Table A.2가 부모별 허용 자식 타입과 그 조합이 허용되는 최소 VT 버전을 정의한다(이후 버전 포함). 요지:
 
 - Working Set·Data Mask·Alarm Mask·Container·Window Mask·Key·Button·Key Group·Input List·Output List가 부모가 될 수 있고, 대부분의 출력·입력 오브젝트가 자식으로 허용된다
 - Alarm Mask·Data Mask에 Container는 v2부터, 대부분 출력 오브젝트는 v2부터, Animation·Scaled Graphic 등 신오브젝트는 각각 v5·v6부터 허용된다
@@ -831,7 +837,7 @@ VT는 Table A.1의 오브젝트 집합을 관리할 수 있어야 한다(기능�
 
 | Event ID | 이벤트 | 발생 조건 |
 | --- | --- | --- |
-| 0 | Reserved | — |
+| 0 | Reserved | - |
 | 1 | On activate | Working Set이 active가 될 때 |
 | 2 | On deactivate | Working Set이 inactive가 될 때 |
 | 3 | On show | Container: hide/show command의 show. mask: 화면에 보이게 될 때 |
@@ -862,7 +868,7 @@ VT는 Table A.1의 오브젝트 집합을 관리할 수 있어야 한다(기능�
 | 27 | On pointing event press (v5+) | 포인팅 이벤트를 유발하는 영역 터치·클릭 |
 | 28 | On pointing event release (v5+) | 터치·클릭 해제 |
 | 240~254 | Proprietary Events | 제조사 코드가 다른 ECU-VT 간 사용 금지 |
-| 255 | Use Extended Macro Reference (v5+) | 이벤트가 아님 — 오브젝트의 이벤트 목록에서 발견되면 16bit Macro Object ID 참조를 뜻함 |
+| 255 | Use Extended Macro Reference (v5+) | 이벤트가 아님. 오브젝트의 이벤트 목록에서 발견되면 16bit Macro Object ID 참조를 뜻함 |
 
 비고: 여러 입력 오브젝트가 같은 variable object를 참조할 때 그중 하나가 수정되면 On entry of a (new) value Macro는 <strong>수정된 입력 오브젝트에서만</strong> 실행된다. 이미 포커스를 가진 오브젝트를 운전자가 열거나 닫을 때는 On Input Field Selection Macro가 실행되지 않는다(Select Input Object command에는 "유효 커맨드는 항상 이벤트를 발생시킨다"는 4.6.22.1 규칙 적용).
 
@@ -914,7 +920,7 @@ VT는 Table A.1의 오브젝트 집합을 관리할 수 있어야 한다(기능�
 | D5 | Extended Load Version command/response | 5 |
 | D6 | Extended Delete Version command/response | 5 |
 
-<strong>커맨드(Annex F)</strong> — Macro 허용 여부 포함(command는 대부분 Yes, response는 항상 No):
+<strong>커맨드(Annex F)</strong>: Macro 허용 여부 포함(command는 대부분 Yes, response는 항상 No):
 
 | Function(hex) | 커맨드 | Macro 허용 | v |
 | --- | --- | --- | --- |
@@ -959,7 +965,7 @@ VT는 Table A.1의 오브젝트 집합을 관리할 수 있어야 한다(기능�
 | FF | Working Set Maintenance message | ECU→VT | 2 |
 | FD | (VT) Unsupported VT Function message | 양방향 | 5 |
 
-<strong>Activation(Annex H)</strong> — VT→ECU가 message, ECU→VT가 response:
+<strong>Activation(Annex H)</strong>: VT→ECU가 message, ECU→VT가 response:
 
 | Function(hex) | 메시지 | v |
 | --- | --- | --- |
@@ -990,7 +996,7 @@ VT는 Table A.1의 오브젝트 집합을 관리할 수 있어야 한다(기능�
 
 function code 60₁₆~7F₁₆은 Proprietary Command 영역이고, 나머지 미정의 코드는 예약이다.
 
-## Annex B — 오브젝트 정의
+## Annex B: 오브젝트 정의
 
 Annex B는 각 오브젝트의 허용 커맨드, 이벤트별 VT 동작, 속성·레코드 포맷을 정의한다. 공통 패턴:
 
@@ -1005,7 +1011,7 @@ Working Set을 기술한다. pool당 정확히 1개 제공해야 하며, Soft Ke
 
 허용 커맨드: Change Active Mask, Change Background Colour, Change Child Location, Change Child Position, Get Attribute Value.
 
-주요 이벤트: On Activate(운전자가 이 WS 선택 — 현재 WS에 deactivate 이벤트, 이 WS의 active Data Mask에 show 이벤트, VT Status message), On Deactivate, On Change Active Mask(active mask 속성 변경, active WS면 기존 mask hide + 새 mask show), On Change Background Colour / Child Location / Child Position(designator가 보이면 지우고 refresh).
+주요 이벤트: On Activate(운전자가 이 WS 선택: 현재 WS에 deactivate 이벤트, 이 WS의 active Data Mask에 show 이벤트, VT Status message), On Deactivate, On Change Active Mask(active mask 속성 변경, active WS면 기존 mask hide + 새 mask show), On Change Background Colour / Child Location / Child Position(designator가 보이면 지우고 refresh).
 
 | 속성 | AID | 크기 | 값 | 설명 |
 | --- | --- | --- | --- | --- |
@@ -1041,7 +1047,7 @@ Data Mask 영역에 나타날 오브젝트들을 기술한다. Data Mask 크기�
 
 동작은 4.6.14 참조. 허용 커맨드는 Data Mask와 같고 Change Priority command가 추가된다.
 
-특유 이벤트: On Change Priority — 이 mask가 해당 WS의 현재 mask이면 알람 우선순위를 재평가한다. (a) 이 Alarm Mask가 visible인데 더 이상 최고 우선순위가 아니면 이 WS를 비활성화하고 최고 우선순위 알람의 WS를 활성화, (b) visible이 아닌데 최고 우선순위가 되면 현재 WS를 비활성화하고 이 WS를 활성화.
+특유 이벤트: On Change Priority. 이 mask가 해당 WS의 현재 mask이면 알람 우선순위를 재평가한다. (a) 이 Alarm Mask가 visible인데 더 이상 최고 우선순위가 아니면 이 WS를 비활성화하고 최고 우선순위 알람의 WS를 활성화, (b) visible이 아닌데 최고 우선순위가 되면 현재 WS를 비활성화하고 이 WS를 활성화.
 
 | 속성 | AID | 크기 | 값 | 설명 |
 | --- | --- | --- | --- | --- |
@@ -1059,7 +1065,7 @@ Data Mask 영역에 나타날 오브젝트들을 기술한다. Data Mask 크기�
 
 허용 커맨드: Hide/Show Object, Change Child Location, Change Child Position, Change Size, Get Attribute Value.
 
-주요 이벤트: On Show(이미 visible이어도 show command로 트리거 — 자식을 나열 순서로 그리고 부모 mask refresh, Hide/Show command로 유발된 경우에만 response), On Hide(mask 배경색으로 다시 그리고 부모 mask refresh), On Change Size(자식들을 배경색으로 지우고 refresh).
+주요 이벤트: On Show(이미 visible이어도 show command로 트리거: 자식을 나열 순서로 그리고 부모 mask refresh, Hide/Show command로 유발된 경우에만 response), On Hide(mask 배경색으로 다시 그리고 부모 mask refresh), On Change Size(자식들을 배경색으로 지우고 refresh).
 
 | 속성 | AID | 크기 | 값 | 설명 |
 | --- | --- | --- | --- | --- |
@@ -1083,7 +1089,7 @@ Key object·Object Pointer·External Object Pointer를 담는 컨테이너. Poin
 | Type | [0] | 1 | =4 | |
 | Background colour | 1 | 1 | 0~255 | Key object 자체의 배경색 속성이 이를 오버라이드 |
 | Number of objects / macros | | 각 1 | | |
-| {Object ID} 반복 | | 2 | | 포함 Key(위치 좌표 없음 — designator 순서 할당) |
+| {Object ID} 반복 | | 2 | | 포함 Key(위치 좌표 없음. designator 순서 할당) |
 | {Event ID, Macro ID} 반복 | | 2 | | |
 
 ### B.6 Key object (Type 5)
@@ -1092,7 +1098,7 @@ Soft Key의 designator와 key code를 정의한다. designator 밖의 오브젝�
 
 허용 커맨드: Select Input Object(v4+), Change Background Colour, Change Child Location, Change Child Position, Change Attribute, Get Attribute Value.
 
-주요 이벤트: On Key Press / On Key Release(운전자가 Soft Key를 누르고 뗌 → Soft Key Activation message), On Input Field Selection/De-selection(v4+, 포커스 획득·상실 — VT는 Key가 선택됐음을 운전자가 알 수 있게 표시).
+주요 이벤트: On Key Press / On Key Release(운전자가 Soft Key를 누르고 뗌 → Soft Key Activation message), On Input Field Selection/De-selection(v4+, 포커스 획득·상실. VT는 Key가 선택됐음을 운전자가 알 수 있게 표시).
 
 | 속성 | AID | 크기 | 값 | 설명 |
 | --- | --- | --- | --- | --- |
@@ -1104,7 +1110,7 @@ Soft Key의 designator와 key code를 정의한다. designator 밖의 오브젝�
 
 ### B.7 Button object (Type 6)
 
-버튼 컨트롤을 정의한다. 주로 터치스크린·포인팅 지원 VT용이지만 <strong>모든 VT가 지원해야 한다</strong> — 터치·포인팅이 없으면 Button으로 내비게이션할 수단을 제공해야 한다. 활성화되면 VT가 Button Activation message를 Master에게 보낸다. VT는 options에 따라 Button의 선택(포커스)·pressed·latched 상태를 표시해야 한다.
+버튼 컨트롤을 정의한다. 주로 터치스크린·포인팅 지원 VT용이지만 <strong>모든 VT가 지원해야 한다</strong>: 터치·포인팅이 없으면 Button으로 내비게이션할 수단을 제공해야 한다. 활성화되면 VT가 Button Activation message를 Master에게 보낸다. VT는 options에 따라 Button의 선택(포커스)·pressed·latched 상태를 표시해야 한다.
 
 <strong>Button의 3요소 구조</strong>
 
@@ -1148,7 +1154,7 @@ Boolean·String·Number·List 4종. <strong>VT는 입력 필드 둘레에 테두
 
 공통 허용 커맨드: Enable/Disable Object, Select Input Object, ESC, Change Background Colour(Input List 제외), Change Numeric Value(Input String 제외), Change String Value(Input String만), Change Attribute, Change Size, Get Attribute Value.
 
-공통 이벤트(Table B.15): On Enable/Disable, On Input Field Selection/De-selection, <strong>On ESC</strong>(운전자 ESC 키 또는 WS의 ESC command — real-time editing이 아니면 값을 입력 시작 전 값으로 되돌리고 다시 그림 → VT ESC message 또는 ESC response), On Change Value(커맨드로 값 변경 — 표시 중이면 새 값으로 다시 그리고 부모 refresh), <strong>On Entry of Value</strong>(ENTER로 저장, 값 변경 무관 — VT Change Numeric/String Value message로 WS 갱신), On Entry of New Value(값이 바뀐 경우 — 추가 통지는 없음).
+공통 이벤트(Table B.15): On Enable/Disable, On Input Field Selection/De-selection, <strong>On ESC</strong>(운전자 ESC 키 또는 WS의 ESC command. real-time editing이 아니면 값을 입력 시작 전 값으로 되돌리고 다시 그림 → VT ESC message 또는 ESC response), On Change Value(커맨드로 값 변경. 표시 중이면 새 값으로 다시 그리고 부모 refresh), <strong>On Entry of Value</strong>(ENTER로 저장, 값 변경 무관. VT Change Numeric/String Value message로 WS 갱신), On Entry of New Value(값이 바뀐 경우, 추가 통지는 없음).
 
 #### B.8.2 Input Boolean object (Type 7)
 
@@ -1159,7 +1165,7 @@ TRUE/FALSE 입력(예: 체크박스). 그래픽 오브젝트이며 값 > 0일 �
 | Object ID / Type | / [0] | 2/1 | =7 | |
 | Background colour | 1 | 1 | 0~255 | |
 | Width | 2 | 2 | 0~65535 | 입력 필드 폭이자 높이(정사각형) |
-| Foreground colour | 3 | 2 | 0~65534 | <strong>Font Attributes object의 Object ID</strong> — 유효 속성은 font colour뿐 |
+| Foreground colour | 3 | 2 | 0~65534 | <strong>Font Attributes object의 Object ID</strong>: 유효 속성은 font colour뿐 |
 | Variable reference | 4 | 2 | 0~65534, 65535 | 값을 저장·조회할 Number Variable의 Object ID. NULL이면 value 속성에 직접 저장 |
 | Value | [5] | 1 | 0, 1~255 | variable reference가 NULL일 때만 사용 |
 | Enabled | [6] (v4+) | 1 | 0/1 | 현재 상태 |
@@ -1188,7 +1194,7 @@ TRUE/FALSE 입력(예: 체크박스). 그래픽 오브젝트이며 값 > 0일 �
 
 정수 raw 값에 스케일을 적용해 서식화·표시·변경한다. 핵심 수식:
 
-- 표시 값 = (value 속성 + Offset) × Scaling Factor — <strong>값이 min/max 범위 밖이어도 이 수식으로 표시</strong>한다
+- 표시 값 = (value 속성 + Offset) × Scaling Factor. <strong>값이 min/max 범위 밖이어도 이 수식으로 표시</strong>한다
 - options에 따라 표시 값은 Number of decimals 자리로 절사(truncate) 또는 반올림된다. 반올림 오차 최소화를 위해 double precision 연산 구현이 권장된다
 - ENTER로 입력을 닫을 때 VT는 (Min + Offset) × Scale ≤ 새 값 ≤ (Max + Offset) × Scale일 때만 수용한다. 아니면 ENTER를 무시하고 입력을 연 상태로 유지한다
 - 수용 시: value 속성(또는 참조 변수) = 새 값/Scaling Factor − Offset
@@ -1218,8 +1224,8 @@ TRUE/FALSE 입력(예: 체크박스). 그래픽 오브젝트이며 값 > 0일 �
 
 - 구현·외관은 VT 고유(+/− 키 순회, 스크롤바 팝업 리스트 등). 편집용으로 열려 있지 않으면 현재 값만 표시하며 width·height는 표시 값 영역만 정의한다
 - Master에 전송되는 값은 선택된 <strong>리스트 인덱스</strong>(0~254)다. <strong>255 = 항목 미선택</strong>(v3 이하에서는 미정의였음). CF는 미선택 표시 목적으로 255를 설정할 수 있으나 운전자가 255나 무효 인덱스(항목 수 − 1 초과)를 선택하는 것은 허용되지 않는다. 단 number variable 참조 시 WS나 다른 입력 오브젝트를 통해 무효 인덱스 값이 들어갈 수는 있다
-- 리스트 항목이 NULL 값 Object Pointer이거나 hidden 상태 Container면 <strong>빈 오브젝트</strong>로 간주된다 — 표시 리스트에서 자리를 차지하고 내용 없이도 선택 가능하다
-- 리스트 항목의 Object ID가 NULL이면 <strong>보이지 않는 오브젝트</strong>다 — 표시 리스트에서 자리를 차지하지 않고 선택 불가하나, 인덱스 계산에는 포함되어 리스트 내 위치를 유지한다
+- 리스트 항목이 NULL 값 Object Pointer이거나 hidden 상태 Container면 <strong>빈 오브젝트</strong>로 간주된다. 표시 리스트에서 자리를 차지하고 내용 없이도 선택 가능하다
+- 리스트 항목의 Object ID가 NULL이면 <strong>보이지 않는 오브젝트</strong>다. 표시 리스트에서 자리를 차지하지 않고 선택 불가하나, 인덱스 계산에는 포함되어 리스트 내 위치를 유지한다
 - 다음 경우 VT는 선택 항목에 아무것도 표시하지 않는다: 인덱스 255, 무효 인덱스, NULL placeholder 항목, NULL 값 Object Pointer 항목, hidden Container 항목
 
 허용 커맨드: Enable/Disable Object, Select Input Object, ESC, Change Numeric Value, Change Attribute, Change List Item, Change Size, Get Attribute Value.
@@ -1237,7 +1243,7 @@ TRUE/FALSE 입력(예: 체크박스). 그래픽 오브젝트이며 값 > 0일 �
 
 ### B.9 출력 필드 오브젝트(개요)
 
-출력 필드는 string·number·list 3종으로, 서로 유사한 관계·동작을 갖되 속성이 다르다. 공통 허용 커맨드: Change Background Colour, Change Numeric Value(Output String 제외), Change String Value(Output String만), Change Attribute, Change Size, Get Attribute Value. (세부 정의는 문서 114페이지 이후 — 다음 담당 범위에서 이어짐)
+출력 필드는 string·number·list 3종으로, 서로 유사한 관계·동작을 갖되 속성이 다르다. 공통 허용 커맨드: Change Background Colour, Change Numeric Value(Output String 제외), Change String Value(Output String만), Change Attribute, Change Size, Get Attribute Value. 세부 정의는 바로 아래 "B.9 Output field 오브젝트" 절에 있다.
 
 ## B.9 Output field 오브젝트
 
@@ -1251,7 +1257,7 @@ Output field 공통 이벤트는 다음과 같다.
 
 | 이벤트 | 발생 원인 | VT 동작 | 응답 메시지 |
 |---|---|---|---|
-| On Refresh | Data Mask Refresh 조건 | 오브젝트 재그리기 | — |
+| On Refresh | Data Mask Refresh 조건 | 오브젝트 재그리기 | - |
 | On Change Background Colour | Change Background Colour 명령 | 배경색 채운 뒤 새 배경색으로 재그리기 | Change Background Colour Response |
 | On Change Value | Change Numeric/String Value 명령 | 새 값으로 재그리기, 부모 갱신 | Change Numeric/String Value response |
 | On Change Attribute | Change Attribute 명령 | 표시 중이면 재그리기, 부모 갱신 | Change Attribute response |
@@ -1267,7 +1273,7 @@ Annex B의 대부분의 오브젝트 레코드는 <strong>Number of macros to fo
 
 | 속성 | AID | 크기(B) | 범위 | 설명 |
 |---|---|---|---|---|
-| Object ID | — | 2 | 0~65534 | 오브젝트 풀 내 유일 식별자 |
+| Object ID | - | 2 | 0~65534 | 오브젝트 풀 내 유일 식별자 |
 | Type | [0] | 1 | =11 | Output String |
 | Width | 1 | 2 | 0~65535 | 필드 최대 폭(픽셀). 벗어나는 부분은 클리핑 |
 | Height | 2 | 2 | 0~65535 | 필드 최대 높이(픽셀) |
@@ -1276,8 +1282,8 @@ Annex B의 대부분의 오브젝트 레코드는 <strong>Number of macros to fo
 | Options | 5 | 1 | 비트마스크 | Bit 0 = Transparent, Bit 1 = Auto-Wrap, Bit 2 = Wrap on Hyphen(v4+, Auto-Wrap이 TRUE일 때만 유효) |
 | Variable reference | 6 | 2 | 0~65534, 65535 | 값을 가져올 String Variable의 ID. NULL(65535)이면 Value 속성에 직접 저장. NULL이 아니면 Length·Value 속성은 무시 |
 | Justification | 7 | 1 | 0~2ᵃ / 0~15ᵇ | Bit 0–1 수평(0=Left, 1=Middle, 2=Right), Bit 2–3 수직(0=Top, 1=Middle, 2=Bottom, v4+). 정렬은 픽셀 단위 그래픽 기준 |
-| Length | — | 2 | 0~65535 | Value의 고정 길이(바이트). variable reference 사용 시 0 가능 |
-| Value | — | Length | — | 출력할 문자열. Length만큼 공백 패딩 필요. 8-bit 또는 WideString 가능 |
+| Length | - | 2 | 0~65535 | Value의 고정 길이(바이트). variable reference 사용 시 0 가능 |
+| Value | - | Length | - | 출력할 문자열. Length만큼 공백 패딩 필요. 8-bit 또는 WideString 가능 |
 
 ᵃ VT v3 이하, ᵇ VT v4 이상. (v3 이하에서 Variable reference가 NULL이 아니면 Length는 0이어야 한다.)
 
@@ -1293,7 +1299,7 @@ Options에 따라 표시값을 "Number of decimals" 자리수로 절사(truncate
 
 | 속성 | AID | 크기(B) | 범위 | 설명 |
 |---|---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | =12 | Output Number |
+| Object ID / Type | -/[0] | 2/1 | =12 | Output Number |
 | Width, Height | 1, 2 | 각 2 | 0~65535 | 필드 크기(픽셀), 초과분 클리핑 |
 | Background colour | 3 | 1 | 0~255 | transparent가 아닐 때 사용 |
 | Font attributes | 4 | 2 | 0~65534 | Font Attributes 오브젝트 ID |
@@ -1322,12 +1328,12 @@ VT version 4에서 추가된 오브젝트로, 오브젝트 집합 중 하나를 
 
 | 속성 | AID | 크기(B) | 범위 | 설명 |
 |---|---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | =37 | Output List |
+| Object ID / Type | -/[0] | 2/1 | =37 | Output List |
 | Width, Height | 1, 2 | 각 2 | 0~65535 | 필드 크기, 초과분 클리핑 |
 | Variable reference | 3 | 2 | 0~65534, 65535 | 인덱스를 담은 Number Variable ID. NULL이면 Value 사용 |
 | Value | [4] | 1 | 0~254, 255 | 선택된 리스트 인덱스. 첫 항목이 0, 255는 미선택 |
-| Number of list items | — | 1 | 0~255 | 뒤따르는 오브젝트 참조 수. 리스트 크기의 상한이며 변경 불가 |
-| Repeat: {Object ID} | — | 각 2 | 0~65534, 65535 | 리스트 구성 오브젝트. NULL은 no-item placeholder. Change List Item 명령으로 교체·제거 가능 |
+| Number of list items | - | 1 | 0~255 | 뒤따르는 오브젝트 참조 수. 리스트 크기의 상한이며 변경 불가 |
+| Repeat: {Object ID} | - | 각 2 | 0~65534, 65535 | 리스트 구성 오브젝트. NULL은 no-item placeholder. Change List Item 명령으로 교체·제거 가능 |
 
 이벤트는 On Refresh, On Change Value(Change Numeric Value로 인덱스 변경), On Change Attribute, On Change Size로 Output field 공통 패턴과 같다.
 
@@ -1348,7 +1354,7 @@ VT version 4에서 추가된 오브젝트로, 오브젝트 집합 중 하나를 
 
 | 속성 | AID | 크기(B) | 범위 | 설명 |
 |---|---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | =13 | Output Line |
+| Object ID / Type | -/[0] | 2/1 | =13 | Output Line |
 | Line attributes | 1 | 2 | 0~65534 | Line Attributes 오브젝트 ID |
 | Width | 2 | 2 | 0~65535 | 둘러싼 가상 사각형 폭(픽셀). X + Width − 1, Y + Height − 1이 클리핑 한계 |
 | Height | 3 | 2 | 0~65535 | 둘러싼 가상 사각형 높이(픽셀) |
@@ -1371,7 +1377,7 @@ Line Direction에 따른 시작·끝점 계산:
 
 | 속성 | AID | 크기(B) | 범위 | 설명 |
 |---|---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | =14 | Output Rectangle |
+| Object ID / Type | -/[0] | 2/1 | =14 | Output Rectangle |
 | Line attributes | 1 | 2 | 0~65534 | Line Attributes 오브젝트 ID |
 | Width, Height | 2, 3 | 각 2 | 0~65535 | 픽셀 크기. (StartX, StartY)~(StartX+Width−1, StartY+Height−1)이 클리핑 한계. 끝점 = Start + 크기 − LineWidth |
 | Line suppression | 4 | 1 | 0~15 | 변 생략 비트마스크. 0 = 닫힌 사각형, Bit 0 = 윗변(최소 Y), Bit 1 = 오른변(최대 X), Bit 2 = 아랫변(최대 Y), Bit 3 = 왼변(최소 X) 생략. 조합 가능 |
@@ -1385,7 +1391,7 @@ Line Direction에 따른 시작·끝점 계산:
 
 | 속성 | AID | 크기(B) | 범위 | 설명 |
 |---|---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | =15 | Ellipse |
+| Object ID / Type | -/[0] | 2/1 | =15 | Ellipse |
 | Line attributes | 1 | 2 | 0~65534 | Line Attributes 오브젝트 ID |
 | Width, Height | 2, 3 | 각 2 | 0~65535 | 둘러싼 가상 사각형 크기. 클리핑 한계 동일 |
 | Ellipse type | 4 | 1 | 0~3 | 0 = 닫힌 타원, 1 = 시작/끝 각으로 정의된 열린 타원(호), 2 = 닫힌 segment(현으로 닫음), 3 = 닫힌 section(중심까지 반지름으로 닫음, 부채꼴) |
@@ -1412,13 +1418,13 @@ Line Direction에 따른 시작·끝점 계산:
 
 | 속성 | AID | 크기(B) | 범위 | 설명 |
 |---|---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | =16 | Polygon |
+| Object ID / Type | -/[0] | 2/1 | =16 | Polygon |
 | Width, Height | 1, 2 | 각 2 | 0~65535 | 둘러싼 가상 사각형 크기, 클리핑 한계 |
 | Line attributes | 3 | 2 | 0~65534 | Line Attributes 오브젝트 ID |
 | Fill attributes | 4 | 2 | 0~65534, 65535 | Fill Attributes ID, NULL이면 채우기 없음 |
 | Polygon type | 5 | 1 | 0~3 | 0 = Convex(수평선이 다각형과 최대 2점에서 교차), 1 = Non-Convex(2점 초과 교차 가능하나 변이 서로 교차하지 않음), 2 = Complex(변이 교차, complex fill 알고리즘 사용), 3 = Open(채우기 불가). 타입 변경은 open↔not open 방향으로만 가능 |
-| Number of points | — | 1 | 3~255 | 점 개수. 점 하나당 4바이트 |
-| Repeat: {Point X, Point Y} | — | 각 2 | 0~65535 | 다각형 좌상단 기준 상대 좌표 |
+| Number of points | - | 1 | 3~255 | 점 개수. 점 하나당 4바이트 |
+| Repeat: {Point X, Point Y} | - | 각 2 | 0~65535 | 다각형 좌상단 기준 상대 좌표 |
 
 ## B.11 Output graphic 오브젝트
 
@@ -1436,7 +1442,7 @@ VT version 4 이상에서의 값 제약 처리: min ≥ max이면 값·target에
 
 | 속성 | AID | 크기(B) | 범위 | 설명 |
 |---|---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | =17 | Output Meter |
+| Object ID / Type | -/[0] | 2/1 | =17 | Output Meter |
 | Width | 1 | 2 | 0~65535 | 둘러싼 정사각형의 폭이자 높이. 미터는 이 영역을 벗어날 수 없음 |
 | Needle colour | 2 | 1 | 0~255 | 바늘(지시자) 색 |
 | Border colour | 3 | 1 | 0~255 | 테두리 색(그릴 경우) |
@@ -1458,7 +1464,7 @@ VT version 4 이상에서의 값 제약 처리: min ≥ max이면 값·target에
 
 | 속성 | AID | 크기(B) | 범위 | 설명 |
 |---|---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | =18 | Output Linear Bar Graph |
+| Object ID / Type | -/[0] | 2/1 | =18 | Output Linear Bar Graph |
 | Width, Height | 1, 2 | 각 2 | 0~65535 | 둘러싼 사각형 크기. 바 그래프는 이 영역을 벗어날 수 없음 |
 | Colour | 3 | 1 | 0~255 | 바 채움·테두리 색 |
 | Target line colour | 4 | 1 | 0~255 | 목표선 색(그릴 경우) |
@@ -1480,7 +1486,7 @@ Change Size 명령으로 "bar graph width"가 오브젝트 폭·높이의 절반
 
 | 속성 | AID | 크기(B) | 범위 | 설명 |
 |---|---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | =19 | Output Arched Bar Graph |
+| Object ID / Type | -/[0] | 2/1 | =19 | Output Arched Bar Graph |
 | Width, Height | 1, 2 | 각 2 | 0~65535 | 둘러싼 사각형 크기 |
 | Colour | 3 | 1 | 0~255 | 바 채움·테두리 색 |
 | Target line colour | 4 | 1 | 0~255 | 목표선 색 |
@@ -1503,15 +1509,15 @@ Change Size 명령으로 "bar graph width"가 오브젝트 폭·높이의 절반
 
 | 속성 | AID | 크기(B) | 범위 | 설명 |
 |---|---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | =20 | Picture Graphic |
+| Object ID / Type | -/[0] | 2/1 | =20 | Picture Graphic |
 | Width | 1 | 2 | 0~65535 | 목표 폭(픽셀). 높이는 종횡비 유지를 위해 Actual width/height와 이 값에서 계산 |
 | Actual width | [4] | 2 | 0~65535 | 원본 데이터의 실제 폭 |
 | Actual height | [5] | 2 | 0~65535 | 원본 데이터의 실제 높이 |
 | Format | [6] | 1 | 0~2 | 0 = Monochrome(1bpp, 바이트당 8픽셀, 팔레트 인덱스 0/1), 1 = 4-bit colour(바이트당 2픽셀, 니블당 인덱스 0~15), 2 = 8-bit colour(바이트당 1픽셀, 인덱스 0~255) |
 | Options | 2 | 1 | 0~7 | Bit 0: 0 = Opaque, 1 = Transparent(transparency colour와 같은 인덱스 픽셀은 배경이 비침), Bit 1: 1 = Flashing(스타일·주기는 VT 재량), Bit 2: 1 = Run-Length Encoded 데이터. Bit 2는 런타임 Change Attribute로 변경 불가(변경 시도는 무시됨) |
 | Transparency colour | 3 | 1 | 0~255 | 투명 처리할 색 인덱스 |
-| Number of bytes in raw data | — | 4 | 0~2³²−1 | 원시 데이터 바이트 수 |
-| Repeat: {raw data} | — | 1 | 0~255 | 그래픽 원시 데이터 |
+| Number of bytes in raw data | - | 4 | 0~2³²−1 | 원시 데이터 바이트 수 |
+| Repeat: {raw data} | - | 1 | 0~255 | 그래픽 원시 데이터 |
 
 ### B.12.2 원시 데이터 형식과 압축
 
@@ -1532,7 +1538,7 @@ Change Size 명령으로 "bar graph width"가 오브젝트 폭·높이의 절반
 
 | 속성 | AID | 크기(B) | 설명 |
 |---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | Type = 21 |
+| Object ID / Type | -/[0] | 2/1 | Type = 21 |
 | Value | [1] | 4 | 32-bit unsigned 정수 값 |
 
 ### B.13.3 String Variable object (Type 22)
@@ -1541,9 +1547,9 @@ Change Size 명령으로 "bar graph width"가 오브젝트 폭·높이의 절반
 
 | 속성 | AID | 크기(B) | 설명 |
 |---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | Type = 22 |
-| Length | — | 2 | 문자열 값의 고정 길이(바이트) |
-| Value | — | Length | 문자열. 공백 패딩 |
+| Object ID / Type | -/[0] | 2/1 | Type = 22 |
+| Length | - | 2 | 문자열 값의 고정 길이(바이트) |
+| Value | - | Length | 문자열. 공백 패딩 |
 
 ## B.14 Attribute 오브젝트
 
@@ -1557,7 +1563,7 @@ Change Size 명령으로 "bar graph width"가 오브젝트 폭·높이의 절반
 
 | 속성 | AID | 크기(B) | 범위 | 설명 |
 |---|---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | =23 | Font Attributes |
+| Object ID / Type | -/[0] | 2/1 | =23 | Font Attributes |
 | Font colour | 1 | 1 | 0~255 | 글자 색 |
 | Font size | 2 | 1 | 0~14ᵃ / 0~14 또는 8~Nᵇ | 아래 참조 |
 | Font type | 3 | 1 | 0, 1, 255ᵃ / 0~2, 4, 5, 7, 240~255ᵇ | 문자 집합 선택(Table K.1, 예: 0 = ISO 8859-1). WideString에 적용될 때는 무시됨 |
@@ -1567,7 +1573,7 @@ Change Size 명령으로 "bar graph width"가 오브젝트 폭·높이의 절반
 
 <strong>Font size</strong>: 비례(proportional) 여부는 Font style bit 7이 결정한다.
 
-- 고정폭 글꼴: 값 0~14가 픽셀 크기(폭×높이)에 대응한다 — 0 = 6×8, 1 = 8×8, 2 = 8×12, 3 = 12×16, 4 = 16×16, 5 = 16×24, 6 = 24×32, 7 = 32×32, 8 = 32×48, 9 = 48×64, 10 = 64×64, 11 = 64×96, 12 = 96×128, 13 = 128×128, 14 = 128×192.
+- 고정폭 글꼴: 값 0~14가 픽셀 크기(폭×높이)에 대응한다. 0 = 6×8, 1 = 8×8, 2 = 8×12, 3 = 12×16, 4 = 16×16, 5 = 16×24, 6 = 24×32, 7 = 32×32, 8 = 32×48, 9 = 48×64, 10 = 64×64, 11 = 64×96, 12 = 96×128, 13 = 128×128, 14 = 128×192.
 - 비례 글꼴(v4+): 값 8~N이 글꼴 높이(픽셀)를 직접 나타낸다. N은 Get Text Font Data response의 Font size 값으로 식별되는 VT의 최대 지원 높이이고, 문자 폭은 가변이다.
 
 <strong>Font style</strong> 비트마스크 (조합 가능, 0 = 일반 텍스트):
@@ -1589,7 +1595,7 @@ Output shape 오브젝트가 참조하는 선 속성 묶음이다. 허용 명령
 
 | 속성 | AID | 크기(B) | 범위 | 설명 |
 |---|---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | =24 | Line Attributes |
+| Object ID / Type | -/[0] | 2/1 | =24 | Line Attributes |
 | Line colour | 1 | 1 | 0~255 | 펜 색 |
 | Line width | 2 | 1 | 0~255 | 펜 두께(픽셀). 이 크기의 정사각 paintbrush로 그림 |
 | Line art | 3 | 2 | 0~65535 | 선 패턴 비트마스크. 각 비트가 브러시 한 칸이며 1 = 선 색으로 그림, 0 = 건너뜀(배경색). 비트 하나의 길이 = 현재 브러시 크기. 예: 00110011은 두 칸 생략 + 두 칸 그림의 반복 |
@@ -1602,7 +1608,7 @@ Output shape 채우기 속성 묶음이다. 허용 명령: Change Fill Attribute
 
 | 속성 | AID | 크기(B) | 범위 | 설명 |
 |---|---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | =25 | Fill Attributes |
+| Object ID / Type | -/[0] | 2/1 | =25 | Fill Attributes |
 | Fill type | 1 | 1 | 0~3 | 0 = 채우기 없음, 1 = line colour로 채움, 2 = Fill colour 속성의 색으로 채움, 3 = Fill pattern 속성의 패턴으로 채움 |
 | Fill colour | 2 | 1 | 0~255 | Fill type = 2일 때만 사용 |
 | Fill pattern | 3 | 2 | 0~65534, 65535 | 패턴으로 쓸 Picture Graphic 오브젝트 ID. Fill type ≠ 3이면 무시. Fill type = 3인데 NULL이면 채우지 않음 |
@@ -1618,10 +1624,10 @@ Input String 오브젝트에 대해 유효/무효 문자를 정의한다. VT는 
 
 | 속성 | AID | 크기(B) | 범위 | 설명 |
 |---|---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | =26 | Input Attributes |
+| Object ID / Type | -/[0] | 2/1 | =26 | Input Attributes |
 | Validation type | [1] | 1 | 0~1 | 0 = 유효 문자를 나열, 1 = 무효 문자를 나열 |
-| Length | — | 1 | 0~255 | 검증 문자열 길이(바이트). 검증 문자열은 8-bit String이어야 함 |
-| Validation string | — | Length | — | 유효 또는 무효 문자 코드 전체를 담은 문자열 |
+| Length | - | 1 | 0~255 | 검증 문자열 길이(바이트). 검증 문자열은 8-bit String이어야 함 |
+| Validation string | - | Length | - | 유효 또는 무효 문자 코드 전체를 담은 문자열 |
 
 ### B.14.6 Extended Input Attributes object (Type 38)
 
@@ -1629,12 +1635,12 @@ VT version 4에서 추가된, WideString용 입력 문자 검증 오브젝트다
 
 | 속성 | AID | 크기(B) | 범위 | 설명 |
 |---|---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | =38 | Extended Input Attributes |
+| Object ID / Type | -/[0] | 2/1 | =38 | Extended Input Attributes |
 | Validation type | [1] | 1 | 0~1 | 0 = 유효 문자 나열, 1 = 무효 문자 나열 |
-| Number of code planes | — | 1 | 1~17 | 유효/무효 문자가 있는 코드플레인 수 |
-| Repeat: {Code plane number} | — | 1 | 0~16 | 문자 범위가 속한 코드플레인(0 = U+0000~U+FFFF, 1 = U+10000~U+1FFFF, …) |
-| {Number of character ranges} | — | 1 | 1~255 | 문자 범위 수 |
-| Repeat: `{{First character}, {Last character}}` | — | 각 2 | 0~65535 | 범위의 첫/끝 문자(WideChar, first ≤ last) |
+| Number of code planes | - | 1 | 1~17 | 유효/무효 문자가 있는 코드플레인 수 |
+| Repeat: {Code plane number} | - | 1 | 0~16 | 문자 범위가 속한 코드플레인(0 = U+0000~U+FFFF, 1 = U+10000~U+1FFFF, …) |
+| {Number of character ranges} | - | 1 | 1~255 | 문자 범위 수 |
+| Repeat: `{{First character}, {Last character}}` | - | 각 2 | 0~65535 | 범위의 첫/끝 문자(WideChar, first ≤ last) |
 
 ## B.15 Object Pointer object (Type 27)
 
@@ -1642,7 +1648,7 @@ VT version 4에서 추가된, WideString용 입력 문자 검증 오브젝트다
 
 | 속성 | AID | 크기(B) | 범위 | 설명 |
 |---|---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | =27 | Object Pointer |
+| Object ID / Type | -/[0] | 2/1 | =27 | Object Pointer |
 | Value | [1] | 2 | 0~65534, 65535 | 참조 오브젝트 ID 또는 NULL |
 
 ## B.16 Macro object (Type 28)
@@ -1651,9 +1657,9 @@ VT version 4에서 추가된, WideString용 입력 문자 검증 오브젝트다
 
 | 속성 | AID | 크기(B) | 범위 | 설명 |
 |---|---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | =28 | Macro. Object ID 범위는 v4 이하 0~255, v5+ 0~65534 |
-| Number of bytes to follow | — | 2 | 0~65535 | 뒤따르는 바이트 수. 8바이트 미만 명령(예: 2바이트 문자열의 Change String Value)은 나머지를 FF₁₆으로 채워 8바이트 경계에 맞춤 |
-| Repeat: {Command} | — | — | — | 명령 메시지 패킷들. Annex F에 나열된 명령만 허용, 형식도 Annex F를 따름 |
+| Object ID / Type | -/[0] | 2/1 | =28 | Macro. Object ID 범위는 v4 이하 0~255, v5+ 0~65534 |
+| Number of bytes to follow | - | 2 | 0~65535 | 뒤따르는 바이트 수. 8바이트 미만 명령(예: 2바이트 문자열의 Change String Value)은 나머지를 FF₁₆으로 채워 8바이트 경계에 맞춤 |
+| Repeat: {Command} | - | - | - | 명령 메시지 패킷들. Annex F에 나열된 명령만 허용, 형식도 Annex F를 따름 |
 
 ## B.17 Colour Map object (Type 39)
 
@@ -1661,22 +1667,22 @@ VT 색 인덱스 → RGB 변환 테이블을 런타임에 바꿀 수 있게 하�
 
 - 풀에는 Colour Map을 여러 개 담을 수 있다. 풀 로드 직후에는 기본 Colour Map을 쓰고, 유효한 Select Colour Map or Palette 명령을 받으면 해당 Working Set의 활성 팔레트 접근이 바뀐다. Working Set 풀의 모든 오브젝트는 그 Working Set의 Colour Map으로 표시된다.
 - Colour Map은 유효한 색 인덱스 각각의 정의를 담는다. 선택 시 결과 값이 VT 능력 범위에서 유효해야 하며, 아니면 Select Colour Map or Palette response로 실패를 알린다. 모노크롬 VT는 엔트리 2개, 256색 VT는 256개를 유지한다. VT 능력을 넘는 Colour Map(예: 2색 VT에 256엔트리 맵 업로드)은 허용되지만, VT 능력보다 <strong>적은</strong> 색 인덱스를 가질 수는 없다.
-- 기본 팔레트는 Table A.4에 정의되며 색 인덱스가 배열 첨자다. Colour Map은 이 RGB 테이블로 가는 간접 참조 한 단계를 제공한다. 예를 들어 [1, 0, …] 값의 Colour Map을 선택하면 색 0과 1이 뒤바뀐다.
+- 기본 팔레트는 이 페이지의 "A.3 VT 표준 색상 팔레트"(원문 Table A.4)에 정의되며 색 인덱스가 배열 첨자다. Colour Map은 이 RGB 테이블로 가는 간접 참조 한 단계를 제공한다. 예를 들어 [1, 0, …] 값의 Colour Map을 선택하면 색 0과 1이 뒤바뀐다.
 - v6 이상은 Colour Palette 오브젝트로 VT 표준 팔레트 자체를 Working Set 정의 팔레트로 바꾸는 것도 지원한다.
 
 허용 명령: Get Attribute Value.
 
 | 속성 | AID | 크기(B) | 범위 | 설명 |
 |---|---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | =39 | Colour Map |
-| Number of colour indexes | — | 2 | 2, 16, 256 | 그래픽 타입 0(모노크롬) = 2, 타입 1(16색) = 16, 타입 2(256색) = 256 |
-| Colour Map | — | 가변 | 0~255 | 각 색 인덱스에 대해 실제로 표시할 VT 색 |
+| Object ID / Type | -/[0] | 2/1 | =39 | Colour Map |
+| Number of colour indexes | - | 2 | 2, 16, 256 | 그래픽 타입 0(모노크롬) = 2, 타입 1(16색) = 16, 타입 2(256색) = 256 |
+| Colour Map | - | 가변 | 0~255 | 각 색 인덱스에 대해 실제로 표시할 VT 색 |
 
 ## B.18 Graphics Context object (Type 36)
 
 캔버스와 뷰포트를 가진 비트맵으로, Working Set이 런타임에 조작(그리기)할 수 있다. v4 이상 선택 사항, v6 이상 필수다. VT가 지원하지 않는데 풀에서 참조되면 NULL을 가리키는 Object Pointer처럼 처리된다(그리지 않고, 열린 Input List에서 선택 가능한 자리를 차지). 이 경우 추가 메모리는 할당되지 않는다.
 
-- <strong>캔버스에 메모리가 있다</strong>: 그리기 영역(canvas)의 픽셀은 화면에서 제거되거나 다른 마스크가 선택돼도 유지된다. 이를 이용해 Working Set이 VT 화면에 런타임 드로잉을 할 수 있다 — 예를 들어 정밀농업 앱에서 움직이는 작업기 이미지 뒤에 작업 궤적(swathe)을 그리는 용도.
+- <strong>캔버스에 메모리가 있다</strong>: 그리기 영역(canvas)의 픽셀은 화면에서 제거되거나 다른 마스크가 선택돼도 유지된다. 이를 이용해 Working Set이 VT 화면에 런타임 드로잉을 할 수 있다. 예를 들어 정밀농업 앱에서 움직이는 작업기 이미지 뒤에 작업 궤적(swathe)을 그리는 용도.
 - 캔버스 크기는 업로드 후 변경 불가(새 오브젝트를 올려야 함). 비트맵 메모리 요구량은 캔버스 크기에서 직접 계산된다.
 - <strong>뷰포트</strong>는 캔버스 중 보이는 부분이자 화면상 표시 크기다. 뷰포트를 부모 마스크·컨테이너의 child로 앵커하면 뷰포트 안에서 하부 내용을 쉽게 팬(pan)할 수 있다. 뷰포트 크기는 런타임 변경 가능하다.
 - 이 오브젝트 내용은 Store Version 명령으로 저장되지 않는다. 그린 내용을 보존하려면 저장 전에 캔버스를 Picture Graphic으로 복사해야 한다.
@@ -1692,7 +1698,7 @@ Graphics Context는 VT에서 상당한 메모리를 차지한다(256색 VT 기�
 
 | 속성 | AID | 크기(B) | 범위 | 설명 |
 |---|---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | =36 | Graphics Context (v4+) |
+| Object ID / Type | -/[0] | 2/1 | =36 | Graphics Context (v4+) |
 | Viewport Width / Height | 1, 2 | 각 2 | 0~32767 | 보이는 뷰포트 크기(픽셀) |
 | Viewport X / Y | 3, 4 | 각 2 | −32768~32767 | 캔버스 좌상단 기준 뷰포트 좌상단 위치. 캔버스 치수에 제약되지 않음 |
 | Canvas Width / Height | [5], [6] | 각 2 | 0~32767 | 캔버스 크기(픽셀). 런타임 변경 불가 |
@@ -1719,17 +1725,17 @@ Window Type이 free form(type 0)이면 Working Set이 다른 오브젝트처럼 
 
 | 속성 | AID | 크기(B) | 범위 | 설명 |
 |---|---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | =34 | Window Mask |
-| Width | — | 1 | 1~2 | 폭(User-Layout Data Mask 열 수). Window Type 0(Free Form)일 때만 사용 |
-| Height | — | 1 | 1~6 | 높이(행 수). Free Form일 때만 사용 |
-| Window Type | — | 1 | 0~18 | 아래 표 참조 |
+| Object ID / Type | -/[0] | 2/1 | =34 | Window Mask |
+| Width | - | 1 | 1~2 | 폭(User-Layout Data Mask 열 수). Window Type 0(Free Form)일 때만 사용 |
+| Height | - | 1 | 1~6 | 높이(행 수). Free Form일 때만 사용 |
+| Window Type | - | 1 | 0~18 | 아래 표 참조 |
 | Background Colour | 1 | 1 | 0~255 | Window Type > 0이면 VT가 형식을 통제하므로 무시됨 |
-| Options | 2 | 1 | 0~3 | Bit 0 = Available(0이면 정의돼 있어도 현재 사용 불가 — VT는 오퍼레이터가 매핑하지 못하게 하고, 이미 매핑됐으면 해당 창 셀을 비움), Bit 1 = Transparent(1이면 배경색 무시, 창 투명) |
+| Options | 2 | 1 | 0~3 | Bit 0 = Available(0이면 정의돼 있어도 현재 사용 불가. VT는 오퍼레이터가 매핑하지 못하게 하고, 이미 매핑됐으면 해당 창 셀을 비움), Bit 1 = Transparent(1이면 배경색 무시, 창 투명) |
 | Name | 3 | 2 | 0~65534 | 이 창의 이름 문자열을 담은 Output String(또는 그를 가리키는 Object Pointer) ID. VT는 색·글꼴을 무시하고 자체 형식을 적용할 수 있으며, 독자적 매핑 화면에서 이 이름을 사용. 최소 20자 표시 가능해야 함 |
-| Window Title | — | 2 | 0~65534, 65535 | 창 제목 문자열 Output String ID. type 0에서는 NULL이어야 하고, type > 0에서는 필수 |
-| Window Icon | — | 2 | 0~65534, 65535 | 창을 나타낼 아이콘 출력 오브젝트 ID. type 0에서만 NULL 허용, 그 외 타입에서는 반드시 제공 |
-| Number of object references | — | 1 | 0~2 | 창 타입별 필수 오브젝트 참조 수. type 0이면 0 |
-| Number of objects to follow | — | 1 | 0~255 | 포함(child) 오브젝트 수. Free Form(0)일 때만 필요, 그 외 타입이면 0. child 하나당 6바이트(ID 2 + X/Y 위치 각 2) |
+| Window Title | - | 2 | 0~65534, 65535 | 창 제목 문자열 Output String ID. type 0에서는 NULL이어야 하고, type > 0에서는 필수 |
+| Window Icon | - | 2 | 0~65534, 65535 | 창을 나타낼 아이콘 출력 오브젝트 ID. type 0에서만 NULL 허용, 그 외 타입에서는 반드시 제공 |
+| Number of object references | - | 1 | 0~2 | 창 타입별 필수 오브젝트 참조 수. type 0이면 0 |
+| Number of objects to follow | - | 1 | 0~255 | 포함(child) 오브젝트 수. Free Form(0)일 때만 필요, 그 외 타입이면 0. child 하나당 6바이트(ID 2 + X/Y 위치 각 2) |
 
 Window Type 값(치수는 창 셀 단위 폭×높이):
 
@@ -1766,14 +1772,14 @@ Free Form을 제외한 Window Mask에 Linear Bar Graph가 포함된 경우, VT�
 | Type | 창 내용 | 오브젝트 참조(순서대로) | Title | Value | Units |
 |---|---|---|---|---|---|
 | 1 / 10 | Numeric Output + Units (1×1 / 2×1) | Output Number, Output String(단위) | 11 / 20자 | 5 / 10자 | 5 / 9자 |
-| 2 / 11 | Numeric Output, no Units | Output Number | 11 / 20자 | 11 / 20자 | — |
-| 3 / 12 | String Output | Output String | 11 / 20자 | 11 / 20자 | — |
+| 2 / 11 | Numeric Output, no Units | Output Number | 11 / 20자 | 11 / 20자 | - |
+| 3 / 12 | String Output | Output String | 11 / 20자 | 11 / 20자 | - |
 | 4 / 13 | Numeric Input + Units | Input Number, Output String(단위) | 11 / 20자 | 5 / 10자 | 5 / 9자 |
-| 5 / 14 | Numeric Input, no Units | Input Number | 11 / 20자 | 11 / 20자 | — |
-| 6 / 15 | String Input | Input String | 11 / 20자 | 11 / 20자 | — |
-| 7 / 16 | Horizontal Linear Bar Graph | Output Linear Bar Graph | 11 / 20자 | — | — |
-| 8 / 17 | Single Button | Button | 11 / 20자 | — | — |
-| 9 / 18 | Double Button | Button(왼쪽), Button(오른쪽) | 11 / 20자 | — | — |
+| 5 / 14 | Numeric Input, no Units | Input Number | 11 / 20자 | 11 / 20자 | - |
+| 6 / 15 | String Input | Input String | 11 / 20자 | 11 / 20자 | - |
+| 7 / 16 | Horizontal Linear Bar Graph | Output Linear Bar Graph | 11 / 20자 | - | - |
+| 8 / 17 | Single Button | Button | 11 / 20자 | - | - |
+| 9 / 18 | Double Button | Button(왼쪽), Button(오른쪽) | 11 / 20자 | - | - |
 
 숫자 Value 자릿수는 소수점 포함 기준이다.
 
@@ -1792,7 +1798,7 @@ Button 타입 창에서는 Working Set이 Button 오브젝트와 그 children을
 
 VT version 4에서 추가된 부모 오브젝트로, VT의 User-Layout Soft Key Mask에서만 사용된다(4.7.8 참조). Key 오브젝트와 Object Pointer를 담는데, Object Pointer는 Key, 다른 Object Pointer, 또는 NULL만 가리켜야 한다.
 
-- 이 오브젝트에 담긴 Key들은 하나의 그룹이다. VT는 오퍼레이터가 Key 레이아웃을 매핑할 때 이 그룹을 — 보이는 Soft Key 페이지 경계를 넘더라도 — 쪼개지 못하게 하고, 그룹 전체를 함께 매핑하도록 요구해야 한다. 따라서 이 오브젝트 하나가 여러 Key Cell을 차지할 수 있다.
+- 이 오브젝트에 담긴 Key들은 하나의 그룹이다. VT는 오퍼레이터가 Key 레이아웃을 매핑할 때, 보이는 Soft Key 페이지 경계를 넘더라도 이 그룹을 쪼개지 못하게 하고, 그룹 전체를 함께 매핑하도록 요구해야 한다. 따라서 이 오브젝트 하나가 여러 Key Cell을 차지할 수 있다.
 - Working Set은 Key Group 오브젝트를 풀에 넣어 User-Layout Soft Key Mask에 참여한다.
 - Key Group은 투명하게 만드는 것이 권장된다. 그러면 VT가 각 child Key의 배경색을 설정해 모든 Key가 같은 배경색을 갖게 할 수 있다. 필요하면 Working Set이 Get Window Mask Data message로 VT의 배경색을 알아낼 수 있다.
 - NULL을 가리키는 Object Pointer는 Key 자리 하나를 예약한다(나머지 Key가 앞으로 당겨지지 않고, 뒤의 Key로 탐색 가능).
@@ -1801,12 +1807,12 @@ VT version 4에서 추가된 부모 오브젝트로, VT의 User-Layout Soft Key 
 
 | 속성 | AID | 크기(B) | 범위 | 설명 |
 |---|---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | =35 | Key Group |
-| Options | 1 | 1 | 0~3 | Bit 0 = Available(0이면 현재 사용 불가 — 매핑 금지, 이미 매핑된 키 셀은 비움), Bit 1 = Transparent(1이면 VT가 child Key들의 배경색 속성을 무시하고 원하는 배경색을 설정) |
+| Object ID / Type | -/[0] | 2/1 | =35 | Key Group |
+| Options | 1 | 1 | 0~3 | Bit 0 = Available(0이면 현재 사용 불가: 매핑 금지, 이미 매핑된 키 셀은 비움), Bit 1 = Transparent(1이면 VT가 child Key들의 배경색 속성을 무시하고 원하는 배경색을 설정) |
 | Name | 2 | 2 | 0~65534 | 그룹 이름 문자열 Output String(또는 Object Pointer) ID. VT 독자 매핑 화면에서 사용, 최소 20자 표시 가능해야 함 |
-| Key Group Icon | — | 2 | 0~65534, 65535 | 그룹 아이콘 출력 오브젝트 ID(선택). NULL이면 표현은 VT 재량. 배경색을 알 수 없는 매핑 화면에 나타날 수 있으므로 투명 배경은 권장되지 않음 |
-| Number of objects | — | 1 | 1~4 | Key/Object Pointer 수. 포인터 역참조 후 기준 Key Group당 <strong>최대 Key 4개</strong> |
-| Repeat: {Object ID} | — | 각 2 | 0~65534 | 그룹에 담긴 오브젝트 ID |
+| Key Group Icon | - | 2 | 0~65534, 65535 | 그룹 아이콘 출력 오브젝트 ID(선택). NULL이면 표현은 VT 재량. 배경색을 알 수 없는 매핑 화면에 나타날 수 있으므로 투명 배경은 권장되지 않음 |
+| Number of objects | - | 1 | 1~4 | Key/Object Pointer 수. 포인터 역참조 후 기준 Key Group당 <strong>최대 Key 4개</strong> |
+| Repeat: {Object ID} | - | 각 2 | 0~65534 | 그룹에 담긴 오브젝트 ID |
 
 ## B.21 Object Label Reference List object (Type 40)
 
@@ -1814,13 +1820,13 @@ VT version 4에서 추가된 오브젝트로, 다른 오브젝트에 String Vari
 
 오브젝트 라벨은 VT의 독자적 화면·팝업 메시지·에디터에서만 쓰이도록 의도됐고, 새 Working Set 설계에 다음 두 용도가 권장된다.
 
-- Working Set 오브젝트에 텍스트 이름 라벨을 제공 — VT가 독자 화면·알람에서 Working Set들을 구별하는 데 사용(예: "Planter").
-- 모든 입력 오브젝트에 라벨 제공 — VT의 팝업 에디터 창이 포커스된 입력 오브젝트를 가릴 수 있으므로, 에디터 창에 라벨을 표시해 오퍼레이터가 무엇을 편집 중인지 알 수 있게 한다.
+- Working Set 오브젝트에 텍스트 이름 라벨을 제공: VT가 독자 화면·알람에서 Working Set들을 구별하는 데 사용(예: "Planter").
+- 모든 입력 오브젝트에 라벨 제공: VT의 팝업 에디터 창이 포커스된 입력 오브젝트를 가릴 수 있으므로, 에디터 창에 라벨을 표시해 오퍼레이터가 무엇을 편집 중인지 알 수 있게 한다.
 
 운영 규칙:
 
 - 라벨은 독자 화면용이므로 이미 표시 중인 라벨을 런타임에 바꿔도 기존 표시가 즉시 갱신되지 않을 수 있다. 변경은 라벨이 다음에 나타날 때(예: 팝업 에디터를 닫았다 다시 열 때) 보이면 된다.
-- 32자를 넘는 문자열은 VT가 32자로 클리핑할 수 있다. 그래픽 지시자는 Soft Key designator 영역에 맞아야 하고, Table A.2의 Object Label graphic representation에 나열된 오브젝트만 담을 수 있다.
+- 32자를 넘는 문자열은 VT가 32자로 클리핑할 수 있다. 그래픽 지시자는 Soft Key designator 영역에 맞아야 한다. 담을 수 있는 오브젝트는 Container, 출력 오브젝트(Output String·Number·List·Line·Rectangle·Ellipse·Polygon·Meter·Linear Bar Graph·Arched Bar Graph), Graphics Context, Picture Graphic, Object Pointer(모두 v4부터)와 Scaled Graphic(v6부터)뿐이다(원문 Table A.2의 Object Label graphic representation 열).
 - 한 오브젝트에 라벨을 둘 이상 할당할 수 없다. 라벨 대상 Object ID가 목록에 두 번 이상 나오면 <strong>풀 전체가 거부된다.</strong> 라벨로 쓰인 오브젝트 자신이 라벨을 갖고 있으면 그 라벨은 표시하지 않는다.
 - 라벨을 비활성화하려면 String Variable 참조와 그래픽 참조를 둘 다 NULL로 두면 되고, VT는 그 경우 라벨을 표시하지 않도록 설계돼야 한다.
 
@@ -1828,12 +1834,12 @@ VT version 4에서 추가된 오브젝트로, 다른 오브젝트에 String Vari
 
 | 속성 | AID | 크기(B) | 범위 | 설명 |
 |---|---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | =40 | Object Label Reference List |
+| Object ID / Type | -/[0] | 2/1 | =40 | Object Label Reference List |
 | Number of Labelled objects | [1] | 2 | 0~65535 | 라벨 항목 수. 항목당 7바이트 |
-| Repeat: {Object ID} | — | 2 | 0~65534 | 라벨을 붙일 대상 오브젝트 ID |
-| {String Variable reference} | — | 2 | 0~65535 | 라벨 문자열을 담은 String Variable ID, 텍스트 없으면 FFFF₁₆ |
-| {Font type} | — | 1 | 0~255 | 글꼴 타입(Annex K). String Variable 참조가 NULL이거나 WideString이면 무시 |
-| {Object Label graphic representation} | — | 2 | 0~65535 | 그래픽 라벨 오브젝트 ID, 없으면 FFFF₁₆. VT가 그릴 때 Soft Key designator 크기로 클리핑 |
+| Repeat: {Object ID} | - | 2 | 0~65534 | 라벨을 붙일 대상 오브젝트 ID |
+| {String Variable reference} | - | 2 | 0~65535 | 라벨 문자열을 담은 String Variable ID, 텍스트 없으면 FFFF₁₆ |
+| {Font type} | - | 1 | 0~255 | 글꼴 타입(Annex K). String Variable 참조가 NULL이거나 WideString이면 무시 |
+| {Object Label graphic representation} | - | 2 | 0~65535 | 그래픽 라벨 오브젝트 ID, 없으면 FFFF₁₆. VT가 그릴 때 Soft Key designator 크기로 클리핑 |
 
 ## B.22 External Object Definition object (Type 41)
 
@@ -1841,11 +1847,11 @@ VT version 5에서 추가. 다른 Working Set이 External Object Pointer를 통�
 
 | 속성 | AID | 크기(B) | 범위 | 설명 |
 |---|---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | =41 | External Object Definition |
+| Object ID / Type | -/[0] | 2/1 | =41 | External Object Definition |
 | Options | 1 | 1 | 0~1 | Bit 0 = Enabled. TRUE면 NAME으로 식별된 WS가 목록의 오브젝트를 External Object Pointer로 참조 가능. FALSE면 비활성(무시) |
-| NAME 0 / NAME 1 | 2, 3 | 각 4 | — | 참조를 허용할 WS Master NAME의 바이트 1~4 / 5~8. NAME 갱신 전에 Enabled 비트를 먼저 끄는 것이 권장 |
-| Number of objects | — | 1 | 0~255 | 목록 크기(0 가능) |
-| Repeat: {Object ID} | — | 각 2 | 0~65534, 65535 | 외부에서 참조 가능한 오브젝트 목록. NULL은 placeholder. Change List Item으로 교체 가능 |
+| NAME 0 / NAME 1 | 2, 3 | 각 4 | - | 참조를 허용할 WS Master NAME의 바이트 1~4 / 5~8. NAME 갱신 전에 Enabled 비트를 먼저 끄는 것이 권장 |
+| Number of objects | - | 1 | 0~255 | 목록 크기(0 가능) |
+| Repeat: {Object ID} | - | 각 2 | 0~65534, 65535 | 외부에서 참조 가능한 오브젝트 목록. NULL은 placeholder. Change List Item으로 교체 가능 |
 
 ## B.23 External Reference NAME object (Type 42)
 
@@ -1853,7 +1859,7 @@ VT version 5에서 추가. External Object Pointer로 <strong>참조할 대상</
 
 | 속성 | AID | 크기(B) | 설명 |
 |---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | Type = 42 |
+| Object ID / Type | -/[0] | 2/1 | Type = 42 |
 | Options | 1 | 1 | Bit 0 = Enabled. FALSE면 이 오브젝트를 참조하는 External Object Pointer는 모두 invalid로 간주 |
 | NAME 0 / NAME 1 | 2, 3 | 각 4 | 참조 대상 WS Master NAME의 바이트 1~4 / 5~8 |
 
@@ -1864,7 +1870,7 @@ VT version 5에서 추가. <strong>다른 Working Set의 오브젝트 풀에 있
 Default Object가 그려지는 조건:
 
 - External Object Pointer(또는 그 뒤에 이어진 Object Pointer)가 NULL을 가리킬 때
-- 오브젝트 계층 규칙(Table A.2) 기준으로 참조 대상의 child가 invalid일 때
+- 오브젝트 계층 규칙("A.1 오브젝트 타입"의 오브젝트 포함 관계, 원문 Table A.2) 기준으로 참조 대상의 child가 invalid일 때
 
 비휘발성 메모리에서 풀이 로드되면 VT는 모든 External Object Pointer의 External Object ID 속성을 NULL로 설정한다. 이는 WS가 External Object ID를 다시 갱신하도록 강제한다.
 
@@ -1881,7 +1887,7 @@ External Object Pointer로 참조된 오브젝트(및 계층)의 소유·통제�
 
 | 속성 | AID | 크기(B) | 범위 | 설명 |
 |---|---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | =43 | External Object Pointer |
+| Object ID / Type | -/[0] | 2/1 | =43 | External Object Pointer |
 | Default Object ID | 1 | 2 | 0~65535 | External Object ID가 무효거나 NULL일 때 표시할 오브젝트(항상 자기 풀의 오브젝트) |
 | External Reference NAME ID | 2 | 2 | 0~65535 | External Reference NAME 오브젝트 ID 또는 NULL |
 | External Object ID | 3 | 2 | 0~65535 | 참조 대상 오브젝트 ID 또는 NULL. NAME으로 식별된 WS Master의 풀에서 찾으며, 해당 External Object Definition에 나열돼 있어야 함 |
@@ -1919,14 +1925,14 @@ disable 시 표현 모드(Options bit 1~2, Disabled Behaviour):
 
 | 속성 | AID | 크기(B) | 범위 | 설명 |
 |---|---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | =44 | Animation |
+| Object ID / Type | -/[0] | 2/1 | =44 | Animation |
 | Width, Height | 1, 2 | 각 2 | 0~65535 | 영역 크기, 초과분 클리핑 |
 | Refresh Interval | 3 | 2 | 0~65535 | 리프레시 간격(ms). 0이면 타이머 정지(단, enabled = 0과 동등하지 않음) |
 | Value | 4 | 1 | 0~254, 255 | 표시할 리스트 인덱스(첫 항목 = 0) |
 | Enabled | 5 | 1 | 0/1 | 1 = 애니메이션 동작, 0 = 정지 |
 | First / Last / Default Child Index | 6, 7, 8 | 각 1 | 0~254 | 시퀀스의 첫/끝/기본 child 인덱스 |
 | Options | 9 | 1 | 0~7 | Bit 0 = Animation Sequence(0 = Single Shot, 1 = Loop), Bit 1~2 = Disabled Behaviour(0 = Pause, 1 = Reset to First, 2 = Default Object, 3 = Blank) |
-| Repeat: {Object ID, X, Y} | — | 각 2 | — | child 오브젝트 ID와 Animation 좌상단 기준 상대 위치(child당 6바이트) |
+| Repeat: {Object ID, X, Y} | - | 각 2 | - | child 오브젝트 ID와 Animation 좌상단 기준 상대 위치(child당 6바이트) |
 
 ## B.26 Colour Palette object (Type 45)
 
@@ -1934,17 +1940,17 @@ VT version 6에서 추가. 이 Working Set이 쓰는 <strong>VT 표준 색 팔�
 
 - 풀에는 Colour Palette를 0개 이상 담을 수 있다. 풀 로드 후 VT는 Working Set Special Controls 오브젝트가 정의한 팔레트를 사용하며, 그 Working Set 풀의 모든 오브젝트가 해당 팔레트로 표시된다. 표시 색 결정 과정에서 Colour Map 오브젝트도 함께 작동할 수 있다.
 - "Number of ARGB values" 속성으로 색 0부터 시작하는 팔레트의 부분 집합만 재정의할 수 있다. 교체 Colour Palette가 포함된 풀 업데이트가 처리되면 VT는 먼저 그 Working Set의 팔레트를 VT 표준 팔레트로 초기화한 뒤 새 오브젝트 기준으로 갱신한다.
-- Alpha 채널로 표현력이 높아지지만, 아래에 깔린 오브젝트 색을 설계자가 통제할 수 없는 곳에서는 투명도를 피해야 한다(예: Data Mask 배경색의 투명 — 마스크 아래 색을 알 수 없음. External Object Pointer로 참조될 수 있는 Button의 투명도도 비권장).
+- Alpha 채널로 표현력이 높아지지만, 아래에 깔린 오브젝트 색을 설계자가 통제할 수 없는 곳에서는 투명도를 피해야 한다(예: Data Mask 배경색의 투명, 마스크 아래 색을 알 수 없음. External Object Pointer로 참조될 수 있는 Button의 투명도도 비권장).
 - ARGB 값은 리틀엔디언으로 배치돼 바이트 순서가 <strong>B, G, R, A</strong>가 된다.
 
 허용 명령: Change Attribute, Get Attribute Value.
 
 | 속성 | AID | 크기(B) | 범위 | 설명 |
 |---|---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | =45 | Colour Palette |
+| Object ID / Type | -/[0] | 2/1 | =45 | Colour Palette |
 | Options | 1 | 1 | 0 | 예약, 0으로 전송 |
-| Number of ARGB values | — | 2 | 0~256 | 뒤따르는 팔레트 엔트리 수 |
-| Repeat: {B, G, R, A} | — | 각 1 | 0~255 | 엔트리당 4바이트. A는 0(투명)~255(불투명) |
+| Number of ARGB values | - | 2 | 0~256 | 뒤따르는 팔레트 엔트리 수 |
+| Repeat: {B, G, R, A} | - | 각 1 | 0~255 | 엔트리당 4바이트. A는 0(투명)~255(불투명) |
 
 ## B.27 Graphic Data object (Type 46)
 
@@ -1952,10 +1958,10 @@ VT version 6에서 추가. 그래픽 표현용 원시 데이터를 담는다. <s
 
 | 속성 | AID | 크기(B) | 범위 | 설명 |
 |---|---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | =46 | Graphic Data |
+| Object ID / Type | -/[0] | 2/1 | =46 | Graphic Data |
 | Format | [1] | 1 | 0 | 그래픽 타입: 0 = PNG(최대 32bit RGBA로 제한) |
-| Number of bytes in raw data | — | 4 | 0~2³²−1 | 원시 데이터 바이트 수 |
-| Repeat: {raw data} | — | 1 | — | 포맷에 따라 해석되는 원시 바이트 |
+| Number of bytes in raw data | - | 4 | 0~2³²−1 | 원시 데이터 바이트 수 |
+| Repeat: {raw data} | - | 1 | - | 포맷에 따라 해석되는 원시 바이트 |
 
 ## B.28 Scaled Graphic object (Type 48)
 
@@ -1963,7 +1969,7 @@ VT version 6에서 추가. 참조된 그래픽 오브젝트를 실제 크기에�
 
 | 속성 | AID | 크기(B) | 범위 | 설명 |
 |---|---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | =48 | Scaled Graphic |
+| Object ID / Type | -/[0] | 2/1 | =48 | Scaled Graphic |
 | Width, Height | 1, 2 | 각 2 | 0~65535 | 목표 폭·높이(픽셀) |
 | ScaleType | 3 | 1 | 0~127 | Bit 0~2 = 스케일 방식: 0 = 스케일 없음(원시 크기 그대로), 1 = 폭 기준 비율 유지, 2 = 높이 기준 비율 유지, 3 = 폭·높이 모두 맞춤(왜곡 가능), 4 = 비율 유지하며 영역에 맞는 최대 크기. Bit 3~4 = 수평 정렬(0 = Left, 1 = Middle, 2 = Right), Bit 5~6 = 수직 정렬(0 = Top, 1 = Middle, 2 = Bottom) |
 | Options | 4 | 1 | 0~1 | Bit 0 = Flashing(스타일·주기는 VT 재량) |
@@ -1983,14 +1989,14 @@ VT version 6에서 추가. Working Set의 <strong>초기 Colour Map·초기 Colo
 
 | 속성 | AID | 크기(B) | 범위 | 설명 |
 |---|---|---|---|---|
-| Object ID / Type | —/[0] | 2/1 | =47 | Working Set Special Controls |
+| Object ID / Type | -/[0] | 2/1 | =47 | Working Set Special Controls |
 | Number of Bytes to follow | [1] | 2 | 5~65535 | 이후 바이트 수(버전 확장 대비 파싱용) |
 | Colour Map object ID | [2] | 2 | 0~65535 | 초기 Colour Map, NULL이면 미사용 |
 | Colour Palette object ID | [3] | 2 | 0~65535 | 초기 Colour Palette, NULL이면 VT 표준 팔레트 |
-| Number of language pairs | — | 1 | 0~255 | 언어 쌍 수 |
-| Repeat: {Language Code, Country Code} | — | 각 2 | — | ISO 639-1 언어 2자 + ISO 3166-1 국가 2자(해당 없으면 20₁₆ 20₁₆). 표준 개정 대비 a-z·A-Z 전 조합 허용 |
+| Number of language pairs | - | 1 | 0~255 | 언어 쌍 수 |
+| Repeat: {Language Code, Country Code} | - | 각 2 | - | ISO 639-1 언어 2자 + ISO 3166-1 국가 2자(해당 없으면 20₁₆ 20₁₆). 표준 개정 대비 a-z·A-Z 전 조합 허용 |
 
-## Annex C (normative) — Object transport protocol
+## Annex C (normative): Object transport protocol
 
 ### C.1 VT 메시지와 오브젝트 전송
 
@@ -2017,8 +2023,8 @@ VT 메시지 프로토콜에 예약된 PGN 두 개:
 
 - VT는 수신한 오브젝트를 파싱·저장한다. 파싱 중 기존 ID와 같은 ID의 새 오브젝트를 만나면 <strong>기존 오브젝트의 교체</strong>로 처리한다.
 - 1바이트보다 큰 데이터·속성은 항상 리틀엔디언(LSB 먼저)으로 전송한다.
-- Working Set Master는 접속된 VT 하드웨어와 보고된 VT 버전에 맞게 조정된 "깨끗한" 풀을 전송해야 한다. 파싱·표시가 제대로 안 되는 무효 풀(무효 색 등)을 보내 놓고 나중에 change 명령으로 고치는 방식은 허용되지 않는다 — 파싱 오류·오류 표시를 유발하고, VT가 해당 오브젝트·매크로를 무시하거나 풀을 휘발성 저장소에서 삭제하고 Working Set을 중단시킬 수 있다.
-- VT는 무효 풀을 식별하고 오퍼레이터에게 알려야 한다(통지는 나중으로 미룰 수 있음 — 예: 무효 참조를 담은 Data Mask 활성화 시점). End of Object Pool response의 오류 코드나 VT Change Active Mask 메시지의 오류가 무효 풀 식별을 나타낸다. VT가 무효 풀로 계속 진행하기로 해도, Working Set Master는 오류 표시를 받으면 안전 상태로 갈 수 있다.
+- Working Set Master는 접속된 VT 하드웨어와 보고된 VT 버전에 맞게 조정된 "깨끗한" 풀을 전송해야 한다. 파싱·표시가 제대로 안 되는 무효 풀(무효 색 등)을 보내 놓고 나중에 change 명령으로 고치는 방식은 허용되지 않는다. 파싱 오류·오류 표시를 유발하고, VT가 해당 오브젝트·매크로를 무시하거나 풀을 휘발성 저장소에서 삭제하고 Working Set을 중단시킬 수 있다.
+- VT는 무효 풀을 식별하고 오퍼레이터에게 알려야 한다(통지는 나중으로 미룰 수 있음. 예: 무효 참조를 담은 Data Mask 활성화 시점). End of Object Pool response의 오류 코드나 VT Change Active Mask 메시지의 오류가 무효 풀 식별을 나타낸다. VT가 무효 풀로 계속 진행하기로 해도, Working Set Master는 오류 표시를 받으면 안전 상태로 갈 수 있다.
 
 <strong>C.2.2 오브젝트 풀 전송 절차</strong>
 
@@ -2073,7 +2079,7 @@ Working Set은 운영 중 풀을 수정·추가할 수 있다(예: 문자열 길
 - VT는 End of Object Pool message 수신 전까지 신규·갱신 오브젝트를 원본 풀과 분리해 유지하고, End of Object Pool response 송신 전에 원본 풀에 병합한다. End of Object Pool message 후 response 수신 전에 신규·갱신 오브젝트에 작용하는 명령을 보내면 원본 풀과 갱신 풀 중 어느 쪽에 적용될지 예측할 수 없으므로, response를 받을 때까지 그런 명령을 보내지 않는 것이 권장된다.
 - 풀 업데이트는 처리 시간이 걸리므로, 가능하면 Annex F 명령을 쓰는 편이 낫다(예: Change Size 명령이 새 크기의 오브젝트 재업로드보다 빠름).
 
-## Annex D (normative) — Technical data messages
+## Annex D (normative): Technical data messages
 
 ### D.1 개요
 
@@ -2093,7 +2099,7 @@ Get Memory response(VT function 192, VT→ECU, 8바이트):
 | 바이트 | 내용 |
 |---|---|
 | 2 | Version Number: 0 = Hannover Agritechnica 2001 한정 기능판, 1 = 2002 FDIS, 2 = 2004 초판, 3·4 = 2010 2판, 5 = 2014 3판, 6 = 2018 4판 |
-| 3 | Status: 0 = 메모리가 충분할 수 있음, 1 = 메모리 부족 — 풀을 전송하지 말 것 |
+| 3 | Status: 0 = 메모리가 충분할 수 있음, 1 = 메모리 부족(풀을 전송하지 말 것) |
 
 status 0이 "충분할 수 있음"인 이유: 오브젝트 저장에는 오버헤드가 있어서 풀의 정확한 내용을 모르면 충분 여부를 단정할 수 없기 때문이다. 버전은 하위 호환이므로 버전 N용으로 설계된 Working Set이 N보다 높은 버전의 VT를 특별 취급할 필요는 없다. 새 설계는 구버전을 구현하더라도 최신 문서 개정판을 기준으로 해야 한다.
 
@@ -2105,10 +2111,10 @@ response 구성:
 
 | 바이트 | 내용 |
 |---|---|
-| 2 | Navigation Soft Keys — 가상 Soft Key 탐색용 물리 키 수(v4+, v3 이하 FF₁₆) |
-| 5 / 6 | X Dots / Y Dots — Soft Key descriptor의 x·y축 픽셀 수 |
-| 7 | Virtual Soft Keys — Soft Key Mask의 가능한 가상 Soft Key 수(v3 이하: 6~64, v4 이상: 64 고정) |
-| 8 | Physical Soft Keys — 물리 Soft Key 수 |
+| 2 | Navigation Soft Keys: 가상 Soft Key 탐색용 물리 키 수(v4+, v3 이하 FF₁₆) |
+| 5 / 6 | X Dots / Y Dots: Soft Key descriptor의 x·y축 픽셀 수 |
+| 7 | Virtual Soft Keys: Soft Key Mask의 가능한 가상 Soft Key 수(v3 이하: 6~64, v4 이상: 64 고정) |
+| 8 | Physical Soft Keys: 물리 Soft Key 수 |
 
 ### D.6 / D.7 Get Text Font Data message·response
 
@@ -2126,16 +2132,16 @@ VT의 하드웨어 설계를 조회한다(VT function 199).
 
 | 바이트 | 내용 |
 |---|---|
-| 2 | Boot time — VT 전원 인가·리셋부터 첫 VT Status message 송신까지 최대 초. 정보 없으면 FF₁₆ (v4+에서 도입, v4 이전에도 허용) |
+| 2 | Boot time: VT 전원 인가·리셋부터 첫 VT Status message 송신까지 최대 초. 정보 없으면 FF₁₆ (v4+에서 도입, v4 이전에도 허용) |
 | 3 | Graphic Type: 0 = 모노크롬(색 0·1, 모노크롬 Picture Graphic만), 1 = 16색(색 0~15, 모노+16색 Picture Graphic), 2 = 256색(색 0~255, 모든 Picture Graphic 포맷) |
 | 4 | Hardware 비트: Bit 0 = 터치스크린 + Pointing Event 지원, Bit 1 = 포인팅 장치 + Pointing Event 지원, Bit 2 = 다주파수 오디오 출력, Bit 3 = 볼륨 조절 오디오, Bit 4 = 물리 Soft Key 전 조합 동시 활성 지원, Bit 5 = Button 전 조합 동시 활성 지원, Bit 6 = 드래그 조작을 Pointing Event로 보고(Bit 0 또는 1 필요), Bit 7 = 드래그 중 중간 좌표 지원(Bit 6 필요). Bit 4~7은 v4+ |
-| 5, 6 / 7, 8 | X-Pixels / Y-Pixels — Data Mask 영역의 가로/세로 픽셀 수(16-bit). Data Mask는 정사각형이므로 Y는 항상 X와 같음 |
+| 5, 6 / 7, 8 | X-Pixels / Y-Pixels: Data Mask 영역의 가로/세로 픽셀 수(16-bit). Data Mask는 정사각형이므로 Y는 항상 X와 같음 |
 
 ### D.10 / D.11 Get Supported Widechars message·response
 
 v4 이상 전용. VT가 지원하는 WideChar를 조회한다(VT function 193). 한 메시지는 <strong>단일 코드플레인</strong>의 문자만 요청하며(여러 플레인은 여러 메시지), First WideChar ≤ Last WideChar 범위를 담는다. 큰 범위 하나 대신 작은 범위 여러 번으로 나누면 응답 프레임 크기를 줄일 수 있다.
 
-response(가변 길이): 코드플레인, 조회 범위, Error Codes(Bit 0 = 범위 내 부분 범위가 255개 초과, Bit 1 = 코드플레인 오류, Bit 4 = 기타 오류), 범위 수, 그리고 {first WideChar, last WideChar} 쌍의 배열이 이어진다. 오류가 있으면 범위 수는 0이다. CF가 이 메시지를 꼭 쓸 필요는 없다 — VT는 지원하지 않는 문자가 포함돼도 WideString을 표시하며, 코드플레인 0 요청의 응답에는 WideChar 최소 문자 집합이 포함된다.
+response(가변 길이): 코드플레인, 조회 범위, Error Codes(Bit 0 = 범위 내 부분 범위가 255개 초과, Bit 1 = 코드플레인 오류, Bit 4 = 기타 오류), 범위 수, 그리고 {first WideChar, last WideChar} 쌍의 배열이 이어진다. 오류가 있으면 범위 수는 0이다. CF가 이 메시지를 꼭 쓸 필요는 없다. VT는 지원하지 않는 문자가 포함돼도 WideString을 표시하며, 코드플레인 0 요청의 응답에는 WideChar 최소 문자 집합이 포함된다.
 
 ### D.12 / D.13 Get Window Mask Data message·response
 
@@ -2162,7 +2168,7 @@ v4 이상 전용(VT function 187). 이 메시지를 받은 VT는 <strong>Alarm M
 - VT Number 표시는 VT 독자 영역이라, VT Number의 용도를 알리는 다른 정보를 함께 표시해도 된다.
 - VT Number = VT Function Instance + 1이며 1~32 범위다(Function Instance 0~31 대응). 0 기반 번호에 익숙하지 않은 오퍼레이터를 위한 +1 오프셋이다.
 
-## Annex E (normative) — Non-volatile memory operations commands
+## Annex E (normative): Non-volatile memory operations commands
 
 ### E.1 개요
 
@@ -2223,7 +2229,7 @@ v5 이상 전용(function 211). 요청 Working Set에 연관된 <strong>확장(3
 
 ### E.12 / E.13 Extended Store Version command·response
 
-v5 이상 전용(function 212, command 길이 33바이트). 현재 풀 사본을 <strong>확장(32자) version label</strong>로 비휘발성 저장소에 저장한다. 동작 규칙은 Store Version과 동일하다 — 언제든 송신 가능, 같은 라벨은 덮어쓰기, 현재 속성·입력값 그대로 저장, 라벨이 전부 공백이면 마지막 저장 확장 버전을 덮어쓰고 저장된 확장 버전이 없으면 오류.
+v5 이상 전용(function 212, command 길이 33바이트). 현재 풀 사본을 <strong>확장(32자) version label</strong>로 비휘발성 저장소에 저장한다. 동작 규칙은 Store Version과 동일하다. 언제든 송신 가능, 같은 라벨은 덮어쓰기, 현재 속성·입력값 그대로 저장, 라벨이 전부 공백이면 마지막 저장 확장 버전을 덮어쓰고 저장된 확장 버전이 없으면 오류.
 
 response(8바이트)의 바이트 6 = Error Codes: 0 = 저장 성공, Bit 1 = version label 부정확, Bit 2 = 메모리 부족, Bit 3 = 기타 오류.
 
@@ -2244,7 +2250,7 @@ v5 이상 전용. 비휘발성 저장소의 확장 버전을 삭제한다. 휘�
 - 라벨이 별표(*) 하나 + 공백 31자면 와일드카드로 해석해, 요청 Working Set 소유의 모든 확장 버전 풀을 삭제한다(v6 이상). 다른 Working Set 소유의 풀은 삭제하지 않는다.
 
 
-## Annex E 말미 — Extended Delete Version (E.16~E.17)
+## Annex E 말미: Extended Delete Version (E.16~E.17)
 
 Annex E의 마지막 부분은 VT 비휘발성 메모리에서 저장된 오브젝트 풀 버전을 삭제하는 Extended Delete Version 명령/응답이다. 둘 다 VT version 5 이상에서만 사용 가능하다.
 
@@ -2253,7 +2259,7 @@ Annex E의 마지막 부분은 VT 비휘발성 메모리에서 저장된 오브�
 | 바이트 | 내용 |
 |---|---|
 | 1 | VT function = 214 (상위 니블 1101 = Non Volatile Memory, 하위 니블 0110 = Extended Delete Version) |
-| 2~33 | Version label — 32문자 버전 문자열. 미사용 바이트는 space로 채운다. 8-bit String만 허용 |
+| 2~33 | Version label: 32문자 버전 문자열. 미사용 바이트는 space로 채운다. 8-bit String만 허용 |
 
 **Extended Delete Version response** (VT→ECU, 8바이트)
 
@@ -2264,7 +2270,7 @@ Annex E의 마지막 부분은 VT 비휘발성 메모리에서 저장된 오브�
 | 6 | Error Codes (0 = 에러 없음: 삭제 성공 또는 wild card 삭제 수행)<br>Bit 1 = Version label이 잘못되었거나 알 수 없음<br>Bit 3 = 기타 에러 (Bit 0, 2는 Reserved) |
 | 7~8 | Reserved, FF₁₆ |
 
-## Annex F (normative) — Command·Macro 메시지
+## Annex F (normative): Command·Macro 메시지
 
 ### F.1 일반 원칙
 
@@ -2293,7 +2299,7 @@ Container 오브젝트의 표시/숨김을 제어한다. 가시성뿐 아니라 
 | 4 | 0 = Hide, 1 = Show |
 | 5~8 | Reserved, FF₁₆ |
 
-**response** (VT→ECU, Macro 불가) — Byte 2~4는 명령과 동일 반향, Byte 5 = Error Codes: Bit 0 = 누락된 child 오브젝트 참조, Bit 1 = Invalid Object ID, Bit 2 = Command error, Bit 4 = 기타 에러. 누락 child 참조 검증은 즉시 보고할 수도 있고, Container가 실제로 표시되는 시점까지 미뤄 VT Change Active Mask 메시지로 보고할 수도 있다(VT 설계 재량).
+**response** (VT→ECU, Macro 불가): Byte 2~4는 명령과 동일 반향, Byte 5 = Error Codes: Bit 0 = 누락된 child 오브젝트 참조, Bit 1 = Invalid Object ID, Bit 2 = Command error, Bit 4 = 기타 에러. 누락 child 참조 검증은 즉시 보고할 수도 있고, Container가 실제로 표시되는 시점까지 미뤄 VT Change Active Mask 메시지로 보고할 수도 있다(VT 설계 재량).
 
 ### F.4~F.5 Enable/Disable Object
 
@@ -2381,7 +2387,7 @@ multisound 미지원 VT에서는 Alarm Mask의 음향이 발생하면 기존 Wor
 
 ### F.22~F.23 Change Numeric Value
 
-숫자 "value" 속성을 가진 오브젝트의 값을 변경한다. 오브젝트 크기는 바뀌지 않으며, 명령에 지정한 오브젝트만 변경된다 — 오브젝트가 참조하는 변수(Variable)는 바뀌지 않는다.
+숫자 "value" 속성을 가진 오브젝트의 값을 변경한다. 오브젝트 크기는 바뀌지 않으며, 명령에 지정한 오브젝트만 변경된다. 오브젝트가 참조하는 변수(Variable)는 바뀌지 않는다.
 
 **command** (VT function = 168, 8바이트, Macro 허용): Byte 2,3 = Object ID / Byte 4 = Reserved(FF₁₆) / Byte 5~8 = 새 값. 값 크기는 오브젝트 타입에 따라 다르며, 1바이트 값은 Byte 5에, 2바이트 값은 Byte 5~6에 두고 리틀엔디언(LSB first)으로 전송, 미사용 바이트는 0으로 채운다.
 
@@ -2476,7 +2482,7 @@ Lock의 의미: 그리기가 멈추는 것이 아니라, 표시 중인 마스크
 
 - 잠긴 마스크의 화면 표시는 어떤 이유로도 갱신되지 않는다. 점멸(flashing) 오브젝트와 마스크 위 Animation 오브젝트도 포함된다. 타이머 기반 Animation은 백그라운드에서 타이머가 계속 돌고 비표시 사본에는 갱신이 반영되지만, 화면에는 unlock까지 반영되지 않는다.
 - 잠금 중에도 CAN 메시지/명령, 키·버튼 누름, 이벤트, 매크로는 정상 처리된다.
-- 잠금 상태는 Soft Key Mask와 Alarm Mask에는 적용되지 않는다 — 이들은 무조건 표시된다.
+- 잠금 상태는 Soft Key Mask와 Alarm Mask에는 적용되지 않는다. 이들은 무조건 표시된다.
 - Lock 명령 수신 시 어떤 Working Set이든 Alarm Mask가 같은 display area에 활성 상태면 Lock은 거부된다.
 - VT는 Lock 명령에는 최대한 빨리 응답한다. Unlock 명령에 대한 응답은 상황에 따라 다르다: Data Mask/User-Layout Data Mask가 숨겨져 있으면(홈 페이지·설정 화면 표시 중 등) 즉시 응답하며 "명령 무시됨"을 표시한다. 마스크가 보이는 상태면 잠금 중의 모든 변경이 화면에 완전히 반영된 후에야 응답한다.
 - 타임아웃이 발생하거나 마스크가 숨겨지는 변화가 생기면 VT는 <strong>unsolicited</strong>(요청 없는) Lock/Unlock Mask Response를 적절한 에러 코드와 함께 보낸다.
@@ -2497,7 +2503,7 @@ Working Set은 마스크를 잠그고 → 필요한 변경 명령들을 보내�
 
 ### F.48~F.49 Execute Macro
 
-Macro 오브젝트를 실행한다(v4 이상). **command** (VT function = 190, 8바이트, Macro 허용): Byte 2 = Macro Object ID(1바이트임에 유의 — Macro ID는 255 이하). **response**: Byte 3 Error Codes: Bit 0 = Object ID 없음, Bit 1 = Macro 오브젝트가 아님, Bit 2 = 기타 에러.
+Macro 오브젝트를 실행한다(v4 이상). **command** (VT function = 190, 8바이트, Macro 허용): Byte 2 = Macro Object ID(1바이트임에 유의, Macro ID는 255 이하). **response**: Byte 3 Error Codes: Bit 0 = Object ID 없음, Bit 1 = Macro 오브젝트가 아님, Bit 2 = 기타 에러.
 
 ### F.50~F.51 Change Object Label
 
@@ -2543,7 +2549,7 @@ Graphics Context 오브젝트를 조작하는 그리기 명령 집합이다(v4 �
 
 **command** (VT function = 184, 가변 길이, Macro 허용): Byte 2,3 = Graphics Context Object ID / Byte 4 = Sub-Command ID / Byte 5~n = 서브커맨드별 파라미터.
 
-**Table F.1 — 그래픽 서브커맨드 요약**
+**Table F.1(그래픽 서브커맨드 요약)**
 
 | ID | 이름 | 동작·파라미터 |
 |---|---|---|
@@ -2557,11 +2563,11 @@ Graphics Context 오브젝트를 조작하는 그리기 명령 집합이다(v4 �
 | 7 | Erase Rectangle | 커서 위치에 현재 배경색으로 사각형 채움(Byte 5~6 = 폭, 7~8 = 높이). Options bit 1과 무관하게 Fill Attributes를 쓰지 않음. 커서는 사각형 내부 우하단 픽셀로 이동 |
 | 8 | Draw Point | 커서 기준 오프셋 위치 픽셀을 전경색으로 설정. 커서는 해당 점으로 이동 |
 | 9 | Draw Line | 커서에서 지정 끝 픽셀(커서 기준 오프셋)까지 전경색 선. Output Line 규칙·Line Attributes 적용. 커서는 끝 픽셀로 이동 |
-| 10 | Draw Rectangle | 커서 위치에 사각형(폭·높이 지정). Rectangle 규칙 적용 — Line Attributes 정의 시 테두리, Fill Attributes 정의 시 채움. 커서는 내부 우하단으로 이동 |
+| 10 | Draw Rectangle | 커서 위치에 사각형(폭·높이 지정). Rectangle 규칙 적용: Line Attributes 정의 시 테두리, Fill Attributes 정의 시 채움. 커서는 내부 우하단으로 이동 |
 | 11 | Draw Closed Ellipse | 커서 위치와 폭·높이가 정의하는 사각형에 내접하는 닫힌 타원. Output Ellipse 규칙 적용. 커서는 경계 사각형 내부 우하단으로 이동 |
 | 12 | Draw Polygon | Byte 5 = 점 개수(0~255), 이후 점마다 4바이트(커서 기준 X·Y 오프셋, 첫 점부터 순차 연결). 마지막 점 오프셋이 0,0이면 닫힘(0,0은 시작 커서 좌표이므로). 닫히지 않으면 자동 닫기 없이 채우기 무시. Output Polygon 규칙 적용. 커서는 리스트 마지막 점으로 이동 |
 | 13 | Draw Text | Byte 5 = 0 Opaque/1 Transparent, Byte 6 = 바이트 수, Byte 7~n = 텍스트(8-bit 또는 WideString). Font Attributes의 flashing 비트는 무시. Opaque면 배경색 속성 사용. 커서는 텍스트 범위 우하단으로 이동 |
-| 14 | Pan Viewport | Viewport X/Y 속성 변경 후 강제 리드로 — 하부 콘텐츠 "패닝". 커서 이동 없음 |
+| 14 | Pan Viewport | Viewport X/Y 속성 변경 후 강제 리드로(하부 콘텐츠 "패닝"). 커서 이동 없음 |
 | 15 | Zoom Viewport | Byte 5~8 = zoom 값(Float, −32,0~+32,0). 커서 이동 없음 |
 | 16 | Pan and Zoom Viewport | 14+15 결합: Byte 5~6 = Viewport X, 7~8 = Y, 9~12 = zoom(Float) |
 | 17 | Change Viewport Size | 뷰포트 크기 변경(Byte 5~6 = 새 폭, 7~8 = 새 높이, 0~32767). 오브젝트 자체 크기(메모리)는 불변. 커서 이동 없음 |
@@ -2601,7 +2607,7 @@ Macro를 실행한다(v5 이상). F.48과 달리 Macro Object ID를 <strong>2바
 
 **command** (VT function = 144, <strong>9바이트</strong>, Macro 허용): Byte 2~9 = 활성화할 Working Set Master의 NAME(8바이트). **response**(8바이트): Byte 2 Error Codes(0 = 에러 없음, 해당 WS가 활성화됨): Bit 0 = 활성 WS가 보낸 명령이 아님, Bit 1 = 현재 활성 마스크가 Alarm Mask, Bit 2 = NAME이 WSM을 식별하지 못함, Bit 3 = NAME의 WSM이 이 VT에 오브젝트 풀이 없음, Bit 4 = NAME의 WSM에 활성 data mask가 없음, Bit 7 = 기타 에러. 에러 비트가 하나라도 세워지면 VT는 새 활성 Working Set을 선택하지 않는다.
 
-## Annex G (normative) — Status 메시지
+## Annex G (normative): Status 메시지
 
 ### G.1 일반
 
@@ -2618,7 +2624,7 @@ VT가 <strong>Global Address로</strong> 송신하여, 현재 표시 중이면�
 <strong>v6 이상 VT의 Byte 2 규칙</strong> (Data Mask 가림 상황 처리):
 
 - Data Mask가 완전히 가려졌거나 전혀 보이지 않고(예: VT 고유 화면 표시 중), 가린 것이 해당 마스크의 입력 수단(팝업 에디터·키보드 등)이 아닌 경우: Byte 2를 FF₁₆, FE₁₆ 또는 VT 자신의 source address로 설정한다.
-- Data Mask가 입력 수단이 아닌 다른 것으로 <strong>부분적으로</strong> 가려진 경우: Working Set이 v3 이하면 Byte 2에 활성 WS의 source address를 유지해 마스크가 계속 갱신되게 한다. Working Set이 v4 이상이면 VT는 둘 중 하나를 택한다 — (1) Byte 2로 "소유자 없음"을 표시하되 VT On User-Layout Hide/Show를 "Show"로 보내 WS가 활성 마스크를 계속 갱신하게 하거나, (2) Byte 2에 활성 WS 주소를 유지한다.
+- Data Mask가 입력 수단이 아닌 다른 것으로 <strong>부분적으로</strong> 가려진 경우: Working Set이 v3 이하면 Byte 2에 활성 WS의 source address를 유지해 마스크가 계속 갱신되게 한다. Working Set이 v4 이상이면 VT는 둘 중 하나를 택한다. (1) Byte 2로 "소유자 없음"을 표시하되 VT On User-Layout Hide/Show를 "Show"로 보내 WS가 활성 마스크를 계속 갱신하게 하거나, (2) Byte 2에 활성 WS 주소를 유지한다.
 - Alarm Mask가 보이는 경우: Byte 2 = 보이는 Alarm Mask를 소유한 Working Set의 source address.
 - 활성 WS의 마스크를 가리는 것이 활성 WS의 문맥 안에서 일어난 일이면(예: Input String 입력 다이얼로그) VT Status는 계속 그 WS를 소유자로 반영한다. 활성 WS 문맥 밖이면(예: 장시간 화면 대부분을 덮는 비디오 앱) VT 자신 주소·FE₁₆·FF₁₆로 소유자 변경을 반영해야 한다. 잠깐 나타나는 연결 안내 화면처럼 마스크를 완전히 덮지 않는 짧은 표시는 VT Status를 바꾸지 않는다.
 
@@ -2634,14 +2640,14 @@ VT가 <strong>Global Address로</strong> 송신하여, 현재 표시 중이면�
 
 ### G.3 Working Set Maintenance message
 
-각 Working Set Master가 VT로 <strong>초당 1회</strong> 주기 송신한다(4.6.9). Working Set 멤버는 자신의 버전을 따로 보고할 수단이 없으므로 모든 멤버는 Master가 보고한 버전을 준수해야 한다 — 예컨대 Master는 Working Set 안에서 가장 낮은 호환 버전을 보고할 수 있고, Master·멤버 간 호환성 판단은 고유(proprietary) 메시지로 할 수 있다.
+각 Working Set Master가 VT로 <strong>초당 1회</strong> 주기 송신한다(4.6.9). Working Set 멤버는 자신의 버전을 따로 보고할 수단이 없으므로 모든 멤버는 Master가 보고한 버전을 준수해야 한다. 예컨대 Master는 Working Set 안에서 가장 낮은 호환 버전을 보고할 수 있고, Master·멤버 간 호환성 판단은 고유(proprietary) 메시지로 할 수 있다.
 
 **메시지 구조** (VT function = 255, 8바이트, ECU to VT, 초당 1회)
 
 | 바이트 | 내용 |
 |---|---|
-| 2 | BitMask (v3 이상): Bit 0 = Initiating — 초기화 중 한 번만 세움. v2 이하: FF₁₆ |
-| 3 | Version Number — 이 Working Set이 준수하는 ISO 11783-6 버전: 3/4/5/6 = 해당 VT Version 준수, FF₁₆ = v2 이하 준수, 나머지 Reserved |
+| 2 | BitMask (v3 이상): Bit 0 = Initiating(초기화 중 한 번만 세움). v2 이하: FF₁₆ |
+| 3 | Version Number: 이 Working Set이 준수하는 ISO 11783-6 버전: 3/4/5/6 = 해당 VT Version 준수, FF₁₆ = v2 이하 준수, 나머지 Reserved |
 | 4~8 | Reserved, FF₁₆ |
 
 - Initiating 비트가 두 개 이상의 메시지에서 세워져 있으면 Working Set이 (정상 셧다운 없이) 초기화를 재시작했다는 뜻이며 unexpected shutdown으로 취급한다(4.6.9).
@@ -2658,7 +2664,7 @@ Working Set이 자신이 지원하지 않는 VT function을 담은 Destination-S
 
 대칭 메시지: VT가 지원하지 않는 VT function을 담은 Destination-Specific ECU→VT 메시지를 받았을 때 Working Set에 알린다. 역시 Global Address 수신분에는 보내지 않고 무시하며, 응답 없음, v5 이상. 구조는 G.4와 동일(VT function = 253, VT to ECU).
 
-## Annex H (normative) — Activation 메시지
+## Annex H (normative): Activation 메시지
 
 ### H.1 일반 원칙과 TAN
 
@@ -2704,7 +2710,7 @@ Button 오브젝트 활성화 전달. 규칙은 Soft Key와 유사: 비래치(no
 
 ### H.6~H.7 Pointing Event
 
-터치스크린·포인팅 디바이스 지원 VT에서 터치/클릭/드래그를 알린다. Data Mask와 Free Form Window Mask(type 0, v6+)에 대해서만 보고된다. 버튼이나 입력 오브젝트가 터치/클릭된 경우에는 쓰지 않는다 — 그때는 Button Activation 또는 VT Select Input Object message가 나간다.
+터치스크린·포인팅 디바이스 지원 VT에서 터치/클릭/드래그를 알린다. Data Mask와 Free Form Window Mask(type 0, v6+)에 대해서만 보고된다. 버튼이나 입력 오브젝트가 터치/클릭된 경우에는 쓰지 않는다. 그때는 Button Activation 또는 VT Select Input Object message가 나간다.
 
 v4 이상 추가 요구사항:
 
@@ -2721,7 +2727,7 @@ v6 이상 추가 요구사항: Data Mask의 유효 영역이 터치되고 Change
 |---|---|
 | 2, 3 | X 위치(픽셀, Data Mask 영역 좌상단 기준, 0 ~ 폭−1) |
 | 4, 5 | Y 위치(0 ~ 높이−1) |
-| 6 | Signal — VT 버전에 따라 정의가 다름(아래 표) |
+| 6 | Signal: VT 버전에 따라 정의가 다름(아래 표) |
 | 7, 8 | v5 이하: Reserved FF₁₆ / v6 이상: Parent Mask Object ID |
 
 Signal 바이트 정의(VT 버전과 WS Version Number 기준):
@@ -2739,7 +2745,7 @@ Signal 바이트 정의(VT 버전과 WS Version Number 기준):
 운전자 조작 또는 ESC 명령의 결과로 입력 필드·Button·Key 오브젝트가 선택(포커스 획득)·선택 해제(포커스 상실)·편집 열림·편집 닫힘될 때마다 VT가 보낸다.
 
 - 활성화가 원자적 트랜잭션으로 완결되는 입력 오브젝트(예: 활성화가 값을 바로 토글하는 Input Boolean, VT가 전용 +1/−1 증감 수단을 갖는 Input Number)에는 보내지 않을 수 있다.
-- Working Set이 Select Input Object command(F.6)로 요청한 포커스 변경에는 보내지 않는다 — 운전자 상호작용의 결과일 때만 보낸다.
+- Working Set이 Select Input Object command(F.6)로 요청한 포커스 변경에는 보내지 않는다. 운전자 상호작용의 결과일 때만 보낸다.
 - v3 이하는 Button/Key 선택 보고를 지원하지 않는다. Button/Key가 선택 대상일 때 "편집 열림"으로는 보고되지 않는다.
 - On Input Field Selection/Deselection 이벤트는 Byte 4가 바뀔 때만 트리거된다. 오브젝트가 반복적으로 편집 열림/닫힘되는 것(Byte 5 변화)으로는 트리거되지 않는다.
 
@@ -2749,7 +2755,7 @@ Signal 바이트 정의(VT 버전과 WS Version Number 기준):
 |---|---|
 | 2, 3 | Object ID |
 | 4 | Selection: 0 = 선택 해제, 1 = 선택(포커스) |
-| 5 | v3 이하: FF₁₆ / v4 이상: Bitmask — Bit 0 = 데이터 입력용으로 열림(이때 Byte 4는 1이어야 함) |
+| 5 | v3 이하: FF₁₆ / v4 이상: Bitmask. Bit 0 = 데이터 입력용으로 열림(이때 Byte 4는 1이어야 함) |
 | 6, 7 | Reserved, FF₁₆ |
 | 8 | v5 이하: FF₁₆ / v6 이상: Bits 7~4 = TAN |
 
@@ -2763,7 +2769,7 @@ Signal 바이트 정의(VT 버전과 WS Version Number 기준):
 
 ### H.12~H.13 VT Change Numeric Value message
 
-운전자가 입력 오브젝트·변수에 숫자 값을 입력할 때마다 — <strong>값이 실제로 바뀌었는지와 무관하게</strong> — VT가 보낸다. 입력이 중단된 경우에는 보내지 않는다(그때는 VT ESC message). 숫자 변수 참조를 가진 입력 오브젝트는 이 메시지에 <strong>변수 오브젝트의 Object ID</strong>를 쓴다. v4 이하에서 Byte 4는 정의되지 않았다.
+운전자가 입력 오브젝트·변수에 숫자 값을 입력할 때마다, <strong>값이 실제로 바뀌었는지와 무관하게</strong> VT가 보낸다. 입력이 중단된 경우에는 보내지 않는다(그때는 VT ESC message). 숫자 변수 참조를 가진 입력 오브젝트는 이 메시지에 <strong>변수 오브젝트의 Object ID</strong>를 쓴다. v4 이하에서 Byte 4는 정의되지 않았다.
 
 **message** (VT function = 5, 8바이트, 숫자 오브젝트 값 변경 시)
 
@@ -2836,13 +2842,13 @@ v4 이상 VT가 Window Mask·Key Group 오브젝트의 표시/제거를 Working 
 
 v4 이상 VT가 Control Audio Signal 명령을 완료 전에 종료시켰을 때 보낸다. 더 낮은 우선순위 Alarm Mask의 음향 신호를 종료할 때는 보내지 않는다.
 
-**message** (VT function = 10, 8바이트, On event): Byte 2 = Termination Cause(Bit 0 = Audio was terminated — 항상 세움) / Byte 3 = v5 이하 FF₁₆, v6 이상 Bits 7~4 TAN. **response**(v6에서 신설, v5 이하에는 response 미정의): Termination Cause와 TAN 반향.
+**message** (VT function = 10, 8바이트, On event): Byte 2 = Termination Cause(Bit 0 = Audio was terminated, 항상 세움) / Byte 3 = v5 이하 FF₁₆, v6 이상 Bits 7~4 TAN. **response**(v6에서 신설, v5 이하에는 response 미정의): Termination Cause와 TAN 반향.
 
-## Annex I (normative) — 기타 메시지
+## Annex I (normative): 기타 메시지
 
-VT는 ISO 11783-7에 정의된 관련 메시지들도 지원·생성해야 한다. 대표적으로 <strong>Language command(PGN 65039)</strong> — 단위계(Units of Operation)와 날짜·시간 형식 파라미터를 담는다. 또한 VT와 Working Set은 Key switch 상태·트랙터 전원 유지 최대 시간 감시와 셧다운 관리를 위해 <strong>Wheel-based speed and distance(PGN 65096)</strong>와 <strong>Maintain power(PGN 65095)</strong>를 쓸 수 있다(4.6.7).
+VT는 ISO 11783-7에 정의된 관련 메시지들도 지원·생성해야 한다. 대표적으로 <strong>Language command(PGN 65039)</strong>: 단위계(Units of Operation)와 날짜·시간 형식 파라미터를 담는다. 또한 VT와 Working Set은 Key switch 상태·트랙터 전원 유지 최대 시간 감시와 셧다운 관리를 위해 <strong>Wheel-based speed and distance(PGN 65096)</strong>와 <strong>Maintain power(PGN 65095)</strong>를 쓸 수 있다(4.6.7).
 
-## Annex J (normative) — Auxiliary control
+## Annex J (normative): Auxiliary control
 
 ### J.1 개요
 
@@ -2897,7 +2903,7 @@ Auxiliary Input은 Auxiliary Input 오브젝트로, Auxiliary Function은 Auxili
 
 Auxiliary Function의 속성과 designator를 정의한다. VT는 이 속성으로 입력-기능 할당 규칙을 강제한다(예: Boolean 기능은 호환 Boolean 입력에만 할당). designator는 Soft Key designator 영역에 맞아야 하며 벗어나는 부분은 클리핑된다. 허용 명령: Get Attribute Value뿐. 이벤트 없음.
 
-**Table J.1 — Auxiliary Function Type 1 레코드**
+**Table J.1(Auxiliary Function Type 1 레코드)**
 
 | 속성 | 크기 | 값 | 설명 |
 |---|---|---|---|
@@ -2914,7 +2920,7 @@ Auxiliary Function의 속성과 designator를 정의한다. VT는 이 속성으�
 
 허용 명령: Change Background Colour, Change Child Location, Change Child Position, Change Attribute, Get Attribute Value. 이벤트 없음.
 
-**Table J.2 — Auxiliary Function Type 2 레코드**
+**Table J.2(Auxiliary Function Type 2 레코드)**
 
 | 속성 | AID | 크기 | 값 | 설명 |
 |---|---|---|---|---|
@@ -2929,7 +2935,7 @@ Auxiliary Function의 속성과 designator를 정의한다. VT는 이 속성으�
 
 Auxiliary Input의 designator, 키/스위치/다이얼 번호, function type을 정의한다. 허용 명령: Change Child Location, Get Attribute Value. 이벤트 없음.
 
-**Table J.3 — Auxiliary Input Type 1 레코드**
+**Table J.3(Auxiliary Input Type 1 레코드)**
 
 | 속성 | 크기 | 값 | 설명 |
 |---|---|---|---|
@@ -2937,7 +2943,7 @@ Auxiliary Input의 designator, 키/스위치/다이얼 번호, function type을 
 | Type | 1 | =30 | |
 | Background colour | 1 | 0~255 | |
 | Function type | 1 | 0/1/2 | 0 = Latching Boolean, 1 = Analogue, 2 = Non-latching Boolean |
-| Input ID | 1 | 0~250 | 입력 식별 번호 — Auxiliary Input 유닛이 status message 송신 시 특정 입력을 식별하는 데 사용 |
+| Input ID | 1 | 0~250 | 입력 식별 번호. Auxiliary Input 유닛이 status message 송신 시 특정 입력을 식별하는 데 사용 |
 | Number of objects to follow | 1 | 1~255 | designator 구성 수 |
 | 반복: {Object ID, X, Y} | 2+2+2 | | designator 구성 오브젝트와 상대 위치 |
 
@@ -2947,7 +2953,7 @@ Auxiliary Input의 designator, 키/스위치/다이얼 번호, function type을 
 
 허용 명령: Change Background Colour, Change Child Location, Change Child Position, Change Attribute, Get Attribute Value. 이벤트 없음.
 
-**Table J.4 — Auxiliary Input Type 2 레코드**
+**Table J.4(Auxiliary Input Type 2 레코드)**
 
 | 속성 | AID | 크기 | 값 | 설명 |
 |---|---|---|---|---|
@@ -2964,25 +2970,25 @@ Auxiliary Input의 designator, 키/스위치/다이얼 번호, function type을 
 
 | Type ID | 타입 | Status message 값 |
 |---|---|---|
-| 0 | Boolean — Latching(위치 유지) On/Off, 2단 스위치(SPDT) | Value 1: 0 = Off(뒤/아래/왼쪽/미누름), 1 = On(앞/위/오른쪽/누름). Value 2: 전원 인가 후 Off→On 전이 횟수(FFFF₁₆에서 0으로 오버플로) |
+| 0 | Boolean: Latching(위치 유지) On/Off, 2단 스위치(SPDT) | Value 1: 0 = Off(뒤/아래/왼쪽/미누름), 1 = On(앞/위/오른쪽/누름). Value 2: 전원 인가 후 Off→On 전이 횟수(FFFF₁₆에서 0으로 오버플로) |
 | 1 | Analogue(위치 유지) | Value 1: 0 %(뒤/아래/왼쪽/반시계) ~ 100 %(FAFF₁₆, 앞/위/오른쪽/시계). Value 2: Reserved FFFF₁₆ |
-| 2 | Boolean — Non-Latching(momentary) 증가, 2단 스위치(momentary SPDT) | Value 1: 0 = Off, 1 = Momentary(작동), 2 = held. Value 2: Off→not Off 전이 횟수(Momentary→held는 미집계) |
-| 3 | Analogue — 50 % 복귀(좌/우), 양방향 아날로그(중앙 복귀) | Value 1: 0~100 %. Value 2: Reserved FFFF₁₆ |
-| 4 | Analogue — 0 % 복귀, 증가, 단방향 아날로그 | Value 1: 0~100 %. Value 2: Reserved FFFF₁₆ |
-| 5 | Dual Boolean — 양쪽 Latching On/Off/On, 3단 스위치(전위치 래치, 중앙 Off) | Value 1: 0 = Off(중앙), 1 = On(앞/위/오른쪽), 4 = On(뒤/아래/왼쪽). Value 2: Off→On 전이 횟수 |
-| 6 | Dual Boolean — 양쪽 Non-Latching(momentary), 증가/Off/감소·Raise/Off/Lower, 3단 스위치(중앙 복귀) | Value 1: 0 = Off, 1 = Momentary 앞/위/오른쪽, 2 = held 앞/위/오른쪽, 4 = Momentary 뒤/아래/왼쪽, 8 = held 뒤/아래/왼쪽. Value 2: Off→not Off 전이 횟수 |
-| 7 | Dual Boolean — 위 Latching/아래 Momentary, 3단 스위치 | Value 1: 0 = Off(래치), 1 = On 앞/위/오른쪽(래치), 4 = On 뒤/아래/왼쪽(비래치), 8 = held 뒤/아래/왼쪽(비래치). Value 2: Off→not Off 전이 횟수(On→held 미집계) |
-| 8 | Dual Boolean — 아래 Latching/위 Momentary, 3단 스위치 | Value 1: 0 = Off(래치), 1 = On 앞/위/오른쪽(비래치), 2 = held 앞/위/오른쪽(비래치), 4 = On 뒤/아래/왼쪽(래치). Value 2: 동일 규칙 |
-| 9 | Combined Analogue — 50 % 복귀 + Dual Boolean Latching(0 %·100 % 위치에서 래치) | Value 1: 0~100 %, FB00₁₆ = Latched forward, FB01₁₆ = Latched backward. Value 2: 비래치→래치 전이 횟수 |
-| 10 | Combined Analogue — 위치 유지 + Dual Boolean Latching(0 %·100 % 래치) | Value 1·2: Type 9와 동일 구성 |
-| 11 | Quadrature Boolean — Non-Latching, 직교 장착 3단 스위치 2개(중앙 복귀) | Value 1: 비트쌍 — Bits 1~0 Forward/up, 3~2 Backward/down, 5~4 Right, 7~6 Left. 쌍별 값: 00 = Off, 01 = On(첫 작동), 10 = held, 11 = reserved. 비트 조합으로 held→held 전이 표현 가능(Figure J.2). Value 2: 임의 축의 Off→On 전이 횟수(On→held 미집계) |
-| 12 | Quadrature Analogue — 위치 유지, 직교 아날로그 2축(각 축 중앙 = 50 %) | Value 1: 축 1 0~100 %(0 = 뒤/아래, FAFF₁₆ = 앞/위). Value 2: 축 2 0~100 %(0 = 왼쪽, FAFF₁₆ = 오른쪽) |
-| 13 | Quadrature Analogue — 중앙(50 %) 복귀 | Value 1·2: Type 12와 동일 구성 |
-| 14 | Bidirectional Encoder | "증가" 방향 회전 시 카운트 증가, 반대 방향 시 감소. Value 1: 현재 카운트(0~FFFF₁₆, 롤오버). Value 2: Calibration — 회전당 인코더 카운트(1~FFFF₁₆ 고정값) |
+| 2 | Boolean: Non-Latching(momentary) 증가, 2단 스위치(momentary SPDT) | Value 1: 0 = Off, 1 = Momentary(작동), 2 = held. Value 2: Off→not Off 전이 횟수(Momentary→held는 미집계) |
+| 3 | Analogue: 50 % 복귀(좌/우), 양방향 아날로그(중앙 복귀) | Value 1: 0~100 %. Value 2: Reserved FFFF₁₆ |
+| 4 | Analogue: 0 % 복귀, 증가, 단방향 아날로그 | Value 1: 0~100 %. Value 2: Reserved FFFF₁₆ |
+| 5 | Dual Boolean: 양쪽 Latching On/Off/On, 3단 스위치(전위치 래치, 중앙 Off) | Value 1: 0 = Off(중앙), 1 = On(앞/위/오른쪽), 4 = On(뒤/아래/왼쪽). Value 2: Off→On 전이 횟수 |
+| 6 | Dual Boolean: 양쪽 Non-Latching(momentary), 증가/Off/감소·Raise/Off/Lower, 3단 스위치(중앙 복귀) | Value 1: 0 = Off, 1 = Momentary 앞/위/오른쪽, 2 = held 앞/위/오른쪽, 4 = Momentary 뒤/아래/왼쪽, 8 = held 뒤/아래/왼쪽. Value 2: Off→not Off 전이 횟수 |
+| 7 | Dual Boolean: 위 Latching/아래 Momentary, 3단 스위치 | Value 1: 0 = Off(래치), 1 = On 앞/위/오른쪽(래치), 4 = On 뒤/아래/왼쪽(비래치), 8 = held 뒤/아래/왼쪽(비래치). Value 2: Off→not Off 전이 횟수(On→held 미집계) |
+| 8 | Dual Boolean: 아래 Latching/위 Momentary, 3단 스위치 | Value 1: 0 = Off(래치), 1 = On 앞/위/오른쪽(비래치), 2 = held 앞/위/오른쪽(비래치), 4 = On 뒤/아래/왼쪽(래치). Value 2: 동일 규칙 |
+| 9 | Combined Analogue: 50 % 복귀 + Dual Boolean Latching(0 %·100 % 위치에서 래치) | Value 1: 0~100 %, FB00₁₆ = Latched forward, FB01₁₆ = Latched backward. Value 2: 비래치→래치 전이 횟수 |
+| 10 | Combined Analogue: 위치 유지 + Dual Boolean Latching(0 %·100 % 래치) | Value 1·2: Type 9와 동일 구성 |
+| 11 | Quadrature Boolean: Non-Latching, 직교 장착 3단 스위치 2개(중앙 복귀) | Value 1: 비트쌍(Bits 1~0 Forward/up, 3~2 Backward/down, 5~4 Right, 7~6 Left). 쌍별 값: 00 = Off, 01 = On(첫 작동), 10 = held, 11 = reserved. 비트 조합으로 held→held 전이 표현 가능(Figure J.2). Value 2: 임의 축의 Off→On 전이 횟수(On→held 미집계) |
+| 12 | Quadrature Analogue: 위치 유지, 직교 아날로그 2축(각 축 중앙 = 50 %) | Value 1: 축 1 0~100 %(0 = 뒤/아래, FAFF₁₆ = 앞/위). Value 2: 축 2 0~100 %(0 = 왼쪽, FAFF₁₆ = 오른쪽) |
+| 13 | Quadrature Analogue: 중앙(50 %) 복귀 | Value 1·2: Type 12와 동일 구성 |
+| 14 | Bidirectional Encoder | "증가" 방향 회전 시 카운트 증가, 반대 방향 시 감소. Value 1: 현재 카운트(0~FFFF₁₆, 롤오버). Value 2: Calibration(회전당 인코더 카운트, 1~FFFF₁₆ 고정값) |
 | 15~30 | Reserved | 향후 사용 |
 | 31 | Reserved | Remove assignment command에 사용 |
 
-:::details Figure J.2 — Quadrature Boolean 값 표현
+:::details Figure J.2(Quadrature Boolean 값 표현)
 Type 11에서 8방향 값은 4개 비트쌍의 조합으로 인코딩된다. 괄호 값은 held 상태, 괄호 없는 값은 상태 전이 시 보고 값이다. 예: 중앙→오른쪽 이동 = 16, 오른쪽 held = 32, 오른쪽→우하단 이동 = 36, 우하단 held = 40. 대각선은 두 축 비트의 합으로 표현된다(예: 앞+오른쪽 held = 34).
 :::
 
@@ -3002,7 +3008,7 @@ Pointer Type별 동작:
 
 허용 명령: Change Attribute, Get Attribute Value. 이벤트 없음.
 
-**Table J.6 — Auxiliary Control Designator Type 2 Object Pointer 레코드**
+**Table J.6(Auxiliary Control Designator Type 2 Object Pointer 레코드)**
 
 | 속성 | AID | 크기 | 값 | 설명 |
 |---|---|---|---|---|
@@ -3011,7 +3017,7 @@ Pointer Type별 동작:
 | Pointer Type | [1] | 1 | 0~3 | 0 = Byte 5~6의 auxiliary 오브젝트를 가리킴 / 1 = Byte 5~6의 오브젝트에 할당된 상대 Auxiliary Function(또는 Input) / 2 = 이 포인터 소유 WS의 Working Set 오브젝트(ID는 FFFF₁₆) / 3 = Byte 5~6 오브젝트에 할당된 상대를 소유한 WS의 Working Set 오브젝트 |
 | Auxiliary Object ID | 2 | 2 | 0~65534, 65535 | 참조하는 Auxiliary Function/Input Object ID 또는 NULL |
 
-**Table J.7 — 비확장 뷰에서 VT가 표시하는 내용** (AI1이 AF1에 할당되어 있다고 가정)
+**Table J.7(비확장 뷰에서 VT가 표시하는 내용)** (AI1이 AF1에 할당되어 있다고 가정)
 
 | Pointer Type | 풀 소유자 | Byte 5~6 참조 | 비확장 뷰 표시 |
 |---|---|---|---|
@@ -3036,7 +3042,7 @@ Pointer Type별 동작:
 5. Preferred Assignment command로 트리거된 경우: 명령에 할당이 명시된 기능은 그 기능에 대한 할당 명령으로, 명시되지 않은 기능은 <strong>할당 제거 명령</strong>으로 해석한다(J.7.7).
 6. 선호 할당과 기존 할당을 검증해 충돌을 감지한다. 충돌 조건: (I) 할당의 "Auxiliary Function Type" 값 불일치, (II) 기능의 Single Assignment 비트 = 1인데 해당 입력이 복수 기능에 매핑됨/되게 됨, (III) 입력의 Single Assignment 비트 = 1인데 그 입력이 복수 기능에 매핑됨/되게 됨, (IV) 기능의 Assignment Restriction 비트 = 1인데 해당 입력이 선호 할당이 아님, (V) 입력의 Critical Control 비트 = 0인데 기능의 Critical Control 비트 = 1, (VI) 하나의 Auxiliary Function을 복수 입력에 할당하려 함, (VII) 할당된 입력·기능을 담은 풀이 제거됨.
 7. 충돌 있는 각 할당에 대해: Auxiliary Function WS Master에 "remove assignment"(NULL)를 담은 Auxiliary Assignment Type 2 command를 보내고, 할당이 제거되었으며 VT의 고유 할당 화면에서 재할당해야 함을 운전자에게 알린다.
-8. 충돌 없는 각 할당에 대해: (I) Auxiliary Input WS Master에 Auxiliary Input Status Type 2 Enable command를 보내 해당 입력의 status message를 활성화한다(이미 보냈으면 반복하지 않음). (II) Auxiliary Function WS Master에 Auxiliary Assignment Type 2 command를 보낸다 — Preferred Assignment 유래 할당이면 이미 보낸 명령은 반복하지 않고 "Preferred Assignment" 비트를 1(선호 할당으로 저장하지 말 것)로, 운전자 수정 유래 할당이면 이미 보냈어도 반복하고 비트를 0(선호 할당으로 저장)으로 설정한다.
+8. 충돌 없는 각 할당에 대해: (I) Auxiliary Input WS Master에 Auxiliary Input Status Type 2 Enable command를 보내 해당 입력의 status message를 활성화한다(이미 보냈으면 반복하지 않음). (II) Auxiliary Function WS Master에 Auxiliary Assignment Type 2 command를 보낸다. Preferred Assignment 유래 할당이면 이미 보낸 명령은 반복하지 않고 "Preferred Assignment" 비트를 1(선호 할당으로 저장하지 말 것)로, 운전자 수정 유래 할당이면 이미 보냈어도 반복하고 비트를 0(선호 할당으로 저장)으로 설정한다.
 9. 할당이 없는 각 Auxiliary Function에 대해 "remove assignment"(NULL) 명령을 보낸다. 운전자 조작으로 인한 제거이면 Preferred Assignment 비트 = 0.
 10. 할당이 없는 각 Auxiliary Input에 대해 Enable command로 해당 status message를 비활성화한다.
 
@@ -3084,7 +3090,7 @@ VT가 Auxiliary Input을 Auxiliary Function에 할당·재할당·할당 제거�
 | 바이트 | 내용 |
 |---|---|
 | 2~9 | Auxiliary Input Unit의 64-bit NAME, 또는 FFFFFFFFFFFFFFFF₁₆(할당 제거) |
-| 10 | Flags — Bit 7 = Preferred Assignment(0 = 선호 할당으로 저장, 1 = 저장하지 말 것; 에러 상황(입력 유닛의 unexpected shutdown·통신 에러 등)에서는 반드시 1)<br>Bits 6~5 = Reserved(0)<br>Bits 4~0 = 할당된 입력의 Auxiliary function type, 또는 1F₁₆(할당 제거) |
+| 10 | Flags: Bit 7 = Preferred Assignment(0 = 선호 할당으로 저장, 1 = 저장하지 말 것; 에러 상황(입력 유닛의 unexpected shutdown·통신 에러 등)에서는 반드시 1)<br>Bits 6~5 = Reserved(0)<br>Bits 4~0 = 할당된 입력의 Auxiliary function type, 또는 1F₁₆(할당 제거) |
 | 11, 12 | Auxiliary Input Object ID, 또는 FFFF₁₆(현재 할당 제거) |
 | 13, 14 | Auxiliary Function Object ID, 또는 FFFF₁₆(모든 할당된 기능에서 현재 할당 제거) |
 
@@ -3130,7 +3136,7 @@ VT의 확인응답(8바이트): Byte 2 Error Codes: Bit 0 = 입력 유닛(NAME �
 - non-latched Boolean 입력이 홀드 중인데 메시지 간격이 300 ms를 넘으면 기능 WS는 릴리스된 것으로 처리해야 한다.
 - <strong>잠금 상태</strong>: 잠금 중 전달되는 "value"는 잠금 활성화 시점의 값을 반영한다. 잠긴 상태에서 조작구가 조작되면 값은 그대로 두고 Interaction Detected status를 1로 세운다. 잠금 해제 시 Interaction Detected는 0으로 리셋된다. 작업기 기능은 이 상태를 "잠금 시점에 활성이던 동작의 비활성화"에 쓸 수 있다.
 - 입력이 무효 상태(스위치 고착, 단선 등)로 판정되면 Error Range 값으로 상태를 알리고, 추가로 연결된 VT에 Alarm Mask를 표시할 수 있다.
-- 송신 방식: learn mode가 아니면 global address로 브로드캐스트(모든 WS가 수신, 무확인). learn mode에서는 NAME이 Function Instance 0을 가리키는 VT로 Destination-Specific 송신(무확인) — 작업기가 메시지를 명령으로 오해할 가능성을 최소화하고 VT 구현도 단순해진다.
+- 송신 방식: learn mode가 아니면 global address로 브로드캐스트(모든 WS가 수신, 무확인). learn mode에서는 NAME이 Function Instance 0을 가리키는 VT로 Destination-Specific 송신(무확인). 작업기가 메시지를 명령으로 오해할 가능성을 최소화하고 VT 구현도 단순해진다.
 - 권장 priority = 3 (제어 목적 메시지의 표준 권고와 일치하며 transport protocol·extended transport protocol 메시지에 막히지 않게 한다).
 
 **구조** (VT function = 38, 8바이트)
@@ -3150,7 +3156,7 @@ Auxiliary Input <strong>Working Set</strong>(개별 입력 조작구가 아니�
 
 동작 규칙:
 
-- 기존 할당된 Auxiliary Input 오브젝트의 변경·삭제로 풀을 바꿔야 하는 입력 유닛의 절차: (1) 구성 변경 전에 status message가 활성화된 입력이 있었다면 Auxiliary Control이 사용 불가해질 수 있음을 운전자에게 알린다(v6에서 신설된 WS 측 의무 — 재구성 원인을 아는 쪽은 WS뿐이므로 WS에 책임을 두어 불필요한 이중 경고를 줄인다), (2) Maintenance message 송신을 <strong>500 ms 초과</strong> 중단, (3) Status = Initializing으로 송신 재개(이때 Model Identification Code는 개정된 구성을 반영해 바뀌어야 함), (4) 풀 갱신(기존 풀 삭제 또는 부분 업데이트 전송, Annex C), (5) VT로부터 에러 없는 End of Object Pool response를 받으면 Status = Ready로 표시. 이 절차가 시스템의 Working Set들이 기능-입력 연결을 안전하게 끊었다 다시 잇는 수단이 된다.
+- 기존 할당된 Auxiliary Input 오브젝트의 변경·삭제로 풀을 바꿔야 하는 입력 유닛의 절차: (1) 구성 변경 전에 status message가 활성화된 입력이 있었다면 Auxiliary Control이 사용 불가해질 수 있음을 운전자에게 알린다(v6에서 신설된 WS 측 의무. 재구성 원인을 아는 쪽은 WS뿐이므로 WS에 책임을 두어 불필요한 이중 경고를 줄인다), (2) Maintenance message 송신을 <strong>500 ms 초과</strong> 중단, (3) Status = Initializing으로 송신 재개(이때 Model Identification Code는 개정된 구성을 반영해 바뀌어야 함), (4) 풀 갱신(기존 풀 삭제 또는 부분 업데이트 전송, Annex C), (5) VT로부터 에러 없는 End of Object Pool response를 받으면 Status = Ready로 표시. 이 절차가 시스템의 Working Set들이 기능-입력 연결을 안전하게 끊었다 다시 잇는 수단이 된다.
 - 기능 WS가 이 메시지를 <strong>300 ms</strong> 동안 못 받으면 입력 WS의 unexpected shutdown 가능성을 가정하고 그 입력 유닛의 모든 기능 할당 제거를 포함한 조치를 해야 한다.
 - VT가 300 ms 동안 못 받으면 마찬가지로 shutdown/재구성을 가정하고 모든 기능 할당을 제거하되, 제거 명령에서 "미할당을 새 선호 할당으로 저장하지 말 것"(Preferred Assignment 비트 = 1)을 지시해야 한다.
 - 입력 WS는 4.6.9의 연결 관리 요건을 따라야 하므로 이 메시지와 <strong>별도로</strong> Working Set Maintenance message도 초당 1회 보낸다.
@@ -3161,7 +3167,7 @@ Auxiliary Input <strong>Working Set</strong>(개별 입력 조작구가 아니�
 
 VT가 Auxiliary Input status message를 활성화/비활성화한다. 목적은 둘이다: 불필요한 네트워크 메시징 감소, 그리고 Auxiliary Function이 <strong>미할당</strong> 입력에 반응할 가능성 감소. VT는 이 명령 송신 후 입력 측의 확인응답을 받기 전에는 그 입력에 기능을 할당하지 않는다. 2 s 내 미수신 시 재전송, 3회 실패 시 해당 Auxiliary Input 사용 불가를 운전자에게 알린다.
 
-**command** (VT function = 37, 8바이트, VT to ECU): Byte 2,3 = Auxiliary Input Object ID — FFFF₁₆는 "모든 입력"을 의미하며 <strong>disable일 때만</strong> 사용 가능 / Byte 4 = Enable: 0 = 해당 입력의 status message 비활성화, 1 = 활성화.
+**command** (VT function = 37, 8바이트, VT to ECU): Byte 2,3 = Auxiliary Input Object ID(FFFF₁₆는 "모든 입력"을 의미하며 <strong>disable일 때만</strong> 사용 가능) / Byte 4 = Enable: 0 = 해당 입력의 status message 비활성화, 1 = 활성화.
 
 **response** (ECU to VT): Byte 2,3 = 응답 대상 Object ID(또는 FFFF₁₆) / Byte 4 = Status: 0 = 비활성화됨, 1 = 활성화됨 / Byte 5 Error Codes(0 = 명령 수락): Bit 0 = Invalid Auxiliary Input Object ID, Bit 1 = 기타 에러.
 
@@ -3173,7 +3179,7 @@ v5 이상, Type 2 auxiliary control 전용. 임의의 CF가 <strong>function ins
 
 **response** (VT function = 39, 가변, VT to ECU): 풀을 VT에 성공적으로 올린 auxiliary 장치들의 전체 목록과 유닛별 Set Information을 담는다. Byte 2 = 해당 Request Type의 Auxiliary Unit 수(Request Type이 무효였으면 0), 이후 유닛마다 반복 { 64-bit NAME(8바이트), 이 유닛의 set 수(1바이트), 반복 { Set Information 3바이트 } }.
 
-**Table J.8 — Set Information(3바이트)**
+**Table J.8(Set Information, 3바이트)**
 
 | 바이트 | 항목 | 내용 |
 |---|---|---|
@@ -3187,13 +3193,13 @@ VT는 운전자가 <strong>해당 입력을 직접 눌러서</strong> Auxiliary 
 
 - learn mode가 켜져 있는 동안 VT는 VT Status message에 이를 표시해야 한다(G.2의 busy code Bit 6).
 - learn mode 활성 중: 모든 Auxiliary Input은 VT의 enable 여부와 무관하게 정상 주기로 Auxiliary Input status message를 보내야 한다(learn mode에서는 J.7.9대로 instance 0 VT로 Destination-Specific 송신). VT는 status message들을 감시해 실제 조작된 Auxiliary Input에 선택된 Auxiliary Function을 할당한다(기능 표시·선택 방법은 VT 고유). Auxiliary Function Working Set들은 VT Status message가 learn mode를 표시하는 동안에는 Auxiliary Input Status message로 인한 어떤 기능도 수행해서는 안 된다.
-- learn mode 진입·이탈 시 조작구 상태가 제어 대상 기능 상태와 어긋날 수 있으며, 이 충돌 해소는 Auxiliary Function 책임이다. 예: 주차 브레이크 기능이 learn mode 이전에 체결 상태였는데, learn mode 종료 시 입력 신호가 해제 상태를 전달하고 있다면 — 기능은 체결 신호를 먼저 본 적이 없으므로 운전자 개입(Alarm Mask, 입력을 체결 상태로 한 번 돌리게 요구 등)을 거친 뒤에야 해제 신호에 따라 브레이크를 풀도록 할 수 있다.
+- learn mode 진입·이탈 시 조작구 상태가 제어 대상 기능 상태와 어긋날 수 있으며, 이 충돌 해소는 Auxiliary Function 책임이다. 예: 주차 브레이크 기능이 learn mode 이전에 체결 상태였는데, learn mode 종료 시 입력 신호가 해제 상태를 전달하고 있다면, 기능은 체결 신호를 먼저 본 적이 없으므로 운전자 개입(Alarm Mask, 입력을 체결 상태로 한 번 돌리게 요구 등)을 거친 뒤에야 해제 신호에 따라 브레이크를 풀도록 할 수 있다.
 
-## Annex K (normative) — Character sets
+## Annex K (normative): Character sets
 
 8-bit 문자열의 인코딩을 정의한다. 8-bit 문자열의 인코딩은 Font Attributes 오브젝트의 Font Type 값에 따라 결정된다.
 
-**Table K.1 — Font Type 매핑**
+**Table K.1(Font Type 매핑)**
 
 | VT Font Type | 인코딩 |
 |---|---|
@@ -3213,12 +3219,12 @@ VT는 운전자가 <strong>해당 입력을 직접 눌러서</strong> Auxiliary 
 이후의 문자표(Table K.2~K.7)는 참고용이며 정확한 문자 집합은 각 ISO 문서를 따른다. 공통 규칙:
 
 - 제어 코드 영역(00₁₆~1F₁₆, 7F₁₆, 80₁₆~9F₁₆)은 표시해서는 안 된다. 예외적으로 0A₁₆(LF)·0D₁₆(CR)은 개행 처리 규칙(4.6.19.6)을 따른다.
-- A0₁₆ = NBSP(non-breaking space) — word-wrap 규칙이 적용되지 않는다.
+- A0₁₆ = NBSP(non-breaking space): word-wrap 규칙이 적용되지 않는다.
 - 00₁₆는 문자열 표시를 종료(termination)시킨다.
 - 각 표의 20₁₆~7E₁₆ 구간은 ASCII와 동일하고, A0₁₆~FF₁₆ 상위 구간이 문자셋별로 다르다: K.2 Latin 1(서유럽), K.3 Latin 9(Latin 1에서 €·Š·š·Ž·ž·Œ·œ·Ÿ 대체), K.4 Latin 2(중동부 유럽), K.5 Latin 4(북유럽·발트), K.6 Cyrillic, K.7 Greek. Latin 2·4·Cyrillic·Greek 표는 v4 이상에서 필수다.
 - ISO 8859-15 표는 v2 이하 VT에 4개 문자 오류(A6₁₆, A8₁₆, B4₁₆, B8₁₆ 위치의 Š/š/Ž/ž)가 있었고 v3에서 수정되었다.
 
-**Table K.8 — WideString 최소 문자 집합**: WideString(2바이트 문자)용으로 VT가 최소한 지원해야 하는 유니코드 문자 범위를 정의한다(v4 이상 필수). 포함 범위: U+0000~U+00FF(Latin-1 상당), U+0100~U+017F(Latin Extended-A), U+02C6~U+02DD 일부(수정 문자), U+0374~U+03CE(그리스), U+0401~U+045F(키릴), U+20AC(€). 규칙은 8-bit 표와 동일하되 0000₁₆이 문자열 표시를 종료하며, 빈 칸은 필수는 아니지만 표시할 수 있는 코드다.
+**Table K.8(WideString 최소 문자 집합)**: WideString(2바이트 문자)용으로 VT가 최소한 지원해야 하는 유니코드 문자 범위를 정의한다(v4 이상 필수). 포함 범위: U+0000~U+00FF(Latin-1 상당), U+0100~U+017F(Latin Extended-A), U+02C6~U+02DD 일부(수정 문자), U+0374~U+03CE(그리스), U+0401~U+045F(키릴), U+20AC(€). 규칙은 8-bit 표와 동일하되 0000₁₆이 문자열 표시를 종료하며, 빈 칸은 필수는 아니지만 표시할 수 있는 코드다.
 
 ## Bibliography (참고문헌)
 

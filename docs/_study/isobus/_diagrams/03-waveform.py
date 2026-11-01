@@ -1,4 +1,4 @@
-"""CH3 §3 이상적인 CAN 파형 — CAN_H / CAN_L(반전) / Diff(차동 전압) (light/dark PNG)."""
+"""CH3 §3 이상적인 CAN 파형: CAN_H / CAN_L(반전) / Diff(차동 전압) (light/dark PNG)."""
 from _common import diagram
 
 

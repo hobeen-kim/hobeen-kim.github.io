@@ -1,4 +1,4 @@
-"""CH10 §10 네트워크 초기화 시퀀스 3종 — Part 5 Figure 4·5·10 (light/dark PNG)."""
+"""CH10 §10 네트워크 초기화 시퀀스 3종: Part 5 Figure 4·5·10 (light/dark PNG)."""
 from _common import diagram
 
 

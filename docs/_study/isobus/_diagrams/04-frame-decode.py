@@ -1,4 +1,4 @@
-"""CH4 §6 실제 비트열 분해 — 스터핑 제거와 필드 경계 (light/dark PNG)."""
+"""CH4 §6 실제 비트열 분해: 스터핑 제거와 필드 경계 (light/dark PNG)."""
 from _common import diagram
 
 RX = "0001001000110000011010101011110011011111011100111100" + "1011111111"   # 62비트
@@ -32,7 +32,7 @@ def draw(d):
                color=P["bg"] if s else P["text"])
     for i in sorted(STUFFED):
         d.text(X0 + i * CW + CW * 0.46, R1Y - 2.0, "▲", size=6, color=P["orange"])
-    d.text(X0 + 42 * CW, R1Y - 4.2, "스터핑 비트 2개 — 데이터가 아니므로 먼저 제거한다",
+    d.text(X0 + 42 * CW, R1Y - 4.2, "스터핑 비트 2개: 데이터가 아니므로 먼저 제거한다",
            size=9, ha="left", color=P["orange"])
 
     # 제거 후 + 필드 경계
@@ -57,7 +57,7 @@ def draw(d):
     d.text(X0, 6.4, "ID = 0x123    데이터 프레임(RTR 0)    표준 11비트(IDE 0)    "
                     "DLC 2 → Data 0xAB 0xCD    CRC 0x7F3C",
            size=9.5, ha="left")
-    d.text(X0, 3.0, "DLC를 읽기 전에는 프레임 전체 길이를 알 수 없다 — "
+    d.text(X0, 3.0, "DLC를 읽기 전에는 프레임 전체 길이를 알 수 없다. "
                     "데이터 길이가 정해져야 CRC 시작 위치가 정해진다",
            size=9, ha="left", color=P["dim"])
 

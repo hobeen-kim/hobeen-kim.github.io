@@ -1,4 +1,4 @@
-"""CH12 §9 TC 중심 작업 데이터 흐름 — Part 1 6.7.3·6.7.4 (light/dark PNG)."""
+"""CH12 §9 TC 중심 작업 데이터 흐름: Part 1 6.7.3·6.7.4 (light/dark PNG)."""
 from _common import diagram
 
 

@@ -1,4 +1,4 @@
-"""CH21 §4.4 이동식 볼륨 제거 절차 — ISO 11783-13 C.1.6~C.1.7, B.30~B.32 (light/dark PNG)."""
+"""CH21 §4.4 이동식 볼륨 제거 절차: ISO 11783-13 C.1.6~C.1.7, B.30~B.32 (light/dark PNG)."""
 from _common import diagram
 
 A, FS, B = 12, 50, 88

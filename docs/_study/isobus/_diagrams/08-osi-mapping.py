@@ -1,4 +1,4 @@
-"""CH08 §6 ISO 11783가 쓰는 OSI 계층 — Part 3 Figure 2 재구성 (light/dark PNG)."""
+"""CH08 §6 ISO 11783가 쓰는 OSI 계층: Part 3 Figure 2 재구성 (light/dark PNG)."""
 from _common import diagram
 
 ROWS = [  # (y, 계층 이름)

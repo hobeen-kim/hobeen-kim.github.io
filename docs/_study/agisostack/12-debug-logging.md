@@ -151,7 +151,7 @@ another ECU with NAME ...
 ```
 
 ::: info 관련 스터디
-주소 경합의 규칙과 NAME 값이 우선순위를 어떻게 결정하는지는 [ISOBUS CH10. J1939 주소 관리](/study/isobus/10-j1939-address), 그리고 이 스터디의 [CH3. 제어 함수와 NAME](/study/agisostack/03-control-function-name)에서 다뤘다.
+주소 경합의 규칙과 NAME 값이 우선순위를 어떻게 결정하는지는 [ISOBUS CH12~14. J1939 주소 관리](/study/isobus/12-j1939-address-name), 그리고 이 스터디의 [CH3. 제어 함수와 NAME](/study/agisostack/03-control-function-name)에서 다뤘다.
 :::
 
 ### 4.2. 파트너를 못 찾을 때 — `[NM]`
@@ -200,7 +200,7 @@ another ECU with NAME ...
 | `Received a Data Transfer message from ... while not expecting one, sending abort` | 핸드셰이크 없이 데이터가 들어왔다 |
 
 ::: info 관련 스터디
-abort 사유 코드의 의미와 RTS/CTS 타이밍 규칙은 [ISOBUS CH11. J1939 Transport Protocol](/study/isobus/11-j1939-transport)에 정리돼 있다. 전송 API 사용법은 [CH10. 전송 계층 사용하기](/study/agisostack/10-transport-layer)를 참고하면 된다.
+abort 사유 코드의 의미와 RTS/CTS 타이밍 규칙은 [ISOBUS CH15~17. J1939 Transport Protocol](/study/isobus/15-tp-bam-cmdt)에 정리돼 있다. 전송 API 사용법은 [CH10. 전송 계층 사용하기](/study/agisostack/10-transport-layer)를 참고하면 된다.
 :::
 
 ### 4.4. VT 연결 문제 — `[VT]`

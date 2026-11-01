@@ -3,7 +3,7 @@ import math
 
 from _common import diagram
 
-# (필드 라벨, 비트 수, 색상 키, 라벨 높이 레벨 0/1 — 좁은 인접 필드 겹침 방지)
+# (필드 라벨, 비트 수, 색상 키, 라벨 높이 레벨 0/1: 좁은 인접 필드 겹침 방지)
 FIELDS = [
     ("SOF", 1, "chip", 0),
     ("Identifier\n(11bit)", 11, "blue", 1),

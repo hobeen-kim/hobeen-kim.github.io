@@ -24,7 +24,7 @@ tags: [AgIsoStack, ISOBUS, C++]
 
 ::: info 관련 스터디
 주소 클레임과 NAME 이 어떻게 주소를 결정하는지는 이론 스터디에 정리돼 있다.
-[ISOBUS CH10. J1939 주소 체계](/study/isobus/10-j1939-address) · [ISOBUS CH14. ISOBUS 네트워크 관리](/study/isobus/14-isobus-network-mgmt) · [AgIsoStack CH3. Control Function 과 NAME](/study/agisostack/03-control-function-name)
+[ISOBUS CH12~14. J1939 주소 체계](/study/isobus/12-j1939-address-name) · [ISOBUS CH26. ISOBUS 네트워크 관리](/study/isobus/26-isobus-network-mgmt) · [AgIsoStack CH3. Control Function 과 NAME](/study/agisostack/03-control-function-name)
 :::
 
 ## NAME 필터

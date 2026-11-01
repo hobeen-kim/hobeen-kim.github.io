@@ -1,4 +1,4 @@
-"""CH21 §4.7 Read Directory Response와 Directory Entry 바이트 배치 — ISO 11783-13 C.3.5.4, B.21, B.24, B.25 (light/dark PNG)."""
+"""52장 5절 Read Directory Response와 Directory Entry 바이트 배치: ISO 11783-13 C.3.5.4, B.21, B.24, B.25 (light/dark PNG)."""
 from _common import diagram
 
 
@@ -37,7 +37,7 @@ def draw(d):
     entry = [
         (11, "Byte 1", "Filename\nLength", "", "green"),
         (20, "Byte 2 ~ n", "Filename", "Length 바이트", "brown"),
-        (11, "Byte n+1", "Attributes", "B.15", "gray"),
+        (11, "Byte n+1", "Attributes", "속성 비트 8개", "gray"),
         (13, "Byte n+2, n+3", "File Date", "LSB 먼저", "purple"),
         (13, "Byte n+4, n+5", "File Time", "LSB 먼저", "purple"),
         (23, "Byte n+6 ~ n+9", "Size", "uint32, LSB 먼저", "blue"),
@@ -68,8 +68,8 @@ def draw(d):
     date_x1 = bitbar(date_x0, date, "purple")
     time_x0 = 55
     time_x1 = bitbar(time_x0, time_, "purple")
-    d.text((date_x0 + date_x1) / 2, 14.2, "File Date (B.24)", size=8.8, color=P["dim"])
-    d.text((time_x0 + time_x1) / 2, 14.2, "File Time (B.25)", size=8.8, color=P["dim"])
+    d.text((date_x0 + date_x1) / 2, 14.2, "File Date: 날짜 2바이트", size=8.8, color=P["dim"])
+    d.text((time_x0 + time_x1) / 2, 14.2, "File Time: 시각 2바이트", size=8.8, color=P["dim"])
 
     dx0, dx1 = s2[3]
     tx0, tx1 = s2[4]

@@ -1,4 +1,4 @@
-"""CH16 §7 오브젝트 레코드 공통 구조 — 머리·고정 속성·개수·자식 목록·매크로 목록 (light/dark PNG)."""
+"""CH16 §7 오브젝트 레코드 공통 구조: 머리·고정 속성·개수·자식 목록·매크로 목록 (light/dark PNG)."""
 from _common import diagram
 
 ROW1 = [

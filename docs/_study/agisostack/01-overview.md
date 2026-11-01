@@ -41,7 +41,7 @@ CAN 컨트롤러 드라이버만 있으면 프레임 하나 보내는 건 어렵
 
 ::: info 관련 스터디
 여기서 나열한 항목이 표준상 정확히 무엇을 요구하는지는 이론 스터디에서 다룬다.
-[ISOBUS CH10. J1939 주소 체계](/study/isobus/10-j1939-address) · [CH11. J1939 Transport Protocol](/study/isobus/11-j1939-transport) · [CH14. ISOBUS 네트워크 관리](/study/isobus/14-isobus-network-mgmt) · [CH15. VT 기초](/study/isobus/15-vt-basics) · [CH18. TC 기초](/study/isobus/18-tc-basics)
+[ISOBUS CH12~14. J1939 주소 체계](/study/isobus/12-j1939-address-name) · [CH15~17. J1939 Transport Protocol](/study/isobus/15-tp-bam-cmdt) · [CH26. ISOBUS 네트워크 관리](/study/isobus/26-isobus-network-mgmt) · [CH29. VT 기초](/study/isobus/29-vt-basics) · [CH41. TC 기초](/study/isobus/41-tc-basics)
 :::
 
 ## 프로젝트 생태계

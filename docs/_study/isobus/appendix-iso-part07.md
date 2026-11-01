@@ -1,14 +1,20 @@
 ---
-title: "표준 정리: Part 7 — Implement messages"
-description: "ISO 11783-7(Implement messages application layer) — 트랙터-작업기 메시지와 파라미터, Amendment 1 변경 사항을 정리한 표준 요약이다."
+title: "표준 정리: Part 7(Implement messages)"
+description: "ISO 11783-7(Implement messages application layer)에서 트랙터-작업기 메시지와 파라미터, Amendment 1 변경 사항을 정리한 표준 요약이다."
 date: 2026-08-21
 tags: [ISOBUS, ISO11783, 표준정리]
+prev: /study/isobus/appendix-iso-part06
+next: /study/isobus/appendix-iso-part08
 ---
 
 # ISO 11783-7: Implement messages application layer 정리
 
 ::: info 이 문서에 대해
 ISO 11783-7 표준 원문을 학습 목적으로 재구성한 <strong>비공식 요약·해설</strong>이다. 규범적 판단이 필요할 때는 반드시 원문 표준을 확인해야 한다.
+:::
+
+::: tip 처음 읽는다면
+이 페이지는 트랙터-작업기 메시지(Part 7: 속도, 히치, PTO, 밸브, 조명 같은 메시지와 그 안의 값)를 원문의 절 구조대로 요약한 참고 자료다. 분량이 커서 처음부터 읽기보다, 특정 메시지의 바이트 배치나 파라미터 범위를 찾아볼 때 펼쳐 본다. 처음이라면 [23장 트랙터-작업기 메시지 (1): 읽는 법과 시간·속도·위치](/study/isobus/23-implement-messages-basics)를 먼저 읽고, [24장 트랙터-작업기 메시지 (2): 히치·PTO·밸브와 작업기의 트랙터 제어](/study/isobus/24-hitch-pto-valve-control)와 [25장 트랙터-작업기 메시지 (3): 언어 설정, 안전 메시지, Part 7 요약](/study/isobus/25-settings-safety-messages)으로 이어 간다.
 :::
 
 ## 개요
@@ -41,7 +47,7 @@ ISO 639(언어 코드), ISO 11783-1/-3/-5/-6/-9/-10/-12, IEC 61162-3(NMEA 2000, 
 
 ## 3장 일반 요구사항과 권고
 
-### 3.1 General — 메시지 집합의 범위
+### 3.1 General: 메시지 집합의 범위
 
 이 파트의 메시지 집합은 작업기가 트랙터로부터 필요로 하는 기본 정보 제공과, 트랙터-작업기 간 협조를 위한 제한적 제어를 지원하도록 설계되었다. 다루는 정보 범주는 다음과 같다.
 
@@ -70,7 +76,7 @@ ISO 11783 네트워크는 어떤 ECU 안의 CF(control function)가 가진 최�
 - 2바이트 이상의 수치 파라미터는 <strong>LSB(least significant byte) 먼저</strong> 전송한다(리틀 엔디언).
 - 파라미터가 바이트 경계에 걸치면 하위 비트를 하위 바이트에, 나머지 상위 비트를 다음 바이트의 첫 비트부터 배치한다.
 
-#### 3.3.2 데이터 타입 — Command vs Measured
+#### 3.3.2 데이터 타입: Command vs Measured
 
 모든 파라미터는 command 또는 measured 중 하나로 분류된다.
 
@@ -83,7 +89,7 @@ ISO 11783 네트워크는 어떤 ECU 안의 CF(control function)가 가진 최�
 command는 "요청"이다. 트랙터는 받은 명령을 그대로 실행할 의무가 없고, 다른 트랙터 제어·운전 조건과 함께 고려해 <strong>트랙터 제어 시스템이 적절하다고 판단할 때만</strong> 실행한다. 제어 명령은 시스템에 운동·동력의 변화를 일으키므로 안전 판단이 트랙터 쪽에 남아 있는 구조다.
 :::
 
-#### 3.3.3 Parameter ranges — 값 범위 규약
+#### 3.3.3 Parameter ranges: 값 범위 규약
 
 전송 신호의 유효성 판정 범위(J1939와 동일한 관례)는 다음과 같다.
 
@@ -102,7 +108,7 @@ command는 "요청"이다. 트랙터는 받은 명령을 그대로 실행할 의
 | 00 | Disabled (Off, passive 등) | 기능 끄기 명령 |
 | 01 | Enabled (On, active 등) | 기능 켜기 명령 |
 | 10 | Error indicator | Reserved |
-| 11 | Not available / not installed | Don't care — 현 상태 유지 |
+| 11 | Not available / not installed | Don't care(현 상태 유지) |
 
 에러 규칙: CF 고장으로 유효 데이터를 못 보내면 error indicator를 값 대신 넣는다. 단, <strong>측정값이 유효한데 정의된 범위를 초과한 경우에는 error indicator를 쓰지 않고</strong> 최소/최대 파라미터 값으로 잘라서 보낸다. 유효 여부를 판정할 수 없으면 error indicator를 보낸다.
 
@@ -116,7 +122,7 @@ command는 "요청"이다. 트랙터는 받은 명령을 그대로 실행할 의
 
 트랙터/작업기 연결 구성과 기준점(reference point) 간 오프셋은 항법 파라미터와 프로세스 데이터 메시지의 implement configuration에 사용된다. 상세는 ISO 11783-10을 따른다.
 
-## Annex A — 파라미터 정의 (normative)
+## Annex A: 파라미터 정의 (normative)
 
 Annex A는 Part 7 메시지에 실리는 개별 파라미터를 정의한다. 각 파라미터는 데이터 길이, 분해능(resolution), 동작 범위, 타입(measured/command), SPN(suspect parameter number)으로 기술된다. 이하 주요 파라미터를 절 구조에 따라 정리한다.
 
@@ -124,10 +130,10 @@ Annex A는 Part 7 메시지에 실리는 개별 파라미터를 정의한다. �
 
 | 파라미터 | 길이 | 분해능·범위 | 타입 | SPN |
 |---|---|---|---|---|
-| Time (UTC) — A.1 | 3 bytes | Byte1: 0,25 s/bit (0~59,75 s), Byte2: 1 min/bit (0~59), Byte3: 1 h/bit (0~23) | Measured | 959/960/961 |
-| Date — A.2 | 3 bytes | Byte1: 1 month/bit (1~12), Byte2: 0,25 d/bit (0,25~31,75 d), Byte3: 1 y/bit, 1985년 오프셋 (1985~2235) | Measured | 963/962/964 |
-| Local minute offset — A.3 | 1 byte | 1 min/bit, −125 min 오프셋, −59~59 min | Measured | 1601 |
-| Local hour offset — A.4 | 1 byte | 1 h/bit, −125 h 오프셋, −23~23 h | Measured | 1602 |
+| Time (UTC)(A.1) | 3 bytes | Byte1: 0,25 s/bit (0~59,75 s), Byte2: 1 min/bit (0~59), Byte3: 1 h/bit (0~23) | Measured | 959/960/961 |
+| Date(A.2) | 3 bytes | Byte1: 1 month/bit (1~12), Byte2: 0,25 d/bit (0,25~31,75 d), Byte3: 1 y/bit, 1985년 오프셋 (1985~2235) | Measured | 963/962/964 |
+| Local minute offset(A.3) | 1 byte | 1 min/bit, −125 min 오프셋, −59~59 min | Measured | 1601 |
+| Local hour offset(A.4) | 1 byte | 1 h/bit, −125 h 오프셋, −23~23 h | Measured | 1602 |
 
 - 날짜의 day 필드가 0,25일 단위인 점에 주의: 값 1~4가 1일, 5~8이 2일을 뜻한다. month=0, day=0은 null이다.
 - Local offset은 UTC에 더해서 지역 시각을 만드는 값이다. 본초자오선 동쪽(날짜변경선까지)이 양수, 서쪽이 음수다.
@@ -138,13 +144,13 @@ Annex A는 Part 7 메시지에 실리는 개별 파라미터를 정의한다. �
 
 | 파라미터 | 길이 | 분해능 | 범위 | 타입 | SPN |
 |---|---|---|---|---|---|
-| Ground-based machine speed — A.5 | 2 bytes | 0,001 m/s/bit | 0~64,255 m/s | Measured | 1859 |
-| Ground-based machine distance — A.6 | 4 bytes | 0,001 m/bit | 0~4 211 081,215 m | Measured | 1860 |
-| Ground-based machine direction — A.7 | 2 bits | 00=Reverse, 01=Forward, 10=Error, 11=N/A | — | Measured | 1861 |
-| Wheel-based machine speed — A.8 | 2 bytes | 0,001 m/s/bit | 0~64,255 m/s | Measured | 1862 |
-| Wheel-based machine distance — A.9 | 4 bytes | 0,001 m/bit | 0~4 211 081,215 m | Measured | 1863 |
-| Wheel-based machine direction — A.10 | 2 bits | A.7과 동일 코딩 | — | Measured | 1864 |
-| Key switch state — A.11 | 2 bits | 00=Off, 01=not Off, 10=Error, 11=N/A | — | Measured | 1865 |
+| Ground-based machine speed(A.5) | 2 bytes | 0,001 m/s/bit | 0~64,255 m/s | Measured | 1859 |
+| Ground-based machine distance(A.6) | 4 bytes | 0,001 m/bit | 0~4 211 081,215 m | Measured | 1860 |
+| Ground-based machine direction(A.7) | 2 bits | 00=Reverse, 01=Forward, 10=Error, 11=N/A | - | Measured | 1861 |
+| Wheel-based machine speed(A.8) | 2 bytes | 0,001 m/s/bit | 0~64,255 m/s | Measured | 1862 |
+| Wheel-based machine distance(A.9) | 4 bytes | 0,001 m/bit | 0~4 211 081,215 m | Measured | 1863 |
+| Wheel-based machine direction(A.10) | 2 bits | A.7과 동일 코딩 | - | Measured | 1864 |
+| Key switch state(A.11) | 2 bits | 00=Off, 01=not Off, 10=Error, 11=N/A | - | Measured | 1865 |
 
 - ground-based는 레이더 등 대지 기준 센서 측정값, wheel-based는 바퀴/테일샤프트 회전수로 계산한 값이다. 슬립이 있으면 두 값이 달라지므로 작업기는 용도에 맞게 선택한다.
 - 거리 파라미터는 최대값(4 211 081,215 m)을 넘으면 0으로 리셋 후 다시 누적한다.
@@ -155,9 +161,9 @@ Annex A는 Part 7 메시지에 실리는 개별 파라미터를 정의한다. �
 
 | 파라미터 | 길이 | 내용 | 타입 | SPN |
 |---|---|---|---|---|
-| Maximum time of tractor power — A.12 | 1 byte | 현재 부하 기준 남은 전원 공급 가능 시간. 1 min/bit, 0~250 min. 추정치일 수 있음 | Measured | 1866 |
-| Maintain ECU power — A.13 | 2 bits | 01 = 앞으로 2 s 더 ECU_PWR 유지 요청, 00 = 더 이상 불필요 | Command | 1867 |
-| Maintain actuator power — A.14 | 2 bits | 01 = 앞으로 2 s 더 PWR(액추에이터 전원) 유지 요청, 00 = 더 이상 불필요 | Command | 1868 |
+| Maximum time of tractor power(A.12) | 1 byte | 현재 부하 기준 남은 전원 공급 가능 시간. 1 min/bit, 0~250 min. 추정치일 수 있음 | Measured | 1866 |
+| Maintain ECU power(A.13) | 2 bits | 01 = 앞으로 2 s 더 ECU_PWR 유지 요청, 00 = 더 이상 불필요 | Command | 1867 |
+| Maintain actuator power(A.14) | 2 bits | 01 = 앞으로 2 s 더 PWR(액추에이터 전원) 유지 요청, 00 = 더 이상 불필요 | Command | 1868 |
 
 키 오프 후에도 작업기 ECU가 셧다운 처리(설정 저장 등)를 끝낼 때까지 트랙터 ECU에 전원 유지를 요청하는 메커니즘이다. 2초 단위로 계속 갱신 요청하는 구조다.
 
@@ -167,9 +173,9 @@ Annex A는 Part 7 메시지에 실리는 개별 파라미터를 정의한다. �
 
 | 파라미터 | 의미 | SPN |
 |---|---|---|
-| Implement transport state — A.15 | 작업기를 운반(transport)해도 되는 상태인지 | 1869 |
-| Implement park state — A.16 | 작업기를 트랙터/파워 유닛에서 분리해도 되는 상태인지 | 1870 |
-| Implement ready-to-work state — A.17 | 작업기가 연결되어 필드 작업 준비가 되었는지 | 1871 |
+| Implement transport state(A.15) | 작업기를 운반(transport)해도 되는 상태인지 | 1869 |
+| Implement park state(A.16) | 작업기를 트랙터/파워 유닛에서 분리해도 되는 상태인지 | 1870 |
+| Implement ready-to-work state(A.17) | 작업기가 연결되어 필드 작업 준비가 되었는지 | 1871 |
 
 ### A.18 Navigation location parameters
 
@@ -181,12 +187,12 @@ Annex A는 Part 7 메시지에 실리는 개별 파라미터를 정의한다. �
 
 | 파라미터 | 길이 | 분해능·범위 | 타입 | SPN |
 |---|---|---|---|---|
-| Front hitch position — A.19.1 | 1 byte | 0,4 %/bit, 0~100 % | Measured | 1872 |
-| Rear hitch position — A.19.2 | 1 byte | 0,4 %/bit, 0~100 % | Measured | 1873 |
-| Front hitch position command — A.19.3 | 1 byte | 0,4 %/bit, 0~100 % | Command | 1874 |
-| Rear hitch position command — A.19.4 | 1 byte | 0,4 %/bit, 0~100 % | Command | 1875 |
-| Front hitch in-work indication — A.19.5 | 2 bits | 00=out-of-work, 01=in-work | Measured | 1876 |
-| Rear hitch in-work indication — A.19.6 | 2 bits | 00=out-of-work, 01=in-work | Measured | 1877 |
+| Front hitch position(A.19.1) | 1 byte | 0,4 %/bit, 0~100 % | Measured | 1872 |
+| Rear hitch position(A.19.2) | 1 byte | 0,4 %/bit, 0~100 % | Measured | 1873 |
+| Front hitch position command(A.19.3) | 1 byte | 0,4 %/bit, 0~100 % | Command | 1874 |
+| Rear hitch position command(A.19.4) | 1 byte | 0,4 %/bit, 0~100 % | Command | 1875 |
+| Front hitch in-work indication(A.19.5) | 2 bits | 00=out-of-work, 01=in-work | Measured | 1876 |
+| Rear hitch in-work indication(A.19.6) | 2 bits | 00=out-of-work, 01=in-work | Measured | 1877 |
 
 in-work indication은 히치가 조정 가능한 전환 임계값(switching threshold) 아래(in-work)인지 위(out-of-work)인지를 나타낸다. 임계값 결정 방법은 표준화되어 있지 않고 제조사 재량이다.
 
@@ -194,10 +200,10 @@ in-work indication은 히치가 조정 가능한 전환 임계값(switching thre
 
 | 파라미터 | 길이 | 분해능·범위 | 타입 | SPN |
 |---|---|---|---|---|
-| Front draft — A.19.7 | 2 bytes | 10 N/bit, −320 000 N 오프셋, −320 000~322 550 N | Measured | 1878 |
-| Rear draft — A.19.8 | 2 bytes | 동일 | Measured | 1879 |
-| Front nominal lower link force — A.19.9 | 1 byte | 0,8 %/bit, −100 % 오프셋, −100~100 % | Measured | 1880 |
-| Rear nominal lower link force — A.19.10 | 1 byte | 동일 | Measured | 1881 |
+| Front draft(A.19.7) | 2 bytes | 10 N/bit, −320 000 N 오프셋, −320 000~322 550 N | Measured | 1878 |
+| Rear draft(A.19.8) | 2 bytes | 동일 | Measured | 1879 |
+| Front nominal lower link force(A.19.9) | 1 byte | 0,8 %/bit, −100 % 오프셋, −100~100 % | Measured | 1880 |
+| Rear nominal lower link force(A.19.10) | 1 byte | 동일 | Measured | 1881 |
 
 - draft는 작업기가 히치에 가하는 겉보기 수평력이다. 양수 = 트랙터 진행 방향과 반대로 작용하는 힘(즉 견인 저항).
 - nominal lower link force는 로어 링크의 힘 센서에서 얻는 견인력 지표다. draft와 대략 선형 관계이며 히치 위치가 고정이면 비례한다고 볼 수 있다. draft control의 원시 데이터로 쓰인다.
@@ -209,9 +215,9 @@ Front(SPN 5150)/Rear(SPN 5151) 히치의 <strong>지속형(persistent) 위치 �
 | 값 | 의미 |
 |---|---|
 | 000 | Not limited |
-| 001 | Operator limited/controlled — 요청 실행 불가 |
-| 010 | Limited High — 더 낮은 명령값만 반영됨 |
-| 011 | Limited Low — 더 높은 명령값만 반영됨 |
+| 001 | Operator limited/controlled: 요청 실행 불가 |
+| 010 | Limited High: 더 낮은 명령값만 반영됨 |
+| 011 | Limited Low: 더 높은 명령값만 반영됨 |
 | 100~101 | Reserved |
 | 110 | Non-recoverable fault |
 | 111 | Not available (파라미터 미지원) |
@@ -252,9 +258,9 @@ PTO(power take-off) 관련 파라미터는 front/rear 대칭으로 정의된다.
 
 | 파라미터 | 타입 | SPN(front/rear) |
 |---|---|---|
-| PTO output shaft speed — A.20.1/A.20.2 | Measured | 1882 / 1883 |
-| PTO output shaft speed set point (현재 설정값 보고) — A.20.3/A.20.4 | Measured | 1884 / 1885 |
-| PTO output shaft speed set point — Command — A.20.5/A.20.6 | Command | 1886 / 1887 |
+| PTO output shaft speed(A.20.1/A.20.2) | Measured | 1882 / 1883 |
+| PTO output shaft speed set point (현재 설정값 보고)(A.20.3/A.20.4) | Measured | 1884 / 1885 |
+| PTO output shaft speed set point: Command(A.20.5/A.20.6) | Command | 1886 / 1887 |
 
 :::info 기존 트랙터의 PTO 속도 유효성
 체결 클러치 앞단에서 PTO 속도를 측정하는 기존 트랙터에서는 PTO가 체결(engaged)된 동안에만 속도가 유효하고, 해제 시에는 not available이 된다.
@@ -266,12 +272,12 @@ PTO(power take-off) 관련 파라미터는 front/rear 대칭으로 정의된다.
 
 | 파라미터 | 의미 | 타입 | SPN(front/rear) |
 |---|---|---|---|
-| PTO engagement — A.20.7/A.20.8 | PTO 체결/해제 상태 | Measured | 1888 / 2408 |
-| PTO mode — A.20.9/A.20.10 | 00=540 r/min 모드, 01=1 000 r/min 모드 | Measured | 1889 / 1890 |
-| PTO economy mode — A.20.11/A.20.12 | 이코노미 모드 체결 여부 | Measured | 1891 / 1892 |
-| PTO engagement — Command — A.20.13/A.20.14 | 체결/해제 명령 | Command | 1893 / 1894 |
-| PTO mode — Command — A.20.15/A.20.16 | 540/1 000 모드 선택 명령 | Command | 1895 / 1896 |
-| PTO economy mode — Command — A.20.17/A.20.18 | 이코노미 모드 체결/해제 명령 | Command | 1897 / 1898 |
+| PTO engagement(A.20.7/A.20.8) | PTO 체결/해제 상태 | Measured | 1888 / 2408 |
+| PTO mode(A.20.9/A.20.10) | 00=540 r/min 모드, 01=1 000 r/min 모드 | Measured | 1889 / 1890 |
+| PTO economy mode(A.20.11/A.20.12) | 이코노미 모드 체결 여부 | Measured | 1891 / 1892 |
+| PTO engagement: Command(A.20.13/A.20.14) | 체결/해제 명령 | Command | 1893 / 1894 |
+| PTO mode: Command(A.20.15/A.20.16) | 540/1 000 모드 선택 명령 | Command | 1895 / 1896 |
+| PTO economy mode: Command(A.20.17/A.20.18) | 이코노미 모드 체결/해제 명령 | Command | 1897 / 1898 |
 
 economy mode는 더 낮은 엔진 회전수에서 540 또는 1 000 r/min PTO 속도를 내는 모드다.
 
@@ -279,22 +285,22 @@ economy mode는 더 낮은 엔진 회전수에서 540 또는 1 000 r/min PTO 속
 
 트랙터 ECU가 작업기의 PTO 요청 처리 결과를 피드백하는 파라미터군이다. 히치와 같은 패턴이 반복된다.
 
-<strong>Request status</strong> (2비트, Measured) — 일시적(transient/one-shot) 요청에 대한 상태:
+<strong>Request status</strong> (2비트, Measured)는 일시적(transient/one-shot) 요청에 대한 상태다.
 
 | 파라미터 | SPN |
 |---|---|
-| Front PTO engagement request status — A.20.19 | 5152 |
-| Front PTO mode request status — A.20.20 | 5153 |
-| Front PTO economy mode request status — A.20.21 | 5154 |
-| Rear PTO engagement request status — A.20.23 | 5156 |
-| Rear PTO mode request status — A.20.24 | 5157 |
-| Rear PTO economy mode request status — A.20.25 | 5158 |
+| Front PTO engagement request status(A.20.19) | 5152 |
+| Front PTO mode request status(A.20.20) | 5153 |
+| Front PTO economy mode request status(A.20.21) | 5154 |
+| Rear PTO engagement request status(A.20.23) | 5156 |
+| Rear PTO mode request status(A.20.24) | 5157 |
+| Rear PTO economy mode request status(A.20.25) | 5158 |
 
 공통 코딩: 00 = 외부 요청 수락(운전자 개입 없음), 01 = Control override(운전자/트랙터 시스템 override로 최근 외부 요청 무시됨), 10 = Error, 11 = Not available.
 
-<strong>Shaft speed limit status</strong> (3비트, Measured) — 지속형 속도 명령에 대한 제한 상태. 코딩은 hitch position limit status(A.19.11)와 동일: Front — A.20.22 (SPN 5155), Rear — A.20.26 (SPN 5159).
+<strong>Shaft speed limit status</strong> (3비트, Measured): 지속형 속도 명령에 대한 제한 상태. 코딩은 hitch position limit status(A.19.11)와 같다. Front는 A.20.22 (SPN 5155), Rear는 A.20.26 (SPN 5159).
 
-<strong>Exit/reason code</strong> (6비트, Measured) — PTO가 원격 명령을 받지 못하는 이유. 코딩은 hitch exit/reason code와 거의 동일하되 010100이 "Invalid PTO gear"인 점만 다르다: Front — A.20.27 (SPN 5817), Rear — A.20.28 (SPN 5820).
+<strong>Exit/reason code</strong> (6비트, Measured): PTO가 원격 명령을 받지 못하는 이유. 코딩은 hitch exit/reason code와 거의 동일하되 010100이 "Invalid PTO gear"인 점만 다르다. Front는 A.20.27 (SPN 5817), Rear는 A.20.28 (SPN 5820).
 
 ### A.21 보조 밸브(auxiliary valve) 파라미터
 
@@ -311,19 +317,19 @@ Annex A는 밸브 0번에 대해 아래 파라미터 세트를 정의하고, 이
 
 | 파라미터 | 길이 | 분해능·범위 | 타입 | SPN(밸브 0) |
 |---|---|---|---|---|
-| Extend port measured flow — A.21.2 | 1 byte | 1 %/bit, −125 % 오프셋, −125~125 % | Measured | 1899 |
-| Retract port measured flow — A.21.3 | 1 byte | 동일 | Measured | 1900 |
-| Extend port estimated flow — A.21.4 | 1 byte | 동일 | Estimated | 1901 |
-| Retract port estimated flow — A.21.5 | 1 byte | 동일 | Estimated | 1902 |
-| Valve state — A.21.6 | 4 bits | 아래 코딩 | Measured | 1903 |
-| Extend port pressure — A.21.7 | 2 bytes | 5 kPa/bit, 0~321 275 kPa | Measured | 1904 |
-| Retract port pressure — A.21.8 | 2 bytes | 동일 | Measured | 1905 |
-| Return port pressure — A.21.9 | 1 byte | 16 kPa/bit, 0~4 000 kPa | Measured | 1906 |
-| Port flow — Command — A.21.10 | 1 byte | 0,4 %/bit, 0~100 % | Command | 1907 |
-| Valve state — Command — A.21.11 | 4 bits | 아래 코딩 | Command | 1908 |
-| Fail safe mode — Command — A.21.12 | 2 bits | 00=Block, 01=Float | Command | 1909 |
-| Fail safe mode — A.21.13 | 2 bits | 00=Block, 01=Float | Measured | 1910 |
-| Measured flow limit status — A.21.14 | 3 bits | limit status 공통 코딩 | Measured | — |
+| Extend port measured flow(A.21.2) | 1 byte | 1 %/bit, −125 % 오프셋, −125~125 % | Measured | 1899 |
+| Retract port measured flow(A.21.3) | 1 byte | 동일 | Measured | 1900 |
+| Extend port estimated flow(A.21.4) | 1 byte | 동일 | Estimated | 1901 |
+| Retract port estimated flow(A.21.5) | 1 byte | 동일 | Estimated | 1902 |
+| Valve state(A.21.6) | 4 bits | 아래 코딩 | Measured | 1903 |
+| Extend port pressure(A.21.7) | 2 bytes | 5 kPa/bit, 0~321 275 kPa | Measured | 1904 |
+| Retract port pressure(A.21.8) | 2 bytes | 동일 | Measured | 1905 |
+| Return port pressure(A.21.9) | 1 byte | 16 kPa/bit, 0~4 000 kPa | Measured | 1906 |
+| Port flow: Command(A.21.10) | 1 byte | 0,4 %/bit, 0~100 % | Command | 1907 |
+| Valve state: Command(A.21.11) | 4 bits | 아래 코딩 | Command | 1908 |
+| Fail safe mode: Command(A.21.12) | 2 bits | 00=Block, 01=Float | Command | 1909 |
+| Fail safe mode(A.21.13) | 2 bits | 00=Block, 01=Float | Measured | 1910 |
+| Measured flow limit status(A.21.14) | 3 bits | limit status 공통 코딩 | Measured | - |
 
 flow 값의 의미: 0 % = 흐름 없음, 100 % = 최대 흐름, −100 % = 이 포트를 통해 트랙터로 되돌아오는 최대 흐름. estimated flow는 밸브 명령 위치에서 추정한 값이므로 <strong>피드백 제어에 쓸 때 주의</strong>가 필요하다(실측 아님).
 
@@ -336,15 +342,15 @@ flow 값의 의미: 0 % = 흐름 없음, 100 % = 최대 흐름, −100 % = 이 �
 | 0010 | Retract | Retract |
 | 0011 | Floating | Float |
 | 0100~1101(cmd는 ~1110) | Reserved | Reserved |
-| 1110 | Error indication | — |
+| 1110 | Error indication | - |
 | 1111 | Not available | Don't care |
 
 상태 의미: Blocked = 밸브 닫힘, 유량 없음(압력은 걸려 있을 수 있음). Floating = 제어 유량 없이 밸브 포트가 탱크에 직결되어 액추에이터가 미는 대로 유체가 드나드는 상태. Extend = extend 포트에서 유량 제어, 유체는 retract 포트로 복귀. Retract = 그 반대. float가 켜지면 작업기가 구동하는 대로 트랙터와 유체가 오갈 수 있다.
 
 #### A.21.14~A.21.16 밸브 0 상태 보고 파라미터
 
-- Measured flow limit status — A.21.14 (SPN 5160), Estimated flow limit status — A.21.15 (SPN 5161): 지속형 flow 명령에 대한 제한 상태. 3비트, 코딩은 limit status 공통(000=Not limited ~ 111=N/A).
-- Exit/reason code — A.21.16 (SPN 5800): 6비트. 히치의 exit/reason code와 동일 체계이되 010101이 "Valve locked out"이다.
+- Measured flow limit status(A.21.14, SPN 5160), Estimated flow limit status(A.21.15, SPN 5161): 지속형 flow 명령에 대한 제한 상태. 3비트, 코딩은 limit status 공통(000=Not limited ~ 111=N/A).
+- Exit/reason code: A.21.16 (SPN 5800): 6비트. 히치의 exit/reason code와 동일 체계이되 010101이 "Valve locked out"이다.
 
 #### A.21.17~A.21.32 밸브 1~15
 
@@ -356,19 +362,19 @@ flow 값의 의미: 0 % = 흐름 없음, 100 % = 최대 흐름, −100 % = 이 �
 
 | 파라미터 | 길이 | 분해능·범위 | 타입 | SPN |
 |---|---|---|---|---|
-| Extend/Retract port measured flow — A.21.33/34 | 1 byte | 1 %/bit, −125 % 오프셋 | Measured | 2937/2938 |
-| Extend/Retract port estimated flow — A.21.35/36 | 1 byte | 동일 | Measured(추정값) | 2939/2940 |
-| Valve state — A.21.37 | 4 bits | 밸브 상태 공통 코딩 | Measured | 2932 |
-| Extend/Retract port pressure — A.21.38/39 | 2 bytes | 5 kPa/bit, 0~321 275 kPa | Measured | 2941/2942 |
-| Return port pressure — A.21.40 | 1 byte | 16 kPa/bit, 0~4 000 kPa | Measured | 2943 |
-| Port flow — Command — A.21.41 | 1 byte | 0,4 %/bit, 0~100 % | Command | 2944 |
-| Valve state — Command — A.21.42 | 4 bits | 공통 코딩 | Command | 2933 |
-| Fail safe mode — Command / Measured — A.21.43/44 | 2 bits | 00=Block, 01=Float | Command/Measured | 2935/2934 |
-| Load sense pressure — A.21.45 | 2 bytes | 5 kPa/bit | Measured | 4086 |
-| Pilot pressure — A.21.46 | 1 byte | 16 kPa/bit, 0~4 000 kPa | Measured | 4087 |
-| Valve assembly load sense pressure — A.21.47 | 2 bytes | 5 kPa/bit | Measured | 4088 |
-| Valve assembly supply pressure — A.21.48 | 2 bytes | 5 kPa/bit | Measured | 4089 |
-| Measured / Estimated limit status — A.21.49/50 | 3 bits | limit status 공통 코딩 | Measured | 5192/5193 |
+| Extend/Retract port measured flow(A.21.33/34) | 1 byte | 1 %/bit, −125 % 오프셋 | Measured | 2937/2938 |
+| Extend/Retract port estimated flow(A.21.35/36) | 1 byte | 동일 | Measured(추정값) | 2939/2940 |
+| Valve state(A.21.37) | 4 bits | 밸브 상태 공통 코딩 | Measured | 2932 |
+| Extend/Retract port pressure(A.21.38/39) | 2 bytes | 5 kPa/bit, 0~321 275 kPa | Measured | 2941/2942 |
+| Return port pressure(A.21.40) | 1 byte | 16 kPa/bit, 0~4 000 kPa | Measured | 2943 |
+| Port flow: Command(A.21.41) | 1 byte | 0,4 %/bit, 0~100 % | Command | 2944 |
+| Valve state: Command(A.21.42) | 4 bits | 공통 코딩 | Command | 2933 |
+| Fail safe mode: Command / Measured(A.21.43/44) | 2 bits | 00=Block, 01=Float | Command/Measured | 2935/2934 |
+| Load sense pressure(A.21.45) | 2 bytes | 5 kPa/bit | Measured | 4086 |
+| Pilot pressure(A.21.46) | 1 byte | 16 kPa/bit, 0~4 000 kPa | Measured | 4087 |
+| Valve assembly load sense pressure(A.21.47) | 2 bytes | 5 kPa/bit | Measured | 4088 |
+| Valve assembly supply pressure(A.21.48) | 2 bytes | 5 kPa/bit | Measured | 4089 |
+| Measured / Estimated limit status(A.21.49/50) | 3 bits | limit status 공통 코딩 | Measured | 5192/5193 |
 
 - load sense pressure는 해당 밸브의 work port A/B 중 현재 측정 압력의 최대값이다.
 - valve assembly load sense pressure는 2개 이상 밸브로 구성될 수 있는 밸브 어셈블리의 집합 load sense 압력 중 최대값이고, assembly supply pressure는 어셈블리로 들어오는 유압 공급 포트 압력이다.
@@ -429,8 +435,8 @@ alternate headlights는 low-beam만 있는 대체 위치 램프로, 로더나 �
 
 조명 관련 나머지 파라미터:
 
-- <strong>Lighting data message request — Command</strong> — A.22.63 (SPN 2393, 2 bits): 모든 조명 컨트롤러에 전체 조명 상태를 담은 lighting data 메시지 송신을 요청. 01 = data requested.
-- <strong>Background illumination level — Command</strong> — A.22.64 (SPN 1487, 1 byte, 0,4 %/bit, 0~100 %): 계기·조작부 백라이트 밝기 설정.
+- <strong>Lighting data message request(Command)</strong>, A.22.63 (SPN 2393, 2 bits): 모든 조명 컨트롤러에 전체 조명 상태를 담은 lighting data 메시지 송신을 요청. 01 = data requested.
+- <strong>Background illumination level(Command)</strong>, A.22.64 (SPN 1487, 1 byte, 0,4 %/bit, 0~100 %): 계기·조작부 백라이트 밝기 설정.
 
 ### A.23 언어·단위 파라미터 (language command)
 
@@ -438,23 +444,23 @@ alternate headlights는 low-beam만 있는 대체 위치 램프로, 로더나 �
 
 | 파라미터 | 길이 | 값 | SPN |
 |---|---|---|---|
-| Language code — A.23.1 | 2 bytes | ISO 639 2문자 코드(7-bit ISO Latin 1). 예: en, de, fr, nl | 2410 |
-| Decimal symbol — A.23.2 | 2 bits | 00=콤마, 01=포인트, 11=No action | 2411 |
-| Date format — A.23.3 | 1 byte | 0=ddmmyyyy, 1=ddyyyymm, 2=mmyyyydd, 3=mmddyyyy, 4=yyyymmdd, 5=yyyyddmm, 6~250=Reserved | 2412 |
-| Time format — A.23.4 | 2 bits | 00=24 h, 01=12 h(am/pm), 11=No action | 2413 |
+| Language code(A.23.1) | 2 bytes | ISO 639 2문자 코드(7-bit ISO Latin 1). 예: en, de, fr, nl | 2410 |
+| Decimal symbol(A.23.2) | 2 bits | 00=콤마, 01=포인트, 11=No action | 2411 |
+| Date format(A.23.3) | 1 byte | 0=ddmmyyyy, 1=ddyyyymm, 2=mmyyyydd, 3=mmddyyyy, 4=yyyymmdd, 5=yyyyddmm, 6~250=Reserved | 2412 |
+| Time format(A.23.4) | 2 bits | 00=24 h, 01=12 h(am/pm), 11=No action | 2413 |
 
 <strong>단위계 파라미터</strong> (A.23.5, 모두 2 bits, Command). 공통적으로 00=Metric, 01=Imperial, 11=No action이고, volume/mass만 Imperial(01)과 US(10)를 구분한다.
 
 | 단위 | 값 구성 | SPN |
 |---|---|---|
-| Distance units — A.23.5.2 | Metric(km, m) / Imperial·US(mile, ft) | 2414 |
-| Area units — A.23.5.3 | Metric(ha, m²) / Imperial·US(acre, ft²) | 2415 |
-| Volume units — A.23.5.4 | Metric(L) / Imperial(gallon) / US(gallon) | 2416 |
-| Mass units — A.23.5.5 | Metric(t, kg) / Imperial(long ton, lb) / US(short ton, lb) | 2417 |
-| Temperature units — A.23.5.6 | Metric(°C, K) / Imperial·US(°F) | 5194 |
-| Pressure units — A.23.5.7 | Metric(kPa, Pa) / Imperial·US(psi) | 5195 |
-| Force units — A.23.5.8 | Metric(N) / Imperial·US(lbf) | 5196 |
-| Units system — A.23.5.9 | 위에 명시되지 않은 그 외 단위의 표시 체계: Metric/Imperial/US | 5197 |
+| Distance units(A.23.5.2) | Metric(km, m) / Imperial·US(mile, ft) | 2414 |
+| Area units(A.23.5.3) | Metric(ha, m²) / Imperial·US(acre, ft²) | 2415 |
+| Volume units(A.23.5.4) | Metric(L) / Imperial(gallon) / US(gallon) | 2416 |
+| Mass units(A.23.5.5) | Metric(t, kg) / Imperial(long ton, lb) / US(short ton, lb) | 2417 |
+| Temperature units(A.23.5.6) | Metric(°C, K) / Imperial·US(°F) | 5194 |
+| Pressure units(A.23.5.7) | Metric(kPa, Pa) / Imperial·US(psi) | 5195 |
+| Force units(A.23.5.8) | Metric(N) / Imperial·US(lbf) | 5196 |
+| Units system(A.23.5.9) | 위에 명시되지 않은 그 외 단위의 표시 체계: Metric/Imperial/US | 5197 |
 
 ### A.23.6~A.23.7 Repetition rate
 
@@ -462,8 +468,8 @@ alternate headlights는 low-beam만 있는 대체 위치 램프로, 로더나 �
 
 | 파라미터 | 길이 | 분해능·범위 | 타입 | SPN |
 |---|---|---|---|---|
-| Repetition rate — Command — A.23.6 | 2 bytes | 1 ms/bit, 0~64 255 | Command | 2418 |
-| Repetition rate — A.23.7 | 2 bytes | 1 ms/bit, 0~64 255 | Measured | 5198 |
+| Repetition rate: Command(A.23.6) | 2 bytes | 1 ms/bit, 0~64 255 | Command | 2418 |
+| Repetition rate(A.23.7) | 2 bytes | 1 ms/bit, 0~64 255 | Measured | 5198 |
 
 command 값 0은 "기본 주기 사용", 65 535는 "변경 요청 없음"을 뜻한다.
 
@@ -471,8 +477,8 @@ command 값 0은 "기본 주기 사용", 65 535는 "변경 요청 없음"을 뜻
 
 | 파라미터 | 길이 | 내용 | 타입 | SPN |
 |---|---|---|---|---|
-| Number of members in working set — A.24.1 | 8 bits | working set의 멤버 수. 1~250 | — | 2409 |
-| NAME of working set member — A.24.2 | 8 bytes | ISO 11783-5 형식의 NAME. 0~2^64−1 | Measured | 2845 |
+| Number of members in working set(A.24.1) | 8 bits | working set의 멤버 수. 1~250 | - | 2409 |
+| NAME of working set member(A.24.2) | 8 bytes | ISO 11783-5 형식의 NAME. 0~2^64−1 | Measured | 2845 |
 
 - working set은 <strong>working set master의 NAME</strong>으로 식별되며, 이 NAME은 이 파라미터를 담은 메시지의 source address(SA)와 연결된다.
 - 한 멤버(특정 NAME으로 식별, CF가 아님)는 동시에 하나의 working set에만 속할 수 있다.
@@ -482,12 +488,12 @@ command 값 0은 "기본 주기 사용", 65 535는 "변경 요청 없음"을 뜻
 
 | 파라미터 | 길이 | 타입 | SPN |
 |---|---|---|---|
-| Implement operating state — Command — A.25.1 | 2 bits | Command | 5139 |
-| Implement Start/Stop operations — A.25.2 | 2 bits | Measured | 5203 |
-| Stop all implement operations — A.25.3 | 2 bits | Measured | 5140 |
-| Stop all implement operations transition number — A.25.4 | 1 byte | Measured | 7443 |
+| Implement operating state: Command(A.25.1) | 2 bits | Command | 5139 |
+| Implement Start/Stop operations(A.25.2) | 2 bits | Measured | 5203 |
+| Stop all implement operations(A.25.3) | 2 bits | Measured | 5140 |
+| Stop all implement operations transition number(A.25.4) | 1 byte | Measured | 7443 |
 
-- <strong>Implement operating state — Command</strong>: 연결된 작업기 시스템의 운용 상태를 설정한다. 00 = field working state, 01 = transport state, 10 = park state, 11 = take no action. (A.15~A.17의 measured 상태와 대응하는 command다.)
+- <strong>Implement operating state: Command</strong>: 연결된 작업기 시스템의 운용 상태를 설정한다. 00 = field working state, 01 = transport state, 10 = park state, 11 = take no action. (A.15~A.17의 measured 상태와 대응하는 command다.)
 - <strong>Implement Start/Stop operations</strong>: 작업기 동작을 시작/허용하는 스위치·운전자 입력의 상태. 작업기가 작업 위치에 놓였거나 운전자가 스위치를 ON에 둔 결과일 수 있다. "Master ON/OFF" 스위치라고도 부른다. 00 = stop/disable, 01 = start/enable.
 - <strong>Stop all implement operations</strong>: VT, auxiliary control input, TECU, task controller, sequence control master의 조작·메시지 명령으로 활성화된 <strong>모든 기능을 즉시 정지</strong>시키는 운전자 입력 상태. 00 = stop, 01 = permit all implements to operation ON.
 
@@ -503,7 +509,7 @@ command 값 0은 "기본 주기 사용", 65 535는 "변경 요청 없음"을 뜻
 
 연결된 작업기나 task controller가 견인 트랙터의 동작을 제어하고 시스템 전체 성능을 최적화하는 데 쓰는 파라미터군이다. <strong>트랙터는 각 제어 모드의 제약을 스스로 판단해 적절한 경우에만 명령을 승인(acknowledge)해야 한다.</strong>
 
-#### A.26.2 Tractor control mode commands (구판 방식 — deprecated)
+#### A.26.2 Tractor control mode commands (구판 방식, deprecated)
 
 :::warning 3판에서 deprecated
 A.26.2의 트랙터 제어 모드 명령은 3판(2015)부터 <strong>deprecated이며 신규 설계에 사용해서는 안 된다.</strong> 아래 내용은 기존 시스템 이해를 위한 것이다.
@@ -532,10 +538,10 @@ A.26.2의 트랙터 제어 모드 명령은 3판(2015)부터 <strong>deprecated�
 
 - <strong>Cruise control</strong>: 트랙터가 고정 대지 속도를 유지한다. 속도원(wheel/ground/navigation)은 현재 운용 조건에서 가장 정확한 측정을 트랙터가 스스로 선택한다(ISO 11783-9 참조).
 - <strong>Slip control</strong>: 트랙터-토양 접촉면 동력 손실을 줄이기 위해 구동륜 슬립을 제한하는 명령들. 전략별 장단점이 있다.
-  - Rear hitch slip control — 히치 장착 작업기의 작업 깊이를 조정해 견인력을 줄이고 하중을 트랙터 후방으로 이전한다. 2WD·MFWD에서는 후륜 하중 증가로 견인력이 개선되지만 4WD·트랙형에서는 효과가 거의 없다. 깊이 조정 때문에 작업 깊이가 일정하지 않게 된다.
-  - Front hitch slip control / Auxiliary valve slip control — 전방 장착/견인식 작업기의 깊이를 조정해 견인력을 줄이지만 유효한 하중 이전은 없다. 역시 깊이가 불규칙해진다.
-  - Front/rear PTO slip control — PTO 속도를 조정해 견인 저항을 줄인다(파워 해로처럼 PTO 속도에 따라 견인 저항이 줄어드는 작업기용). 일정한 작업 깊이와 총 출력(PTO+드로바) 극대화가 가능하지만, 엔진 속도와 독립적으로 PTO 속도를 조정할 수 있어야 한다.
-  - Reduce speed slip control — 차량의 대지 속도를 낮춰 견인 요구를 줄인다. 깊이는 일정하지만 최대 출력보다 낮게 운용된다.
+  - Rear hitch slip control: 히치 장착 작업기의 작업 깊이를 조정해 견인력을 줄이고 하중을 트랙터 후방으로 이전한다. 2WD·MFWD에서는 후륜 하중 증가로 견인력이 개선되지만 4WD·트랙형에서는 효과가 거의 없다. 깊이 조정 때문에 작업 깊이가 일정하지 않게 된다.
+  - Front hitch slip control / Auxiliary valve slip control: 전방 장착/견인식 작업기의 깊이를 조정해 견인력을 줄이지만 유효한 하중 이전은 없다. 역시 깊이가 불규칙해진다.
+  - Front/rear PTO slip control: PTO 속도를 조정해 견인 저항을 줄인다(파워 해로처럼 PTO 속도에 따라 견인 저항이 줄어드는 작업기용). 일정한 작업 깊이와 총 출력(PTO+드로바) 극대화가 가능하지만, 엔진 속도와 독립적으로 PTO 속도를 조정할 수 있어야 한다.
+  - Reduce speed slip control: 차량의 대지 속도를 낮춰 견인 요구를 줄인다. 깊이는 일정하지만 최대 출력보다 낮게 운용된다.
 - <strong>Maximum draft power mode</strong>: 변속비를 교대로 바꿔(엔진 rpm이 일정 수준 떨어지면 감속, 회복·초과하면 증속) 견인 동력을 최대화하는 파워트레인 전략.
 - <strong>Constant PTO speed mode</strong>: 일정 PTO 속도 제어. cruise control과의 조합 모드도 있다.
 - <strong>Minimum engine speed mode</strong>: 소음·연료 소비를 줄이도록 엔진 속도·스로틀·기어비를 조정.
@@ -549,12 +555,12 @@ A.26.2의 트랙터 제어 모드 명령은 3판(2015)부터 <strong>deprecated�
 
 | 파라미터 | 길이 | 분해능·범위 | 기본값 | SPN |
 |---|---|---|---|---|
-| Commanded vehicle speed — A.26.3.2 | 2 bytes | 0,001 m/s/bit, 0~64,255 m/s | 0 | 5205 |
-| Commanded PTO speed — A.26.3.3 | 2 bytes | 0,125 1/min/bit, 0~8 031,875 1/min | 850 | 5206 |
-| Commanded hitch position — A.26.3.4 | 1 byte | 0,4 %/bit, 0~100 % | 0 | 5207 |
-| Commanded PTO torque — A.26.3.5 | 1 byte | 0,4 %/bit, 0~100 % | 0 | 5208 |
-| Commanded auxiliary valve slip control — A.26.3.6 | 2 bytes | 아래 구조 | — | — |
-| Commanded draft force — A.26.3.7 | 1 byte | 1 000 N/bit, −100 000 N 오프셋, −100 000~150 000 N | 0 | 5212 |
+| Commanded vehicle speed(A.26.3.2) | 2 bytes | 0,001 m/s/bit, 0~64,255 m/s | 0 | 5205 |
+| Commanded PTO speed(A.26.3.3) | 2 bytes | 0,125 1/min/bit, 0~8 031,875 1/min | 850 | 5206 |
+| Commanded hitch position(A.26.3.4) | 1 byte | 0,4 %/bit, 0~100 % | 0 | 5207 |
+| Commanded PTO torque(A.26.3.5) | 1 byte | 0,4 %/bit, 0~100 % | 0 | 5208 |
+| Commanded auxiliary valve slip control(A.26.3.6) | 2 bytes | 아래 구조 | - | - |
+| Commanded draft force(A.26.3.7) | 1 byte | 1 000 N/bit, −100 000 N 오프셋, −100 000~150 000 N | 0 | 5212 |
 
 Commanded auxiliary valve slip control(2 bytes)의 구조:
 
@@ -594,12 +600,12 @@ A.26.4.2~A.26.4.10은 이 표의 부분집합을 모드 계열별(cruise, slip, 
 
 | 파라미터 | 길이 | 분해능·범위 | 타입 | SPN |
 |---|---|---|---|---|
-| Vehicle speed set point — A.26.5.2 | 2 bytes | 0,001 m/s/bit, 0~64,255 m/s | Measured | 5214 |
-| PTO speed set point — A.26.5.3 | 2 bytes | 0,125 1/min/bit, 0~8 031,875 1/min | Measured | 5215 |
-| Hitch position set point — A.26.5.4 | 1 byte | 0,4 %/bit, 0~100 % | Measured | 5216 |
-| PTO torque set point — A.26.5.5 | 1 byte | 0,4 %/bit, 0~100 % | Measured | 5217 |
-| Maximum slip set point — A.26.5.6 | 1 byte | 0,4 %/bit, 0~100 % | Measured/Estimated | 5218 |
-| Auxiliary valve slip control — A.26.5.7 | 2 bytes | 아래 구조 | Measured | — |
+| Vehicle speed set point(A.26.5.2) | 2 bytes | 0,001 m/s/bit, 0~64,255 m/s | Measured | 5214 |
+| PTO speed set point(A.26.5.3) | 2 bytes | 0,125 1/min/bit, 0~8 031,875 1/min | Measured | 5215 |
+| Hitch position set point(A.26.5.4) | 1 byte | 0,4 %/bit, 0~100 % | Measured | 5216 |
+| PTO torque set point(A.26.5.5) | 1 byte | 0,4 %/bit, 0~100 % | Measured | 5217 |
+| Maximum slip set point(A.26.5.6) | 1 byte | 0,4 %/bit, 0~100 % | Measured/Estimated | 5218 |
+| Auxiliary valve slip control(A.26.5.7) | 2 bytes | 아래 구조 | Measured | - |
 
 - Maximum slip set point는 slip control 기능 내에서 확정된(settled) 보조 밸브의 최대 flow를 보고한다. 대상 밸브는 valve number로, 포트 선택은 auxiliary valve slip control mode command 안에서 지정된다.
 - Auxiliary valve slip control(response)의 구조는 command(A.26.3.6)와 동일: Byte 1 = valve flow(SPN 5219, 0,4 %/bit, Measured/Estimated), Byte 2 bits 8~5 = valve state(SPN 5220), bits 4~1 = valve number(SPN 5221, 0~15).
@@ -773,9 +779,9 @@ ISOBUS 적합성 인증 메시지에 실리는 파라미터들이다. 3판(2015)
 | A.29.18 | Compliance certification reference number | 16 bits | 4330 | 인증 랩이 부여한 참조 번호. Lab ID·CF Manufacturer ID와 조합해 시험 파일을 고유 식별 |
 | A.29.19 | ISOBUS Compliance Certification message revision | 1 bit | 7446 | 0=2판 형식, 1=3판 이후 형식 |
 
-<strong>A.29.2 revision 해석</strong>: A.29.19가 "1"(3판 이후)이면 5 bits, 1/bit, 0~30의 숫자 revision suffix다. "0"(2판)이면 3 bits로 알파벳 suffix를 표현한다 — 000=First revision(무suffix), 001=Second(A), 010=Third(B), 011=Fourth(C), 100~110=Reserved, 111=Not available.
+<strong>A.29.2 revision 해석</strong>: A.29.19가 "1"(3판 이후)이면 5 bits, 1/bit, 0~30의 숫자 revision suffix다. "0"(2판)이면 3 bits로 알파벳 suffix를 표현한다. 000=First revision(무suffix), 001=Second(A), 010=Third(B), 011=Fourth(C), 100~110=Reserved, 111=Not available.
 
-<strong>A.29.3 laboratory type 해석</strong>: 3판 기준 2 bits — 00=Non-certified laboratory/self-certification, 01=AEF certified laboratory, 10=Reserved, 11=Not available. 3판 이전에는 3 bits로 000=self-test, 001=EU certified, 010=NA certified, 011~110=Reserved, 111=Not available이었다.
+<strong>A.29.3 laboratory type 해석</strong>: 3판 기준 2 bits. 00=Non-certified laboratory/self-certification, 01=AEF certified laboratory, 10=Reserved, 11=Not available. 3판 이전에는 3 bits로 000=self-test, 001=EU certified, 010=NA certified, 011~110=Reserved, 111=Not available이었다.
 
 ### Deprecated된 certification type 비트들 (A.29.5~A.29.17)
 
@@ -843,7 +849,7 @@ Machine selected speed 값을 적분한 실제 주행 거리. 4 bytes, 0,001 m/b
 | 절 | 파라미터 | 길이 | Resolution | Type | SPN | 설명 |
 |---|---|---|---|---|---|---|
 | A.30.5 | Machine selected speed set point command | 2 bytes | 0,001 m/s/bit | Command | 4310 | 선택 소스 기준 속도 명령 세트포인트 |
-| A.30.6 | Machine selected direction command | 2 bits | — | Command | 4312 | 00=Reverse, 01=Forward, 10=Error, 11=N/A. 섀시 기준 방향 |
+| A.30.6 | Machine selected direction command | 2 bits | - | Command | 4312 | 00=Reverse, 01=Forward, 10=Error, 11=N/A. 섀시 기준 방향 |
 | A.30.7 | Machine selected speed set point limit | 2 bytes | 0,001 m/s/bit | Command | 4311 | 머신이 트랙터에 알리는 자신의 최대 허용 속도 |
 
 ### A.30.8 Machine selected speed limit status
@@ -950,16 +956,16 @@ heartbeat 메시지의 시퀀스 번호다. heartbeat 메시지는 CF가 송신�
 
 시퀀스 번호 검증 방법과 송수신 CF의 필요 조치는 B.33 Heartbeat message에 규정된다. 이 SPN 진단에는 다음 FMI를 쓸 수 있다: FMI 10(Abnormal Rate of Change), 11(Root Cause not Known), 12(Bad Intelligent Device or Component), 19(Received Network Data in Error). 송신자·수신자 모두 이 FMI로 heartbeat 처리 오류로 인한 기능 저하나 오류 상태의 원인을 표시할 수 있다.
 
-## Annex B (normative) — Parameter groups
+## Annex B (normative): Parameter groups
 
 Annex B는 Part 7의 모든 메시지(PGN)를 정의한다. 각 메시지의 PGN, 송신 주기, 우선순위, 바이트 배치를 규정하고 필드 정의는 Annex A를 참조한다. 아래에 메시지별 핵심 정보를 정리한다.
 
-### B.1 Time/Date — PGN 65254 (0x00FEE6)
+### B.1 Time/Date: PGN 65254 (0x00FEE6)
 
 - 송신: On request, 8 bytes, priority 6, PF 254/PS 230
 - Bytes 1~3: Time (UTC, A.1) / Bytes 4~6: Date (A.2) / Byte 7: Local minute offset (A.3) / Byte 8: Local hour offset (A.4)
 
-### B.2 Ground-based speed and distance — PGN 65097 (0x00FE49)
+### B.2 Ground-based speed and distance: PGN 65097 (0x00FE49)
 
 Tractor ECU가 임플리먼트 버스에 보내는 대지 기준(ground-based) 속도·거리·주행 방향 메시지다.
 
@@ -970,7 +976,7 @@ Tractor ECU가 임플리먼트 버스에 보내는 대지 기준(ground-based) �
 wheel 기반·ground 기반 속도 모두 정확도가 속도 의존적이며 저속에서 저하된다. 저속에서는 wheel 기반 정보가 100 ms 주기로 갱신되지 않을 수 있다.
 :::
 
-### B.3 Wheel-based speed and distance — PGN 65096 (0x00FE48)
+### B.3 Wheel-based speed and distance: PGN 65096 (0x00FE48)
 
 Tractor ECU가 보내는 휠 기준 속도·거리 메시지로, start/stop 스위치 상태·key switch 상태·운전석 반전 여부까지 포함한다.
 
@@ -980,7 +986,7 @@ Tractor ECU가 보내는 휠 기준 속도·거리 메시지로, start/stop 스�
 
 이그니션 키를 끈 뒤에도 ECU_PWR·PWR을 유지해 이 메시지를 추가 2초간 송신해야 한다(엔진 크랭킹 중에는 불요). 이 2초가 아래 B.4 Maintain power 요청의 트리거 창이 된다.
 
-### B.4 Maintain power — PGN 65095 (0x00FE47)
+### B.4 Maintain power: PGN 65095 (0x00FE47)
 
 임플리먼트 버스의 임의 CF가 "이그니션 OFF를 알리는 wheel-based speed and distance 메시지를 받은 뒤에도 2초간 전원을 끄지 말라"고 Tractor ECU에 요청하는 메시지다. 연결된 임플리먼트의 운용 상태도 함께 실린다.
 
@@ -993,7 +999,7 @@ Tractor ECU가 보내는 휠 기준 속도·거리 메시지로, start/stop 스�
 
 ISO 11783 네트워크는 IEC 61162-3(NMEA 2000)의 항법 위치 메시지를 사용해야 한다. 권장(최소) 메시지는 "GNSS position data", "Position delta, high precision rapid update", "COG & SOG, Rapid Update", "GNSS pseudo-range noise statistics"다. 복수 데이터 프레임이 필요한 메시지는 ISO 11783-3의 transport protocol이 아니라 <strong>NMEA fast packet protocol</strong>을 써야 한다.
 
-### B.6 Secondary or front hitch status — PGN 65094 (0x00FE46)
+### B.6 Secondary or front hitch status: PGN 65094 (0x00FE46)
 
 전방 히치 파라미터 측정값 메시지. 100 ms, 8 bytes, priority 3.
 
@@ -1007,11 +1013,11 @@ ISO 11783 네트워크는 IEC 61162-3(NMEA 2000)의 항법 위치 메시지를 �
 | Byte 6 bits 6~1 | Front hitch exit/reason code (A.19.13) |
 | 나머지 | Reserved |
 
-### B.7 Primary or rear hitch status — PGN 65093 (0x00FE45)
+### B.7 Primary or rear hitch status: PGN 65093 (0x00FE45)
 
 후방 히치 파라미터 측정값 메시지. 100 ms, 8 bytes, priority 3. 구조는 B.6과 대칭이다: Byte 1 Rear hitch position (A.19.2), Byte 2 bits 8,7 Rear hitch in-work indication (A.19.6), bits 6~4 Rear hitch position limit status (A.19.12), Byte 3 Rear nominal lower link force (A.19.10), Bytes 4,5 Rear draft (A.19.8), Byte 6 bits 6~1 Rear hitch exit/reason code (A.19.14).
 
-### B.8 Secondary or front PTO output shaft — PGN 65092 (0x00FE44)
+### B.8 Secondary or front PTO output shaft: PGN 65092 (0x00FE44)
 
 전방 PTO 출력축 측정값 메시지. engaged 상태에서 100 ms, 그 외에는 on request. 8 bytes, priority 3.
 
@@ -1029,11 +1035,11 @@ ISO 11783 네트워크는 IEC 61162-3(NMEA 2000)의 항법 위치 메시지를 �
 | Byte 7 bits 6~1 | Front PTO exit/reason code (A.20.27) |
 | 나머지 | Reserved |
 
-### B.9 Primary or rear PTO output shaft — PGN 65091 (0x00FE43)
+### B.9 Primary or rear PTO output shaft: PGN 65091 (0x00FE43)
 
 후방 PTO 출력축 측정값 메시지. 구조·주기는 B.8과 대칭이다(engaged 시 100 ms). Bytes 1,2 Rear PTO output shaft speed (A.20.2), Bytes 3,4 set point (A.20.4), Byte 5: engagement (A.20.8)/mode (A.20.10)/economy mode (A.20.12)/engagement request status (A.20.23), Byte 6: mode request status (A.20.24)/economy mode request status (A.20.25)/shaft speed limit status (A.20.26), Byte 7 bits 6~1: Rear PTO exit/reason code (A.20.28).
 
-### B.10 Hitch and PTO commands — PGN 65090 (0x00FE42)
+### B.10 Hitch and PTO commands: PGN 65090 (0x00FE42)
 
 히치 위치, PTO 축 세트포인트 속도, PTO engagement를 제어하는 명령 메시지다. 활성 시 100 ms, 8 bytes, priority 3.
 
@@ -1047,7 +1053,7 @@ ISO 11783 네트워크는 IEC 61162-3(NMEA 2000)의 항법 위치 메시지를 �
 | Byte 8 bits 8,7 / 6,5 | Front / Rear PTO mode command (A.20.15 / A.20.16) |
 | Byte 8 bits 4,3 / 2,1 | Front / Rear PTO economy mode command (A.20.17 / A.20.18) |
 
-### B.11 Auxiliary valve 0 estimated flow — PGN 65040 (0x00FE10)
+### B.11 Auxiliary valve 0 estimated flow: PGN 65040 (0x00FE10)
 
 auxiliary valve 0번의 추정 유량 메시지. 이 밸브는 "power beyond" 제어에 쓰인다. 100 ms, 8 bytes, priority 3.
 
@@ -1061,7 +1067,7 @@ auxiliary valve 0번의 추정 유량 메시지. 이 밸브는 "power beyond" �
 | Byte 5 bits 6~1 | Exit/reason code (A.21.16) |
 | 나머지 | Reserved |
 
-### B.12 Auxiliary valve 0 measured flow — PGN 65056 (0x00FE20)
+### B.12 Auxiliary valve 0 measured flow: PGN 65056 (0x00FE20)
 
 auxiliary valve 0번의 측정값 메시지("power beyond" 제어용). 100 ms, 8 bytes, priority 3.
 
@@ -1074,7 +1080,7 @@ auxiliary valve 0번의 측정값 메시지("power beyond" 제어용). 100 ms, 8
 | Byte 7 | Return port pressure (A.21.9) |
 | Byte 8 bits 8~6 | Limit status (A.21.14) |
 
-### B.13 Auxiliary valve 0 command — PGN 65072 (0x00FE30)
+### B.13 Auxiliary valve 0 command: PGN 65072 (0x00FE30)
 
 auxiliary valve 0번 유량 제어 명령. 활성 시 100 ms, 8 bytes, priority 3.
 
@@ -1100,19 +1106,19 @@ auxiliary valve 0번 유량 제어 명령. 활성 시 100 ms, 8 bytes, priority 
 
 즉 estimated flow는 0xFE10+n, measured flow는 0xFE20+n, command는 0xFE30+n이다 (n=0~15, 단 valve 15 command는 0xFE3F).
 
-### B.15 Auxiliary valve 15 estimated flow — PGN 65055 (0x00FE1F)
+### B.15 Auxiliary valve 15 estimated flow: PGN 65055 (0x00FE1F)
 
-100 ms, 8 bytes, priority 3. Byte 1: extend port estimated flow (A.21.20), Byte 2: retract port estimated flow (A.21.21), Byte 3: fail safe mode (A.21.29)/valve state (A.21.22), Byte 4 bits 8~6: estimated limit status (A.21.31 — 원문은 범용 밸브 파라미터인 A.21.49로 잘못 표기), Byte 5 bits 6~1: exit/reason code (A.21.32).
+100 ms, 8 bytes, priority 3. Byte 1: extend port estimated flow (A.21.20), Byte 2: retract port estimated flow (A.21.21), Byte 3: fail safe mode (A.21.29)/valve state (A.21.22), Byte 4 bits 8~6: estimated limit status (A.21.31, 원문은 범용 밸브 파라미터인 A.21.49로 잘못 표기), Byte 5 bits 6~1: exit/reason code (A.21.32).
 
-### B.16 Auxiliary valve 15 measured flow — PGN 65071 (0x00FE2F)
+### B.16 Auxiliary valve 15 measured flow: PGN 65071 (0x00FE2F)
 
 100 ms, 8 bytes, priority 3. Byte 1: extend port measured flow (A.21.18), Byte 2: retract port measured flow (A.21.19), Bytes 3,4: extend port pressure (A.21.23), Bytes 5,6: retract port pressure (A.21.24), Byte 7: return port pressure (A.21.25), Byte 8 bits 8~6: limit status (A.21.30).
 
-### B.17 Auxiliary valve 15 command — PGN 65087 (0x00FE3F)
+### B.17 Auxiliary valve 15 command: PGN 65087 (0x00FE3F)
 
 활성 시 100 ms, 8 bytes, priority 3. Byte 1: port flow command (A.21.26), Byte 3: fail safe mode command (A.21.28)/state command (A.21.27).
 
-### B.18 Lighting command — PGN 65089 (0x00FE41)
+### B.18 Lighting command: PGN 65089 (0x00FE41)
 
 트랙터가 트랙터·부착 임플리먼트의 모든 조명 컨트롤러에 보내는 전역(global) 메시지다. 트랙터/임플리먼트의 작업등·주행등 파라미터가 분리되어 있고, 특수 장비를 위한 임플리먼트 OEM 옵션 조명 명령과 공통 marking/signalling 파라미터가 제공된다.
 
@@ -1138,21 +1144,21 @@ auxiliary valve 0번 유량 제어 명령. 활성 시 100 ms, 8 bytes, priority 
 
 (모든 항목은 command 파라미터다.)
 
-### B.19 Lighting data — PGN 65088 (0x00FE40)
+### B.19 Lighting data: PGN 65088 (0x00FE40)
 
-lighting command 메시지 안의 lighting data 요청에 대한 응답이다. 요청을 받으면 트랙터·임플리먼트의 <strong>각 조명 컨트롤러</strong>가 Tractor ECU로 이 메시지를 송신해야 하고, 트랙터는 이를 통해 어느 조명 계통이 동작 중인지 판단한다. 램프 감지(lamp-sensing) 능력이 있는 컨트롤러는 전구 고장도 보고해야 한다 — 많은 지역에서 법적 요구사항이다.
+lighting command 메시지 안의 lighting data 요청에 대한 응답이다. 요청을 받으면 트랙터·임플리먼트의 <strong>각 조명 컨트롤러</strong>가 Tractor ECU로 이 메시지를 송신해야 하고, 트랙터는 이를 통해 어느 조명 계통이 동작 중인지 판단한다. 램프 감지(lamp-sensing) 능력이 있는 컨트롤러는 전구 고장도 보고해야 한다. 많은 지역에서 법적 요구사항이다.
 
 - 송신: As requested, 8 bytes, priority 6, PF 254/PS 64
 - 바이트 배치는 B.18과 동일한 구조로, 각 위치에 command가 아닌 <strong>상태 파라미터</strong>(A.22.2, A.22.4, ... 짝수 절)가 실린다. Byte 8 bits 2,1은 Reserved다.
 
-### B.20 Background lighting level command — PGN 53248 (0x00D000)
+### B.20 Background lighting level command: PGN 53248 (0x00D000)
 
 계기·스위치 등 배경 조명(background lighting) 상태를 제어하는 메시지다. 배경 조명 레벨이 바뀔 때마다 송신하며, 메시지 간 최대 5초 간격을 지킨다.
 
 - 8 bytes, priority 3, PDU format 208(destination-specific, PS=DA)
 - Byte 1: Background illumination level (A.22.64), Bytes 2~8: Reserved
 
-### B.21 Language command — PGN 65039 (0x00FE0F)
+### B.21 Language command: PGN 65039 (0x00FE0F)
 
 연결된 시스템이 사용할 언어·날짜/시간 형식·측정 단위를 ISO 11783 버스의 모든 CF에 알리는 전역 메시지다.
 
@@ -1174,7 +1180,7 @@ lighting command 메시지 안의 lighting data 요청에 대한 응답이다. �
 
 ### B.22 Flexible repetition rates
 
-#### B.22.1 Request for repetition rate — PGN 52224 (0x00CC00)
+#### B.22.1 Request for repetition rate: PGN 52224 (0x00CC00)
 
 메시지 사용자 필요에 맞게 버스 대역폭을 조정할 수 있게 하는 메커니즘이다. 특정 PGN의 사용자는 원하는 송신 주기를 요청할 수 있고, 0x0000을 보내면 기본 주기를 요청하는 것이다. 요청된 PGN의 소스는 가능하다면 요청을 존중한다.
 
@@ -1188,13 +1194,13 @@ lighting command 메시지 안의 lighting data 요청에 대한 응답이다. �
 - On request, 8 bytes, priority 6, PDU format 204(destination-specific)
 - Bytes 1~3: 주기를 요청할 대상 PGN (ISO 11783-3 형식) / Bytes 4,5: Repetition rate command (A.23.6) / Bytes 6~8: Reserved
 
-#### B.22.2 Response for repetition rate — PGN 65038 (0x00FE0E)
+#### B.22.2 Response for repetition rate: PGN 65038 (0x00FE0E)
 
 주기 변경 요청에 대한 전역 응답 메시지다. 데이터 필드는 요청과 같은 구조이며, repetition rate 값에는 송신자의 <strong>실제 값</strong>이 실린다. On request, 8 bytes, priority 6, PF 254/PS 14. Bytes 1~3: 요청의 PGN, Bytes 4,5: Repetition rate (A.23.7), Bytes 6~8: 요청과 동일.
 
 ### B.23 Working set messages
 
-#### B.23.1 General — working set 개념
+#### B.23.1 General: working set 개념
 
 working set은 여러 control function(CF)이 분산 프로세스로서 <strong>하나의 애플리케이션을 이루는</strong> 경우의 통신을 지원한다. 각 CF는 고유 NAME을 가지며, 하나의 ECU 안에 있을 수도, 네트워크에 연결된 서로 다른 ECU에 있을 수도 있다. 서로 다른 NAME들이 하나의 임플리먼트로 기능해야 할 때 working set을 쓴다.
 
@@ -1205,16 +1211,16 @@ working set은 여러 control function(CF)이 분산 프로세스로서 <strong>
 
 예: 파종기(planter)가 row마다 하나씩 Working Set Member를 두고 master가 총괄한다. 연결된 VT는 master와 각 멤버의 명령을 받고, 각 멤버는 자기 row의 표시를 갱신한다.
 
-working set 정의에는 두 메시지가 필요하다 — 크기를 정의하는 master 메시지와 멤버를 식별하는 member 메시지. 둘 다 master가 송신한다. 실제 활용 방식은 각 응용 계층 문서(ISO 11783-6, -10 등)에서 제한·변형될 수 있다.
+working set 정의에는 두 메시지가 필요하다. 크기를 정의하는 master 메시지와 멤버를 식별하는 member 메시지. 둘 다 master가 송신한다. 실제 활용 방식은 각 응용 계층 문서(ISO 11783-6, -10 등)에서 제한·변형될 수 있다.
 
-#### B.23.2 Working Set Master message — PGN 65037 (0x00FE0D)
+#### B.23.2 Working Set Master message: PGN 65037 (0x00FE0D)
 
 working set에 몇 명의 멤버가 있는지 알리는 메시지다. master 자신도 멤버 수에 포함된다. 이 메시지의 source address가 master의 NAME과 연결되며, working set은 master의 NAME으로 식별할 수 있다.
 
 - As required, 8 bytes, priority 7, PF 254/PS 13
 - Byte 1: Number of members in working set (A.24.1), Bytes 2~8: Reserved
 
-#### B.23.3 Working Set Member message — PGN 65036 (0x00FE0C)
+#### B.23.3 Working Set Member message: PGN 65036 (0x00FE0C)
 
 특정 working set의 개별 멤버를 식별하는 메시지다(master의 SA가 어느 working set인지 식별). master가 보내는 이 메시지의 개수는 <strong>멤버 수 − 1</strong>이다. master의 NAME은 별도 메시지 없이 master의 address claim에서 얻는다. working set과 통신하는 CF는 member 메시지를 정확한 개수만큼 받았는지 검증해 전체 멤버를 식별해야 한다.
 
@@ -1227,29 +1233,29 @@ working set에 몇 명의 멤버가 있는지 알리는 메시지다. master 자
 
 적용 규칙:
 
-- <strong>a) 메시지 순서와 재시도</strong> — working-set-master 메시지 뒤에는 반드시 적정 개수(크기 − 1)의 working-set-member 메시지가 따라와야 한다. 멤버 정의를 정확한 개수만큼 받지 못한 service provider는 master에게 working-set-master PGN을 요청하고, master는 요청을 받으면 master 메시지 + 멤버 메시지 전체를 다시 보내 set을 완전하게 정의해야 한다. working set을 쓰지 않는 애플리케이션은 working set 메시지를 무시하고 다른 CF들과 직접 통신하면 된다. 응용 계층 문서에 다른 규정이 없는 한, service provider는 <strong>최소 3회</strong> 완전한 멤버 목록 획득에 실패하면 그 working set을 무시할 수 있다.
-- <strong>b) 타이밍</strong> — working set은 멤버들의 NAME으로 정의된다. working-set-member 메시지는 100 ms 간격으로 송신된다. 마지막 member 메시지 후 <strong>350 ms</strong>가 지나면 수신자는 master가 모든 멤버 NAME 송신을 마쳤다고 간주해야 한다.
-- <strong>c) 멤버의 개별성</strong> — 멤버도 네트워크의 개별 CF이므로 개별 CF로서 통신한다. fault 메시지는 각 CF의 SA에서 송신되고, fault table 클리어·프로그램 파라미터 등의 명령은 대상 CF의 개별 SA로 보내야 한다. 멤버는 자신에게 오지 않은 프로그래밍을 전체 멤버가 수락하는 일 없이, master로의 개별 통신을 허용하도록 프로그래밍되어야 한다.
-- <strong>d) 유일 소속과 재정의</strong> — 각 CF는 <strong>둘 이상의 working set 멤버가 될 수 없다</strong>. 기존 master가 새 working-set-master 메시지를 내면 service provider는 이전 정의를 새 정의로 교체해야 한다. 변경이 필요하면 master가 재정의 책임을 지며, working set이 더 이상 필요 없으면 멤버 수 0인 master 메시지를 보내야 한다.
-- <strong>e) NAME 변경</strong> — master가 NAME을 바꾸면 새 working set을 만들어야 한다. 이전 working set은 더 이상 존재하지 않지만 d)의 클린업(멤버 수 0 송신) 전까지 service provider 메모리에 정의가 남을 수 있다. 멤버 중복의 감지·정정 책임은 그 working set의 service provider에 있다. service provider는 주기적으로 중복·미사용 working set을 점검해 메모리를 회수하는 식으로 자원을 관리해야 한다.
-- <strong>f) master SA 변경</strong> — master의 SA 변경은 set 정의를 바꾸지 않는다. service provider는 새 address claim 수신 시 SA-NAME 연계를 갱신하고, 멤버들은 working set 통신 수신에 쓰는 주소를 바꿔야 한다.
-- <strong>g) 멤버 SA 변경</strong> — 멤버가 SA를 바꾸면 service provider는 새 SA를 해당 working set과 다시 연계해야 한다. working set은 NAME으로 정의되므로, NAME이 그대로라면 SA 변경은 새 address claim 수신 처리만으로 대응할 수 있다.
-- <strong>h) 멤버 NAME 관리 책임</strong> — working set 멤버 전원의 NAME을 파악하는 책임은 master에 있다. 멤버가 네트워크에 들어오거나 나가면 master가 working set 정의를 갱신해야 한다. service provider는 member 메시지에 명시된 총원 그대로 working set을 만들고, 멤버들이 주소를 claim할 때 SA를 붙여 나간다.
+- <strong>a) 메시지 순서와 재시도</strong>: working-set-master 메시지 뒤에는 반드시 적정 개수(크기 − 1)의 working-set-member 메시지가 따라와야 한다. 멤버 정의를 정확한 개수만큼 받지 못한 service provider는 master에게 working-set-master PGN을 요청하고, master는 요청을 받으면 master 메시지 + 멤버 메시지 전체를 다시 보내 set을 완전하게 정의해야 한다. working set을 쓰지 않는 애플리케이션은 working set 메시지를 무시하고 다른 CF들과 직접 통신하면 된다. 응용 계층 문서에 다른 규정이 없는 한, service provider는 <strong>최소 3회</strong> 완전한 멤버 목록 획득에 실패하면 그 working set을 무시할 수 있다.
+- <strong>b) 타이밍</strong>: working set은 멤버들의 NAME으로 정의된다. working-set-member 메시지는 100 ms 간격으로 송신된다. 마지막 member 메시지 후 <strong>350 ms</strong>가 지나면 수신자는 master가 모든 멤버 NAME 송신을 마쳤다고 간주해야 한다.
+- <strong>c) 멤버의 개별성</strong>: 멤버도 네트워크의 개별 CF이므로 개별 CF로서 통신한다. fault 메시지는 각 CF의 SA에서 송신되고, fault table 클리어·프로그램 파라미터 등의 명령은 대상 CF의 개별 SA로 보내야 한다. 멤버는 자신에게 오지 않은 프로그래밍을 전체 멤버가 수락하는 일 없이, master로의 개별 통신을 허용하도록 프로그래밍되어야 한다.
+- <strong>d) 유일 소속과 재정의</strong>: 각 CF는 <strong>둘 이상의 working set 멤버가 될 수 없다</strong>. 기존 master가 새 working-set-master 메시지를 내면 service provider는 이전 정의를 새 정의로 교체해야 한다. 변경이 필요하면 master가 재정의 책임을 지며, working set이 더 이상 필요 없으면 멤버 수 0인 master 메시지를 보내야 한다.
+- <strong>e) NAME 변경</strong>: master가 NAME을 바꾸면 새 working set을 만들어야 한다. 이전 working set은 더 이상 존재하지 않지만 d)의 클린업(멤버 수 0 송신) 전까지 service provider 메모리에 정의가 남을 수 있다. 멤버 중복의 감지·정정 책임은 그 working set의 service provider에 있다. service provider는 주기적으로 중복·미사용 working set을 점검해 메모리를 회수하는 식으로 자원을 관리해야 한다.
+- <strong>f) master SA 변경</strong>: master의 SA 변경은 set 정의를 바꾸지 않는다. service provider는 새 address claim 수신 시 SA-NAME 연계를 갱신하고, 멤버들은 working set 통신 수신에 쓰는 주소를 바꿔야 한다.
+- <strong>g) 멤버 SA 변경</strong>: 멤버가 SA를 바꾸면 service provider는 새 SA를 해당 working set과 다시 연계해야 한다. working set은 NAME으로 정의되므로, NAME이 그대로라면 SA 변경은 새 address claim 수신 처리만으로 대응할 수 있다.
+- <strong>h) 멤버 NAME 관리 책임</strong>: working set 멤버 전원의 NAME을 파악하는 책임은 master에 있다. 멤버가 네트워크에 들어오거나 나가면 master가 working set 정의를 갱신해야 한다. service provider는 member 메시지에 명시된 총원 그대로 working set을 만들고, 멤버들이 주소를 claim할 때 SA를 붙여 나간다.
 
 ### B.24 Tractor control messages
 
-#### B.24.1 Tractor control mode command — PGN 65035 (0x00FE0B) [deprecated]
+#### B.24.1 Tractor control mode command: PGN 65035 (0x00FE0B) [deprecated]
 
 3판부터 <strong>deprecated이며 신규 설계에 쓰면 안 된다</strong>. task controller 또는 임플리먼트가 Tractor ECU로 보내는 메시지로, 하나의 메시지에 두 개의 명령이 실린다. 다수의 명령 모드가 상호 배타적이라 이렇게 묶었다.
 
 - 송신 주기: 기본 100 ms, closed-loop cruise control은 최대 10 ms. slip control 기능 설정은 10초에 1회 + 상태 변화 시. <strong>15초 동안 갱신이 없으면 Tractor ECU는 no-slip control로 복귀한다.</strong>
 - 8 bytes, priority 3. Byte 1/2 bits 8~4: mode command number 1/2 (A.26.2.1), Bytes 3,4 / 6,7: command value number 1/2 (A.26.3), Byte 5/8: limit command number 1/2 (A.26.8)
 
-#### B.24.2 Tractor control command tractor response — PGN 65034 (0x00FE0A) [deprecated]
+#### B.24.2 Tractor control command tractor response: PGN 65034 (0x00FE0A) [deprecated]
 
 역시 3판부터 deprecated. 명령마다(on every command) 응답으로 송신한다. Byte 1/2: mode response number 1/2 (A.26.4) + limit status number 1/2 (A.26.7), Bytes 3,4 / 6,7: value response number 1/2 (A.26.5), Byte 5/8: control limit number 1/2 (A.26.6).
 
-#### B.24.3 Tractor facility response message — PGN 65033 (0x00FE09)
+#### B.24.3 Tractor facility response message: PGN 65033 (0x00FE09)
 
 임플리먼트 CF나 task controller의 트랙터 클래스·기능 요청에 대한 트랙터의 응답이다. power-up 시 1회, 이후 on request로 송신한다. 8 bytes, priority 3.
 
@@ -1261,16 +1267,16 @@ working set에 몇 명의 멤버가 있는지 알리는 메시지다. master 자
 | Byte 1 bits 6~1 | <strong>Class 1 facilities</strong>: key switch, maximum time tractor power, maintain power, wheel-based speed, ground-based speed, engine speed |
 | Byte 2 bits 8~4 | Class 1 계속: rear hitch position, rear in work, rear PTO shaft speed, rear PTO shaft engagement, 최소 조명 세트(기존 트레일러 커넥터 수준) |
 | Byte 2 bit 3 | Language command storage in Tractor ECU |
-| Byte 2 bits 2,1 | Reserved — 0으로 설정 |
+| Byte 2 bits 2,1 | Reserved(0으로 설정) |
 | Byte 3 bits 8~1 | <strong>Class 2 facilities</strong>: time date, ground-based distance, ground-based direction, wheel-based distance, wheel-based direction, rear draft, full implement lighting message set, estimated/measured auxiliary valve status |
 | Byte 4 bits 8~3 | <strong>Class 3 facilities</strong>: rear hitch position command, rear PTO speed command, rear PTO engagement command, auxiliary valve commands, Limit/request status reporting (A.27.8), rear PTO mode/gear command |
-| Byte 4 bits 2,1 | Reserved — 0 |
+| Byte 4 bits 2,1 | Reserved(0) |
 | Byte 5 bits 8~1 | <strong>Addendum N</strong>: navigational system high-output position, navigational system position data, navigational pseudo-range noise statistics, (reserved), operator external light controls, machine selected speed, machine selected speed control, direction control |
 | Byte 6 bits 8~1 | <strong>Addendum F</strong>(front 계열): front hitch position, front in work, front PTO shaft speed, front PTO shaft engagement, front draft, front hitch position command, front PTO speed command, front PTO engagement command |
 | Byte 7 bit 8 | front PTO mode/gear command |
 | Byte 7 bit 2 / bit 1 | External Guidance Status and Commands / Drive Strategy Status and Commands |
-| Byte 8 bit 1 | Reserved bit indicator (A.27.6) — reserved bit가 0임을 나타내려면 0으로 설정 |
-| 그 외 | Reserved — 0 |
+| Byte 8 bit 1 | Reserved bit indicator (A.27.6). reserved bit가 0임을 나타내려면 0으로 설정 |
+| 그 외 | Reserved(0) |
 
 :::warning 하위 호환 처리 (Byte 8/Bit 1)
 Byte 8/Bit 1이 "1"이면 다음 비트들은 "Reserved"로 간주해야 한다: Byte 2 bits 1,2 · Byte 4 bits 1~4 · Byte 5 bits 1~5 · Byte 7 bits 1~8 · Byte 8 bits 2~8. 신규 facility 지원을 "1"로 표시할 수 있으려면 reserved bit는 "0"이어야 하는데, 이전 판에서는 이를 명시하지 않아 관례대로 "1"로 채워졌기 때문에 이 판별 비트가 필요하다.
@@ -1278,7 +1284,7 @@ Byte 8/Bit 1이 "1"이면 다음 비트들은 "Reserved"로 간주해야 한다:
 
 주의: 3판부터 최소 조명 세트(Byte 2 bit 4)는 Classification 1 요구사항이 아니라 <strong>Classification 2</strong> 요구사항이다.
 
-#### B.24.4 Required tractor facilities message — PGN 65032 (0x00FE08)
+#### B.24.4 Required tractor facilities message: PGN 65032 (0x00FE08)
 
 임플리먼트 CF/task controller가 Tractor ECU에 원하는 트랙터 클래스·기능을 <strong>요청</strong>하는 메시지다. On request, 8 bytes, priority 3. 바이트·비트 배치는 B.24.3과 완전히 동일하되, 각 비트가 A.27.3(request: 0=불요, 1=요구), Byte 1 bits 8,7이 A.27.2(class request), Byte 4 bit 4가 A.27.7(Limit/request status reporting 요구)로 해석된다. Byte 8/Bit 1의 reserved bit indicator 규칙(NOTE 1·2)도 동일하다.
 
@@ -1288,32 +1294,32 @@ Byte 8/Bit 1이 "1"이면 다음 비트들은 "Reserved"로 간주해야 한다:
 
 general-purpose valve 메시지는 ISO 11783 네트워크에 연결된 <strong>컨트롤러 내장형 유압 밸브</strong>용이다. TECU를 통하거나, TECU를 master로 하는 Working Set을 통하거나, 임플리먼트 버스에서 통신하는 closed system을 통해 임플리먼트 버스의 컨트롤러와 인터페이스하는 폐쇄 시스템에서 사용한다. auxiliary valve 메시지(B.11~B.17)와 달리 <strong>destination-specific</strong>(PDU1 형식)이다.
 
-#### B.25.2 General-purpose valve estimated flow — PGN 50688 (0x00C600)
+#### B.25.2 General-purpose valve estimated flow: PGN 50688 (0x00C600)
 
 100 ms, 8 bytes, priority 3, PF 198(DA). Byte 1: extend port estimated flow (A.21.35), Byte 2: retract port estimated flow (A.21.36), Byte 3: fail safe mode (A.21.44)/valve state (A.21.37), Byte 4 bits 8~6: limit status (A.21.50).
 
-#### B.25.3 General-purpose valve measured flow — PGN 50432 (0x00C500)
+#### B.25.3 General-purpose valve measured flow: PGN 50432 (0x00C500)
 
-100 ms, 8 bytes, priority 3, PF 197(DA). Byte 1: extend port measured flow (A.21.33 — 원문은 밸브 15번 파라미터인 A.21.18로 잘못 표기), Byte 2: retract port measured flow (A.21.34), Bytes 3,4: extend port pressure (A.21.38), Bytes 5,6: retract port pressure (A.21.39), Byte 7: return port pressure (A.21.40), Byte 8 bits 8~6: limit status (A.21.49).
+100 ms, 8 bytes, priority 3, PF 197(DA). Byte 1: extend port measured flow (A.21.33, 원문은 밸브 15번 파라미터인 A.21.18로 잘못 표기), Byte 2: retract port measured flow (A.21.34), Bytes 3,4: extend port pressure (A.21.38), Bytes 5,6: retract port pressure (A.21.39), Byte 7: return port pressure (A.21.40), Byte 8 bits 8~6: limit status (A.21.49).
 
-#### B.25.4 General-purpose valve command — PGN 50176 (0x00C400)
+#### B.25.4 General-purpose valve command: PGN 50176 (0x00C400)
 
 활성 시 100 ms, 8 bytes, priority 3, PF 196(DA). Byte 1: port flow command (A.21.41), Byte 3: fail safe mode command (A.21.43)/valve state command (A.21.42). 원문은 측정 파라미터인 A.21.44/A.21.37을 가리킨다.
 
-#### B.25.5 General-purpose valve load sense pressure — PGN 1792 (0x000700)
+#### B.25.5 General-purpose valve load sense pressure: PGN 1792 (0x000700)
 
 밸브의 load sense 압력·pilot 압력 측정값 메시지다. 밸브 어셈블리가 지원하면 어셈블리의 load sense·supply 압력도 함께 제공한다. 활성 시 100 ms, 8 bytes, priority 6, PF 07(DA). Bytes 1,2: valve load sense pressure (A.21.45), Byte 3: pilot pressure (A.21.46), Bytes 4,5: assembly load sense pressure (A.21.47), Bytes 6,7: assembly supply pressure (A.21.48).
 
 ### B.26 Guidance system messages
 
-#### B.26.1 Guidance system command — PGN 44288 (0x00AD00)
+#### B.26.1 Guidance system command: PGN 44288 (0x00AD00)
 
 자동 guidance 제어 시스템이 machine steering system(TECU가 대표)에 보내는 메시지다. 조향 명령을 전달하는 동시에 guidance 시스템과 조향 제어 시스템 사이의 <strong>heartbeat</strong> 역할을 한다.
 
 - 100 ms, 8 bytes, priority 3, PF 173(destination-specific)
 - Bytes 1,2: Curvature command (A.28.1) / Byte 3 bits 2,1: Curvature command status (A.28.3) / 나머지: Reserved
 
-#### B.26.2 Guidance machine status — PGN 44032 (0x00AC00)
+#### B.26.2 Guidance machine status: PGN 44032 (0x00AC00)
 
 machine steering system이 guidance 제어 시스템에 주는 피드백 메시지다. 조향 제어 시스템의 정보·상태를 guidance 시스템에 제공한다.
 
@@ -1324,13 +1330,13 @@ machine steering system이 guidance 제어 시스템에 주는 피드백 메시�
 | Bytes 1,2 | Estimated curvature (A.28.2) |
 | Byte 3 bits 8,7 | Request reset command status (A.28.4) |
 | Byte 3 bits 6,5 | Steering input position status (A.28.5) |
-| Byte 3 bits 4,3 | Steering system readiness (A.28.6) — 원문 B.26.2 표에는 이 행이 없다. Byte 3에 남은 자리로 본 추정이다(확인 필요) |
+| Byte 3 bits 4,3 | Steering system readiness (A.28.6). 원문 B.26.2 표에는 이 행이 없다. Byte 3에 남은 자리로 본 추정이다(확인 필요) |
 | Byte 3 bits 2,1 | Mechanical system lockout (A.28.7) |
 | Byte 4 bits 8~6 | Guidance limit status (A.28.8) |
 | Byte 5 bits 6~1 | Guidance system command exit/reason code (A.28.9) |
 | 나머지 | Reserved |
 
-### B.27 ISOBUS compliance certification message — PGN 64834 (0x00FD42)
+### B.27 ISOBUS compliance certification message: PGN 64834 (0x00FD42)
 
 특정 ECU의 적합성 인증 상태를 보고한다. On request, 8 bytes, priority 6, PF 253/PS 66.
 
@@ -1345,16 +1351,16 @@ machine steering system이 guidance 제어 시스템에 주는 피드백 메시�
 | Byte 2 bits 3,2 | certification laboratory type (A.29.3) |
 | Byte 2 bit 1 | protocol revision의 bit 3 (A.29.2) |
 | Byte 3 | certification lab ID 상위 비트 (A.29.4) |
-| Bytes 4,5 | Reserved — 0 |
+| Bytes 4,5 | Reserved(0) |
 | Byte 6 bit 8 | ISOBUS Compliance Certification message revision (A.29.19) |
-| Byte 6 bits 7~1 | Reserved — 0 |
+| Byte 6 bits 7~1 | Reserved(0) |
 | Bytes 7,8 | Compliance certification reference number (A.29.18) |
 
 3판부터 기능성(functionality)의 구성·통신이 바뀌었다(ISO 11783-12 참조). 3판 이전 형식은 Byte 4에 Minimum CF/TECU Class 1~3/Class 3 ECU/VT/VT WS master/VT WS member 비트, Byte 5에 Task controller/TC WS master/TC WS member/File server/GPS receiver 비트(A.29.5~A.29.17)를 실었고 revision 필드가 3 bits + MSBit 구성이었다.
 
 ### B.28 Machine selected speed messages
 
-#### B.28.1 Machine selected speed — PGN 61474 (0x00F022)
+#### B.28.1 Machine selected speed: PGN 61474 (0x00F022)
 
 현재 machine selected speed·방향·소스 파라미터를 제공하는 메시지다. 100 ms, 8 bytes, priority 3, PF 240/PS 34.
 
@@ -1367,15 +1373,15 @@ machine steering system이 guidance 제어 시스템에 주는 피드백 메시�
 | Byte 8 bits 5~3 | Machine selected speed source (A.30.4) |
 | Byte 8 bits 2,1 | Machine selected direction (A.30.3) |
 
-#### B.28.2 Machine selected speed command — PGN 64835 (0x00FD43)
+#### B.28.2 Machine selected speed command: PGN 64835 (0x00FD43)
 
 머신 속도·방향 제어 메시지다. 100 ms, 8 bytes, priority 3, PF 253/PS 67. Bytes 1,2: speed set point command (A.30.5), Bytes 3,4: speed set point limit (A.30.7), Byte 8 bits 2,1: direction command (A.30.6).
 
-### B.29 Implement operating state command — PGN 64771 (0x00FD03)
+### B.29 Implement operating state command: PGN 64771 (0x00FD03)
 
 Tractor ECU가 임플리먼트 버스로 보내는, 현재 명령된 임플리먼트 운용 상태 메시지다(임업·농업 임플리먼트 대상). 1초 주기 + 상태 변화 시, 8 bytes, priority 3, PF 253/PS 03. Byte 8 bits 2,1: Implement operating state command (A.25.1), 나머지 Reserved.
 
-### B.30 All implements stop operations switch state — PGN 64770 (0x00FD02)
+### B.30 All implements stop operations switch state: PGN 64770 (0x00FD02)
 
 임플리먼트 버스에 연결된 임의 CF가 송신할 수 있는, all implement stop operations 스위치(ISB)의 현재 상태 방송 메시지다. 연결된 시스템의 <strong>각 운전자 위치마다 이 스위치가 최소 1개</strong> 있어야 한다.
 
@@ -1390,7 +1396,7 @@ Tractor ECU가 임플리먼트 버스로 보내는, 현재 명령된 임플리�
 - 1초 주기 + 상태 변화 시, 8 bytes, priority 3, PF 253/PS 02
 - Byte 7: Stop all implement operations transition number (A.25.4) / Byte 8 bits 2,1: All implement stop operations switch state (A.25.3) / 나머지 Reserved
 
-### B.31 Drive strategy status — PGN 64717 (0x00FCCD)
+### B.31 Drive strategy status: PGN 64717 (0x00FCCD)
 
 트랙터가 임플리먼트에 현재 drive strategy 우선순위 구조(파워트레인 기능들의 우선순위)를 알리는 메시지다. 500 ms, 8 bytes, priority 6, PF 252/PS 205.
 
@@ -1401,7 +1407,7 @@ Tractor ECU가 임플리먼트 버스로 보내는, 현재 명령된 임플리�
 | Byte 8 bits 6~1 | Drive strategy exit/reason code (A.32.6) |
 | 나머지 | Reserved |
 
-### B.32 Drive strategy command — PGN 64718 (0x00FCCE)
+### B.32 Drive strategy command: PGN 64718 (0x00FCCE)
 
 임플리먼트가 트랙터에 파워트레인 drive strategy 우선순위 구조 변경을 요청하는 메시지다. 500 ms 주기 + PGN 내 데이터 변화 시 송신하되 <strong>100 ms보다 빠르게는 보내지 않는다</strong>. 8 bytes, priority 3, PF 252/PS 206.
 
@@ -1430,9 +1436,9 @@ hardware category 2 시스템에서 DC medium을 충족하려면 ISO 11783 CAN �
 - d) Heartbeat 검사가 실패하면 수신 시스템은 <strong>안전 상태(safe state)로 진입</strong>해야 한다.
 - e) Heartbeat 메시지의 샘플 레이트는 안전 관련 CAN 메시지의 샘플 레이트 이상이어야 한다.
 
-CF가 송신하는 어떤 메시지든 safety critical path의 일부가 될 수 있으므로, <strong>네트워크의 모든 CF는 요청 시 heartbeat 메시지를 송신할 수 있어야 한다</strong>. safety critical path의 판별 방법은 AEF 가이드라인(ISO 25119와 ISOBUS 정렬)에 정의된다. CF가 송신하는 모든 메시지의 내용은 송신 전 내부적으로 검증돼야 하며, heartbeat는 그 위에 네트워크 통신을 추가로 보증하는 장치다 — heartbeat가 정해진 주기로 송신되고 시퀀스 번호가 유효 범위에서 증가하는 동안, 소스 CF가 정상 동작하며 모든 메시지에 올바른 데이터를 제공하고 있다는 의미가 된다.
+CF가 송신하는 어떤 메시지든 safety critical path의 일부가 될 수 있으므로, <strong>네트워크의 모든 CF는 요청 시 heartbeat 메시지를 송신할 수 있어야 한다</strong>. safety critical path의 판별 방법은 AEF 가이드라인(ISO 25119와 ISOBUS 정렬)에 정의된다. CF가 송신하는 모든 메시지의 내용은 송신 전 내부적으로 검증돼야 하며, heartbeat는 그 위에 네트워크 통신을 추가로 보증하는 장치다. heartbeat가 정해진 주기로 송신되고 시퀀스 번호가 유효 범위에서 증가하는 동안, 소스 CF가 정상 동작하며 모든 메시지에 올바른 데이터를 제공하고 있다는 의미가 된다.
 
-#### B.33.2 Heartbeat message 정의 — PGN 61668 (0x00F0E4)
+#### B.33.2 Heartbeat message 정의: PGN 61668 (0x00F0E4)
 
 CF가 송신하는 메시지·파라미터 통신의 무결성 판단에 쓴다. 네트워크에 여러 인스턴스가 있을 수 있고, 요청을 받으면 각 CF는 적절한 시퀀스 번호로 이 메시지를 송신해야 한다.
 
@@ -1441,16 +1447,16 @@ CF가 송신하는 메시지·파라미터 통신의 무결성 판단에 쓴다.
 
 #### B.33.3 Heartbeat message 처리
 
-<strong>요청(B.33.3.1)</strong> — 대역폭 절약을 위해 CF는 기본적으로 heartbeat를 송신하지 않는다. 다른 CF의 정보를 critical path에 쓰는 CF(A)는 그 CF(B)에게 heartbeat를 요청해야 한다. 절차:
+<strong>요청(B.33.3.1)</strong>: 대역폭 절약을 위해 CF는 기본적으로 heartbeat를 송신하지 않는다. 다른 CF의 정보를 critical path에 쓰는 CF(A)는 그 CF(B)에게 heartbeat를 요청해야 한다. 절차:
 
 1. 소비 CF(A)가 heartbeat 메시지에 대해 <strong>100 ms 주기의 Request for Repetition rate</strong>(B.22.1)를 보낸다.
 2. 제공 CF(B)가 heartbeat 송신을 시작하고, CF(A)는 검증을 시작한다.
 3. CF(B)가 요청을 존중할 수 없으면 응답하지 않는다. <strong>250 ms</strong> 내 repetition rate 응답이 없으면 CF(A)는 요청 거절로 간주하고 위험도 평가(risk assessment)에 따라 적절히 대응한다.
 4. 이미 어떤 CF가 heartbeat를 제공 중이면, 소비 CF는 그 CF에 중복 요청을 보내면 안 된다.
 
-<strong>시퀀스 번호 규칙(B.33.3.2)</strong> — CF 초기화 시(전원 인가, 리셋, VT-status 메시지 송신 시작 등) 시퀀스 번호를 <strong>251</strong>로 1회 설정한다. 이후 송신 시마다 1씩 증가시키며 0~250을 순환한다(250 초과 시 0으로 리셋). 송신할 때마다 반드시 갱신한다.
+<strong>시퀀스 번호 규칙(B.33.3.2)</strong>: CF 초기화 시(전원 인가, 리셋, VT-status 메시지 송신 시작 등) 시퀀스 번호를 <strong>251</strong>로 1회 설정한다. 이후 송신 시마다 1씩 증가시키며 0~250을 순환한다(250 초과 시 0으로 리셋). 송신할 때마다 반드시 갱신한다.
 
-<strong>시퀀스 번호 검증(B.33.3.3)</strong> — 소비 CF는 이전 시퀀스 번호를 저장해 두고 현재 heartbeat의 번호가 +1 증가했는지 비교한다. 이전 값이 250 또는 251(초기화)이면 현재 값은 0이어야 한다. 그 외에는 통신 오류로 판정한다.
+<strong>시퀀스 번호 검증(B.33.3.3)</strong>: 소비 CF는 이전 시퀀스 번호를 저장해 두고 현재 heartbeat의 번호가 +1 증가했는지 비교한다. 이전 값이 250 또는 251(초기화)이면 현재 값은 0이어야 한다. 그 외에는 통신 오류로 판정한다.
 
 - 값 254는 <strong>송신 측 오류 상태</strong>를 뜻한다. 수신자는 heartbeat 시스템을 오류 상태로 취급하고 위험도 평가에 따라 대응한다.
 - 값 255는 not available이며, 송신 CF가 shutdown 상태로 <strong>네트워크에서 정상적으로(gracefully) 이탈</strong>할 때 써야 한다. 수신 CF는 운전자에게 알리고 안전 상태로 진입할 수 있다.
@@ -1467,11 +1473,11 @@ CF가 송신하는 메시지·파라미터 통신의 무결성 판단에 쓴다.
 | 6 | (250 roll-over 고려 시) 증가폭이 3 초과 | Heartbeat Sequence Error State. 원문 해설은 "최대 3개 유실 허용"이라 적지만, 증가폭 4(3개 유실)부터 오류이므로 규칙 문장대로면 연속 2개 유실까지 허용된다 |
 | 7 | Sequence Error State 진입 후 | <strong>연속 8개</strong>의 올바른 순차 heartbeat를 수신해야 Operational State로 복귀 |
 
-<strong>타이밍 검증(B.33.3.4)</strong> — 소비 CF는 heartbeat의 주기도 검증해야 하며, 반복 주기가 <strong>300 ms를 초과하면</strong> 통신 오류로 판정한다.
+<strong>타이밍 검증(B.33.3.4)</strong>: 소비 CF는 heartbeat의 주기도 검증해야 하며, 반복 주기가 <strong>300 ms를 초과하면</strong> 통신 오류로 판정한다.
 
-<strong>오류 시 대응(B.33.3.5)</strong> — 통신 오류가 감지되면 CF는 위험도 평가에 따라 적절히 대응해야 한다. 안전 상태 진입과 운전자 통지가 대표적인 대응이다.
+<strong>오류 시 대응(B.33.3.5)</strong>: 통신 오류가 감지되면 CF는 위험도 평가에 따라 적절히 대응해야 한다. 안전 상태 진입과 운전자 통지가 대표적인 대응이다.
 
-## Annex C (informative) — Tractor control messages 예시
+## Annex C (informative): Tractor control messages 예시
 
 :::warning 3판에서의 위상
 3판부터 Tractor Remote Control 메시지(B.24.1/B.24.2)가 deprecated 되어, 해당 메시지 정의가 없는 시스템에는 이 Annex가 더 이상 적용되지 않는다. 아래는 레거시 시스템 이해용 참고다.
@@ -1483,12 +1489,12 @@ CF가 송신하는 메시지·파라미터 통신의 무결성 판단에 쓴다.
 
 핵심 원리:
 
-- <strong>현재값 일치 후 수락</strong> — 트랙터가 원격 명령을 수락하게 하려면, 임플리먼트 컨트롤러가 먼저 자신의 명령 값을 트랙터가 현재 송신 중인 값에 일치시켜야 한다. 그러면 트랙터가 limit status를 바꾸고 변경 명령을 받아들이기 시작한다. 이렇게 하면 임플리먼트가 운전자 조작 상황을 최신으로 반영한 상태에서 매끄럽게 요청 값으로 전환할 수 있다.
-- <strong>운전자 개입 시</strong> — 운전자가 임플리먼트 요청 진행을 막는 조작(예: 히치를 수동으로 올려 auxiliary depth control 요청을 무효화)을 하면, 트랙터는 요청이 수락되지 않았고 상태가 operator limited/controlled임을 알린다. 임플리먼트는 리밋을 받아들이고 해제를 기다리거나, 운전자 인터페이스를 통해 리밋 해제를 요청할 수 있다.
-- <strong>통신 실패 시</strong> — 트랙터는 operator limited/controlled로 전환하거나 non-recoverable error를 신호해야 한다. 어느 쪽인지는 복구에 필요한 조치에 달렸다. 원격 모드 복귀 전 트랙터 네트워크에서 운전자 개입이 필요하면 non-recoverable fault를 보고해야 한다. 필요한 운전자 개입의 내용은 트랙터 설계자 재량이다.
-- <strong>재개</strong> — 트랙터가 operator limited/controlled로 복귀하면 임플리먼트는 현재 트랙터 설정에 값을 일치시켜 외부 명령을 재개해야 한다.
-- <strong>초기 값 획득</strong> — 트랙터는 임플리먼트 버스의 명령에 대한 응답으로만 현재 명령 값을 보내므로, 임플리먼트는 시동 후 "Not Requested"(ALL ONES) 명령을 보내 현재 트랙터 명령을 얻어야 한다. 트랙터는 이 명령에 동작하지 않고 현재 값으로 응답한다.
-- <strong>미지원 명령</strong> — 특정 명령을 트랙터가 지원하지 않으면 해당 limit status에 "Not Available"로 응답한다. 임플리먼트 요청에 미지원 명령이 하나라도 섞여 있으면 트랙터는 그 요청의 <strong>모든</strong> 원격 명령 값을 수락하지 않는다.
+- <strong>현재값 일치 후 수락</strong>: 트랙터가 원격 명령을 수락하게 하려면, 임플리먼트 컨트롤러가 먼저 자신의 명령 값을 트랙터가 현재 송신 중인 값에 일치시켜야 한다. 그러면 트랙터가 limit status를 바꾸고 변경 명령을 받아들이기 시작한다. 이렇게 하면 임플리먼트가 운전자 조작 상황을 최신으로 반영한 상태에서 매끄럽게 요청 값으로 전환할 수 있다.
+- <strong>운전자 개입 시</strong>: 운전자가 임플리먼트 요청 진행을 막는 조작(예: 히치를 수동으로 올려 auxiliary depth control 요청을 무효화)을 하면, 트랙터는 요청이 수락되지 않았고 상태가 operator limited/controlled임을 알린다. 임플리먼트는 리밋을 받아들이고 해제를 기다리거나, 운전자 인터페이스를 통해 리밋 해제를 요청할 수 있다.
+- <strong>통신 실패 시</strong>: 트랙터는 operator limited/controlled로 전환하거나 non-recoverable error를 신호해야 한다. 어느 쪽인지는 복구에 필요한 조치에 달렸다. 원격 모드 복귀 전 트랙터 네트워크에서 운전자 개입이 필요하면 non-recoverable fault를 보고해야 한다. 필요한 운전자 개입의 내용은 트랙터 설계자 재량이다.
+- <strong>재개</strong>: 트랙터가 operator limited/controlled로 복귀하면 임플리먼트는 현재 트랙터 설정에 값을 일치시켜 외부 명령을 재개해야 한다.
+- <strong>초기 값 획득</strong>: 트랙터는 임플리먼트 버스의 명령에 대한 응답으로만 현재 명령 값을 보내므로, 임플리먼트는 시동 후 "Not Requested"(ALL ONES) 명령을 보내 현재 트랙터 명령을 얻어야 한다. 트랙터는 이 명령에 동작하지 않고 현재 값으로 응답한다.
+- <strong>미지원 명령</strong>: 특정 명령을 트랙터가 지원하지 않으면 해당 limit status에 "Not Available"로 응답한다. 임플리먼트 요청에 미지원 명령이 하나라도 섞여 있으면 트랙터는 그 요청의 <strong>모든</strong> 원격 명령 값을 수락하지 않는다.
 - limit high/low 제어 모드는 물리적·운전자 설정 리밋(예: 히치 상한)에 도달했을 때 트랙터가 보낸다. 임플리먼트는 이동이 제한됐고 그 방향의 추가 세트포인트 변경이 무시됨을 알 수 있다. 세트포인트 변화율 제한(ramp) 때문에 일시적일 수 있고, ramp가 목표에 도달하면 "Not limited"로 돌아온다.
 
 ### C.2 Cruise control 예시
@@ -1499,9 +1505,9 @@ CF가 송신하는 메시지·파라미터 통신의 무결성 판단에 쓴다.
 |---|---|---|
 | 1 | 임플리먼트→트랙터 | mode #1=00001(cruise control), value #1=0xFFFF(Not Requested)로 현재 명령 값 요청 |
 | 2 | 트랙터→임플리먼트 | 원격 모드 진입 없이 응답. limit status #1=001(Operator Limited/Controlled), value #1=600(현재 속도 0,6 m/s) |
-| 3 | 임플리먼트→트랙터 | value #1=600 — 현재 속도에 일치시킨 세트포인트 요청 |
+| 3 | 임플리먼트→트랙터 | value #1=600(현재 속도에 일치시킨 세트포인트 요청) |
 | 4 | 트랙터→임플리먼트 | 수락 응답. limit status #1=000(Not Limited), value #1=600 |
-| 5 | 임플리먼트→트랙터 | value #1=500 — 0,5 m/s로 감속 요청 |
+| 5 | 임플리먼트→트랙터 | value #1=500(0,5 m/s로 감속 요청) |
 | 6 | 트랙터→임플리먼트 | 수락. limit status #1=000(remote mode), value #1=500 |
 
 ### C.3 Combined constant PTO speed + cruise control 예시
@@ -1513,24 +1519,24 @@ PTO 정속과 차량 속도를 <strong>한 메시지에 두 명령</strong>으�
 
 ### C.4 Auxiliary valve slip control + cruise control 예시
 
-auxiliary valve 유량 가변으로 슬립을 제어하면서 속도도 함께 제어하는 다중 제어 모드다. mode #1=00111(Valve slip control), mode #2=00001(Cruise control). value #1은 복합 필드다 — bits 16~9: 유량 값(예: 25=10 % flow), bits 8~5: 밸브 상태(0001=Extend), bits 4~1: 밸브 번호(0010=Valve 2). value #2=1389(1,389 m/s). 두 명령 간 우선순위는 없으며, 파라미터 세트가 유지되는 한 #1/#2를 뒤바꿔도 된다.
+auxiliary valve 유량 가변으로 슬립을 제어하면서 속도도 함께 제어하는 다중 제어 모드다. mode #1=00111(Valve slip control), mode #2=00001(Cruise control). value #1은 복합 필드다. bits 16~9: 유량 값(예: 25=10 % flow), bits 8~5: 밸브 상태(0001=Extend), bits 4~1: 밸브 번호(0010=Valve 2). value #2=1389(1,389 m/s). 두 명령 간 우선순위는 없으며, 파라미터 세트가 유지되는 한 #1/#2를 뒤바꿔도 된다.
 
-## Annex D (informative) — 임플리먼트에 의한 트랙터 기능 제어 구현 지침
+## Annex D (informative): 임플리먼트에 의한 트랙터 기능 제어 구현 지침
 
 임플리먼트 명령·원격 제어 메시지의 취지는 제어권을 운전자에게서 임플리먼트로 넘기는 것이 아니라, <strong>트랙터가 자신의 전체 제어 체계 안에 임플리먼트 컨트롤러의 능력을 편입</strong>할 수단을 주는 것이다.
 
 - 이 파라미터들을 임플리먼트 컨트롤러의 고속 제어 루프에서 조정하는 것은 권장되지 않는다. 세트포인트 변경에 대한 응답 시간은 CAN 버스 지연, 트랙터 내부 필터링·지연 등 여러 변수에 좌우되며 시스템마다 다르다.
-- <strong>operating envelope</strong> — 임플리먼트의 히치 위치 명령은 "요청"일 뿐이며, 트랙터는 운전자가 설정한 리밋·조작과 조율한 뒤 수행한다. 운전자 컨트롤과 설정이 임플리먼트가 변경할 수 있는 "운용 범위(envelope)"를 정의한다. 히치가 좋은 예다: 위치·상한·하한 운전자 설정에 더해 대부분 시스템에는 현재 draft에 따라 히치 위치/하한을 연속 조정하는 "draft-mix" 설정이 있고, 이들이 모두 임플리먼트의 히치 위치 명령을 제한한다.
-- <strong>persistent command</strong> — 히치 명령처럼, 리밋 조건이 해소되면 목표 위치를 향해 계속 움직이는 명령. 예: 운전자가 draft-mix를 조정해 이동 범위를 넓히면 진행이 재개된다.
-- <strong>transient command</strong> — PTO engagement처럼 일시적 성격의 명령. 즉시 충족될 수 없으면 트랙터가 무시한다. 예: 캡 내 컨트롤로 PTO가 비활성화돼 있으면 engage 명령은 무시되고, 이후 캡 컨트롤이 허용으로 바뀌어도 임플리먼트가 <strong>새 "engage" 명령을 보내기 전까지</strong> PTO는 걸리지 않는다.
-- <strong>persistent command 초기화</strong> — rear hitch 같은 기능의 외부 제어를 시작하려면, 임플리먼트 컨트롤러는 먼저 rear hitch status PGN의 히치 위치 파라미터와 <strong>같은 값</strong>을 담은 hitch and PTO command PGN을 보내야 한다. 트랙터가 수락하면 rear hitch position limit status에 "Not Limited"(000)로 응답한다.
+- <strong>operating envelope</strong>: 임플리먼트의 히치 위치 명령은 "요청"일 뿐이며, 트랙터는 운전자가 설정한 리밋·조작과 조율한 뒤 수행한다. 운전자 컨트롤과 설정이 임플리먼트가 변경할 수 있는 "운용 범위(envelope)"를 정의한다. 히치가 좋은 예다: 위치·상한·하한 운전자 설정에 더해 대부분 시스템에는 현재 draft에 따라 히치 위치/하한을 연속 조정하는 "draft-mix" 설정이 있고, 이들이 모두 임플리먼트의 히치 위치 명령을 제한한다.
+- <strong>persistent command</strong>: 히치 명령처럼, 리밋 조건이 해소되면 목표 위치를 향해 계속 움직이는 명령. 예: 운전자가 draft-mix를 조정해 이동 범위를 넓히면 진행이 재개된다.
+- <strong>transient command</strong>: PTO engagement처럼 일시적 성격의 명령. 즉시 충족될 수 없으면 트랙터가 무시한다. 예: 캡 내 컨트롤로 PTO가 비활성화돼 있으면 engage 명령은 무시되고, 이후 캡 컨트롤이 허용으로 바뀌어도 임플리먼트가 <strong>새 "engage" 명령을 보내기 전까지</strong> PTO는 걸리지 않는다.
+- <strong>persistent command 초기화</strong>: rear hitch 같은 기능의 외부 제어를 시작하려면, 임플리먼트 컨트롤러는 먼저 rear hitch status PGN의 히치 위치 파라미터와 <strong>같은 값</strong>을 담은 hitch and PTO command PGN을 보내야 한다. 트랙터가 수락하면 rear hitch position limit status에 "Not Limited"(000)로 응답한다.
 - 제어를 요청하지 않거나 기능 제어를 반납할 때는 명령에 "Not Requested"(ALL ONES)를 보내야 한다.
 - <strong>transient command 초기화</strong>도 유사하다. 임플리먼트가 현재 트랙터 파라미터 값을 명령 PGN으로 보내고, 트랙터가 해당 request status에 "External Request Accepted"로 응답하면 이후 명령이 수락·수행된다. 운전자 조작이나 외부 명령을 막는 조건이 생기면 트랙터는 해당 request status에 "Driver control" 또는 "Error"를 보고해야 한다.
 
 ## Bibliography (Part 7)
 
-- ISO 11898-1:2003 — CAN data link layer/physical signalling
-- SAE J1939 — Recommended Practice for a Serial Control and Communications Vehicle Network
+- ISO 11898-1:2003: CAN data link layer/physical signalling
+- SAE J1939: Recommended Practice for a Serial Control and Communications Vehicle Network
 - AEF guideline for the alignment of ISOBUS systems with ISO 25119 (heartbeat의 safety critical path 판별 근거 문서)
 
 ## Amendment 1 (2018) 주요 변경 사항
@@ -1539,11 +1545,11 @@ ISO 11783-7:2015/Amd.1:2018 (2018-06)은 3판 본문을 수정·확장한다. �
 
 ### 1) 기존 조항 자구 수정
 
-- Clause 2: 인용 표준에 <strong>ISO 3166-1</strong>(country codes) 추가 — 아래 Language command 확장의 근거.
-- A.5/A.6 (ground-based speed/distance): 정의를 "휠 슬립에 영향받지 않는 센서(radar, GPS, <strong>LIDAR</strong>, stationary object tracking 등)로 측정한 실제 대지 속도/거리"로 교체 — 허용 센서 예시가 넓어졌다.
+- Clause 2: 인용 표준에 <strong>ISO 3166-1</strong>(country codes) 추가. 아래 Language command 확장의 근거다.
+- A.5/A.6 (ground-based speed/distance): 정의를 "휠 슬립에 영향받지 않는 센서(radar, GPS, <strong>LIDAR</strong>, stationary object tracking 등)로 측정한 실제 대지 속도/거리"로 교체. 허용 센서 예시가 넓어졌다.
 - A.19.7/A.19.8 (front/rear draft): "양수 값은 트랙터의 전진 방향에 반대로 작용하는 힘"으로 문구를 교체하고, forward/reverse는 섀시의 정상 주행 방향 기준이며 운전석 반전과 무관하다는 NOTE를 추가. A.19.9(front nominal lower link force)에도 동일한 취지의 문구 교체.
 
-### 2) A.19 확장 — 히치 roll/pitch/yaw 파라미터 (A.19.15~A.19.50 신설)
+### 2) A.19 확장: 히치 roll/pitch/yaw 파라미터 (A.19.15~A.19.50 신설)
 
 전·후방 3점 히치의 자세(roll·pitch·yaw)를 측정·명령하는 파라미터 세트가 대거 추가됐다. 구조는 front/rear 대칭이며, 축마다 angle(측정) + limit status + exit/reason code + sensitivity(측정/명령) + angle command로 구성된다.
 
@@ -1551,7 +1557,7 @@ ISO 11783-7:2015/Amd.1:2018 (2018-06)은 3판 본문을 수정·확장한다. �
 
 - roll/pitch angle 및 command: 2 bytes, 0,002 °/bit, −64° offset, 범위 −64°~64,51°
 - yaw angle 및 command: 2 bytes, 1/128 °/bit, −200° offset, 범위 −200°~200°
-- sensitivity 및 command: 1 byte, 0,4 %/bit, 0~100 % — 제어 루프 게인의 백분율. 0 %는 최소 게인(0 부근이면 루프가 반응하지 않을 수 있음), 100 %는 최대 게인
+- sensitivity 및 command: 1 byte, 0,4 %/bit, 0~100 %. 제어 루프 게인의 백분율. 0 %는 최소 게인(0 부근이면 루프가 반응하지 않을 수 있음), 100 %는 최대 게인
 - limit status: 3 bits, 본문 A.26.7과 동일한 값 체계(000=Not limited ~ 111=Not available)
 - exit/reason code: 6 bits, 본문 A.19.13 계열과 유사하되 <strong>010101="Hitch locked out"</strong> 항목이 있는 값 체계
 
@@ -1582,55 +1588,55 @@ ISO 11783-7:2015/Amd.1:2018 (2018-06)은 3판 본문을 수정·확장한다. �
 
 <strong>Yaw angle reference frame</strong> (4 bits): 0000=Main body of the machine, 0001=Body of the hitch, 0010=Direction of travel, 1110=Non-recoverable fault, 1111=Not available. 전륜 조향 트랙터에는 machine main body 기준이 권장되고, crab steering 가능 트랙터에는 direction of travel, 굴절식(articulated) 트랙터의 전방 히치에는 body of the hitch 기준이 적합하다.
 
-<strong>Yaw angle actual control mode</strong> (4 bits): 트랙터에서 활성인 제어 모드를 나타낸다 — 0000=Disabled(운송 등으로 yaw 고정), 0001=직접 유압 밸브 제어(수동), 0010=Floating mode, 0011=자동 1:1(인접 조향 휠 추종), 0100=자동 N:1(basic curvature contour mode), 0101=자동 position control, 1110=Error, 1111=Not available. <strong>yaw command(A.19.32/A.19.50)가 유효하려면 actual control mode가 0101(position control)이어야 한다.</strong>
+<strong>Yaw angle actual control mode</strong> (4 bits): 트랙터에서 활성인 제어 모드를 나타낸다. 0000=Disabled(운송 등으로 yaw 고정), 0001=직접 유압 밸브 제어(수동), 0010=Floating mode, 0011=자동 1:1(인접 조향 휠 추종), 0100=자동 N:1(basic curvature contour mode), 0101=자동 position control, 1110=Error, 1111=Not available. <strong>yaw command(A.19.32/A.19.50)가 유효하려면 actual control mode가 0101(position control)이어야 한다.</strong>
 
-### 3) A.21 확장 — 고분해능 밸브 유량 파라미터 (A.21.51~A.21.60 신설)
+### 3) A.21 확장: 고분해능 밸브 유량 파라미터 (A.21.51~A.21.60 신설)
 
 기존 1-byte(0,4 %/bit) 유량 파라미터의 분해능 한계를 보완하는 2-byte 파라미터들이 추가됐다.
 
 | 절 | 파라미터 | 형식 | SPN |
 |---|---|---|---|
 | A.21.51 | Aux valve 0 high resolution estimated flow | 2 bytes, 0,004 %/bit, −125 % offset, 범위 −125~+132,02 % (운용 −100~+100 %), Estimated | 9732 |
-| A.21.52 | Aux valve 0 Resolution mode — Command | 2 bits, Status | 7872 |
-| A.21.53 | Aux valve 0 port flow — Extended Resolution Command | 2 bytes, 0,001 562 5 %/bit, 0~100 %, Command | 7856 |
+| A.21.52 | Aux valve 0 Resolution mode: Command | 2 bits, Status | 7872 |
+| A.21.53 | Aux valve 0 port flow: Extended Resolution Command | 2 bytes, 0,001 562 5 %/bit, 0~100 %, Command | 7856 |
 | A.21.54 | Aux valve 15 high resolution estimated flow | A.21.51과 동일 형식 | 9747 |
-| A.21.55 | Aux valve 15 Resolution mode — Command | 2 bits, Status | 7887 |
-| A.21.56 | Aux valve 15 port flow — Extended Resolution Command | A.21.53과 동일 형식 | 7871 |
+| A.21.55 | Aux valve 15 Resolution mode: Command | 2 bits, Status | 7887 |
+| A.21.56 | Aux valve 15 port flow: Extended Resolution Command | A.21.53과 동일 형식 | 7871 |
 | A.21.57 | GP valve extend port high resolution estimated flow | A.21.51과 동일 형식 | 9728 |
 | A.21.58 | GP valve retract port high resolution estimated flow | A.21.51과 동일 형식 | 9729 |
-| A.21.59 | GP valve port flow — Extended Resolution Command | A.21.53과 동일 형식 | 9727 |
+| A.21.59 | GP valve port flow: Extended Resolution Command | A.21.53과 동일 형식 | 9727 |
 | A.21.60 | General-purpose valve exit/reason code | 5 bits, Measured (10001="Valve locked out" 포함). Amd1은 이 값을 싣는 메시지 바이트를 지정하지 않았다 | 9730 |
 
 해석 규칙:
 
 - estimated flow에서 0 %=무유량, +100 %=extend port 최대 유량, −100 %=retract port 최대 유량. <strong>estimated(측정 아님)이므로 피드백 제어에 쓸 때 주의</strong>가 필요하다. "not available"(all 1's)이면 기존 저분해능 파라미터만 유효하다.
 - Resolution mode command: 00=표준 분해능 파라미터만 유효, 01=확장·표준 둘 다 유효, 11=Don't care.
-- Extended Resolution Command가 "not available"이 아니면 유효 값을 담고 있으며, 이때 <strong>저분해능 파라미터에도 항상 (더 낮은 분해능의) 유효 값을 함께 실어야 한다</strong> — 구형 수신기와의 호환 유지 장치다.
+- Extended Resolution Command가 "not available"이 아니면 유효 값을 담고 있으며, 이때 <strong>저분해능 파라미터에도 항상 (더 낮은 분해능의) 유효 값을 함께 실어야 한다</strong>: 구형 수신기와의 호환 유지 장치다.
 
-### 4) A.23.1 교체 — Language code + Country code
+### 4) A.23.1 교체: Language code + Country code
 
 언어가 "Language code + 선택적 Country code"로 재정의됐다. country code는 방언(dialect) 구분에 쓴다(예: es-MX, es-AR).
 
 - <strong>A.23.1.1 Language code</strong> (SPN 2410): 2 bytes, ISO 639 두 글자 소문자 코드(nl, fr, en, de 등). Command.
 - <strong>A.23.1.2 Country code</strong> (SPN 9731, 신설): 2 bytes, ISO 3166-1 alpha-2 대문자 코드(NL, FR, GB, US, DE 등). 두 문자 모두 all 1's면 country code 미지정. Command.
 
-### 5) A.28.10 신설 — Guidance system remote engage switch status
+### 5) A.28.10 신설: Guidance system remote engage switch status
 
 Remote Engage Switch의 상태다. 차량이 guidance 시스템용 engage 스위치를 자체 제공할 수 있게 한다. 2 bits, Measured, SPN 9726. 00=Disengage guidance commands, 01=Engage guidance commands, 10=Error indication, 11=Not available/Take no Action.
 
-### 6) A.35 신설 — Operator presence parameters
+### 6) A.35 신설: Operator presence parameters
 
 운전자 재석·주의(awareness) 상태를 네트워크로 방송하기 위한 파라미터 그룹이다.
 
-<strong>A.35.1 Operator status sequence counter</strong> (8 bits, SPN 5141) — operator status PGN 송신 횟수 카운터다(경과 시간 정보 아님). 동작·검증 규칙은 B.33 heartbeat 시퀀스 번호와 같은 골격이다: 초기화 시 251(0xFB), 이후 0~250 순환(modulus 250), 값이 갱신된 operator status PGN 송신마다 +1, 송신자별 독립. 252~253 예약(수신 무시), 254 오류, 255 not available(메시지 내 다른 SPN도 모두 not available임을 의미). 수신자는 첫 수신 값을 초기값으로 삼고, 동일 값 반복(255 제외)·254 수신·roll-over 고려 증가폭 3 초과 시 error state로 판정한다. 원문 해설은 최대 3개 유실 허용이라 적지만 증가폭 규칙대로면 연속 2개 유실까지다. error state에서 <strong>연속 8개</strong> 정상 수신 시 operational state 복귀, 251 수신 시 송신자 리셋으로 인식하고 동기화 — heartbeat와 동일한 규칙 세트다. 수신자는 이 카운터로 송신자가 유효한 네트워크 연결을 유지 중인지, 해당 SA에서 이 메시지를 보내는 CF가 유일한지 판단한다.
+<strong>A.35.1 Operator status sequence counter</strong> (8 bits, SPN 5141): operator status PGN 송신 횟수 카운터다(경과 시간 정보 아님). 동작·검증 규칙은 B.33 heartbeat 시퀀스 번호와 같은 골격이다: 초기화 시 251(0xFB), 이후 0~250 순환(modulus 250), 값이 갱신된 operator status PGN 송신마다 +1, 송신자별 독립. 252~253 예약(수신 무시), 254 오류, 255 not available(메시지 내 다른 SPN도 모두 not available임을 의미). 수신자는 첫 수신 값을 초기값으로 삼고, 동일 값 반복(255 제외)·254 수신·roll-over 고려 증가폭 3 초과 시 error state로 판정한다. 원문 해설은 최대 3개 유실 허용이라 적지만 증가폭 규칙대로면 연속 2개 유실까지다. error state에서 <strong>연속 8개</strong> 정상 수신 시 operational state 복귀, 251 수신 시 송신자 리셋으로 인식하고 동기화. heartbeat와 동일한 규칙 세트다. 수신자는 이 카운터로 송신자가 유효한 네트워크 연결을 유지 중인지, 해당 SA에서 이 메시지를 보내는 CF가 유일한지 판단한다.
 
-<strong>A.35.2 Operator presence state</strong> (2 bits, SPN 9711) — 운전자 재석 감지 시스템의 현재 상태. 00=Operator Not Present, 01=Operator Present, 10=Error, 11=Not available/Not Installed.
+<strong>A.35.2 Operator presence state</strong> (2 bits, SPN 9711): 운전자 재석 감지 시스템의 현재 상태. 00=Operator Not Present, 01=Operator Present, 10=Error, 11=Not available/Not Installed.
 
-<strong>A.35.3 Operator awareness state</strong> (2 bits, SPN 9712) — 운전자가 기계를 안전하게 조작할 필요 작업을 수행할 수 있는 상태(alert & engaged)인지. 00=Operator Not Aware, 01=Operator Aware, 10=Error, 11=Not available/Not Installed.
+<strong>A.35.3 Operator awareness state</strong> (2 bits, SPN 9712): 운전자가 기계를 안전하게 조작할 필요 작업을 수행할 수 있는 상태(alert & engaged)인지. 00=Operator Not Aware, 01=Operator Aware, 10=Error, 11=Not available/Not Installed.
 
-<strong>A.35.4 Operator presence and awareness status checksum</strong> (8 bits, SPN 9713) — operator status 메시지 앞 56 데이터 비트에 대한 <strong>CRC-8-CCITT</strong>(0x07/0xE0/0x83) 체크섬. CAN 송신 전 데이터 손상 검증용이다. 체크섬 실패 메시지는 시퀀스 오류로 취급하며, 수신 장치는 presence/awareness 상태를 값 2("error indicator") 수신처럼 처리한다. 체크섬 실패로 error state에 들어간 경우도 연속 8개 정상 메시지 수신 후 복귀한다.
+<strong>A.35.4 Operator presence and awareness status checksum</strong> (8 bits, SPN 9713): operator status 메시지 앞 56 데이터 비트에 대한 <strong>CRC-8-CCITT</strong>(0x07/0xE0/0x83) 체크섬. CAN 송신 전 데이터 손상 검증용이다. 체크섬 실패 메시지는 시퀀스 오류로 취급하며, 수신 장치는 presence/awareness 상태를 값 2("error indicator") 수신처럼 처리한다. 체크섬 실패로 error state에 들어간 경우도 연속 8개 정상 메시지 수신 후 복귀한다.
 
-### 7) Annex B 확장 — 히치 자세 메시지 6종 신설
+### 7) Annex B 확장: 히치 자세 메시지 6종 신설
 
 B.6(front hitch status) 뒤에 B.6.2~B.6.6, B.7(rear hitch status) 뒤에 B.7.2~B.7.6이 추가됐다. 모두 100 ms 주기, 8 bytes다(sensitivity 메시지만 변화 시 100 ms + 무변화 시 1 s 주기, priority 6; 나머지는 priority 3).
 
@@ -1657,7 +1663,7 @@ reserved였던 바이트들이 고분해능 파라미터로 채워졌다.
 - <strong>B.17</strong> (aux valve 15 command): Byte 2 bits 2,1 → A.21.55, Bytes 4,5 → A.21.56
 - <strong>B.25.2</strong> (GP valve estimated flow): Bytes 5,6 → extend port high res (A.21.57), Bytes 7,8 → retract port high res (A.21.58)
 - <strong>B.25.4</strong> (GP valve command): Bytes 4,5 → Extended Resolution Command (A.21.59)
-- <strong>B.26.2</strong> (Guidance machine status): Byte 5 bits 8,7 → Remote Engage Switch Status (A.28.10) — 기존 reserved 자리
+- <strong>B.26.2</strong> (Guidance machine status): Byte 5 bits 8,7 → Remote Engage Switch Status (A.28.10), 기존 reserved 자리
 - <strong>B.21</strong> (Language command): Bytes 1,2 → Language code (A.23.1.1), <strong>Bytes 7,8(기존 reserved) → Country code</strong>
 
 ### 9) B.18 Lighting command 규정 변경
@@ -1671,7 +1677,7 @@ reserved였던 바이트들이 고분해능 파라미터로 채워졌다.
 
 네트워크에 Language command 소스가 <strong>여러 개</strong> 있을 수 있으므로, destination-global 요청은 서로 다른 설정의 응답을 여럿 받을 수 있다. 따라서 CF는 <strong>자신이 서비스를 이용 중인 CF에게 destination-specific 요청</strong>을 보내는 것이 권장된다. 예: Working Set이 네트워크에서 VT를 여러 대 발견하면, 자신의 UI를 게시 중인 VT의 SA에서 온 Language command 데이터를 써야 한다.
 
-### 11) B.33.3.6 신설 — Operator status 메시지 — PGN 64388 (0x00FB84)
+### 11) B.33.3.6 신설: Operator status 메시지: PGN 64388 (0x00FB84)
 
 heartbeat 절(B.33.3.5) 뒤에 추가된 운전자 상태 방송 메시지다.
 
@@ -1687,6 +1693,6 @@ heartbeat 절(B.33.3.5) 뒤에 추가된 운전자 상태 방송 메시지다.
 | Bytes 3~7 | Reserved |
 | Byte 8 | Operator Presence and Awareness Status Checksum (A.35.4) |
 
-### 12) Annex D 추가 — TIM 예고
+### 12) Annex D 추가: TIM 예고
 
 Annex D 말미에 다음 취지의 문단이 추가됐다: AEF가 <strong>"Tractor-Implement Management"(TIM)</strong>라는 새 기능성을 정의 중이며, 이 문서의 트랙터 제어 관련 메시지·파라미터 일부를 결국 대체하거나 최소한 불필요하게 만들 것으로 예상된다. 영향(및 잠재적 deprecation) 가능성이 큰 메시지로 front/rear hitch roll·pitch command, Hitch and PTO commands, auxiliary valve 0/1~14/15 command, Tractor control mode command, Guidance system command, Machine selected speed command, Drive strategy command가 열거됐다. 즉 <strong>명령(command) 계열 메시지 전반이 TIM으로 이관될 방향</strong>임을 표준 스스로 예고한 것이다.

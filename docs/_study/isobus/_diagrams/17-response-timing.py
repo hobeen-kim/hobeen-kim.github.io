@@ -17,7 +17,7 @@ def draw(d):
 
     # 왼쪽 패널: Annex F (WS -> VT)
     d.box(1, 1.5, 47, 57, P["chip"], ec=P["edge"], lw=1.0)
-    d.text(24.5, 56.6, "Annex F 명령 (WS -> VT)", size=10, weight="bold", color=P["accent"])
+    d.text(24.5, 56.6, "명령과 응답 (Working Set -> VT)", size=10, weight="bold", color=P["accent"])
     WS_L, VT_L = 10, 39
     lane(WS_L, "Working Set", P["green"])
     lane(VT_L, "VT", P["blue"])
@@ -36,7 +36,7 @@ def draw(d):
 
     # 오른쪽 패널: Annex H (VT -> WS), v6
     d.box(52, 1.5, 47, 57, P["chip"], ec=P["edge"], lw=1.0)
-    d.text(75.5, 56.6, "Annex H 활성화 (VT -> WS, v6 이상)", size=10, weight="bold", color=P["accent"])
+    d.text(75.5, 56.6, "활성화 메시지와 응답 (VT -> Working Set, v6 이상)", size=10, weight="bold", color=P["accent"])
     VT_R, WS_R = 61, 90
     lane(VT_R, "VT", P["blue"])
     lane(WS_R, "Working Set", P["green"])
@@ -52,7 +52,7 @@ def draw(d):
     hop(VT_R, WS_R, 26, "재시도: 같은 데이터, 같은 TAN=2", P["violet"])
     d.text(75.5, 20.5, "재시도 최대 3회", size=8.5, color=P["violet"])
     d.box(60, 7, 31, 7.5, P["brown"], lw=1.2)
-    d.text(75.5, 10.75, "그래도 응답이 없으면\nWS unexpected shutdown 처리", size=8.8)
+    d.text(75.5, 10.75, "그래도 응답이 없으면\nWorking Set unexpected shutdown 처리", size=8.8)
 
     d.legend([
         Line2D([0], [0], color=P["accent"], lw=2.2, label="요청·통지"),

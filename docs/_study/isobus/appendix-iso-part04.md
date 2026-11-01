@@ -1,14 +1,20 @@
 ---
-title: "표준 정리: Part 4 — Network layer"
-description: "ISO 11783-4(Network layer) — NIU 유형, 메시지 포워딩·필터링, 네트워크 상호연결을 정리한 표준 요약이다."
+title: "표준 정리: Part 4(Network layer)"
+description: "ISO 11783-4(Network layer)에서 NIU 유형, 메시지 포워딩·필터링, 네트워크 상호연결을 정리한 표준 요약이다."
 date: 2026-08-21
 tags: [ISOBUS, ISO11783, 표준정리]
+prev: /study/isobus/appendix-iso-part03
+next: /study/isobus/appendix-iso-part05
 ---
 
 # ISO 11783-4: Network layer 정리
 
 ::: info 이 문서에 대해
 ISO 11783-4 표준 원문을 학습 목적으로 재구성한 <strong>비공식 요약·해설</strong>이다. 규범적 판단이 필요할 때는 반드시 원문 표준을 확인해야 한다.
+:::
+
+::: tip 처음 읽는다면
+이 페이지는 네트워크 계층(Part 4: 여러 버스를 잇는 장치인 NIU의 규칙)을 원문의 절 구조대로 요약한 참고 자료다. NIU가 메시지를 넘기거나 거르는 규칙, network message의 바이트를 원문 순서로 확인할 때 펼쳐 본다. 처음이라면 [21장 네트워크 계층과 NIU: 버스와 버스를 잇는 장치](/study/isobus/21-niu-network-layer)를 먼저 읽는다.
 :::
 
 ## 개요
@@ -205,7 +211,7 @@ network message 데이터 필드의 <strong>1번째 바이트</strong>가 수신
 | 193 | connection open 요청 응답 | NIU → CF |
 | 194 | connection close 요청 | CF → NIU |
 | 195 | connection close 요청 응답 | NIU → CF |
-| 196–255 | 예약 | — |
+| 196–255 | 예약 | - |
 
 #### Port number (6.5.3)
 
@@ -237,7 +243,7 @@ message filter database는 다음 세 방법으로 설정할 수 있다.
 | 방법 | 설명 | 한계 |
 | --- | --- | --- |
 | 공급자 고정 DB | 제조 시점에 OEM이 사전 설정 | CF·메시지 전체를 미리 알아야 하고, 이후 네트워크 변경은 서비스 중 재설정 없이 반영 불가 |
-| 진단 도구 설정 | 서비스 절차의 일부로 네트워크를 통해 bridge를 설정 | — |
+| 진단 도구 설정 | 서비스 절차의 일부로 네트워크를 통해 bridge를 설정 | - |
 | 임의 CF가 상시 설정 | 네트워크의 어떤 CF든 아무 때나 설정 | 별도 보안 절차가 필요할 수 있고, 재설정 접근 제한은 응용에 따라 다름 |
 
 N.MFDB_Create_Entry로 만든 엔트리에는 생성한 CF의 <strong>NAME이 부착</strong>되며, 같은 NAME만 그 엔트리를 제거할 수 있다. 이는 요청 충돌 자체를 막지는 않지만 엔트리의 예기치 않은 삭제를 방지한다. 단, 진단 도구 사용 시 이 제약을 무시(override)할 수 있는 수단은 마련해야 한다.
@@ -260,7 +266,7 @@ filter database에 등록된 PGN의 필터 모드는 filter mode byte로 식별�
 
 모든 메시지는 PGN 60672(00ED00₁₆), destination-specific으로 보낸다. 명령에 대한 확인 응답은 Acknowledgment Message(PGN 59392)로 제공된다.
 
-<strong>N.MFDB_Request (function 0)</strong> — CF가 NIU에 filter database 사본을 요청.
+<strong>N.MFDB_Request (function 0)</strong>: CF가 NIU에 filter database 사본을 요청.
 
 | 바이트 | 내용 |
 | --- | --- |
@@ -270,7 +276,7 @@ filter database에 등록된 PGN의 필터 모드는 filter mode byte로 식별�
 
 데이터 길이 8바이트.
 
-<strong>N.MFDB_Response (function 1)</strong> — 필터링되는 PGN 엔트리와 filter mode를 담은 NIU의 응답. 데이터 길이 가변.
+<strong>N.MFDB_Response (function 1)</strong>: 필터링되는 PGN 엔트리와 filter mode를 담은 NIU의 응답. 데이터 길이 가변.
 
 | 바이트 | 내용 |
 | --- | --- |
@@ -279,7 +285,7 @@ filter database에 등록된 PGN의 필터 모드는 filter mode byte로 식별�
 | 3 | Filter mode |
 | 4–n | PGN 엔트리들 |
 
-<strong>N.MFDB_Add (function 2)</strong> — filter database에 엔트리 1개 이상 추가. "To" 포트를 global로 하면 해당 "From" 포트를 포함하는 모든 port pair에 엔트리가 만들어진다. 이 명령에는 filter mode가 포함되지 않으므로, 사용하는 CF는 해당 port pair의 filter mode를 사전에 알고 있어야 한다. filter mode는 그 port pair의 database를 clear 후 재구축하지 않는 한 바꿀 수 없다.
+<strong>N.MFDB_Add (function 2)</strong>: filter database에 엔트리 1개 이상 추가. "To" 포트를 global로 하면 해당 "From" 포트를 포함하는 모든 port pair에 엔트리가 만들어진다. 이 명령에는 filter mode가 포함되지 않으므로, 사용하는 CF는 해당 port pair의 filter mode를 사전에 알고 있어야 한다. filter mode는 그 port pair의 database를 clear 후 재구축하지 않는 한 바꿀 수 없다.
 
 | 바이트 | 내용 |
 | --- | --- |
@@ -287,11 +293,11 @@ filter database에 등록된 PGN의 필터 모드는 filter mode byte로 식별�
 | 2 | Port pair |
 | 3–n | PGN 엔트리들 |
 
-<strong>N.MFDB_Delete (function 3)</strong> — 엔트리 1개 이상 삭제. 구조는 N.MFDB_Add와 같고 function code만 3이다.
+<strong>N.MFDB_Delete (function 3)</strong>: 엔트리 1개 이상 삭제. 구조는 N.MFDB_Add와 같고 function code만 3이다.
 
-<strong>N.MFDB_Clear (function 4)</strong> — 지정한 port pair·방향의 filter database를 통째로 clear. 데이터 길이 8바이트, 바이트 3–8은 FF₁₆.
+<strong>N.MFDB_Clear (function 4)</strong>: 지정한 port pair·방향의 filter database를 통째로 clear. 데이터 길이 8바이트, 바이트 3–8은 FF₁₆.
 
-<strong>N.MFDB_Create_Entry (function 6)</strong> — filter mode를 포함해 엔트리를 생성. "To" 포트가 global이면 해당 "From" 포트를 포함한 port pair마다 엔트리가 만들어질 수 있다. 포함된 filter mode는 기존 port pair의 filter mode를 바꾸지 못한다. clear되지 않은 database에 시도하면 요청자에게 오류를 반환하는 것이 권장된다. 하나의 database 레코드에 서로 다른 모드의 엔트리가 섞이는 것을 막기 위해, (Set_Mode 명령 폐기와 함께) N.MFDB_Add 사용으로 충분하도록 설계됐다.
+<strong>N.MFDB_Create_Entry (function 6)</strong>: filter mode를 포함해 엔트리를 생성. "To" 포트가 global이면 해당 "From" 포트를 포함한 port pair마다 엔트리가 만들어질 수 있다. 포함된 filter mode는 기존 port pair의 filter mode를 바꾸지 못한다. clear되지 않은 database에 시도하면 요청자에게 오류를 반환하는 것이 권장된다. 하나의 database 레코드에 서로 다른 모드의 엔트리가 섞이는 것을 막기 위해, (Set_Mode 명령 폐기와 함께) N.MFDB_Add 사용으로 충분하도록 설계됐다.
 
 | 바이트 | 내용 |
 | --- | --- |
@@ -300,7 +306,7 @@ filter database에 등록된 PGN의 필터 모드는 filter mode byte로 식별�
 | 3 | Filter mode |
 | 4–n | PGN 엔트리들 |
 
-<strong>N.MFDBNQ_Add (function 7)</strong> — PGN과 <strong>발신자 NAME</strong>을 함께 조건으로 하는 filter database 엔트리 추가. 공통 주소 공간·분리 주소 공간 모두에 적용할 수 있다.
+<strong>N.MFDBNQ_Add (function 7)</strong>: PGN과 <strong>발신자 NAME</strong>을 함께 조건으로 하는 filter database 엔트리 추가. 공통 주소 공간·분리 주소 공간 모두에 적용할 수 있다.
 
 - 주소 공간이 다른 세그먼트에서 메시지를 forwarding할 때, open connection(6.9)이 없으면 NIU는 <strong>자기 자신의 주소</strong>를 source address로 사용한다. 발신 CF와 open connection이 맺어져 있으면 virtual CF의 SA를 사용한다.
 - PDU2 메시지와 global 주소로 보내진 PDU1 메시지를 bridge 너머로 필터링할 수 있다. 요청자가 64-bit NAME과 64-bit qualification mask를 지정하면, NIU가 자신의 source address/NAME 테이블에서 그 정체성에 해당하는 source address를 연결한다.
@@ -342,7 +348,7 @@ filter database에 등록된 PGN의 필터 모드는 filter mode byte로 식별�
 address request의 타임아웃은 <strong>300 ms</strong>를 쓴다. NIU 1단 지연 + CF 응답 시간을 합한 값이다.
 :::
 
-#### N.NT_Request / N.NT_Response (6.7.2.1, 6.7.2.2) — 구형, 신규 설계 비권장
+#### N.NT_Request / N.NT_Response (6.7.2.1, 6.7.2.2): 구형, 신규 설계 비권장
 
 N.NT_Request(function 64)는 NIU 포트의 source address 목록을 요청한다. port pair가 <strong>같은 주소 공간</strong>을 공유할 때, NIU 기준 포트들의 물리적 배치·토폴로지를 파악하려는 용도다. bridge의 경우 address claim이 NIU 양쪽에 다 나타나므로, 어느 포트가 어느 세그먼트에 속하는지 이 메시지로 알아낼 수 있다.
 
@@ -394,24 +400,24 @@ NIU의 상태(status)·통계(statistics)에 접근하는 message function은 �
 
 | Parametric ID | 바이트 수 | 리셋 가능 | 정의 |
 | --- | --- | --- | --- |
-| 0 | N/A | — | 전체 파라미터를 번호 순으로 요청 (응답에는 쓰이지 않음) |
-| 1 | 2 | — | Buffer size (bytes) |
-| 2 | 2 | — | Maximum filter database size (bytes) |
-| 3 | 2 | — | Number of filter database entries |
-| 4 | 2 | — | 초당 최대 수신 메시지 수 |
-| 5 | 2 | — | 초당 최대 forwarding 메시지 수 |
-| 6 | 2 | — | 초당 최대 filtering 메시지 수 |
-| 7 | 2 | — | Maximum transit delay time (ms) |
+| 0 | N/A | - | 전체 파라미터를 번호 순으로 요청 (응답에는 쓰이지 않음) |
+| 1 | 2 | - | Buffer size (bytes) |
+| 2 | 2 | - | Maximum filter database size (bytes) |
+| 3 | 2 | - | Number of filter database entries |
+| 4 | 2 | - | 초당 최대 수신 메시지 수 |
+| 5 | 2 | - | 초당 최대 forwarding 메시지 수 |
+| 6 | 2 | - | 초당 최대 filtering 메시지 수 |
+| 7 | 2 | - | Maximum transit delay time (ms) |
 | 8 | 2 | Yes | Average transit delay time (ms) |
 | 9 | 2 | Yes | 버퍼 오버플로로 유실된 메시지 수 |
 | 10 | 2 | Yes | transit delay 초과 메시지 수 |
 | 11 | 2 | Yes | 초당 평균 수신 메시지 수 |
 | 12 | 2 | Yes | 초당 평균 forwarding 메시지 수 |
 | 13 | 2 | Yes | 초당 평균 filtering 메시지 수 |
-| 14 | 4 | — | 마지막 power-on reset 이후 uptime (s) |
-| 15 | 1 | — | 포트 수 |
-| 16 | 1 | — | NIU Type |
-| 17–255 | N/A | — | ISO 향후 할당 예약 |
+| 14 | 4 | - | 마지막 power-on reset 이후 uptime (s) |
+| 15 | 1 | - | 포트 수 |
+| 16 | 1 | - | NIU Type |
+| 17–255 | N/A | - | ISO 향후 할당 예약 |
 
 파라미터 정의 공통 사항: 1바이트 초과 데이터는 ISO 11783-7의 바이트 순서 규약을 따르고, 값 범위 규약도 ISO 11783-7을 따른다(별도 명시가 없는 한). 2바이트 파라미터의 데이터 범위는 0~64 255, 분해능은 1 단위/bit·offset 0이다(예: transit delay는 1 ms/bit). 파라미터에 따라 NIU 전체용, 특정 port pair용, 또는 둘 다일 수 있다.
 
@@ -439,14 +445,14 @@ Repeater·Bridge 값은 repeater가 네트워크 통신용 주소를 claim한 �
 
 #### General parametric 메시지 (6.8.3)
 
-<strong>N.GP_Request (function 128, CF→NIU)</strong> — parametric 1개 이상 요청. parametric 0을 요청하면 전체 목록이 반환된다. 8바이트 초과면 transport protocol 사용, 7개 미만 요청 시 남는 바이트는 FF₁₆. identifier는 오름차순으로 나열해야 한다.
+<strong>N.GP_Request (function 128, CF→NIU)</strong>: parametric 1개 이상 요청. parametric 0을 요청하면 전체 목록이 반환된다. 8바이트 초과면 transport protocol 사용, 7개 미만 요청 시 남는 바이트는 FF₁₆. identifier는 오름차순으로 나열해야 한다.
 
 | 바이트 | 내용 |
 | --- | --- |
 | 1 | Message function = 128 |
 | 2–n | Parametric identifier, 바이트당 1개 |
 
-<strong>N.GP_Response (function 129, NIU→CF)</strong> — 요청받은 parametric들을 반환. parametric 0 요청에 대한 응답은 전체 parametric을 번호 순으로 담는다. 반환 목록이 기대보다 짧으면, NIU가 목록의 추가 항목을 알지 못해 마지막으로 아는 파라미터에서 멈췄다는 뜻이다.
+<strong>N.GP_Response (function 129, NIU→CF)</strong>: 요청받은 parametric들을 반환. parametric 0 요청에 대한 응답은 전체 parametric을 번호 순으로 담는다. 반환 목록이 기대보다 짧으면, NIU가 목록의 추가 항목을 알지 못해 마지막으로 아는 파라미터에서 멈췄다는 뜻이다.
 
 | 바이트 | 내용 |
 | --- | --- |
@@ -454,7 +460,7 @@ Repeater·Bridge 값은 repeater가 네트워크 통신용 주소를 claim한 �
 | 2, 3 | 첫 번째 요청 parametric |
 | 4–n | 나머지 요청 parametric들 |
 
-<strong>N.GP_Reset_Statistics (function 130, CF→NIU, 8바이트)</strong> — Table 6에서 리셋 가능("Yes")으로 표시된 통계 파라미터 전부를 clear하는 명령. 바이트 2–8은 FF₁₆. Acknowledgment Message(PGN 59392)로 확인 응답한다.
+<strong>N.GP_Reset_Statistics (function 130, CF→NIU, 8바이트)</strong>: Table 6에서 리셋 가능("Yes")으로 표시된 통계 파라미터 전부를 clear하는 명령. 바이트 2–8은 FF₁₆. Acknowledgment Message(PGN 59392)로 확인 응답한다.
 
 #### Specific parametric 메시지 (6.8.4)
 
@@ -525,25 +531,25 @@ ISO 11783-3:2018 5.4.5는 Acknowledgement의 Byte 5(address acknowledge)에 요�
 Table 2(6.5.2)에는 192 = open 요청, 193 = open 응답, 194 = close 요청, 195 = close 응답으로 정리돼 있으나, 6.9.5의 개별 메시지 정의에는 192 = N.OC_Request, 193 = N.CC_Request, 194 = N.OC_Response, 195 = N.CC_Response로 적혀 있다. 원문 자체의 불일치이므로 구현 시 상호 운용 대상과 해석을 맞춰야 한다.
 :::
 
-<strong>N.OC_Request (function 192)</strong> — 다른 네트워크 세그먼트로의 connection open 요청. 요청 CF가 NIU로 보내며, 목적지 세그먼트의 port pair와 목적지 세그먼트에 있는 원하는 CF의 NAME을 담는다. 10바이트라 Transport Protocol을 사용한다.
+<strong>N.OC_Request (function 192)</strong>: 다른 네트워크 세그먼트로의 connection open 요청. 요청 CF가 NIU로 보내며, 목적지 세그먼트의 port pair와 목적지 세그먼트에 있는 원하는 CF의 NAME을 담는다. 10바이트라 Transport Protocol을 사용한다.
 
 | 바이트 | 내용 |
 | --- | --- |
 | 1 | Message function = 192 |
-| 2 | Port pair — bits 3–0 "To": connection 대상 CF의 세그먼트에 연결된 NIU 포트, bits 7–4 "From": 요청자 세그먼트에 연결된 포트(local port 0 권장) |
+| 2 | Port pair. bits 3–0 "To": connection 대상 CF의 세그먼트에 연결된 NIU 포트, bits 7–4 "From": 요청자 세그먼트에 연결된 포트(local port 0 권장) |
 | 3–10 | "To" 포트에서 연결할 CF의 NAME |
 
 요청 CF는 network message의 N.NTX_Request(6.7.2.3)로 목적지 세그먼트의 CF 정체를 먼저 파악해 원하는 CF를 골라야 한다. 이미 활성인 connection과 정확히 일치하는 open 요청이 오면 응답은 평소처럼 보내고 connection 상태는 바뀌지 않는다.
 
-<strong>N.CC_Request (function 193)</strong> — connection close 요청. 구조는 N.OC_Request와 같고(10바이트, Transport Protocol) 바이트 3–10은 원격 네트워크에서 분리할 CF의 NAME이다. <strong>connection을 처음 연 CF만</strong> 닫을 수 있으며, 열 때 사용한 것과 같은 NAME을 사용해야 한다.
+<strong>N.CC_Request (function 193)</strong>: connection close 요청. 구조는 N.OC_Request와 같고(10바이트, Transport Protocol) 바이트 3–10은 원격 네트워크에서 분리할 CF의 NAME이다. <strong>connection을 처음 연 CF만</strong> 닫을 수 있으며, 열 때 사용한 것과 같은 NAME을 사용해야 한다.
 
-<strong>N.OC_Response (function 194)</strong> — open 요청에 대한 NIU의 응답. 8바이트, NIU → 요청 CF.
+<strong>N.OC_Response (function 194)</strong>: open 요청에 대한 NIU의 응답. 8바이트, NIU → 요청 CF.
 
 | 바이트 | 내용 |
 | --- | --- |
 | 1 | Message function = 194 |
-| 2 | Port pair — bits 3–0 "To": 요청자 세그먼트 쪽 포트(local port 0), bits 7–4 "From": 대상 CF 세그먼트 쪽 포트 |
-| 3 | Status — bits 1,2: 0x01 = 성공, 0x00 = 실패. bits 3–8 예약 |
+| 2 | Port pair. bits 3–0 "To": 요청자 세그먼트 쪽 포트(local port 0), bits 7–4 "From": 대상 CF 세그먼트 쪽 포트 |
+| 3 | Status. bits 1,2: 0x01 = 성공, 0x00 = 실패. bits 3–8 예약 |
 | 4 | Failure Reason Code |
 | 5–8 | 예약(FF₁₆) |
 
@@ -557,7 +563,7 @@ Table 2(6.5.2)에는 192 = open 요청, 193 = open 응답, 194 = close 요청, 1
 | 5–254 | 예약 |
 | 255 | Not available |
 
-<strong>N.CC_Response (function 195)</strong> — close 요청에 대한 NIU의 응답. 구조는 N.OC_Response와 같다(8바이트, Status + Failure Reason Code).
+<strong>N.CC_Response (function 195)</strong>: close 요청에 대한 NIU의 응답. 구조는 N.OC_Response와 같다(8바이트, Status + Failure Reason Code).
 
 ## NIU 유형 (7절)
 

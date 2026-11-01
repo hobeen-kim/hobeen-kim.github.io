@@ -27,9 +27,9 @@ CAN 버스가 무엇인지 정도는 알고 있다고 가정한다. CAN 자체�
 
 - [CH2. CAN 통신 입문](/study/isobus/02-can-intro)
 - [CH9. J1939 메시지 구조](/study/isobus/09-j1939-message)
-- [CH10. J1939 주소 체계](/study/isobus/10-j1939-address)
-- [CH11. J1939 Transport Protocol](/study/isobus/11-j1939-transport)
-- [CH12. ISOBUS 개요](/study/isobus/12-isobus-overview)
+- [CH12~14. J1939 주소 체계](/study/isobus/12-j1939-address-name)
+- [CH15~17. J1939 Transport Protocol](/study/isobus/15-tp-bam-cmdt)
+- [CH18. ISOBUS 개요](/study/isobus/18-isobus-overview)
 :::
 
 ## 원문 출처

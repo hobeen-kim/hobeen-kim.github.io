@@ -2,7 +2,7 @@
 from _common import diagram
 
 ROWS = [
-    ("Version", "B.5.3 · P5 · DA 지정", [
+    ("Version", "우선순위 5 · 상대 지정", [
         ("0x10", "Version", "blue"),
         ("버전", "0~4", "green"),
         ("부팅 시간", "s, TC/DL만", "green"),
@@ -12,17 +12,17 @@ ROWS = [
         ("섹션 수", "전체 붐 합", "green"),
         ("채널 수", "위치 기반 제어", "green"),
     ]),
-    ("TC Status", "B.8.1 · P3 · 전역", [
+    ("TC Status", "우선순위 3 · 전체에게", [
         ("0xFE", "TC Status", "blue"),
         ("0xFF", "element N/A", "gray"),
         ("0xFF", "DDI N/A", "gray"),
         ("0xFF", "DDI N/A", "gray"),
         ("상태 비트", "bit 1~4, 8", "brown"),
         ("클라이언트 SA", "Busy일 때만", "green"),
-        ("B.6 명령", "Busy일 때만", "green"),
+        ("처리 중 명령", "Busy일 때만", "green"),
         ("예약", "", "gray"),
     ]),
-    ("Client Task", "B.8.2 · P3 · DA 지정", [
+    ("Client Task", "우선순위 3 · 상대 지정", [
         ("0xFF", "Client Task", "blue"),
         ("0xFF", "element N/A", "gray"),
         ("0xFF", "DDI N/A", "gray"),

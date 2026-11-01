@@ -1,4 +1,4 @@
-"""CH17 §13 AUX-N(Type 2) 할당 시퀀스 — 입력 유닛 준비, Preferred Assignment, VT 할당 처리, 상태 송신, 해제 (light/dark PNG)."""
+"""CH17 §13 AUX-N(Type 2) 할당 시퀀스: 입력 유닛 준비, Preferred Assignment, VT 할당 처리, 상태 송신, 해제 (light/dark PNG)."""
 from _common import diagram
 from matplotlib.lines import Line2D
 

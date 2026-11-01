@@ -1,4 +1,4 @@
-"""CH14 §10 DM1/DM2 DTC 4바이트 비트 배치 — 예: 60 08 1F 01 (light/dark PNG)."""
+"""CH14 §10 DM1/DM2 DTC 4바이트 비트 배치: 예: 60 08 1F 01 (light/dark PNG)."""
 from _common import diagram
 
 EXAMPLE = [0x60, 0x08, 0x1F, 0x01]

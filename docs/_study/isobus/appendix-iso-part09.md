@@ -1,14 +1,20 @@
 ---
-title: "표준 정리: Part 9 — Tractor ECU"
-description: "ISO 11783-9(Tractor ECU) — TECU의 게이트웨이 역할, 클래스 구분, 전원 관리 시퀀스를 정리한 표준 요약이다."
+title: "표준 정리: Part 9(Tractor ECU)"
+description: "ISO 11783-9(Tractor ECU)에서 TECU의 게이트웨이 역할, 클래스 구분, 전원 관리 시퀀스를 정리한 표준 요약이다."
 date: 2026-08-21
 tags: [ISOBUS, ISO11783, 표준정리]
+prev: /study/isobus/appendix-iso-part08
+next: /study/isobus/appendix-iso-part10
 ---
 
 # ISO 11783-9: Tractor ECU 정리
 
 ::: info 이 문서에 대해
 ISO 11783-9 표준 원문을 학습 목적으로 재구성한 <strong>비공식 요약·해설</strong>이다. 규범적 판단이 필요할 때는 반드시 원문 표준을 확인해야 한다.
+:::
+
+::: tip 처음 읽는다면
+이 페이지는 트랙터 ECU(Part 9: 트랙터를 대표해 트랙터 버스와 작업기 버스를 잇는 TECU의 요구사항)를 원문의 절 구조대로 요약한 참고 자료다. TECU 클래스별 최소 메시지나 전원 관리 순서를 확인할 때 펼쳐 본다. 처음이라면 [22장 트랙터 ECU: 클래스, 조명, 전원, Safe mode](/study/isobus/22-tractor-ecu)를 먼저 읽는다.
 :::
 
 ## 개요
@@ -31,20 +37,20 @@ TECU는 단순한 프로토콜 변환기가 아니다. 두 가지 역할을 동�
 | 절 | 내용 |
 | --- | --- |
 | 1~3 | Scope, 인용 표준, 용어 정의 |
-| 4.1 | Ports — TECU의 버스 포트 구성 |
-| 4.2 | Functions and parameter repackaging — 메시지 중계 규칙 |
-| 4.3 | Identity association — 트랙터 측 CF의 그룹화 |
-| 4.4 | Classification — TECU 클래스(1/2/3)와 부가 분류(N/F/G/P/M), 최소 지원 메시지 |
-| 4.5 | Control of lighting — 작업기 조명 제어 |
-| 4.6 | Control of ECU_PWR and PWR — 작업기 전원 제어와 시스템 셧다운 |
-| 4.7 | Safe-mode operation — 페일세이프 요구사항 |
+| 4.1 | Ports: TECU의 버스 포트 구성 |
+| 4.2 | Functions and parameter repackaging: 메시지 중계 규칙 |
+| 4.3 | Identity association: 트랙터 측 CF의 그룹화 |
+| 4.4 | Classification: TECU 클래스(1/2/3)와 부가 분류(N/F/G/P/M), 최소 지원 메시지 |
+| 4.5 | Control of lighting: 작업기 조명 제어 |
+| 4.6 | Control of ECU_PWR and PWR: 작업기 전원 제어와 시스템 셧다운 |
+| 4.7 | Safe-mode operation: 페일세이프 요구사항 |
 
 ### 인용 표준
 
 Normative reference로 ISO 11783의 Part 1, 2, 4, 5, 6, 7, 8, 10과 함께 다음 두 표준이 등장한다.
 
-- <strong>ISO 11786</strong>: 트랙터 장착 센서 인터페이스 — Class 1 TECU가 제공하는 기본 트랙터 측정값의 출처
-- <strong>ISO 16154</strong>: 공로 주행용 조명·등화 장치 설치 — Class 2의 lighting 메시지 요구의 근거
+- <strong>ISO 11786</strong>: 트랙터 장착 센서 인터페이스. Class 1 TECU가 제공하는 기본 트랙터 측정값의 출처
+- <strong>ISO 16154</strong>: 공로 주행용 조명·등화 장치 설치. Class 2의 lighting 메시지 요구의 근거
 
 참고로 ISO 11783 전체는 CAN(ISO 11898-1) 기반이며 SAE J1939와 공동 개발된 프로토콜 위에 서 있다.
 
@@ -142,7 +148,7 @@ TECU 기능은 VT 기능을 제공하는 디스플레이에 통합될 수도 있
 
 이 구조 덕분에, 예를 들어 instance 0 TECU에 ground-based speed가 없을 때 GPS 수신기가 연결된 디스플레이 내장 TECU가 그 메시지를 대신 송신할 수 있다. 작업기 CF는 복수의 tractor facility response 메시지를 수신·처리할 수 있어야 한다.
 
-### Class 1 — 기본 인터페이스
+### Class 1: 기본 인터페이스
 
 Class 1은 단순한 네트워크 지원 ECU가 ISO 11786의 기본 트랙터 내부 측정값을 제공하는 인터페이스다. 기존 센서를 간단한 네트워크 ECU에 연결하는 것만으로 ISO 적합성을 빠르게 확보할 수 있게 하려는 의도이지만, <strong>신규 트랙터 설계에는 사용하지 않아야 한다</strong>.
 
@@ -157,7 +163,7 @@ version 2부터는 전원 관리, 기본 언어, tractor facilities response가 
 | Language | VT 초기화용 default language를 TECU에 저장 |
 | Facilities | tractor facilities response (version 2 이상) |
 
-### Class 2 — 전체 측정 인터페이스
+### Class 2: 전체 측정 인터페이스
 
 Class 2는 트랙터 측정 기능의 전체 집합을 제공한다. Class 1 대비 주요 확장은 다음 네 가지다.
 
@@ -176,7 +182,7 @@ Class 2는 트랙터 측정 기능의 전체 집합을 제공한다. Class 1 대
 | Lighting | ISO 16154가 해당 지역에 요구하는 작업기·트랙터 조명 메시지 세트 (version 2 이상) |
 | Auxiliary valve | estimated or measured flow |
 
-### Class 3 — 명령 수용 인터페이스
+### Class 3: 명령 수용 인터페이스
 
 Class 3은 <strong>implement bus에서 오는 명령을 수용하는 TECU</strong>를 다룬다. rear hitch, PTO, auxiliary valve에 대한 기본 명령을 처리해야 하며, 이를 통해 작업기가 트랙터의 동력원과 히치 위치를 제어할 수 있게 된다. 트랙터는 명령을 <strong>negative-acknowledge로 거부할 수도 있다</strong>.
 
@@ -195,11 +201,11 @@ Class 3은 Class 2 메시지 전부에 더해 다음을 지원한다(ISO 11783-7
 version 2에서 추가된 limit status·exit/reason code 계열 파라미터는 "명령이 왜 그대로 수행되지 않았는가"를 작업기에게 알려주는 피드백 채널이다. 명령 수용형(Class 3) 인터페이스에서 트랙터가 명령을 제한하거나 종료한 이유를 작업기가 알 수 있게 하여, 상호 제어의 투명성을 높인다.
 :::
 
-### Addendum N — Navigational
+### Addendum N: Navigational
 
 트랙터에 GPS 또는 DGPS 수신기가 설치되어 ISO 11783-7의 항법 메시지 세트를 implement bus에 제공하는 경우 클래스 번호에 "N"을 붙인다. 예를 들어 항법 메시지를 지원하는 class 3 인터페이스는 <strong>class 3N</strong>이 되며, ISO 11783-7의 "Navigation location system messages"를 지원해야 한다.
 
-### Addendum F — 전방/보조 작업기 지원
+### Addendum F: 전방/보조 작업기 지원
 
 전방(front-mounted) 또는 보조(secondary) 히치·PTO가 설치되어 그 정보를 implement bus에 제공하는 경우 "F"를 붙인다. 예: front 메시지를 지원하는 class 2 인터페이스는 <strong>class 2F</strong>.
 
@@ -211,7 +217,7 @@ front 관련 파라미터의 지원 범위는 기본 클래스에 따라 계단�
 | Class 2 TECU | (추가) front draft |
 | Class 3 TECU | (추가) front hitch position limit status·exit/reason code, front hitch position command, front PTO engagement request status·shaft speed limit status·exit/reason code, front PTO output shaft speed set point command, front PTO engagement command (limit status·exit/reason code 계열은 version 2 이상) |
 
-### Addendum G — Guidance (version 2 이상)
+### Addendum G: Guidance (version 2 이상)
 
 트랙터에 조향(guidance/steering) 시스템이 설치되어 guidance 기능을 제공할 수 있으면 "G"를 붙인다. F와 달리 <strong>G는 기본 클래스(1/2/3)와 무관하게 붙을 수 있다</strong>. G를 붙인 트랙터는 guidance의 상태와 제어를 아우르는 파라미터 전부를 제공해야 한다. 예: guidance를 지원하는 class 2 인터페이스는 <strong>class 2G</strong>이며 조향 시스템의 외부 제어를 지원해야 한다.
 
@@ -225,7 +231,7 @@ guidance 분류에 사용하는 파라미터(ISO 11783-7):
 - steering system readiness
 - mechanical system lockout
 
-### Addendum P — Powertrain (version 2 이상)
+### Addendum P: Powertrain (version 2 이상)
 
 작업기 컨트롤러로부터 속도 및/또는 주행 전략(drive strategy) 명령을 수용할 수 있으면 "P"를 붙인다. G와 마찬가지로 <strong>기본 클래스와 무관</strong>하다. P를 붙인 트랙터는 속도의 상태·제어를 아우르는 파라미터 전부를 제공해야 한다. 단, 주행 전략 제어와 정지(속도 0.0) 능력은 선택 사항이며, 작업기는 tractor facilities response message로 그 지원 여부를 확인할 수 있다.
 
@@ -241,11 +247,11 @@ powertrain 분류에 사용하는 파라미터(ISO 11783-7):
 
 제어에 사용될 때 machine selected speed는 트랙터가 차속 제어에 실제로 쓰는 속도 소스여야 한다. 보통 wheel-based speed지만 다른 소스일 수도 있으며, <strong>제어 중 속도 소스가 바뀌는 경우 매끄러운 전환을 보장하는 것은 트랙터의 책임</strong>이다.
 
-### Addendum M — Motion Initiation (version 2 이상)
+### Addendum M: Motion Initiation (version 2 이상)
 
 차량의 발진(전진/후진) 명령을 수용할 수 있으면 "M"을 붙인다. 예: 발진 명령을 지원하는 class 3 인터페이스는 <strong>class 3M</strong>. 해당 메시지 세트는 ISO 11783-7에서 정의될 예정으로 기술되어 있다.
 
-### 작업기 명령형 트랙터 — 제어 옵션 (4.4.3)
+### 작업기 명령형 트랙터: 제어 옵션 (4.4.3)
 
 트랙터는 속도·토크·유량·압력·힘 등의 제어 변수에 대해, 전달 일관성을 높이거나 극대화하기 위한 <strong>추가 제어 모드</strong>를 제공할 수 있다(ISO 11783-7의 명령 사용). 제어 모드의 가용성은 트랙터 설계에 따라 다르며 tractor facilities message로 확인할 수 있다. 트랙터는 각 제어 모드의 제약을 스스로 판단하고, 적절한 경우에만 명령을 acknowledge해야 한다.
 
@@ -365,5 +371,5 @@ Safe-mode 요구는 특히 Class 3(작업기가 트랙터를 명령하는 구조
 
 ## Bibliography
 
-- ISO 11898-1:2003 — CAN 데이터 링크 계층·물리 시그널링
-- SAE J1939 — Serial Control and Communications Vehicle Network 권고 규격
+- ISO 11898-1:2003: CAN 데이터 링크 계층·물리 시그널링
+- SAE J1939: Serial Control and Communications Vehicle Network 권고 규격

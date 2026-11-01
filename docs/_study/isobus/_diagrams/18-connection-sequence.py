@@ -50,7 +50,7 @@ def draw(d):
     msg(d, 28.5, "Language", to_tc=False, color=P["violet"], ls="--")
 
     d.box(CX + 3, 21.5, TX - CX - 6, 5, P["purple"])
-    d.text((CX + TX) / 2, 24, "DDOP 확인 · 전송 · Activate  (20장)", size=9)
+    d.text((CX + TX) / 2, 24, "DDOP 확인 · 전송 · Activate", size=9)
     side(d, TX + 11, 24, "TC Status [Busy]", "brown", w=16)
     msg(d, 19, "Object-pool Activate Response", to_tc=False)
     msg(d, 15, "measurement 명령", to_tc=False)

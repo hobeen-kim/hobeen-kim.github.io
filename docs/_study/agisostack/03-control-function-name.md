@@ -104,7 +104,7 @@ J1939와 ISOBUS는 <strong>address claiming(주소 클레임)</strong>이라는 
 실제 코드에서 애플리케이션이 하는 일은 NAME 필드를 채워 넣고 희망 주소를 하나 지정하는 것까지다. 그 뒤로 클레임 메시지를 언제 보내고, 충돌이 나면 어떻게 재시도하고, 상대 장치의 주소 변화를 어떻게 추적할지는 스택의 몫이다.
 
 ::: info 관련 스터디
-주소 클레임 메시지의 실제 형식과 중재 규칙, 그리고 Cannot Claim Address 같은 예외 흐름은 [ISOBUS CH10. J1939 주소 체계](/study/isobus/10-j1939-address)와 [CH14. ISOBUS 네트워크 관리](/study/isobus/14-isobus-network-mgmt)에서 다룬다.
+주소 클레임 메시지의 실제 형식과 중재 규칙, 그리고 Cannot Claim Address 같은 예외 흐름은 [ISOBUS CH12~14. J1939 주소 체계](/study/isobus/12-j1939-address-name)와 [CH26. ISOBUS 네트워크 관리](/study/isobus/26-isobus-network-mgmt)에서 다룬다.
 :::
 
 ## 정리

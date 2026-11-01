@@ -1,4 +1,4 @@
-"""CH15 §7 가상 Soft Key 페이지 넘김 예 — 물리 6개·내비게이션 1개 (light/dark PNG)."""
+"""CH15 §7 가상 Soft Key 페이지 넘김 예: 물리 6개·내비게이션 1개 (light/dark PNG)."""
 from _common import diagram
 
 ENTRIES = ["K1", "K2", None, "K3", "K4", "K5", "K6", "K7", None, "K8", "K9", None, None]

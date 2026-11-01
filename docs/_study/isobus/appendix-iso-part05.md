@@ -1,14 +1,20 @@
 ---
-title: "표준 정리: Part 5 — Network management"
-description: "ISO 11783-5(Network management) — 64비트 NAME, 주소 클레임 절차, 상태 천이를 정리한 표준 요약이다."
+title: "표준 정리: Part 5(Network management)"
+description: "ISO 11783-5(Network management)에서 64비트 NAME, 주소 클레임 절차, 상태 천이를 정리한 표준 요약이다."
 date: 2026-08-21
 tags: [ISOBUS, ISO11783, 표준정리]
+prev: /study/isobus/appendix-iso-part04
+next: /study/isobus/appendix-iso-part06
 ---
 
 # ISO 11783-5: Network management 정리
 
 ::: info 이 문서에 대해
 ISO 11783-5 표준 원문을 학습 목적으로 재구성한 <strong>비공식 요약·해설</strong>이다. 규범적 판단이 필요할 때는 반드시 원문 표준을 확인해야 한다.
+:::
+
+::: tip 처음 읽는다면
+이 페이지는 네트워크 관리(Part 5: 장치 이름인 NAME, 주소 클레임, 초기화 절차)를 원문의 절 구조대로 요약한 참고 자료다. 주소 클레임 타이밍이나 NAME 필드의 정확한 규칙을 확인할 때 펼쳐 본다. 처음이라면 [12장 주소와 NAME: 누가 보냈는지 알아보는 법](/study/isobus/12-j1939-address-name)과 [13장 주소 클레임: 주소를 정하는 절차](/study/isobus/13-j1939-address-claim)를 먼저 읽는다.
 :::
 
 ## 개요
@@ -84,7 +90,7 @@ NAME은 우선순위 순서(최상위 → 최하위)로 다음 10개 필드로 �
 | Industry group | 2846 | 3 | Byte 8, bit 7~5 | ISO가 정의·할당. 산업군 식별(농업 장비 등) |
 | Device class instance | 2843 | 4 | Byte 8, bit 4~1 | 네트워크 내 특정 device class의 발생 순번. 해석은 industry group에 의존 |
 | Device class | 2842 | 7 | Byte 7, bit 8~2 | ISO가 정의·할당. 기능 그룹의 공통 NAME("agricultural equipment"의 "planter" 등) |
-| Reserved | — | 1 | Byte 7, bit 1 | ISO 예약. <strong>0으로 설정해야 한다</strong> |
+| Reserved | - | 1 | Byte 7, bit 1 | ISO 예약. <strong>0으로 설정해야 한다</strong> |
 | Function | 2841 | 8 | Byte 6 | ISO가 정의·할당. 0~127은 다른 필드와 무관하게 정의되고, 128~253은 device class에 따라 해석이 달라진다 |
 | Function instance | 2839 | 5 | Byte 5, bit 8~4 | 네트워크의 특정 장치 시스템에서 해당 function의 발생 순번 |
 | ECU instance | 2840 | 3 | Byte 5, bit 3~1 | 한 function에 연결된 ECU 그룹 중 어느 ECU인지 식별 |
@@ -235,12 +241,12 @@ NM control mode indicator는 항상 Byte 3의 하위 4비트에 실리며 메시
 | Commanded industry group | 5673 | 0,1,2,3,8 | 3 | Byte 8, bit 7~5 |
 | Commanded device class instance | 5672 | 0,1,2,3,8 | 4 | Byte 8, bit 4~1 |
 | Commanded device class | 5671 | 0,1,2,3,8 | 7 | Byte 7, bit 8~2 |
-| Reserved | — | — | 1 | Byte 7, bit 1 |
+| Reserved | - | - | 1 | Byte 7, bit 1 |
 | Commanded function | 5670 | 0,1,2,3,8 | 8 | Byte 6 |
 | Commanded function instance | 5669 | 0,1,2,3,8 | 5 | Byte 5, bit 8~4 |
 | Commanded ECU instance | 5668 | 0,1,2,3,8 | 3 | Byte 5, bit 3~1 |
 | Commanded manufacturer code | 5667 | 0,1,2,3,8 | 11 | Byte 4(상위 8) + Byte 3 bit 8~6(하위 3) |
-| Reserved | — | — | 1 | Byte 3, bit 5 |
+| Reserved | - | - | 1 | Byte 3, bit 5 |
 | NM Control Mode Indicator | 5666 | 전 모드 | 4 | Byte 3, bit 4~1 |
 | Self-configurable address capable qualifier flag | 5665 | 0,4,8 | 1 | Byte 2, bit 8 |
 | Industry group qualifier flag | 5664 | 0,4,8 | 1 | Byte 2, bit 7 |
@@ -281,15 +287,15 @@ Commanded 필드는 해당 qualifier flag가 0일 때만 값이 채워지고, fl
 
 #### NM Control Mode (Byte 3 하위 4비트, SPN 5666, 값 범위 0~15)
 
-- <strong>Mode 0 — Set Pending NAME</strong>: CAN 식별자의 목적지 주소에 있는 target CF에게 pending NAME 변경을 명령한다. 모든 데이터 필드 필수. commanded 필드가 새 NAME 값이며 qualifier flag로 적용 여부를 지정한다. NAME checksum(target CF의 원래 NAME 8바이트 합의 하위 8비트)으로 SA 변동 가능성을 방어한다.
-- <strong>Mode 1 — Pending NAME</strong>: target CF가 pending NAME 조회 요청에 응답으로 송신. pending NAME을 commanded 필드에 담는다(전 필드 필수). qualifier flag·checksum은 미사용(모두 1). pending NAME이 미설정이거나 유효하지 않으면 이 메시지 대신 Mode 4(NACK)를 보낸다.
-- <strong>Mode 2 — Current NAME</strong>: target CF가 current NAME 조회 요청에 응답으로 송신. current NAME을 commanded 필드에 담는다(전 필드 필수). qualifier flag·checksum은 미사용(모두 1).
-- <strong>Mode 3 — NAME ACK</strong>: target CF가 직전에 받은 "set pending NAME" 명령이 성공적으로 수행됐음을 알린다. pending NAME을 commanded 필드에 담는다(전 필드 필수). qualifier flag·checksum은 미사용(모두 1).
-- <strong>Mode 4 — NAME NACK</strong>: target CF가 직전의 "set pending NAME" 또는 "request pending NAME" 명령이 실패했음을 알린다. 유효 필드는 control mode indicator, error code, qualifier flag뿐이며 나머지는 모두 1.
-- <strong>Mode 5 — Request pending NAME</strong>: commanding CF가 target CF에게 pending NAME 응답을 요청. control mode 파라미터만 유효, 나머지는 모두 1.
-- <strong>Mode 6 — Request current NAME</strong>: commanding CF가 target CF에게 current NAME 응답을 요청. control mode 파라미터만 유효, 나머지는 모두 1.
-- <strong>Mode 7 — Adopt pending NAME</strong>: commanding CF가 보내는 "트리거" 명령. target CF(Global로 보내면 pending NAME을 가진 모든 CF)에게 pending NAME을 current NAME으로 채택하고 그 새 NAME으로 <strong>주소 클레임 절차를 다시 시작</strong>하도록 지시한다. control mode 파라미터만 유효. 특정 SA 또는 Global 주소로 보낼 수 있다.
-- <strong>Mode 8 — Request NAME address claim</strong>: <strong>SA를 모르는 CF</strong>에게 address-claimed 메시지를 보내게 하여 요청자가 그 CF의 SA를 알아내는 용도다. qualifier flag로 NAME의 전부 또는 일부만 매칭 조건으로 지정할 수 있으며, 반드시 Global 주소로 송신한다. 지정된 qualifier 필드가 current NAME과 일치하는 CF는 current NAME으로 address claim을 보내고, 일치하지 않는 CF는 address claim도 NACK도 보내지 않는다(침묵).
+- <strong>Mode 0: Set Pending NAME</strong>: CAN 식별자의 목적지 주소에 있는 target CF에게 pending NAME 변경을 명령한다. 모든 데이터 필드 필수. commanded 필드가 새 NAME 값이며 qualifier flag로 적용 여부를 지정한다. NAME checksum(target CF의 원래 NAME 8바이트 합의 하위 8비트)으로 SA 변동 가능성을 방어한다.
+- <strong>Mode 1: Pending NAME</strong>: target CF가 pending NAME 조회 요청에 응답으로 송신. pending NAME을 commanded 필드에 담는다(전 필드 필수). qualifier flag·checksum은 미사용(모두 1). pending NAME이 미설정이거나 유효하지 않으면 이 메시지 대신 Mode 4(NACK)를 보낸다.
+- <strong>Mode 2: Current NAME</strong>: target CF가 current NAME 조회 요청에 응답으로 송신. current NAME을 commanded 필드에 담는다(전 필드 필수). qualifier flag·checksum은 미사용(모두 1).
+- <strong>Mode 3: NAME ACK</strong>: target CF가 직전에 받은 "set pending NAME" 명령이 성공적으로 수행됐음을 알린다. pending NAME을 commanded 필드에 담는다(전 필드 필수). qualifier flag·checksum은 미사용(모두 1).
+- <strong>Mode 4: NAME NACK</strong>: target CF가 직전의 "set pending NAME" 또는 "request pending NAME" 명령이 실패했음을 알린다. 유효 필드는 control mode indicator, error code, qualifier flag뿐이며 나머지는 모두 1.
+- <strong>Mode 5: Request pending NAME</strong>: commanding CF가 target CF에게 pending NAME 응답을 요청. control mode 파라미터만 유효, 나머지는 모두 1.
+- <strong>Mode 6: Request current NAME</strong>: commanding CF가 target CF에게 current NAME 응답을 요청. control mode 파라미터만 유효, 나머지는 모두 1.
+- <strong>Mode 7: Adopt pending NAME</strong>: commanding CF가 보내는 "트리거" 명령. target CF(Global로 보내면 pending NAME을 가진 모든 CF)에게 pending NAME을 current NAME으로 채택하고 그 새 NAME으로 <strong>주소 클레임 절차를 다시 시작</strong>하도록 지시한다. control mode 파라미터만 유효. 특정 SA 또는 Global 주소로 보낼 수 있다.
+- <strong>Mode 8: Request NAME address claim</strong>: <strong>SA를 모르는 CF</strong>에게 address-claimed 메시지를 보내게 하여 요청자가 그 CF의 SA를 알아내는 용도다. qualifier flag로 NAME의 전부 또는 일부만 매칭 조건으로 지정할 수 있으며, 반드시 Global 주소로 송신한다. 지정된 qualifier 필드가 current NAME과 일치하는 CF는 current NAME으로 address claim을 보내고, 일치하지 않는 CF는 address claim도 NACK도 보내지 않는다(침묵).
 - <strong>Mode 9~15</strong>: ISO 예약.
 
 #### Commanded 파라미터 사용 규칙 (4.4.3.3.4)
@@ -373,12 +379,12 @@ NM 메시지 송신 전에 변경 대상 CF의 신원과 SA를 검증해야 한�
 1. request-for-address-claimed를 Global 주소로 송신
 2. 최소 <strong>250 ms + RTxD</strong> 대기
 3. 대기 중 수신한 모든 address-claimed 메시지의 SA를 저장
-4. 사용되지 않은 주소를 클레임하는 address-claimed 송신 — initial address가 비어 있으면 그것을, 이미 클레임되어 있으면 다른 빈 주소를 클레임
+4. 사용되지 않은 주소를 클레임하는 address-claimed 송신: initial address가 비어 있으면 그것을, 이미 클레임되어 있으면 다른 빈 주소를 클레임
 
 <strong>b) 단일 주소 조회 방식</strong>
 
 1. 자신의 initial address를 목적지로 request-for-address-claimed 송신
-2. 최소 <strong>250 ms + RTxD</strong> 대기 — 대기 중 그 주소를 클레임하는 address-claimed를 수신하면 새 initial address를 선택하고 1단계부터 반복
+2. 최소 <strong>250 ms + RTxD</strong> 대기: 대기 중 그 주소를 클레임하는 address-claimed를 수신하면 새 initial address를 선택하고 1단계부터 반복
 3. initial address를 클레임하는 address-claimed 송신
 
 :::info 대기 시간에 관한 노트
@@ -434,9 +440,9 @@ initial address X가 이미 다른 CF들(SA=X,Y,Z)에 의해 클레임된 것으
 
 | 시나리오 | 상황 | 해결 |
 |---|---|---|
-| a | 한쪽이 250 ms + RTxD를 먼저 끝냄 | 경합 없이 해결 — 늦은 쪽이 대기 중에 상대 클레임을 보고 다른 주소 선택 |
+| a | 한쪽이 250 ms + RTxD를 먼저 끝냄 | 경합 없이 해결. 늦은 쪽이 대기 중에 상대 클레임을 보고 다른 주소 선택 |
 | b | 동시에 끝나지만 클레임 송신이 근소하게 어긋남 | 주소 클레임 우선순위 판정으로 해결(4.5.4.2) |
-| c | 동시에 끝나고 클레임도 동시에 송신 | 네트워크 오류 발생 가능 — 4.5.4.3의 절차로 해결 |
+| c | 동시에 끝나고 클레임도 동시에 송신 | 네트워크 오류 발생 가능. 4.5.4.3의 절차로 해결 |
 
 #### 4.5.4.2 주소 클레임 우선순위 판정
 
@@ -458,7 +464,7 @@ request-for-address-claimed·address-claimed·cannot-claim-source-address는 서
 
 - 두 CF가 동시에 NULL 주소(254)로 보내는 request-for-address-claimed는 데이터 필드까지 같으므로 문제가 없다.
 - 그러나 같은 주소를 다투는 여러 CF가 <strong>동시에 address-claimed를 송신</strong>하면 데이터 필드(NAME)가 서로 달라 CAN 수준의 네트워크 오류(비트 충돌)가 발생할 수 있다. 여러 CF가 NULL 주소에서 동시에 보내는 cannot-claim-source-address도 같은 이유로 오류를 일으킬 수 있다.
-- 데이터 링크 계층이 이런 오류를 감지·보고할 수 있다면: address claim 송신 후 오류 코드를 모니터링하고, 네트워크 오류가 확인되면 <strong>RTxD 후 클레임 재송신을 스케줄</strong>한다. (동기화된 충돌이 반복되면 장치들이 Bus OFF까지 갈 수 있는데, 서로 다른 RTxD가 재송신 시점을 흩어 놓아 충돌을 끊는다 — Figure 9.)
+- 데이터 링크 계층이 이런 오류를 감지·보고할 수 있다면: address claim 송신 후 오류 코드를 모니터링하고, 네트워크 오류가 확인되면 <strong>RTxD 후 클레임 재송신을 스케줄</strong>한다. (동기화된 충돌이 반복되면 장치들이 Bus OFF까지 갈 수 있는데, 서로 다른 RTxD가 재송신 시점을 흩어 놓아 충돌을 끊는다. Figure 9.)
 - cannot-claim-source-address끼리 충돌한 경우도 같은 절차(RTxD 후 재송신)를 쓴다.
 
 ### 4.5.5 주소를 얻지 못한 CF
@@ -470,7 +476,7 @@ request-for-address-claimed·address-claimed·cannot-claim-source-address는 서
 
 전원이 재인가되면 다시 주소 클레임을 시도할 수 있다.
 
-## Annex A (참고) — NAME 구성 예시
+## Annex A (참고): NAME 구성 예시
 
 ### A.1 단일 엔진 트랙터의 엔진 ECU
 
@@ -479,14 +485,14 @@ ISO 11783-1 부속서의 코드 표를 사용해 구성한다.
 | 필드 | 값 | 근거 |
 |---|---|---|
 | Self-config. address | 0 | non-configurable |
-| Industry group | 000 | global(0) — function 0~127은 다른 industry group에도 적용 가능 |
+| Industry group | 000 | global(0). function 0~127은 다른 industry group에도 적용 가능 |
 | Device class instance | 0000 | 첫 인스턴스 |
 | Device class | 0000001 | tractor(1) |
 | Reserved | 0 | 고정 |
 | Function | 00000000 | engine(0) |
 | Function instance | 00000 | 단일 엔진 차량 |
 | ECU instance | 000 | ECU 1대 |
-| Mfc. code / Identity number | 제조사별 | — |
+| Mfc. code / Identity number | 제조사별 | - |
 
 ### A.2 고속도로용 대형 트랙터 첫 트레일러의 ABS ECU (non-self-configurable)
 

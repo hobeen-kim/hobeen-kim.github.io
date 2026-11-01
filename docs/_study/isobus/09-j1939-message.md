@@ -1,36 +1,45 @@
 ---
-title: "J1939 메시지 구조"
-description: "J1939의 29비트 ID 해부, PGN/SPN 개념, PDU1/PDU2 구분, 실제 CAN 메시지 디코딩 실습까지 학습한다."
+title: "J1939 메시지 구조: 29비트 ID, PGN, SPN"
+description: "J1939가 29비트 CAN ID에 우선순위, 메시지 종류, 보낸 이를 담는 방법과 PGN, SPN을 읽는 법을 익힌다."
 date: 2026-04-13
-tags:
-  - isobus
-  - j1939
-  - pgn
-  - spn
-  - can
+tags: [J1939, PGN, SPN, CAN, PDU]
+prev: /study/isobus/08-j1939-intro
+next: /study/isobus/10-j1939-request-ack
 ---
 
-<Header />
-
-[[toc]]
+# J1939 메시지 구조: 29비트 ID, PGN, SPN
 
 ::: info 학습 목표
-- J1939 29비트 ID의 각 필드(Priority, EDP, DP, PF, PS, SA)를 계산할 수 있다.
-- PGN 계산 공식을 적용해 PF/PS 값으로 PGN을 도출할 수 있다.
-- SPN의 개념과 데이터 필드 내 위치, 스케일/오프셋 적용 방법을 이해한다.
-- PDU1과 PDU2의 차이를 PF 값으로 구분할 수 있다.
-- 실제 CAN 메시지 문자열을 직접 파싱해 온도값을 추출할 수 있다.
-- Acknowledgement(PGN 59392) 프레임을 control byte별로 디코딩하고, NACK을 보내야 할 때와 침묵해야 할 때를 구분할 수 있다.
-- Request2와 Transfer 프레임을 바이트 단위로 만들고 디코딩할 수 있다.
-- Tr·T3와 재시도 규칙으로 요청 측 타임아웃 로직을 설계할 수 있다.
+- 16진수 CAN ID를 2진수로 풀어 Priority, EDP, DP, PF, PS, SA 여섯 칸으로 손으로 나눌 수 있다.
+- PF 값으로 PDU1(받는 주소를 적는 메시지)과 PDU2(모두에게 보내는 메시지)를 구분할 수 있다.
+- ID에서 PGN을 계산하고, 거꾸로 PGN과 주소로 ID를 만들 수 있다.
+- SPN의 위치, 분해능, 오프셋으로 데이터 바이트를 실제 값(예: 냉각수 온도)으로 바꿀 수 있다.
+- 로그 한 줄 `18FEEE00#B03204FFFFFFFFFF`를 처음부터 끝까지 해석할 수 있다.
 :::
 
-# 1. 29비트 ID 해부
+::: tip 시작하기 전에
+- 먼저 읽을 장: [8장 SAE J1939 입문](/study/isobus/08-j1939-intro), [4장 CAN 데이터 프레임](/study/isobus/04-can-data-frame)
+- 이 장에서 처음 나오는 말
+  - 비트 번호: 29비트 ID에서 비트의 자리 번호다. 맨 오른쪽(가장 낮은 자리)이 0번, 맨 왼쪽이 28번이다.
+  - PDU1, PDU2: PF 값으로 나뉘는 두 메시지 형식이다. PDU1은 받는 장치의 주소를 적고, PDU2는 모두에게 보낸다.
+  - DA(Destination Address): 받는 장치의 주소다. 255(`0xFF`)는 "모두에게"라는 뜻이다.
+  - GE(Group Extension): PDU2에서 PS 칸이 맡는 역할이다. 메시지 종류 번호(PGN)의 일부가 된다.
+  - SPN(Suspect Parameter Number): 메시지 데이터 안의 값 하나하나에 붙은 번호다.
+  - 분해능(resolution)과 오프셋(offset): 데이터에 실린 원시값을 실제 값으로 바꾸는 곱셈 계수와 덧셈 상수다.
+:::
 
-## 필드별 상세 설명
+택배 상자에 붙은 송장처럼, CAN 프레임 앞부분의 ID가 이 데이터가 무엇인지 알려 준다. [8장](/study/isobus/08-j1939-intro)에서는 J1939가 29비트 ID를 여섯 칸으로 나눈다는 큰 그림을 봤다. 이 장에서는 실제 16진수 ID를 손으로 쪼개 칸마다 값을 읽고, 그 값으로 메시지 종류(PGN)와 데이터 안의 값(SPN)을 찾아낸다. 장 끝에서는 로그 한 줄을 처음부터 끝까지 해석한다.
+
+## 1. 29비트 ID를 손으로 쪼개기
+
+이 절에서는 16진수로 적힌 CAN ID를 여섯 칸으로 나누는 과정을 손으로 따라 한다. 이 과정이 손에 익으면 로그를 볼 때마다 누가 무엇을 보냈는지 바로 읽힌다.
+
+### 필드별 상세 설명
 
 ![J1939 29비트 CAN ID 필드 구조와 비트 번호(28~0)](/images/study-isobus/09-canid-fields-light.png)
 ![J1939 29비트 CAN ID 필드 구조와 비트 번호(28~0)](/images/study-isobus/09-canid-fields-dark.png)
+
+그림 읽는 법: 상자 하나가 칸 하나이고, 상자 아래 눈금이 비트 번호다. 비트 번호는 오른쪽 끝(SA의 가장 낮은 비트)이 0번, 왼쪽 끝(Priority의 가장 높은 비트)이 28번이다. 10진수에서 오른쪽 끝이 일의 자리인 것처럼, 0번 비트가 가장 낮은 자리다. [8장](/study/isobus/08-j1939-intro)의 그림은 같은 칸을 버스에 나가는 순서(왼쪽부터 0번째)로 셌으니 세는 방향만 반대다.
 
 | 필드 | 비트 위치 | 범위 | 설명 |
 |---|---|---|---|
@@ -43,16 +52,131 @@ tags:
 
 각 필드가 차지하는 비트 위치는 위 그림의 눈금(28~0)과 표가 그대로 대응한다.
 
-## 예제: 0x18FEEE00 분해
+표의 "범위"는 칸에 들어갈 수 있는 값이다. 3비트 칸은 0~7, 8비트 칸은 0~255를 담는다. SA의 범위가 0~253인 것은 254와 255가 "주소 없음"과 "모두에게"라는 특별한 뜻으로 쓰이기 때문이다([8장](/study/isobus/08-j1939-intro)). Priority 기본값의 "제어 지향 메시지"는 무언가를 움직이라고 명령하는 메시지이고, "그 외"는 상태 정보나 요청 같은 메시지다.
+
+### 16진수를 2진수로 바꾸는 표
+
+16진수 한 자리는 2진수 네 자리(4비트)와 정확히 맞는다. 손으로 ID를 쪼개려면 아래 표만 있으면 된다.
+
+| 16진수 | 2진수 | 16진수 | 2진수 |
+|---|---|---|---|
+| 0 | 0000 | 8 | 1000 |
+| 1 | 0001 | 9 | 1001 |
+| 2 | 0010 | A | 1010 |
+| 3 | 0011 | B | 1011 |
+| 4 | 0100 | C | 1100 |
+| 5 | 0101 | D | 1101 |
+| 6 | 0110 | E | 1110 |
+| 7 | 0111 | F | 1111 |
+
+A~F는 10진수 10~15다. 2진수 네 자리의 자릿값은 왼쪽부터 8, 4, 2, 1이다. 예를 들어 `1110`은 8 + 4 + 2 = 14 = `E`다.
+
+### 예제: 0x18FEEE00 분해
 
 CAN 29비트 ID `0x18FEEE00`을 hex → binary로 풀면 `0001 1000 1111 1110 1110 1110 0000 0000`(32bit)이고, 하위 29비트만 취해 필드로 나누면 다음과 같다.
 
 ![0x18FEEE00 CAN ID 분해: Priority=6, EDP=0, DP=0, PF=0xFE(254), PS=0xEE(238), SA=0x00](/images/study-isobus/09-canid-example-18feee00-light.png)
 ![0x18FEEE00 CAN ID 분해: Priority=6, EDP=0, DP=0, PF=0xFE(254), PS=0xEE(238), SA=0x00](/images/study-isobus/09-canid-example-18feee00-dark.png)
 
-# 2. PGN (Parameter Group Number)
+손으로 따라 하면 이렇다.
 
-## PGN이란
+1. 16진수를 한 자리씩 2진수로 바꾼다: `1`→`0001`, `8`→`1000`, `F`→`1111`, `E`→`1110`, `E`→`1110`, `E`→`1110`, `0`→`0000`, `0`→`0000`.
+2. 이어 쓰면 32비트다. CAN ID는 29비트이므로 맨 앞 3비트 `000`은 ID가 아니다. 버린다.
+3. 남은 29비트를 왼쪽부터 3, 1, 1, 8, 8, 8비트로 자른다.
+
+| 칸 | 비트 번호 | 잘라 낸 비트 | 값 |
+|---|---|---|---|
+| Priority | 28~26 | `110` | 6 |
+| EDP | 25 | `0` | 0 |
+| DP | 24 | `0` | 0 |
+| PF | 23~16 | `1111 1110` | `0xFE` = 254 |
+| PS | 15~8 | `1110 1110` | `0xEE` = 238 |
+| SA | 7~0 | `0000 0000` | `0x00` = 0 |
+
+4. 값을 해석한다. Priority 6은 정보 메시지의 기본값이다. PF 254는 240 이상이므로 PDU2이고(2절), PS `0xEE`는 받는 주소가 아니라 메시지 종류의 일부(GE)다. SA `0x00`은 보낸 장치가 엔진 ECU라는 뜻이다.
+
+### 지름길: 맨 앞 두 자리만 2진수로 푼다
+
+PF, PS, SA는 8비트씩이고 바이트 경계에 딱 맞게 놓여 있다. 그래서 16진수 여덟 자리 가운데 뒤 여섯 자리는 두 자리씩 끊기만 하면 PF, PS, SA다. 2진수로 풀어야 하는 것은 맨 앞 두 자리(첫 바이트)뿐이다.
+
+![0x18FEEE00을 두 자리씩 18, FE, EE, 00으로 끊으면 뒤 세 바이트가 그대로 PF 254, PS 238, SA 0이 되고, 첫 바이트 18만 2진수 0001 1000으로 풀어 버리는 3비트, Priority 110(6), EDP 0, DP 0으로 나누는 지름길](/images/study-isobus/09-id-byte-shortcut-light.png)
+![0x18FEEE00을 두 자리씩 18, FE, EE, 00으로 끊으면 뒤 세 바이트가 그대로 PF 254, PS 238, SA 0이 되고, 첫 바이트 18만 2진수 0001 1000으로 풀어 버리는 3비트, Priority 110(6), EDP 0, DP 0으로 나누는 지름길](/images/study-isobus/09-id-byte-shortcut-dark.png)
+
+첫 바이트 8비트는 [버리는 3비트][Priority 3비트][EDP 1비트][DP 1비트]로 나뉜다. 자주 보는 첫 바이트를 미리 풀어 두면 다음과 같다.
+
+| 첫 바이트 | 2진수 (3·3·1·1로 끊음) | Priority | EDP | DP |
+|---|---|---|---|---|
+| `0x0C` | `000 011 0 0` | 3 | 0 | 0 |
+| `0x18` | `000 110 0 0` | 6 | 0 | 0 |
+| `0x19` | `000 110 0 1` | 6 | 0 | 1 |
+| `0x1C` | `000 111 0 0` | 7 | 0 | 0 |
+
+예를 들어 `0x18FEEE00`은 `18 | FE | EE | 00`으로 끊고, `18`을 표에서 찾으면 Priority 6, EDP 0, DP 0이다. 나머지는 PF `FE`, PS `EE`, SA `00`이다.
+
+<small>근거: ISO 11783-3 5.1.2, 5.2.2, Table 1</small>
+
+## 2. PDU1과 PDU2: PF 값이 정하는 두 형식
+
+PS 칸은 PF 값에 따라 뜻이 바뀐다. 송장의 한 칸이 어떤 때는 "받는 사람"이 되고 어떤 때는 "물건 종류의 세부 번호"가 되는 셈이다. 이 절에서는 그 기준과 두 형식의 차이를 본다. 3절의 PGN 계산도 이 구분에서 출발한다.
+
+### 구분 기준: PF 값
+
+![29비트 CAN ID를 받으면 PF 값을 확인해, PF가 240보다 작으면 PDU1(Peer-to-Peer)로 보고 PS를 받는 주소(특정 노드 또는 전역 DA=255)로 읽고, 아니면 PDU2(Broadcast)로 보고 PS를 Group Extension으로 읽어 모든 노드에게 보낸 메시지로 처리하는 흐름](/images/study-isobus/09-pdu-format-decision-light.png)
+![29비트 CAN ID를 받으면 PF 값을 확인해, PF가 240보다 작으면 PDU1(Peer-to-Peer)로 보고 PS를 받는 주소(특정 노드 또는 전역 DA=255)로 읽고, 아니면 PDU2(Broadcast)로 보고 PS를 Group Extension으로 읽어 모든 노드에게 보낸 메시지로 처리하는 흐름](/images/study-isobus/09-pdu-format-decision-dark.png)
+
+기준은 숫자 하나, 240(`0xF0`)이다. 16진수로 보면 더 쉽다. PF의 첫 자리가 `F`이면(`F0`~`FF`) PDU2, 그 밖이면 PDU1이다. 그림의 Peer-to-Peer는 "한 장치가 다른 한 장치에게", Broadcast는 "한 장치가 모두에게"라는 뜻이다.
+
+### PDU1 (PF < 240): 목적지 지정 메시지
+
+```
+PS = DA (Destination Address)
+
+예: 진단 도구(SA=0xF9)가 엔진 ECU(DA=0x00)에게 요청
+  Priority = 6, EDP=0, DP=0
+  PF = 0xEA (234, < 240 → PDU1)
+  PS = DA = 0x00 (엔진 ECU)
+  SA = 0xF9 (진단 도구)
+  → CAN ID: 0x18EA00F9
+```
+
+이 ID를 1절의 지름길로 읽으면 `18 | EA | 00 | F9`다. 첫 바이트 `18`은 Priority 6, EDP 0, DP 0이다. PF `0xEA`(234)는 240보다 작으므로 PDU1이고, PS `0x00`은 받는 장치(엔진 ECU)의 주소다. SA `0xF9`는 보낸 진단 도구다. PF 234는 "데이터를 보내 달라"는 Request(요청) 메시지로, [10장](/study/isobus/10-j1939-request-ack)에서 자세히 본다.
+
+PDU1이 특정 노드 전용은 아니다. DA에 전역 주소 255(0xFF)를 넣으면 PDU1 메시지도 모든 노드를 대상으로 브로드캐스트할 수 있다. 반면 PDU2는 목적지를 지정할 수 없는 <strong>전역 전용</strong>이다.
+
+### PDU2 (PF >= 240): 브로드캐스트 메시지
+
+```
+PS = Group Extension (PGN의 일부)
+
+예: 엔진 ECU(SA=0x00)가 Engine Temperature 브로드캐스트
+  Priority = 6, EDP=0, DP=0
+  PF = 0xFE (254, >= 240 → PDU2)
+  PS = 0xEE (238, Group Extension → PGN의 일부)
+  SA = 0x00 (엔진 ECU)
+  → CAN ID: 0x18FEEE00
+  → PGN = 254 * 256 + 238 = 65262
+```
+
+여기서 PS `0xEE`는 받는 주소가 아니라 메시지 종류 번호의 일부다. 그래서 마지막 줄처럼 PGN 계산에 PS가 들어간다. 계산 방법은 3절에서 본다.
+
+### 비교 표
+
+| 항목 | PDU1 | PDU2 |
+|---|---|---|
+| PF 값 범위 | 0 ~ 239 (0x00 ~ 0xEF) | 240 ~ 255 (0xF0 ~ 0xFF) |
+| PS 의미 | Destination Address | Group Extension (PGN의 일부) |
+| 전송 방식 | 특정 노드 지정 (DA=255면 전역 전송) | 버스 전체 브로드캐스트 (전역 전용) |
+| 주요 용도 | 요청/응답, 진단 | 센서 데이터 주기적 전송 |
+
+"요청/응답, 진단"은 특정 장치에게 묻고 답하는 메시지이고, "센서 데이터 주기적 전송"은 온도·속도처럼 여러 장치가 함께 쓰는 값을 정해진 주기로 방송하는 메시지다.
+
+<small>근거: ISO 11783-3 5.2.6, 5.3.1~5.3.3, Table 4</small>
+
+## 3. PGN: 메시지 종류 번호
+
+PGN(Parameter Group Number)은 ID에서 "이 메시지가 무엇인가"를 나타내는 번호다. 이 절에서는 ID에서 PGN을 계산하고, 거꾸로 PGN으로 ID를 만드는 법을 익힌다.
+
+### PGN이란
 
 PGN은 <strong>메시지의 종류(의미)</strong>를 식별하는 번호다. 같은 PGN을 가진 메시지는 항상 같은 형식의 데이터를 담는다.
 
@@ -62,7 +186,9 @@ PGN 65265 → Cruise Control/Vehicle Speed
 PGN 61444 → Electronic Engine Controller 1
 ```
 
-## PGN 계산 공식
+Parameter Group(PG)은 함께 보내는 값들의 묶음이다. 예를 들어 PGN 65262 묶음에는 냉각수 온도, 연료 온도, 오일 온도 같은 엔진 온도 값이 들어 있다(4절). 받는 쪽은 PGN만 알면 데이터 8바이트 가운데 어디에 무엇이 있는지 안다.
+
+### PGN 계산 공식
 
 PGN 계산에는 PF 값이 핵심이다.
 
@@ -77,7 +203,19 @@ PF < 240 (PDU1, 목적지 지정):
 
 > EDP는 J1939에서 보통 0이므로 EDP 항은 생략 가능.
 
-## 계산 예제 1: PGN 65262 (Engine Temperature)
+공식의 곱셈은 "자리를 옮겨 붙이기"다. 256을 곱하면 8비트, 즉 16진수 두 자리만큼 왼쪽으로 옮겨진다. 65536(= 256 × 256)을 곱하면 16비트, 131072(= 65536 × 2)를 곱하면 17비트만큼 옮겨진다. 그래서 16진수로 보면 PGN은 DP, PF, PS를 이어 붙인 것과 같다.
+
+- PDU2: PGN = DP, PF, PS를 이어 붙인 값. 예: `0x18FEEE00` → DP `0`, PF `FE`, PS `EE` → `0x0FEEE` = 65262
+- PDU1: PGN = DP, PF, `00`을 이어 붙인 값. 예: `0x18EAFF26` → DP `0`, PF `EA`, PS 자리는 `00` → `0x0EA00` = 59904
+
+![PDU2 예 0x18FEEE00에서는 Priority와 SA를 빼고 EDP·DP 0, PF FE, PS EE를 이어 PGN 0x0FEEE = 65262를 만들고, PDU1 예 0x18EAFF26에서는 받는 주소인 PS FF 대신 00을 넣어 PGN 0x0EA00 = 59904를 만드는 과정](/images/study-isobus/09-pgn-from-id-light.png)
+![PDU2 예 0x18FEEE00에서는 Priority와 SA를 빼고 EDP·DP 0, PF FE, PS EE를 이어 PGN 0x0FEEE = 65262를 만들고, PDU1 예 0x18EAFF26에서는 받는 주소인 PS FF 대신 00을 넣어 PGN 0x0EA00 = 59904를 만드는 과정](/images/study-isobus/09-pgn-from-id-dark.png)
+
+그림 읽는 법: 위 줄이 ID의 여섯 칸, 아래 줄이 PGN이다. 회색 칸(Priority, SA, 그리고 PDU1의 PS)은 PGN에 들어가지 않는다. PDU1에서 PS를 빼는 이유는 PS가 받는 주소이기 때문이다. 같은 요청 메시지를 엔진에게 보내든 변속기에게 보내든 메시지 종류는 같아야 한다.
+
+### 계산 예제 1: PGN 65262 (Engine Temperature)
+
+거꾸로 PGN에서 PF와 PS를 구할 수도 있다. DP가 0일 때 PGN을 256으로 나눈 몫이 PF, 나머지가 PS다.
 
 ```
 목표: PGN 65262 → PF, PS 값 역산
@@ -93,7 +231,11 @@ CAN ID 구성 (Priority=6, DP=0, EDP=0, SA=0x00):
   0x18FEEE00
 ```
 
-## 계산 예제 2: PGN 61444 (EEC1)
+마지막 줄의 ID는 1절 지름길 표의 첫 바이트 `0x18`(Priority 6, EDP 0, DP 0) 뒤에 PF `FE`, PS `EE`, SA `00`을 이어 쓴 것이다.
+
+### 계산 예제 2: PGN 61444 (EEC1)
+
+EEC1(Electronic Engine Controller 1)은 엔진 제어기가 보내는 메시지 가운데 하나다.
 
 ```
 목표: PGN 61444 → PF, PS 역산
@@ -106,9 +248,22 @@ CAN ID (Priority=3, SA=0x00):
   0x0CF00400
 ```
 
-# 3. SPN (Suspect Parameter Number)
+`Priority=3 → 0b011 → 0x0C000000` 줄은 Priority 3을 2진수 `011`로 쓰고, 그것을 비트 28~26 자리에 놓으면 `0x0C000000`이 된다는 뜻이다. 1절 지름길 표의 첫 바이트 `0x0C`가 바로 Priority 3이다. 여기에 PF `F0`, PS `04`, SA `00`을 이어 쓰면 `0x0CF00400`이다.
 
-## SPN이란
+ID를 만드는 일반 규칙을 식으로 쓰면 다음과 같다.
+
+- ID = Priority × 2²⁶ + (PGN + DA) × 256 + SA
+- DA는 PDU1일 때만 더하고, PDU2이면 0으로 둔다.
+
+예를 들어 VT(SA `0x26`)가 모두에게(DA `0xFF`) 보내는 요청(PGN 59904 = `0xEA00`)은 `0x18000000` + `0xEAFF00` + `0x26` = `0x18EAFF26`이다.
+
+<small>근거: ISO 11783-3 5.1.3, 5.2.6, Table 2</small>
+
+## 4. SPN: 데이터 안의 값 하나하나
+
+PGN이 "상자의 종류"라면 SPN은 상자 안 칸마다 붙은 번호다. 이 절에서는 SPN이 데이터 8바이트의 어디에 놓이는지, 원시값을 실제 값으로 어떻게 바꾸는지 본다.
+
+### SPN이란
 
 SPN은 <strong>데이터 필드(8바이트) 내의 개별 파라미터</strong>를 식별하는 번호다. 하나의 PGN 메시지에 여러 SPN이 포함될 수 있다.
 
@@ -117,16 +272,22 @@ PGN 65262 (Engine Temperature) 내 SPN 목록:
   SPN 110 : Engine Coolant Temperature    (byte 1, 1byte)
   SPN 174 : Engine Fuel Temperature 1    (byte 2, 1byte)
   SPN 175 : Engine Oil Temperature 1     (byte 3~4, 2byte)
-  SPN 176 : Engine Turbo Temperature     (byte 5~6, 2byte)
-  SPN 1134: Engine Intercooler Temp      (byte 7, 1byte)
-  SPN 1135: Engine Intercooler Coolant Temp (byte 8, 1byte)
+  SPN 176 : Engine Turbocharger Oil Temperature (byte 5~6, 2byte)
+  SPN 52  : Engine Intercooler Temperature (byte 7, 1byte)
+  SPN 1134: Engine Intercooler Thermostat Opening (byte 8, 1byte)
 ```
+
+목록의 "byte 1"은 데이터 필드의 첫 번째 바이트다. 표준 문서는 바이트를 1부터 센다([4장](/study/isobus/04-can-data-frame)). "byte 3~4, 2byte"는 값 하나가 바이트 두 개에 걸쳐 있다는 뜻이다.
 
 ::: tip 멀티바이트 파라미터는 LSB 먼저
 SPN 175처럼 2바이트 이상인 파라미터는 데이터 필드에 <strong>LSB 먼저</strong>(리틀엔디언) 배치한다. 예를 들어 byte 3~4에 놓인 2바이트 파라미터는 byte 3이 LSB, byte 4가 MSB다(ASCII 등 별도 명시된 경우는 예외).
 :::
 
-## SPN 속성 (SPN 110 예시)
+LSB(Least Significant Byte)는 값의 낮은 자리 바이트, MSB(Most Significant Byte)는 높은 자리 바이트다. 예를 들어 값 `0x1234`를 byte 3~4에 실으면 byte 3에 `34`, byte 4에 `12`가 들어간다. 읽을 때는 거꾸로 byte 4를 앞에, byte 3을 뒤에 붙여 `0x1234`로 만든다. 낮은 자리를 먼저 놓는 이 방식을 리틀 엔디언(little-endian)이라고 부른다.
+
+### SPN 속성 (SPN 110 예시)
+
+SPN 하나에는 위치와 계산 규칙이 함께 정해져 있다. 냉각수 온도(SPN 110)의 속성은 다음과 같다.
 
 | 속성 | 값 |
 |---|---|
@@ -140,7 +301,26 @@ SPN 175처럼 2바이트 이상인 파라미터는 데이터 필드에 <strong>L
 | 유효 범위 | -40 ~ 210 °C |
 | 원시값 0xFF | Not Available (N/A) |
 
-## SPN 값 변환 공식
+- 데이터 위치 "byte 1 (offset 0)": 표준 번호로는 1번째 바이트, 프로그램 배열 번호(0부터 셈)로는 0번이다.
+- 분해능 "1 °C/bit": 원시값이 1 늘 때 실제 값이 1 °C 는다는 뜻이다.
+- 오프셋 "-40 °C": 계산 마지막에 더하는 값이다. 원시값은 0 이상의 수만 담으므로, 영하의 온도를 나타내려고 기준점을 -40 °C로 내려 둔 것이다.
+- 유효 범위 "-40 ~ 210 °C": 1바이트 값의 정상 범위 0~250(아래 특수값 표)을 공식에 넣은 결과다. 0 × 1 - 40 = -40, 250 × 1 - 40 = 210이다.
+
+### 특수값: FF는 "값 없음"
+
+데이터에는 정상 값 말고도 "지금은 값을 줄 수 없다"는 표시가 필요하다. 센서가 없거나 고장 난 경우다. ISO 11783-7(트랙터·작업기 메시지를 정하는 표준 문서)은 값의 크기마다 맨 위쪽 몇 값을 이런 표시로 떼어 둔다.
+
+| 이름 | 1바이트 값 | 2바이트 값 | 뜻 |
+|---|---|---|---|
+| 정상 신호(Valid signal) | `00`~`FA` (0~250) | `0000`~`FAFF` | 실제 측정값 |
+| 파라미터별 지시(Parameter-specific indicator) | `FB` (251) | `FBxx` | 파라미터마다 따로 정한 특별한 뜻 |
+| 예약 | `FC`~`FD` (252~253) | `FC00`~`FDFF` | 나중에 쓰려고 비워 둔 값 |
+| 오류 표시(Error indicator) | `FE` (254) | `FExx` | 센서나 장치 고장으로 값을 줄 수 없다 |
+| 값 없음(Not available) | `FF` (255) | `FFxx` | 설치되지 않았거나 보내지 않는 값이다 |
+
+`xx`는 아무 값이나 와도 된다는 뜻이다. 2바이트 값은 높은 자리 바이트(MSB)만 보면 어느 칸인지 알 수 있다. SPN 속성 표의 "원시값 0xFF = Not Available (N/A)"이 바로 이 규칙이다. 데이터 필드에서 쓰지 않는 바이트도 `FF`로 채운다.
+
+### SPN 값 변환 공식
 
 ```
 실제값 = 원시값(raw) * 분해능 + 오프셋
@@ -149,72 +329,24 @@ SPN 110, raw = 0xB0 = 176:
   실제 온도 = 176 * 1 + (-40) = 136 °C
 ```
 
-# 4. PDU1 vs PDU2
+단계별로 풀면 다음과 같다.
 
-## 구분 기준: PF 값
+1. byte 1의 원시값 `0xB0`을 10진수로 바꾼다. `B`는 11이므로 11 × 16 + 0 = 176이다.
+2. 분해능을 곱한다: 176 × 1 = 176.
+3. 오프셋을 더한다: 176 + (-40) = 136.
+4. 단위를 붙인다: 136 °C.
 
-```mermaid
-flowchart TD
-    A["29비트 CAN ID 수신"]
-    B["PF 값 확인"]
-    C{"PF < 240?"}
-    D["PDU1<br>(Peer-to-Peer)"]
-    E["PDU2<br>(Broadcast)"]
-    F["PS = Destination Address<br>특정 노드 또는 전역(DA=255)"]
-    G["PS = Group Extension<br>모든 노드에게 전송"]
+<small>근거: ISO 11783-3 5.4.1, ISO 11783-7 3.3.3</small>
 
-    A --> B --> C
-    C -- Yes --> D --> F
-    C -- No  --> E --> G
-```
+## 5. 로그 한 줄 해석하기: 18FEEE00#B03204FFFFFFFFFF
 
-## PDU1 (PF < 240): 목적지 지정 메시지
-
-```
-PS = DA (Destination Address)
-
-예: 진단 도구(SA=0xF9)가 엔진 ECU(DA=0x00)에게 요청
-  Priority = 6, EDP=0, DP=0
-  PF = 0xEA (234, < 240 → PDU1)
-  PS = DA = 0x00 (엔진 ECU)
-  SA = 0xF9 (진단 도구)
-  → CAN ID: 0x18EA00F9
-```
-
-PDU1이 특정 노드 전용은 아니다. DA에 전역 주소 255(0xFF)를 넣으면 PDU1 메시지도 모든 노드를 대상으로 브로드캐스트할 수 있다. 반면 PDU2는 목적지를 지정할 수 없는 <strong>전역 전용</strong>이다.
-
-## PDU2 (PF >= 240): 브로드캐스트 메시지
-
-```
-PS = Group Extension (PGN의 일부)
-
-예: 엔진 ECU(SA=0x00)가 Engine Temperature 브로드캐스트
-  Priority = 6, EDP=0, DP=0
-  PF = 0xFE (254, >= 240 → PDU2)
-  PS = 0xEE (238, Group Extension → PGN의 일부)
-  SA = 0x00 (엔진 ECU)
-  → CAN ID: 0x18FEEE00
-  → PGN = 254 * 256 + 238 = 65262
-```
-
-## 비교 표
-
-| 항목 | PDU1 | PDU2 |
-|---|---|---|
-| PF 값 범위 | 0 ~ 239 (0x00 ~ 0xEF) | 240 ~ 255 (0xF0 ~ 0xFF) |
-| PS 의미 | Destination Address | Group Extension (PGN의 일부) |
-| 전송 방식 | 특정 노드 지정 (DA=255면 전역 전송) | 버스 전체 브로드캐스트 (전역 전용) |
-| 주요 용도 | 요청/응답, 진단 | 센서 데이터 주기적 전송 |
-
-# 5. PGN/SPN 디코딩 실습
-
-## 대상 메시지
+지금까지 배운 것을 모두 써서 실제 로그 한 줄을 처음부터 끝까지 읽어 본다. 대상 메시지는 다음과 같다.
 
 ```
 18FEEE00#B03204FFFFFFFFFF
 ```
 
-## 파싱 단계
+`#` 앞은 CAN ID, 뒤는 데이터 바이트를 16진수로 이어 쓴 것이다. 리눅스의 CAN 도구(can-utils)가 쓰는 표기다.
 
 ### 1단계: CAN ID와 데이터 분리
 
@@ -224,12 +356,16 @@ CAN ID   : 18FEEE00 (hex, 29비트)
            [0][1][2][3][4][5][6][7]
 ```
 
+아래 줄의 `[0]`~`[7]`은 프로그램 배열 번호다. 표준 문서의 Byte 1~8과 한 칸씩 어긋나므로 `[0]`을 Byte 1로 바꿔 읽는다.
+
 ### 2단계: 29비트 ID 분해
 
 CAN ID `18FEEE00`을 binary로 풀어 필드별로 나누면 앞서 본 것과 동일하다 (PF = 0xFE = 254 → PDU2).
 
 ![0x18FEEE00 CAN ID 분해: Priority=6, EDP=0, DP=0, PF=0xFE(254), PS=0xEE(238), SA=0x00](/images/study-isobus/09-canid-example-18feee00-light.png)
 ![0x18FEEE00 CAN ID 분해: Priority=6, EDP=0, DP=0, PF=0xFE(254), PS=0xEE(238), SA=0x00](/images/study-isobus/09-canid-example-18feee00-dark.png)
+
+지름길로 읽으면 `18 | FE | EE | 00`이고, `18`은 Priority 6, EDP 0, DP 0이다.
 
 ### 3단계: PGN 계산
 
@@ -243,8 +379,10 @@ PGN = DP * 65536 + PF * 256 + PS
 
 ### 4단계: 데이터 필드 해석
 
-![데이터 필드(8byte) 내 SPN 배치: byte[0]=SPN110→136°C, byte[1]=SPN174→10°C, byte[2~3]=SPN175(LSB/MSB), byte[4~5]=SPN176, byte[6]=SPN1134, byte[7]=SPN1135](/images/study-isobus/09-spn-byte-layout-light.png)
-![데이터 필드(8byte) 내 SPN 배치: byte[0]=SPN110→136°C, byte[1]=SPN174→10°C, byte[2~3]=SPN175(LSB/MSB), byte[4~5]=SPN176, byte[6]=SPN1134, byte[7]=SPN1135](/images/study-isobus/09-spn-byte-layout-dark.png)
+![데이터 필드(8byte) 내 SPN 배치: byte[0]=SPN110→136°C, byte[1]=SPN174→10°C, byte[2~3]=SPN175(LSB/MSB), byte[4~5]=SPN176, byte[6]=SPN52, byte[7]=SPN1134](/images/study-isobus/09-spn-byte-layout-light.png)
+![데이터 필드(8byte) 내 SPN 배치: byte[0]=SPN110→136°C, byte[1]=SPN174→10°C, byte[2~3]=SPN175(LSB/MSB), byte[4~5]=SPN176, byte[6]=SPN52, byte[7]=SPN1134](/images/study-isobus/09-spn-byte-layout-dark.png)
+
+그림의 상자 여덟 개가 데이터 8바이트다. 상자 안 위쪽은 그 바이트를 쓰는 SPN, 아래쪽은 실제 바이트 값이고, 상자 밑은 해석 결과다. `byte[0]`은 배열 번호이므로 Byte 1이다. SPN 175와 176은 바이트 두 개씩 차지한다.
 
 ### 5단계: SPN 110 값 추출
 
@@ -272,14 +410,20 @@ PGN      : 65262 (Engine Temperature)
 SPN 110  Engine Coolant Temperature : 136 °C  (byte[0]=0xB0)
 SPN 174  Engine Fuel Temperature 1  : 10 °C   (byte[1]=0x32, 50-40=10)
 SPN 175  Engine Oil Temperature 1   : N/A     (byte[2~3]=0x04,0xFF → raw=0xFF04, N/A 영역)
-SPN 176  Engine Turbo Temperature   : N/A
-SPN 1134 Intercooler Temp           : N/A
-SPN 1135 Intercooler Coolant Temp   : N/A
+SPN 176  Engine Turbocharger Oil Temp : N/A
+SPN 52   Engine Intercooler Temp    : N/A
+SPN 1134 Intercooler Thermostat Open : N/A
 ```
 
-::: details Python 파싱 예제
-## Python 파싱 예제
+SPN 110 말고 나머지도 같은 방법으로 읽는다.
 
+- SPN 174: byte 2 = `0x32` = 3 × 16 + 2 = 50이다. 50 × 1 - 40 = 10 °C.
+- SPN 175: byte 3~4 = `04 FF`다. LSB가 먼저이므로 byte 4의 `FF`를 앞에 붙여 원시값 `0xFF04`가 된다. 높은 자리 바이트가 `FF`이므로 특수값 표의 "값 없음"이다.
+- SPN 176, 52, 1134: 해당 바이트가 모두 `FF`라서 "값 없음"이다.
+
+아래 함수는 1~5단계를 코드로 옮긴 것이다. ID에서 칸을 뽑을 때는 오른쪽으로 민 뒤(`>>`) 필요한 비트만 남긴다(`&`). 미는 칸 수가 그 칸의 가장 낮은 비트 번호다. 예를 들어 PS는 비트 15~8이므로 8칸 밀고 `& 0xFF`로 끝 8비트만 남긴다.
+
+::: details Python 파싱 예제
 ```python
 def parse_j1939_message(can_id_hex: str, data_hex: str):
     """
@@ -348,545 +492,75 @@ PGN      : 65262 (0x0FEEE)
   SPN 110 Engine Coolant Temp: 136 °C (raw=0xB0)
   SPN 174 Engine Fuel Temp 1 : 10 °C (raw=0x32)
 ```
+
+Priority, SA, PF, PS, PGN이 2~3단계와 같고, SPN 110과 174의 값이 6단계와 같다.
 :::
 
-::: tip 핵심 정리
-- 29비트 ID는 Priority(3) + EDP(1) + DP(1) + PF(8) + PS(8) + SA(8)로 구성된다.
-- **PGN** = PF가 >= 240이면 PS 포함, PF < 240이면 PS 제외하여 계산한다.
-- <strong>SPN</strong>은 PGN 데이터 필드 내 개별 파라미터이며, `실제값 = raw * 분해능 + 오프셋` 공식으로 변환한다.
-- PDU1(PF < 240)은 목적지 지정이며 DA=255로 전역 전송도 가능하다. PDU2(PF >= 240)는 전역 전용 브로드캐스트다.
-- `18FEEE00#B03204FFFFFFFFFF` 파싱 결과: Priority=6, PGN=65262, SA=0x00, 냉각수 온도=136°C.
+## 6. PDU 필드별 규칙: 보내는 쪽과 받는 쪽 (심화)
+
+::: info 처음 읽는다면
+이 절은 직접 구현할 때 필요한 세부다. 처음에는 건너뛰고 장 끝의 핵심 정리로 가도 된다.
 :::
 
-# 6. PDU 필드별 규정 — 송신 측과 수신 측
+1절은 29비트 ID의 필드를 "무엇이 들어 있나"로 봤다. ISO 11783-3(ISOBUS의 데이터 링크 계층을 정하는 표준 문서)은 같은 필드를 "송신 측은 무엇을 지켜야 하고 수신 측은 어떻게 읽어야 하나"로 규정한다. PDU는 Priority, EDP, DP, PF, PS, SA, 데이터의 7개 필드이고, 고전 CAN 프레임 하나에 PDU는 정확히 하나다.
 
-§1은 29비트 ID의 필드를 "무엇이 들어 있나"로 봤다. ISO 11783-3:2018(이하 Part 3) 5.2는 같은 필드를 "송신 측은 무엇을 지켜야 하고 수신 측은 어떻게 읽어야 하나"로 규정한다. PDU는 Priority, EDP, DP, PF, PS, SA, 데이터의 7개 필드이고, 고전 CAN 프레임 하나에 PDU는 정확히 하나다(Part 3 5.2.1).
+| 필드 | 송신 측 규칙 | 수신 측 규칙 |
+|---|---|---|
+| Priority | 기본값은 제어 3, 그 밖 6. PGN별로 재설정할 수 있어야 함 | 마스킹해 무시 |
+| EDP | 항상 0 | 1이면 DP와 함께 판별(둘 다 1이면 ISO 15765-2 프레임) |
+| DP | 페이지 0·1 선택 | PGN 계산에 포함 |
+| PF | PDU 형식과 PGN 결정. 8바이트를 다 쓰도록 파라미터를 묶는 것을 권장 | 240 미만 PDU1, 이상 PDU2 |
+| PS | PDU1이면 DA, PDU2면 GE | DA가 자기 주소도 전역(255)도 아니면 무시. 255면 모두 듣고 해당하면 대응 |
+| SA | 네트워크에서 SA 하나는 CF 하나만 쓴다 | 송신자 식별, 응답의 목적지 |
+| 데이터 | DLC 규칙, 여러 바이트 값은 LSB 먼저, 남는 바이트는 FF | PG 정의로 해석 |
 
-| 필드 | 송신 측 규칙 | 수신 측 규칙 | 근거 |
-|---|---|---|---|
-| Priority | 기본값은 제어 3, 그 밖 6. PGN별로 재설정할 수 있어야 함 | 마스킹해 무시 | 5.2.2, Annex A |
-| EDP | 항상 0 | 1이면 DP와 함께 판별(둘 다 1이면 ISO 15765-2 프레임) | 5.2.3, Table 3 |
-| DP | 페이지 0·1 선택 | PGN 계산에 포함 | 5.2.4 |
-| PF | PDU 형식과 PGN 결정. 8바이트를 다 쓰도록 파라미터를 묶는 것을 권장 | 240 미만 PDU1, 이상 PDU2 | 5.2.5, 5.3 |
-| PS | PDU1이면 DA, PDU2면 GE | DA가 자기 주소도 전역(255)도 아니면 무시. 255면 모두 듣고 해당하면 대응 | 5.2.6 |
-| SA | 네트워크에서 SA 하나는 CF 하나만 쓴다 | 송신자 식별, 응답의 목적지 | 5.2.7 |
-| 데이터 | DLC 규칙, 여러 바이트 값은 LSB 먼저, 남는 바이트는 FF | PG 정의로 해석 | 5.2.8, 5.4.1 |
+표의 낱말 몇 개를 풀면 이렇다. 마스킹(masking)은 특정 비트를 지워 비교에서 빼는 것이다. ISO 15765-2 프레임은 EDP와 DP가 모두 1인 자동차 진단 통신용 프레임이다([8장](/study/isobus/08-j1939-intro)). CF(Control Function)는 버스에서 주소 하나를 쓰는 기능 단위다. DLC(Data Length Code)는 프레임의 데이터 바이트 수를 적는 칸이다([4장](/study/isobus/04-can-data-frame)).
 
 몇 가지는 풀어 둘 필요가 있다.
 
 - <strong>Priority는 수신 측 판단에 쓰지 않는다.</strong> 같은 PGN이 다른 Priority로 와도 같은 메시지다. 필터 설정은 [CAN 중재와 우선순위](/study/isobus/05-can-arbitration) 챕터에서 다룬다.
-- <strong>DA 비교는 집합으로 한다.</strong> 컨트롤러 하나가 여러 기능을 수행하면 주소를 여러 개 가질 수 있다(Part 3 Annex A NOTE 2). "내 주소는 값 하나"라고 가정하면 두 번째 CF 앞으로 온 메시지를 버린다.
-- <strong>DA = 255는 "모두 들어라"이면서 "해당하면 대응하라"다.</strong> 전역 목적지 주소는 모든 컨트롤러에게 듣고 그에 맞게 응답하도록 요구한다(5.2.6). 무엇이 "맞게"인지는 §7의 요청 규칙이 정한다.
-- <strong>GE는 PGN의 일부다.</strong> PF의 상위 4비트가 모두 1이면(PF ≥ 240) PS는 GE이고, GE와 PF의 하위 4비트가 합쳐 데이터 페이지당 4096개의 PG를 만든다(5.2.6 NOTE).
+- <strong>DA 비교는 집합으로 한다.</strong> 컨트롤러 하나가 여러 기능을 수행하면 주소를 여러 개 가질 수 있다. "내 주소는 값 하나"라고 가정하면 두 번째 CF 앞으로 온 메시지를 버린다.
+- <strong>DA = 255는 "모두 들어라"이면서 "해당하면 대응하라"다.</strong> 전역 목적지 주소는 모든 컨트롤러에게 듣고 그에 맞게 응답하도록 요구한다. 무엇이 "맞게"인지는 [10장](/study/isobus/10-j1939-request-ack)의 요청 규칙이 정한다.
+- <strong>GE는 PGN의 일부다.</strong> PF의 상위 4비트가 모두 1이면(PF ≥ 240) PS는 GE이고, GE와 PF의 하위 4비트가 합쳐 데이터 페이지당 4096개의 PG를 만든다. PF의 상위 4비트가 모두 1이라는 것은 16진수 첫 자리가 `F`라는 뜻이다(2절). PF의 하위 4비트 16가지와 GE 256가지를 곱하면 4096이다.
 
 ::: info PDU2는 정말 "전역 전용"인가
-§4는 PDU2를 "목적지를 지정할 수 없는 전역 전용"이라고 했다. Part 3 5.3.3도 PDU2 형식을 고르면 그 PGN은 특정 목적지로 보낼 수 없다고 적는다. 단, 이것은 <strong>단일 프레임</strong>에 대한 이야기다. 8바이트를 넘는 PDU2 PGN은 TP로 보내는데, TP.CM 메시지 자체는 PDU1이라 DA를 가진다. 그래서 Part 3 Table 5는 8바이트를 넘는 PDU2 PGN을 특정 요청에 대해 RTS/CTS로 특정 목적지에 보낸다고 정리한다(§7).
+2절은 PDU2를 "목적지를 지정할 수 없는 전역 전용"이라고 했다. ISO 11783-3도 PDU2 형식을 고르면 그 PGN은 특정 목적지로 보낼 수 없다고 적는다. 단, 이것은 <strong>단일 프레임</strong>에 대한 이야기다. 8바이트를 넘는 PDU2 PGN은 TP로 보내는데, TP.CM 메시지 자체는 PDU1이라 DA를 가진다. 그래서 표준의 요청·응답 표는 8바이트를 넘는 PDU2 PGN을 특정 요청에 대해 RTS/CTS로 특정 목적지에 보낸다고 정리한다. 그 표는 [10장](/study/isobus/10-j1939-request-ack)에 옮겨 두었다. TP는 8바이트보다 긴 데이터를 나눠 보내는 방법이고, TP.CM은 그 전송을 열고 닫는 연결 관리 메시지, RTS/CTS는 한 장치에게 보내는 TP 방식이다([15장](/study/isobus/15-tp-bam-cmdt)).
 :::
 
-# 7. 메시지 타입과 요청·응답 규칙
-
-## 다섯 가지 메시지 타입
-
-Part 3 5.4.1은 현재 지원하는 메시지 타입을 다섯 가지로 든다. 타입은 할당된 PGN으로 구별한다.
-
-| 타입 | 하는 일 | 근거 |
-|---|---|---|
-| Command | 특정 또는 전역 목적지에 동작을 지시한다. PDU1·PDU2 모두 쓸 수 있다. 원문의 예는 Transmission Control, Address Request, Torque/Speed Control | 5.4.2 |
-| Request | 특정 또는 전역 목적지에 정보를 요청한다(PGN 59904) | 5.4.3 |
-| Broadcast/Response | 비요청 브로드캐스트, 또는 명령·요청에 대한 응답 | 5.4.4 |
-| Acknowledgement | 특정 명령·요청에 대한 ACK·NACK 등(PGN 59392) | 5.4.5 |
-| Group Function | 첫 데이터 바이트 등으로 하위 기능을 고르는 PG 묶음 | 5.4.6 |
-
-Part 3은 여기에 Request2(5.4.7)와 Transfer(5.4.8)를 더 정의한다. 리모트 프레임(RTR = 1)은 쓸 수 없고, 요청은 데이터 프레임인 Request PGN으로 한다(5.4.1). 그 이유는 [CAN 데이터 프레임](/study/isobus/04-can-data-frame) 챕터에서 봤다.
-
-## Request (PGN 59904)
-
-| 항목 | 값 |
-|---|---|
-| PF / PS | 234(`0xEA`) / DA (전역 또는 특정) |
-| 데이터 길이 | 3바이트. 이 PG의 프레임은 DLC를 3으로 해야 한다(shall) |
-| 기본 Priority | 6 |
-| Byte 1~3 | 요청하는 PGN (LSB 먼저) |
-| 송신 빈도 | 사용자 요구에 따르되 초당 2~3회 이하를 권장 |
-
-(근거: Part 3 5.4.3)
-
-예를 들어 VT(SA `0x26`)가 네트워크의 모든 CF에게 Address Claimed(PGN 60928 = `0x00EE00`)를 요청하는 전역 요청은 `18EAFF26#00EE00`이다. Priority 6, PF `0xEA`, DA `0xFF`, SA `0x26`이고 데이터는 PGN을 LSB부터 적은 `00 EE 00`이다.
-
-## 응답의 목적지와 TP — Table 5를 규칙으로
-
-Part 3 Table 5는 PDU 형식·데이터 길이·요청 방식의 조합마다 응답 목적지와 TP를 정리한다(전체 표는 [Part 3 정리 부록](/study/isobus/appendix-iso-part03)). 구현할 규칙으로 줄이면 다음과 같다.
-
-1. 요청이 전역이면 응답도 전역이다. 8바이트를 넘으면 BAM으로 보낸다.
-2. 요청이 특정 목적지면 응답도 그 요청자에게 보낸다. 8바이트를 넘으면 RTS/CTS로 보낸다.
-3. 예외: PDU2 PGN이고 8바이트 이하면 DA 칸이 없으므로 특정 요청에도 전역으로 답한다.
-4. 예외: Address Claim은 특정 요청을 받아도 전역으로 답한다(ISO 11783-5).
-5. 요청 없이 보내는 주기·비요청 메시지는 송신자가 목적지를 고른다. PDU2 8바이트 이하는 전역만 가능하다.
-
-Part 3 5.4.3 본문은 규칙 2를 "데이터 길이가 8바이트 이상이면 특정 주소 응답에 RTS/CTS를 써야 한다"고 적는다. 그러나 TP는 9바이트 이상에 쓰는 것이고(5.10.6.3) Table 5도 "8바이트 초과"로 나누므로, "8바이트 초과"로 읽는 것이 일관된다.
-
-::: details 파이썬 — Table 5를 함수로
-```python
-GLOBAL = 0xFF
-
-
-def response_plan(pdu, length, request_da):
-    """(PDU 형식, 데이터 길이, 요청 DA) -> (응답 목적지, TP). Address Claim 예외는 제외."""
-    if request_da == GLOBAL:
-        return ("global", "BAM" if length > 8 else None)
-    if pdu == 2 and length <= 8:
-        return ("global", None)              # PDU2 단일 프레임에는 DA 칸이 없다
-    return ("specific", "RTS/CTS" if length > 8 else None)
-
-
-rows = [
-    (1, 8, 0x00, ("specific", None)), (1, 8, GLOBAL, ("global", None)),
-    (1, 9, 0x00, ("specific", "RTS/CTS")), (1, 9, GLOBAL, ("global", "BAM")),
-    (2, 8, 0x00, ("global", None)), (2, 8, GLOBAL, ("global", None)),
-    (2, 9, 0x00, ("specific", "RTS/CTS")), (2, 9, GLOBAL, ("global", "BAM")),
-]
-for pdu, length, da, expected in rows:
-    assert response_plan(pdu, length, da) == expected
-```
+::: details 원문을 가진 독자를 위한 메모
+- 필드별 규칙 표의 조항: Priority 5.2.2·Annex A, EDP 5.2.3·Table 3, DP 5.2.4, PF 5.2.5·5.3, PS 5.2.6, SA 5.2.7, 데이터 5.2.8·5.4.1.
+- 주소를 여러 개 가질 수 있다는 내용은 Annex A NOTE 2, GE 4096개는 5.2.6 NOTE, PDU2 전역 전용은 5.3.3, 요청·응답 표는 Table 5다.
 :::
 
-## NACK을 보낼 때와 침묵할 때
-
-요청을 받은 CF가 그 PG를 지원하지 않을 때의 동작은 요청 형식에 따라 정반대다.
-
-| 받은 요청 | PGN 지원 | 응답 | 근거 |
-|---|---|---|---|
-| 특정 목적지 | 지원 | 요청된 데이터. Acknowledgement가 적절한 PG면 control 0(ACK), 2(Access Denied), 3(Cannot Respond) 중 하나 | 5.4.3 |
-| 특정 목적지 | 미지원 | NACK(control 1) 필수 | 5.4.3 |
-| 전역 | 지원 | 요청된 데이터를 전역으로. 이 PG를 쓰는 모든 CF가, 요청자 자신까지 응답 | 5.13.4 |
-| 전역 | 미지원 | 침묵. 전역 요청에 NACK을 보내면 안 되고, Acknowledgement 자체가 허용되지 않음 | 5.4.3, 5.13.4 |
-
-"지원하지 않는다"는 "그 PG를 송신하지 않는다"는 뜻이다(5.4.3 NOTE 2). 요청으로는 상대가 그 PG를 받았을 때 동작하는지(수신 기능)를 알 수 없다. PGN은 인식하지만 파라미터 값을 줄 수 없으면 NACK이 아니라 해당 데이터 값을 255(FF)로 채운 정상 응답을 보낸다. 명령이나 요청의 PGN을 목적지가 아예 인식하지 못해도 NACK을 보내는 것이 맞다(Annex C).
-
-전역 요청에서 요청자가 자신에게도 답해야 하는 이유는 5.13.4가 적는다. 모든 CF가 응답하리라고 기대되는 상황에서 요청자가 답하지 않으면, 다른 CF들이 요청된 정보에 대해 잘못된 결론을 내릴 수 있다. 원문이 드는 예는 주소 요청이다. 요청자의 Address Claimed가 빠지면 다른 CF들은 그 주소를 쓰는 CF가 없다고 판단할 수 있다(추론).
-
-## Annex C를 프레임으로
-
-Part 3 Annex C는 엔진(SA `0x00`)을 예로 메시지 타입의 쓰임을 보여 준다. 요청자는 SA `0x03`, 명령자는 SA `0xF0`(240)이다. 원문의 숫자를 CAN 프레임으로 옮기면 다음과 같다.
-
-| 장면 | ID | 데이터 | 해설 |
-|---|---|---|---|
-| 특정 요청 | `0x18EA0003` | `EB FE 00` | 엔진에게 Component ID(65259) 요청 |
-| 응답 | — | — | Component ID 데이터. 8바이트를 넘으면 SA 3에게 RTS/CTS |
-| 또는 NACK | `0x18E80300` | `01 FF FF FF 03 EB FE 00` | control 1, 주소 3, PGN 65259 |
-| 전역 요청 | `0x18EAFF03` | `EB FE 00` | 응답은 전역(8바이트 초과면 BAM). 미지원이면 침묵 |
-| 명령에 대한 ACK | `0x18E8F000` | `00 FF FF FF F0` + 명령 PGN | 명령 완료 |
-| 명령에 대한 NACK | `0x18E8F000` | `01 FF FF FF F0` + 명령 PGN | 명령 수행 불가 |
-
-원문은 응답 행을 PF 254·GE 235의 PDU2 한 프레임으로 그린다. 메시지 종류를 보여 주려는 단순화로 보이고, Component ID가 8바이트를 넘는다면 Table 5에 따라 특정 요청에는 RTS/CTS로 SA 3에게, 전역 요청에는 BAM으로 보내야 한다(추론).
-
-명령에 대한 ACK은 필수가 아니다. 명령은 늘 성공 여부를 확인할 수단을 갖고 있고, 다른 수단이 있으면 ACK을 생략해 버스 트래픽을 줄인다. 원문의 예는 엔진 토크 명령이다. 엔진이 내보내는 토크 모드 비트와 토크 값으로 결과를 확인할 수 있다(Annex C NOTE).
-
-# 8. Acknowledgement (PGN 59392)
-
-## 정의와 바이트 배치
-
-| 항목 | 값 |
-|---|---|
-| PF / PS | 232(`0xE8`) / DA |
-| 데이터 길이 | 8바이트 |
-| 기본 Priority | 6 |
-| 송신 시점 | 이 형태의 확인 응답을 요구하는 PGN을 받았을 때 |
-
-(근거: Part 3 5.4.5)
-
-![Acknowledgement 8바이트 배치: Byte 1 control, Byte 2~4는 기본형이면 Group Function 값과 FF FF, 확장 1·2·3바이트형이면 그 길이만큼 확장 식별자와 나머지 FF, Byte 5 응답받을 주소, Byte 6~8 요청됐던 PGN](/images/study-isobus/09-ack-layout-light.png)
-![Acknowledgement 8바이트 배치: Byte 1 control, Byte 2~4는 기본형이면 Group Function 값과 FF FF, 확장 1·2·3바이트형이면 그 길이만큼 확장 식별자와 나머지 FF, Byte 5 응답받을 주소, Byte 6~8 요청됐던 PGN](/images/study-isobus/09-ack-layout-dark.png)
-
-CAN 프레임의 ACK 슬롯이 "적어도 한 노드가 받았다"만 알려 준다면, 이 PG는 특정 명령·요청에 대해 응용 계층이 답하는 확인 응답이다. 두 형식의 차이는 [CAN 에러 처리](/study/isobus/06-can-error) 챕터에서 다뤘다.
-
-## Control byte 읽는 법
-
-정의된 control byte는 16개다(Part 3 5.4.5). 기본형 0~3과, Request2가 확장 식별자를 쓸 때만 쓰는 128~131, 144~147, 160~163이다. 값을 늘어놓으면 규칙성이 보인다.
-
-| 종류 | 기본형 | 확장 1바이트 | 확장 2바이트 | 확장 3바이트 |
-|---|---|---|---|---|
-| ACK (Positive Acknowledgement) | 0 | 128 | 144 | 160 |
-| NACK (Negative Acknowledgement) | 1 | 129 | 145 | 161 |
-| Access Denied (지원하지만 보안상 거부) | 2 | 130 | 146 | 162 |
-| Cannot Respond (지원하지만 바쁨, 나중에 다시 요청) | 3 | 131 | 147 | 163 |
-
-이진수로 보면 Bit 8은 확장 식별자 사용 여부, Bit 6~5는 확장 식별자 길이에서 1을 뺀 값, Bit 2~1은 응답 종류다. 원문이 이렇게 설명하지는 않으므로 해석 코드를 짤 때의 관찰로만 쓴다. 나머지 값(4~127, 132~143, 148~159, 164~255)은 장래 표준을 위한 예약이다.
-
-- Byte 2의 Group Function Value는 Group Function PG의 어느 하위 기능에 대한 응답인지 알려 준다. 값은 PG마다 고유하며 0~250을 쓰는 것이 바람직하고, 251~255는 ISO 11783-7의 관례를 따른다. 해당 사항이 없으면 FF다(5.4.5).
-- Byte 5는 확인 응답을 받을 원래 요청자의 SA이고, PS(DA) 필드의 복제다. 원문은 SAE J1939와의 최대 호환을 위해서라고만 적는다. 데이터 필드만 남는 로그에서도 누구의 요청에 대한 응답인지 알 수 있다는 실용적 이점이 있다(추론).
-- 예약 바이트(기본형의 Byte 3~4)는 FF로 보낸다(5.4.5).
-
-## 해석 예제
-
-로그 `18E82680#01FFFFFF26EBFE00`을 읽어 보자.
-
-- ID: Priority 6, PF `0xE8`(Acknowledgement), DA `0x26`, SA `0x80`
-- Byte 1 `01`: NACK, 기본형
-- Byte 2~4 `FF FF FF`: Group Function Value 없음, 예약
-- Byte 5 `26`: SA `0x26`의 요청에 대한 응답 (DA와 같다)
-- Byte 6~8 `EB FE 00`: PGN 65259
-
-결론: SA `0x80`은 SA `0x26`이 특정 요청한 Component Identification(65259)을 송신하지 않는다.
-
-확장형 예로 데이터 `81 12 FF FF 26 00 EF 00`은 control 129(NACK, 확장 1바이트), 확장 식별자 `0x12`, PGN 61184(Proprietary A)다. "첫 데이터 바이트가 `0x12`인 Proprietary A 메시지는 보내지 않는다"는 뜻이다. 이런 요청을 만드는 Request2는 §10에서 본다.
-
-::: details 파이썬 — Acknowledgement 해석기
-```python
-KIND = {0: "ACK", 1: "NACK", 2: "Access Denied", 3: "Cannot Respond"}
-EXT_LEN = {0: 0, 128: 1, 144: 2, 160: 3}      # control byte 기준값 -> 확장 식별자 바이트 수
-
-
-def decode_ack(data):
-    cb = data[0]
-    base = cb & 0xFC
-    if base not in EXT_LEN:
-        return {"control": cb, "kind": "reserved"}
-    n = EXT_LEN[base]
-    return {
-        "kind": KIND[cb & 0x03],
-        "group_function_value": None if n or data[1] == 0xFF else data[1],
-        "extended_identifier": int.from_bytes(bytes(data[1:1 + n]), "little") if n else None,
-        "address": data[4],
-        "pgn": data[5] | (data[6] << 8) | (data[7] << 16),
-    }
-
-
-defined = [0, 1, 2, 3, 128, 129, 130, 131, 144, 145, 146, 147, 160, 161, 162, 163]
-for cb in range(256):                           # 정의된 16개만 해석되고 나머지는 예약
-    r = decode_ack([cb, 0xFF, 0xFF, 0xFF, 0x26, 0xEB, 0xFE, 0x00])
-    assert (r["kind"] != "reserved") == (cb in defined)
-
-r = decode_ack([0x01, 0xFF, 0xFF, 0xFF, 0x26, 0xEB, 0xFE, 0x00])
-assert (r["kind"], r["address"], r["pgn"]) == ("NACK", 0x26, 65259)
-r = decode_ack([0x81, 0x12, 0xFF, 0xFF, 0x26, 0x00, 0xEF, 0x00])
-assert (r["kind"], r["extended_identifier"], r["pgn"]) == ("NACK", 0x12, 61184)
-```
-:::
-
-# 9. Group function과 제조사 독점 메시지
-
-## Group function
-
-Group function은 PGN 하나에 여러 기능을 묶는 메시지 타입이다. 그룹은 PGN으로, 그룹 안의 기능은 데이터 구조(보통 데이터 필드의 첫 바이트)로 구별한다(Part 3 5.4.6.1). Part 3은 이를 쓰는 곳으로 제조사 독점 기능, multi-packet 전송 기능, 네트워크 관리(ISO 11783-5), VT(ISO 11783-6), TC(ISO 11783-10), FS(ISO 11783-13), SC(ISO 11783-14)를 든다. TP.CM의 control byte(RTS 16, CTS 17 …)도, VT 명령의 첫 바이트도 같은 원리다.
-
-구현에 필요한 규칙은 세 가지다.
-
-- 같은 group function PG는 CAN ID가 같으므로 데이터 길이를 하나로 고정한다(5.2.8.1).
-- Group function은 Part 3의 Request·ACK·NACK이 부족하면 자체 요청·확인 메커니즘을 둘 수 있다(5.4.6.1). VT·TC가 자기 응답 메시지를 갖는 이유다.
-- Request(59904)로 group function PG의 지원 여부를 물을 수 있다. 지원하면 Acknowledgement control 0(또는 2, 3), 지원하지 않으면 control 1이다. 여기서도 "지원하지 않음"은 송신하지 않는다는 뜻이고, 상대가 그 PG를 받아 동작하는지는 알 수 없다(5.4.6.1).
-
-## Proprietary A·A2·B
-
-| 이름 | PGN | 형식 | ID 예 (SA `0x80` → `0x81`) |
-|---|---|---|---|
-| Proprietary A | 61184 (`0x00EF00`) | PDU1, DP 0, PS = DA | `0x18EF8180` |
-| Proprietary A2 | 126720 (`0x01EF00`) | PDU1, DP 1, PS = DA | `0x19EF8180` |
-| Proprietary B | 65280 ~ 65535 (`0x00FF00` ~ `0x00FFFF`) | PDU2, PS = 제조사가 정하는 GE | `0x18FF1280` (GE `0x12`, 전역) |
-
-세 PG 모두 기본 Priority 6이고, 데이터 길이는 0~1785바이트로 multi-packet을 지원한다(Part 3 5.4.6.2~5.4.6.4). 데이터 필드를 어떻게 쓸지, 독점 메시지를 쓸지 말지는 제조사가 정한다.
-
-::: warning 같은 PGN, 다른 의미
-Proprietary 메시지의 데이터 길이는 제조사마다 다르다. 두 제조사가 같은 GE 값을 쓰면서 DLC가 다를 수 있고, 수신 측은 두 제조사를 구별해야 한다(5.4.6.1). Proprietary B는 여러 SA가 같은 PGN 값을 서로 다른 목적으로 쓸 수 있어 특히 주의해야 한다(5.4.6.4). 구별 방법은 원문에 없다. 실무에서는 SA로 상대를 고르되, SA는 주소 클레임 결과에 따라 바뀔 수 있으므로 그 SA가 주소 클레임 때 보낸 NAME의 제조사 코드로 확인하는 편이 안전하다(추론, NAME은 [J1939 주소 체계](/study/isobus/10-j1939-address) 참고).
-:::
-
-Part 3은 정상 운용 중 독점 메시지 사용을 최소화하고, CF당 Proprietary A·A2·B의 합이 네트워크 용량의 2%를 넘지 않게 하라고 권한다(5.4.6.1). 계산 방법은 [SAE J1939 입문](/study/isobus/08-j1939-intro) 챕터에 있다.
-
-# 10. Request2와 Transfer
-
-## 왜 필요한가
-
-CF 하나가 자기 데이터뿐 아니라 다른 CF들의 데이터까지 보고해야 하는 경우가 있다. Part 3이 드는 예는 ECU Identification, Component ID, Software Identification 같은 PGN이다. Request(59904)로는 "누구의 데이터인지"를 구별해 여러 개를 받을 방법이 없다. Request2는 응답에 Transfer PGN을 쓰라고 지정할 수 있고, Transfer는 데이터 세트마다 그 데이터의 주인을 표시한다(Part 3 5.4.7, 5.4.8). Request2 지원은 선택 사항이다(5.4.7).
-
-## Request2 (PGN 51456)
-
-| 항목 | 값 |
-|---|---|
-| PF / PS | 201(`0xC9`) / DA (전역 또는 특정) |
-| 데이터 길이 | 8바이트 |
-| 기본 Priority | 6 |
-| 송신 빈도 | 초당 2~3회 이하 권장 |
-| 지원하는 CF의 의무 | 특정 목적지로 요청된 PG를 지원하지 않으면 NACK 필수 |
-
-(근거: Part 3 5.4.7)
-
-![Request2 8바이트 배치(Byte 1~3 요청 PGN, Byte 4 특수 지시, Byte 5~7 확장 식별자, Byte 8 예약)와 Byte 4의 비트 8~6 예약, 비트 5~3 확장 식별자 종류, 비트 2~1 Transfer 사용 여부, 그리고 Transfer의 a 요청 PGN 뒤에 b 길이·c CF 신원(NAME 바이트 5~8)·d 데이터가 반복되는 구조](/images/study-isobus/09-request2-transfer-layout-light.png)
-![Request2 8바이트 배치(Byte 1~3 요청 PGN, Byte 4 특수 지시, Byte 5~7 확장 식별자, Byte 8 예약)와 Byte 4의 비트 8~6 예약, 비트 5~3 확장 식별자 종류, 비트 2~1 Transfer 사용 여부, 그리고 Transfer의 a 요청 PGN 뒤에 b 길이·c CF 신원(NAME 바이트 5~8)·d 데이터가 반복되는 구조](/images/study-isobus/09-request2-transfer-layout-dark.png)
-
-Byte 4(특수 지시)의 비트는 이렇게 나뉜다(5.4.7).
-
-| 비트 | 이름 | 값 |
-|---|---|---|
-| 8~6 | 예약 | — |
-| 5~3 | 확장 식별자 종류 | 000 없음(Byte 5~7은 FF), 001 1바이트, 010 2바이트, 011 3바이트, 100~110 예약, 111 동작 안 함 |
-| 2~1 | Transfer PGN 사용 | 00 No, 01 Yes, 10 Undefined, 11 Not Allowed |
-
-확장 식별자는 "요청한 PGN의 데이터 첫 1~3바이트가 이 값인 것"을 고르는 필터다. 1바이트형이면 Byte 5가 요청 PGN의 data byte 1과 맞춰질 값이고, 2·3바이트형이면 Byte 6·7이 data byte 2·3과 맞춰진다. 쓰지 않는 바이트는 FF다(5.4.7). Group function PG의 특정 하위 기능을 요청할 때 쓴다. 확장 식별자를 쓴 Request2에 Acknowledgement로 답할 때는 §8의 control 128~163을 쓴다.
-
-Use Transfer = 00이면 Request(59904)와 효과가 같고, 응답도 Transfer 없이 59904에 대한 응답과 똑같이 보낸다. 확장 식별자 종류 000은 "이 장치가 새 Request2 특수 지시 기능을 지원한다"는 표시도 겸한다(5.4.7).
-
-## Request2 바이트 예제
-
-VT(SA `0x26`)가 Software Identification(PGN 65242 = `0x00FEDA`)을 Transfer로 받으려고 전역 Request2를 보낸다.
-
-`18C9FF26#DAFE00E1FFFFFFFF`
-
-| 바이트 | 값 | 해석 |
-|---|---|---|
-| 1~3 | `DA FE 00` | 요청 PGN 65242 |
-| 4 | `E1` = `111 000 01` | 예약 111, 확장 식별자 없음(000), Transfer 사용 Yes(01) |
-| 5~7 | `FF FF FF` | 확장 식별자가 없으므로 FF |
-| 8 | `FF` | 예약 |
-
-5.4.7은 예약 비트·바이트의 값을 명시하지 않는다. 여기서는 Acknowledgement가 예약 바이트를 FF로 보내는 관례(5.4.5)를 따라 1로 채웠다(가정).
-
-두 번째 예는 확장 식별자를 쓴 특정 요청이다. VT가 SA `0x80`에게 "첫 데이터 바이트가 `0x12`인 Proprietary A 메시지"를 요청한다. ID는 `0x18C98026`, 데이터는 `00 EF 00 E4 12 FF FF FF`다. Byte 4 `E4` = `111 001 00`(1바이트 확장 식별자, Transfer No)이고 Byte 5가 `0x12`다. SA `0x80`이 이 메시지를 보내지 않는다면 §8의 `81 12 FF FF 26 00 EF 00`(control 129)로 답한다.
-
-## Transfer (PGN 51712)
-
-| 항목 | 값 |
-|---|---|
-| PF / PS | 202(`0xCA`) / DA (특정 또는 전역) |
-| 데이터 길이 | 9~1785바이트 (multi-packet) |
-| 기본 Priority | 6 |
-| 송신 시점 | "Use Transfer PGN" = 01인 Request2를 받았을 때 |
-
-(근거: Part 3 5.4.8)
-
-데이터는 a 하나 뒤에 (b, c, d)가 반복되는 구조다.
-
-- a (Byte 1~3): Request2가 요청한 PGN
-- b (1바이트): 이 데이터 세트의 길이. 길이 바이트 자신 + 신원 4바이트 + 데이터이므로 b = 5 + d의 길이
-- c (4바이트): 이 데이터의 주인인 CF의 신원. ISO 11783-5 NAME의 바이트 5~8과 같은 배치다(Function Instance·ECU Instance, Function, Device Class, Self Configurable·Industry Group·Device Class Instance)
-- d: 그 CF에 대한, 요청된 PGN의 데이터
-
-규칙은 두 가지다. 응답하는 CF는 59904 요청을 받았을 때 보고했을 정보를 <strong>첫 데이터 세트</strong>로 보내야 한다. 데이터 세트가 하나뿐이어도 Transfer로 응답해야 한다(5.4.8).
-
-## Transfer 바이트 예제 — Request2부터 BAM까지
-
-위 전역 Request2에 SA `0x80`인 작업기 ECU가 답한다. 이 ECU는 자신과, 자신이 보고를 맡은 CF 하나의 소프트웨어 버전을 안다(아래 값은 예시).
-
-| 세트 | c (신원) | d (데이터) | b |
-|---|---|---|---|
-| 1 (자신) | `00 81 08 A0` | `"SW1.0*"` = `53 57 31 2E 30 2A` | 5 + 6 = 11 (`0x0B`) |
-| 2 (맡은 CF) | `08 81 08 A0` | `"SW2.3*"` = `53 57 32 2E 33 2A` | 11 |
-
-c의 `00 81 08 A0`은 Function Instance 0·ECU Instance 0, Function `0x81`, Device Class 4(Byte 7 = 4 × 2 + 예약 비트 0), Self Configurable 1·Industry Group 2·Device Class Instance 0을 담은 예시 값이다. 두 번째 세트는 Function Instance만 1이다(`08`).
-
-Transfer 데이터는 3 + 11 + 11 = 25바이트다. 요청이 전역이었으므로 Table 5에 따라 BAM으로 보낸다. 25바이트는 TP.DT 4개다.
-
-| 프레임 | 데이터 |
-|---|---|
-| TP.CM_BAM | `20 19 00 04 FF 00 CA 00` (크기 25, 패킷 4, PGN 51712) |
-| TP.DT 1 | `01 DA FE 00 0B 00 81 08` |
-| TP.DT 2 | `02 A0 53 57 31 2E 30 2A` |
-| TP.DT 3 | `03 0B 08 81 08 A0 53 57` |
-| TP.DT 4 | `04 32 2E 33 2A FF FF FF` |
-
-BAM과 TP.DT의 규칙은 [J1939 Transport Protocol](/study/isobus/11-j1939-transport) 챕터에서 자세히 다룬다. Part 3 5.4.8의 예도 같은 흐름이다. 엔진이 트랙터와 트레일러의 VIN을 둘 다 안다면, Use Transfer = 01인 전역 Request2에는 두 VIN을 Transfer에 담아 BAM으로 보내고, 00이었다면 트랙터 VIN만 Transfer 없이 BAM으로 보낸다.
-
-::: details 파이썬으로 검산 — Request2 만들기, Transfer 만들고 풀기
-```python
-import math
-
-
-def le(v, n):
-    return [(v >> (8 * i)) & 0xFF for i in range(n)]
-
-
-def request2(pgn, use_transfer, ext=None, ext_len=0):
-    """예약 비트·바이트는 1(FF)로 채운다고 가정(5.4.7은 값을 명시하지 않음)."""
-    b4 = (0b111 << 5) | (ext_len << 2) | (0b01 if use_transfer else 0b00)
-    ext_bytes = (le(ext, ext_len) + [0xFF] * (3 - ext_len)) if ext_len else [0xFF] * 3
-    return le(pgn, 3) + [b4] + ext_bytes + [0xFF]
-
-
-assert request2(65242, True) == [0xDA, 0xFE, 0x00, 0xE1, 0xFF, 0xFF, 0xFF, 0xFF]
-assert request2(61184, False, ext=0x12, ext_len=1) == [0x00, 0xEF, 0x00, 0xE4, 0x12, 0xFF, 0xFF, 0xFF]
-
-
-def identity(func_inst, ecu_inst, function, dev_class, ind_group, dci, self_cfg):
-    """NAME 바이트 5~8과 같은 배치 (Part 3 5.4.8, Part 5 Table 1). 예약 비트는 0."""
-    return [(func_inst << 3) | ecu_inst, function, dev_class << 1,
-            (self_cfg << 7) | (ind_group << 4) | dci]
-
-
-def transfer(pgn, datasets):
-    out = le(pgn, 3)
-    for ident, payload in datasets:
-        out += [5 + len(payload)] + ident + list(payload)
-    return out
-
-
-def decode_transfer(d):
-    pgn, i, sets = d[0] | d[1] << 8 | d[2] << 16, 3, []
-    while i < len(d):
-        n = d[i]
-        sets.append((bytes(d[i + 1:i + 5]).hex(" "), bytes(d[i + 5:i + n])))
-        i += n
-    return pgn, sets
-
-
-tr = transfer(65242, [(identity(0, 0, 0x81, 4, 2, 0, 1), b"SW1.0*"),
-                      (identity(1, 0, 0x81, 4, 2, 0, 1), b"SW2.3*")])
-assert len(tr) == 25
-assert decode_transfer(tr) == (65242, [("00 81 08 a0", b"SW1.0*"), ("08 81 08 a0", b"SW2.3*")])
-
-bam = [0x20] + le(len(tr), 2) + [math.ceil(len(tr) / 7), 0xFF] + le(51712, 3)
-assert bam == [0x20, 0x19, 0x00, 0x04, 0xFF, 0x00, 0xCA, 0x00]
-for s in range(math.ceil(len(tr) / 7)):
-    chunk = tr[s * 7:(s + 1) * 7]
-    print(" ".join(f"{b:02X}" for b in [s + 1] + chunk + [0xFF] * (7 - len(chunk))))
-```
-
-출력되는 네 줄이 위 표의 TP.DT 1~4와 같다.
-:::
-
-# 11. PDU 처리 요구사항과 전형적 수신 루틴
-
-## 100% 부하에서도 잃지 않는다
-
-컨트롤러는 데이터 링크가 100% 사용률일 때도 메시지를 잃지 않을 만큼 빠르게 처리해야 한다(shall). 버스가 한산할 때 프레임이 연달아 와도 마찬가지다. 이것은 응답을 즉시 만들라는 뜻이 아니라, 새 메시지가 이전 메시지를 덮어쓰지 않게 하라는 뜻이다(Part 3 5.12). 갱신이 잦고 지연 요구가 엄격한 데이터는 가능하면 하드웨어 메시지 필터를 쓸 수 있게 설계하라는 권고도 있다(Part 3 5.13.1).
-
-## Annex A의 수신 루틴
-
-Part 3 Annex A(참고)는 CAN 칩이 프레임을 받았을 때 어디에 저장할지 정하는 전형적인 순서를 보여 준다.
-
-![프레임을 받으면 Priority는 보지 않고, PF가 234(Request)이면 DA가 전역이거나 내 주소일 때 request queue에 ID 4바이트와 데이터 3바이트를 넣고, 아니면 PDU1은 DA가 전역이거나 내 주소일 때만, PDU2는 그대로 관심 PGN 점프 테이블을 거쳐 SA가 특별 관심 대상이면 전용 버퍼(데이터 8바이트), 아니면 순환 큐(ID 4 + 데이터 8 = 12바이트)에 넣는 흐름](/images/study-isobus/09-receive-routine-light.png)
-![프레임을 받으면 Priority는 보지 않고, PF가 234(Request)이면 DA가 전역이거나 내 주소일 때 request queue에 ID 4바이트와 데이터 3바이트를 넣고, 아니면 PDU1은 DA가 전역이거나 내 주소일 때만, PDU2는 그대로 관심 PGN 점프 테이블을 거쳐 SA가 특별 관심 대상이면 전용 버퍼(데이터 8바이트), 아니면 순환 큐(ID 4 + 데이터 8 = 12바이트)에 넣는 흐름](/images/study-isobus/09-receive-routine-dark.png)
-
-이 루틴에서 읽어 낼 설계 원칙은 다음과 같다.
-
-- <strong>인터럽트에서는 분류와 저장만 한다.</strong> 응답은 request queue를 나중에 처리하면서 만든다. 5.12가 "즉시 응답하라는 뜻이 아니다"라고 한 것과 맞물린다.
-- <strong>Priority는 처음부터 버린다</strong>(Annex A NOTE 1).
-- <strong>점프 테이블로 관심 PGN만 고른다.</strong> 관심 없는 PGN은 저장하지 않는다.
-- <strong>SA에 따라 저장 방식을 나눈다.</strong> 원문은 특별 관심 SA의 데이터 8바이트는 전용 버퍼에, 나머지는 ID와 데이터 12바이트를 순환 큐에 넣는다. 최신값만 필요한 상대는 덮어쓰는 버퍼로, 순서와 개수가 중요한 메시지는 큐로 받는 구분으로 읽을 수 있다(추론).
-
-Annex A의 의사코드는 Request가 아닌 PDU1 분기에서 DA를 내 주소와 비교하지 않는다. 그러나 5.2.6은 DA가 가리키지 않는 다른 컨트롤러는 그 메시지를 무시해야 한다고(should) 적으므로, 그림과 아래 코드처럼 DA가 내 주소 집합이나 전역일 때만 받도록 거르는 편이 맞다. 남의 메시지를 일부러 봐야 하는 NIU나 로거는 예외다(추론).
-
-::: details 파이썬 — Annex A 수신 루틴
-```python
-REQUEST_PF, GLOBAL = 0xEA, 0xFF
-MY_ADDRESSES = {0x80, 0x81}           # 한 컨트롤러가 주소를 여러 개 가질 수 있다 (Annex A NOTE 2)
-PGN_OF_INTEREST = {65096, 61184, 59392}
-SA_OF_SPECIAL_INTEREST = {0x1C}
-
-
-def pgn_of(can_id):
-    dp, pf, ps = (can_id >> 24) & 1, (can_id >> 16) & 0xFF, (can_id >> 8) & 0xFF
-    return (dp << 16) | (pf << 8) | (ps if pf >= 240 else 0)
-
-
-def on_receive(can_id, data):
-    """Part 3 Annex A의 전형적 수신 루틴. Priority 비트는 보지 않는다."""
-    pf, ps, sa = (can_id >> 16) & 0xFF, (can_id >> 8) & 0xFF, can_id & 0xFF
-    if pf == REQUEST_PF:
-        if ps == GLOBAL or ps in MY_ADDRESSES:
-            return "request queue"             # ID 4바이트 + 데이터 3바이트
-        return "ignore"
-    if pf < 240 and ps != GLOBAL and ps not in MY_ADDRESSES:
-        return "ignore"                        # 5.2.6: 다른 컨트롤러는 무시
-    if pgn_of(can_id) not in PGN_OF_INTEREST:
-        return "ignore"
-    if sa in SA_OF_SPECIAL_INTEREST:
-        return "dedicated buffer"              # 데이터 8바이트
-    return "circular queue"                    # ID 4 + 데이터 8 = 12바이트
-
-
-tests = [
-    (0x18EA8126, "request queue"),     # 나(0x81)에게 온 특정 요청
-    (0x18EA2726, "ignore"),            # 남(0x27)에게 온 특정 요청
-    (0x18EAFF26, "request queue"),     # 전역 요청
-    (0x0CFE481C, "dedicated buffer"),  # PDU2, 관심 SA
-    (0x18FE481C, "dedicated buffer"),  # 같은 PGN, Priority만 다름
-    (0x0CFE4823, "circular queue"),    # PDU2, 일반 SA
-    (0x18EF8023, "circular queue"),    # Proprietary A, DA = 나(0x80)
-    (0x18EF2723, "ignore"),            # Proprietary A, DA = 남
-    (0x18EFFF23, "circular queue"),    # Proprietary A, 전역
-    (0x18FEEE00, "ignore"),            # 관심 없는 PGN
-]
-for cid, expected in tests:
-    assert on_receive(cid, [0] * 8) == expected, hex(cid)
-```
-:::
-
-# 12. 응답 시간·재시도·필수 응답
-
-## Tr과 T3
-
-| 값 | 의미 | 근거 |
-|---|---|---|
-| Tr = 0.2 s | 응답을 요구받은 모든 컨트롤러는 이 시간 안에 응답해야 한다(shall) | 5.13.3 |
-| T3 = 1.25 s | 응답을 기다리는 모든 컨트롤러는 포기하거나 재시도하기 전에 최소 이만큼 기다려야 한다(shall) | 5.13.3 |
-
-특정 응용은 다른 값을 쓸 수 있다. 고속 제어 메시지라면 20 ms 응답을 기대할 수 있고, 그렇게 빨리 답하려면 버퍼에 쌓인 송신 메시지의 순서를 바꿔야 할 수도 있다. 최소 응답 시간 제한은 없다(5.13.3).
-
-T3가 왜 1.25 s인지는 5.13.3의 예가 설명한다. 브리지 하나의 최대 전달 지연이 50 ms이고, 트랙터 1 + 트레일러 5 + 돌리 4로 브리지가 10개면 한 방향 네트워크 지연이 500 ms다. 여기에 타임아웃 마진 50 ms를 둔다. 원문은 합산식을 적지 않지만, 요청이 가는 500 ms + 응답 시간 Tr 200 ms + 응답이 오는 500 ms + 마진 50 ms를 더하면 정확히 1250 ms가 된다.
-
-![정상 응답은 요청 뒤 Tr 200 ms 안에 오고, 무응답이면 T3 1.25 s 간격으로 요청을 세 번 보낸 뒤 3.75 s에 포기하며, T3는 요청 편도 500 ms(브리지 10개 x 50 ms)와 Tr 200 ms, 응답 편도 500 ms, 마진 50 ms를 더한 1250 ms인 타이밍](/images/study-isobus/09-request-timing-light.png)
-![정상 응답은 요청 뒤 Tr 200 ms 안에 오고, 무응답이면 T3 1.25 s 간격으로 요청을 세 번 보낸 뒤 3.75 s에 포기하며, T3는 요청 편도 500 ms(브리지 10개 x 50 ms)와 Tr 200 ms, 응답 편도 500 ms, 마진 50 ms를 더한 1250 ms인 타이밍](/images/study-isobus/09-request-timing-dark.png)
-
-## 재시도
-
-응답 타임아웃 안에 응답(PG 또는 Acknowledgement)이 없으면 같은 Request를 다시 보낼 수 있다. 재시도는 2회로 제한하는 것이 권장되므로 요청은 최대 3번이다. 그래도 응답이 없으면 같은 정보 요청을 포기하거나, 초가 아니라 분 단위로 오래 기다렸다가 다시 시도한다(5.4.3). Request2도 같은 규칙이다(5.4.7). T3 = 1.25 s를 적용하면 첫 요청부터 포기까지 최소 3.75 s다.
-
-Cannot Respond(control 3)는 "지원하지만 지금은 바쁘니 나중에 다시 요청하라"는 뜻이다(5.4.5). 얼마 뒤에 다시 요청할지는 원문에 없다.
-
-## 요청 스케줄링
-
-- 요청하려던 정보가 요청을 보내기 전에 이미 들어왔다면 요청을 취소한다. 원문의 예는 요청 예정 시각 50 ms 전에 정보가 들어온 경우다(5.13.2).
-- 브로드캐스트가 권장되는 PG는 요청하지 않는다. 권장 브로드캐스트 주기가 특별한 필요에 비해 너무 느린 경우는 예외다(5.13.2).
-- 주기적으로 브로드캐스트하는 PGN은 대부분 전역 목적지로 보내는 것이 바람직하다(5.13.5).
-
-::: details 파이썬 — 요청 재시도 타이밍
-```python
-T3, RETRIES = 1.25, 2
-
-
-def request_outcome(response_delays):
-    """시도별 응답 지연(초) 또는 None(무응답) -> (결과, 첫 요청부터 경과 시간)"""
-    t = 0.0
-    for attempt in range(1 + RETRIES):
-        delay = response_delays[attempt] if attempt < len(response_delays) else None
-        if delay is not None and delay <= T3:
-            return (f"{attempt + 1}번째 요청에서 응답", round(t + delay, 3))
-        t += T3
-    return ("포기(또는 분 단위로 기다린 뒤 다시)", t)
-
-
-assert request_outcome([0.15]) == ("1번째 요청에서 응답", 0.15)
-assert request_outcome([None, 0.18]) == ("2번째 요청에서 응답", 1.43)
-assert request_outcome([None, None, None]) == ("포기(또는 분 단위로 기다린 뒤 다시)", 3.75)
-
-bridge = 50 * 10                                   # 편도 지연 (5.13.3 EXAMPLE)
-assert bridge + 200 + bridge + 50 == 1250          # = T3
-```
-:::
-
-::: warning 구현 함정 — 전역 요청 뒤의 침묵
-전역 요청에는 NACK도 ACK도 오지 않는다(5.4.3, 5.13.4). 그래서 전역 요청 뒤 T3 동안 아무 응답이 없다는 것은 "그 PG를 송신하는 CF가 지금 없다"는 뜻이지 "요청이 거절됐다"는 뜻이 아니다. 반대로 특정 요청에 T3까지 아무것도 오지 않으면 상대가 규칙(미지원이면 NACK 필수)을 어겼거나 버스에 없다는 신호다. 두 경우의 재시도·진단 로직을 분리해 두는 것이 좋다(추론).
-:::
-
-::: tip 정리
-- 수신 측은 Priority를 무시하고, DA는 내 주소 집합 또는 전역과 비교한다.
-- 응답 목적지는 요청을 따른다. 전역 요청에는 전역(8바이트 초과면 BAM), 특정 요청에는 특정(8바이트 초과면 RTS/CTS)으로 답한다. PDU2 8바이트 이하와 Address Claim은 예외로 전역이다.
-- 특정 요청에 미지원이면 NACK이 필수이고, 전역 요청에는 NACK·ACK을 보내지 않는다.
-- Acknowledgement는 Byte 1 control, Byte 5 요청자 주소, Byte 6~8 PGN이다. 128~163은 Request2의 확장 식별자용이다.
-- Request2와 Transfer로 한 CF가 여러 CF의 데이터를 신원 4바이트(NAME 바이트 5~8)와 함께 보고한다.
-- 응답은 Tr 0.2 s 안에 하고, 기다리는 쪽은 T3 1.25 s 이상 기다리며, 재시도는 2회(총 3회)까지다.
+<small>근거: ISO 11783-3 5.2.1~5.2.8, 5.3.3, 5.4.1, Table 3, Table 5, Annex A</small>
+
+::: tip 핵심 정리
+- 29비트 ID는 Priority(3) + EDP(1) + DP(1) + PF(8) + PS(8) + SA(8)로 구성된다. 16진수 ID는 뒤 여섯 자리를 두 자리씩 끊으면 PF, PS, SA이고, 맨 앞 두 자리만 2진수로 풀면 Priority, EDP, DP가 나온다.
+- PF < 240이면 PDU1으로 PS는 받는 주소(DA)이고, DA=255로 전역 전송도 가능하다. PF >= 240이면 PDU2로 PS는 GE이고, 전역 전용 브로드캐스트다.
+- **PGN** = PF가 >= 240이면 PS 포함, PF < 240이면 PS 제외하여 계산한다. 16진수로는 DP, PF, PS(PDU1이면 00)를 이어 붙인 값이다.
+- <strong>SPN</strong>은 PGN 데이터 필드 내 개별 파라미터이며, `실제값 = raw * 분해능 + 오프셋` 공식으로 변환한다. 여러 바이트 값은 LSB가 먼저 오고, `FF`(2바이트면 `FFxx`)는 값 없음이다.
+- `18FEEE00#B03204FFFFFFFFFF` 파싱 결과: Priority=6, PGN=65262, SA=0x00, 냉각수 온도=136°C.
 :::
 
 ::: details 확인 문제
-1. (디코딩) 로그 `18E82680#01FFFFFF26EBFE00`을 해석하라. 누가 누구에게, 무엇에 대해, 어떤 응답을 보냈는가?
-2. (디코딩) VT가 `18C98026#00EF00E412FFFFFF`를 보냈고 곧바로 `18E82680#8112FFFF2600EF00`을 받았다. 두 프레임을 해석하라.
-3. (시나리오) TC 클라이언트를 만들면서 부팅 직후 어떤 PGN을 전역으로 요청한다. 1초 기다려 응답이 없으면 "NACK도 없으니 실패"로 기록하고, 200 ms마다 같은 요청을 무기한 반복하도록 했다. 표준과 어긋나는 점을 모두 찾아라.
+1. (개념) PF 값만 보고 PDU1과 PDU2를 어떻게 구분하는가? 각각 PS 칸은 무엇을 뜻하는가?
+2. (읽기) ID `0x0CF00400`을 여섯 칸으로 나누고 PGN을 구하라.
+3. (읽기) ID `0x18EA00F9`의 PGN은 얼마이고, 누가 누구에게 보낸 메시지인가?
+4. (계산) PGN 65262 메시지의 byte 1이 `0x5A`이면 냉각수 온도는 몇 °C인가? byte 1이 `0xFE`나 `0xFF`이면 어떻게 읽어야 하는가?
+5. (계산) 2바이트 SPN이 byte 3~4에 `20 4E`로 실려 있다. 원시값은 10진수로 얼마인가?
+6. (만들기) Priority 6인 엔진 ECU(SA `0x00`)가 PGN 65265(Cruise Control/Vehicle Speed)를 보낼 때의 CAN ID를 구하라.
+7. (심화) 수신 측이 PS(DA)를 자기 주소 하나와만 비교하면 어떤 문제가 생기는가?
 
 **답 가이드**
-1. SA `0x80`이 SA `0x26`에게 보낸 Acknowledgement다. control 1 = NACK, Byte 5 `0x26`은 요청자 주소(DA와 같음), Byte 6~8은 PGN 65259다. `0x80`은 Component Identification을 송신하지 않는다는 뜻이다(Part 3 5.4.5).
-2. 첫 프레임은 VT(`0x26`)가 SA `0x80`에게 보낸 특정 Request2다. 요청 PGN 61184(Proprietary A), Byte 4 `E4` = 확장 식별자 1바이트·Transfer No, 확장 식별자 `0x12`. 두 번째는 `0x80`의 Acknowledgement로 control 129 = 확장 1바이트형 NACK, 확장 식별자 `0x12`, 주소 `0x26`, PGN 61184다. 첫 바이트가 `0x12`인 Proprietary A 메시지는 보내지 않는다는 답이다(5.4.5, 5.4.7).
-3. 전역 요청에는 NACK이 오지 않으므로 침묵을 "실패"로 볼 근거가 없다(5.4.3, 5.13.4). 기다림은 1초가 아니라 최소 T3 1.25 s여야 한다(5.13.3). 200 ms 간격 반복은 초당 5회로 "초당 2~3회 이하" 권고를 넘고(5.4.3), 재시도는 2회(총 3회)로 제한한 뒤 포기하거나 분 단위로 기다려야 한다(5.4.3).
+1. PF가 240(`0xF0`) 미만이면 PDU1, 이상이면 PDU2다. 16진수로는 PF 첫 자리가 `F`이면 PDU2다. PDU1의 PS는 받는 장치의 주소(DA, 255면 모두에게)이고, PDU2의 PS는 PGN의 일부인 GE다.
+2. `0C | F0 | 04 | 00`으로 끊는다. `0x0C` = `000 011 0 0`이므로 Priority 3, EDP 0, DP 0이다. PF `0xF0`(240)이라 PDU2, PS `0x04`는 GE, SA는 `0x00`이다. PGN = 240 × 256 + 4 = 61444(EEC1)다.
+3. `18 | EA | 00 | F9`로 끊으면 Priority 6, PF `0xEA`(234)라 PDU1이다. PGN = 234 × 256 = 59904(Request)다. 진단 도구(SA `0xF9`)가 엔진 ECU(DA `0x00`)에게 보낸 요청이다.
+4. `0x5A` = 5 × 16 + 10 = 90이고, 90 × 1 - 40 = 50 °C다. `0xFE`는 오류 표시(고장 등으로 값을 줄 수 없음), `0xFF`는 값 없음(Not available)이므로 온도로 계산하지 않는다.
+5. LSB가 먼저이므로 byte 4의 `4E`를 앞에 붙여 `0x4E20`이다. 4 × 4096 + 14 × 256 + 2 × 16 + 0 = 20000이다.
+6. 65265 ÷ 256 = 254, 나머지 241이므로 PF 254(`0xFE`), PS 241(`0xF1`)이다. PDU2라서 PS는 GE다. Priority 6이면 첫 바이트가 `0x18`이므로 ID는 `0x18FEF100`이다.
+7. 컨트롤러 하나가 CF 여러 개를 품어 주소를 여러 개 가질 수 있다. 주소 하나와만 비교하면 두 번째 CF 앞으로 온 메시지를 버리게 된다. DA는 내 주소 집합 또는 전역(255)과 비교해야 한다.
 :::
 
 ## 다음 챕터
 
-- 다음 : [J1939 주소 체계](/study/isobus/10-j1939-address)
+- 다음: [10장 요청과 응답: Request, ACK, Group function](/study/isobus/10-j1939-request-ack)

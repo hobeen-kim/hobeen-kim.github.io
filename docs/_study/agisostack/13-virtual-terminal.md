@@ -19,9 +19,9 @@ tags: [AgIsoStack, ISOBUS, VirtualTerminal, C++]
 ::: info 관련 스터디
 프로토콜 차원의 배경 지식은 이론 스터디에 정리돼 있다. 이번 챕터는 그 이론을 AgIsoStack++ 코드로 옮기는 작업이다.
 
-- [ISOBUS CH15. VT 기초](/study/isobus/15-vt-basics)
-- [ISOBUS CH16. VT 오브젝트 풀](/study/isobus/16-vt-object-pool)
-- [ISOBUS CH17. VT 명령어](/study/isobus/17-vt-commands)
+- [ISOBUS CH29. VT 기초](/study/isobus/29-vt-basics)
+- [ISOBUS CH32~35. VT 오브젝트 풀](/study/isobus/32-vt-object-pool-basics)
+- [ISOBUS CH36~40. VT 명령어](/study/isobus/36-vt-commands-basics)
 
 스택 사용법은 앞 챕터를 전제로 한다.
 

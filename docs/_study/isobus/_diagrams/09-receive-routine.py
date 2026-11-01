@@ -44,7 +44,7 @@ def draw(d):
     d.arrow(38, 36, 30, 36)
     lab(34, 37.8, "예")
     d.arrow(12, 33, 12, 27.9, color=P["dim"])
-    lab(10.5, 30.5, "아니오\n(5.2.6)", ha="right")
+    lab(10.5, 30.5, "아니오", ha="right")
     d.ax.plot([24, 24, 44], [33, 30, 30], color=P["accent"], lw=1.8)
     d.arrow(44, 30, 44, 27)
     lab(25.5, 31.2, "예", ha="left")

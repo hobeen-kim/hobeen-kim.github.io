@@ -1,4 +1,4 @@
-"""CH03 §8 트랙터·작업기 네트워크의 물리 구성 — ISO 11783-1 Figure 2 단순화 (light/dark PNG)."""
+"""CH03 §8 트랙터·작업기 네트워크의 물리 구성: ISO 11783-1 Figure 2 단순화 (light/dark PNG)."""
 from _common import diagram
 
 

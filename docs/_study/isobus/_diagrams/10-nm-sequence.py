@@ -1,4 +1,4 @@
-"""CH10 §8 NAME management 절차 — 지원 확인부터 새 NAME 클레임까지 (light/dark PNG)."""
+"""CH10 §8 NAME management 절차: 지원 확인부터 새 NAME 클레임까지 (light/dark PNG)."""
 from _common import diagram
 
 

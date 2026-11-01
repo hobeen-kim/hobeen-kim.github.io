@@ -1,14 +1,20 @@
 ---
-title: "표준 정리: Part 3 — Data link layer"
-description: "ISO 11783-3(Data link layer) — CAN 식별자 구성, PGN 체계, Transport Protocol을 정리한 표준 요약이다."
+title: "표준 정리: Part 3(Data link layer)"
+description: "ISO 11783-3(Data link layer)에서 CAN 식별자 구성, PGN 체계, Transport Protocol을 정리한 표준 요약이다."
 date: 2026-08-21
 tags: [ISOBUS, ISO11783, 표준정리]
+prev: /study/isobus/appendix-iso-part01
+next: /study/isobus/appendix-iso-part04
 ---
 
 # ISO 11783-3: Data link layer 정리
 
 ::: info 이 문서에 대해
 ISO 11783-3 표준 원문을 학습 목적으로 재구성한 <strong>비공식 요약·해설</strong>이다. 규범적 판단이 필요할 때는 반드시 원문 표준을 확인해야 한다.
+:::
+
+::: tip 처음 읽는다면
+이 페이지는 데이터 링크 계층(Part 3: CAN 프레임에 메시지를 싣는 규칙과 긴 데이터를 나눠 보내는 방법)을 원문의 절 구조대로 요약한 참고 자료다. PGN 체계, Request와 ACK, TP와 ETP의 바이트 규칙을 원문 순서로 확인할 때 펼쳐 본다. 처음이라면 [9장 J1939 메시지 구조: 29비트 ID, PGN, SPN](/study/isobus/09-j1939-message), [10장 요청과 응답: Request, ACK, Group function](/study/isobus/10-j1939-request-ack), [15장 Transport Protocol 기초: 8바이트보다 긴 데이터 보내기](/study/isobus/15-tp-bam-cmdt)를 먼저 읽는다.
 :::
 
 ## 개요
@@ -54,7 +60,7 @@ CEFF 메시지 하나는 하나의 PDU를 담는다. PDU는 애플리케이션 �
 - Extended Data Page (EDP)
 - Data Page (DP)
 - PDU Format (PF)
-- PDU Specific (PS) — Destination Address(DA), Group Extension(GE), 또는 proprietary
+- PDU Specific (PS): Destination Address(DA), Group Extension(GE), 또는 proprietary
 - Source Address (SA)
 - Data
 
@@ -167,7 +173,7 @@ SA는 8 bit이며, <strong>네트워크에서 하나의 SA는 하나의 control 
 
 <strong>8바이트 이하 데이터</strong>: 한 프레임의 8바이트를 그대로 쓴다. 향후 확장을 위해 PGN 할당 시 8바이트 전부를 배정·예약하는 것이 권장된다. PGN에 연계된 데이터 바이트 수는 한 번 정해지면 바꿀 수 없다(원래 multi-packet으로 정의되지 않았다면 multi-packet으로 바뀔 수도 없다). CAN DLC는 데이터 길이가 8바이트 이하면 정의된 "data length" 값으로, 9바이트 이상이면 8로 설정한다. 예를 들어 REQUEST PGN(59 904)의 데이터 길이는 3바이트이므로 DLC는 3이다.
 
-<strong>8바이트 초과 데이터(multi-packet)</strong>: 여러 CAN 프레임으로 나눠 통신한다. multi-packet 가능으로 정의된 PG라도 실제 전송할 데이터가 9바이트 미만이면 DLC 8의 단일 프레임으로 보낸다. 9바이트 이상이면 transport protocol 기능을 사용한다 — connection management로 연결을 설정·종료하고, data transfer로 "패킷화"된 데이터를 나르며, destination-specific 전송에는 흐름 제어와 핸드셰이킹을 제공한다. multi-packet 응답의 모든 프레임은 DLC 8이어야 하고 미사용 바이트는 "Not Available"로 채운다. 패킷 수는 고정형·가변형 모두 존재한다(예: active diagnostic codes PGN은 가변형).
+<strong>8바이트 초과 데이터(multi-packet)</strong>: 여러 CAN 프레임으로 나눠 통신한다. multi-packet 가능으로 정의된 PG라도 실제 전송할 데이터가 9바이트 미만이면 DLC 8의 단일 프레임으로 보낸다. 9바이트 이상이면 transport protocol 기능을 사용한다. connection management로 연결을 설정·종료하고, data transfer로 "패킷화"된 데이터를 나르며, destination-specific 전송에는 흐름 제어와 핸드셰이킹을 제공한다. multi-packet 응답의 모든 프레임은 DLC 8이어야 하고 미사용 바이트는 "Not Available"로 채운다. 패킷 수는 고정형·가변형 모두 존재한다(예: active diagnostic codes PGN은 가변형).
 
 ## 5.3 Protocol data unit (PDU) formats
 
@@ -285,7 +291,7 @@ Group Function PG의 경우 Group Function Value 파라미터로 어떤 group fu
 
 | Byte | 내용 |
 |---|---|
-| 1 | Control byte: 0 = ACK, 1 = NACK, 2 = Access Denied(지원하지만 보안상 거부), 3 = Cannot Respond(지원하지만 바쁨 — 나중에 재요청) |
+| 1 | Control byte: 0 = ACK, 1 = NACK, 2 = Access Denied(지원하지만 보안상 거부), 3 = Cannot Respond(지원하지만 바쁨, 나중에 재요청) |
 | 2 | Group Function Value (해당 시), 아니면 FF₁₆ |
 | 3~4 | 예약, FF₁₆ 송신 |
 | 5 | Address Acknowledged / Address Negative Acknowledgement / Address Access Denied / Address Busy |
@@ -309,7 +315,7 @@ Group Function 메시지 타입은 기능 묶음(group of functions)에 쓰인�
 - 이 문서에 정의된 메시지로 부족하면 group function이 자체 request·ACK·NACK 메커니즘을 제공할 수 있다.
 - PGN 59 904 요청으로 특정 Group Function PG의 지원 여부를 확인할 수 있다. 지원하면 control byte 0(ACK)·2·3으로, 지원하지 않으면 1(NACK)로 Acknowledgement PGN을 보낸다. 여기서도 "지원하지 않음"은 그 PG를 송신하지 않는다는 의미다.
 
-proprietary group function은 제조사 간 CAN identifier 사용 충돌 없이 proprietary 메시지를 주고받는 수단을 제공한다. Proprietary A·A2·B 메시지의 데이터 길이는 제조사가 정하므로, 두 제조사가 같은 GE 값을 다른 DLC로 쓸 수 있다 — 수신 측이 제조사를 구분해야 한다. <strong>proprietary 메시지의 상시 사용은 최소화해야 하며, CF당 Proprietary A + A2 + B의 합이 네트워크 용량의 2 %를 넘지 않아야 한다</strong>(Annex D 참조).
+proprietary group function은 제조사 간 CAN identifier 사용 충돌 없이 proprietary 메시지를 주고받는 수단을 제공한다. Proprietary A·A2·B 메시지의 데이터 길이는 제조사가 정하므로, 두 제조사가 같은 GE 값을 다른 DLC로 쓸 수 있다. 수신 측이 제조사를 구분해야 한다. <strong>proprietary 메시지의 상시 사용은 최소화해야 하며, CF당 Proprietary A + A2 + B의 합이 네트워크 용량의 2 %를 넘지 않아야 한다</strong>(Annex D 참조).
 
 | 항목 | Proprietary A | Proprietary A2 | Proprietary B |
 |---|---|---|---|
@@ -351,9 +357,9 @@ Extended Identifier Type(bit 3~5) 값:
 | 값 | 의미 |
 |---|---|
 | 000₂ | Extended Identifier 없음. Byte 5~7은 FF₁₆ |
-| 001₂ | One Byte — Byte 5가 요청 대상 PGN의 data byte 1과 매칭될 값. Byte 6~7은 FF₁₆ |
-| 010₂ | Two Byte — Byte 5·6이 대상 PGN의 data byte 1·2와 매칭. Byte 7은 FF₁₆ |
-| 011₂ | Three Byte — Byte 5·6·7이 대상 PGN의 data byte 1·2·3과 매칭 |
+| 001₂ | One Byte: Byte 5가 요청 대상 PGN의 data byte 1과 매칭될 값. Byte 6~7은 FF₁₆ |
+| 010₂ | Two Byte: Byte 5·6이 대상 PGN의 data byte 1·2와 매칭. Byte 7은 FF₁₆ |
+| 011₂ | Three Byte: Byte 5·6·7이 대상 PGN의 data byte 1·2·3과 매칭 |
 | 100₂~110₂ | 예약 |
 | 111₂ | Take no action / Not applicable |
 
@@ -399,13 +405,13 @@ control function identity(c)의 비트 배치:
 
 ## 5.5 Message priority ~ 5.8 Error detection
 
-<strong>5.5 Message priority</strong> — CAN 데이터 프레임 우선순위는 ISO 11898-1을 따른다. CAN identifier 필드의 값이 우선순위를 결정한다: 값이 낮을수록(29 bit 모두 0이 최고) 우선순위가 높고, 클수록(모두 1이 최저) 낮다. 할당은 5.9의 지침을 따라 응용 계층에서 이뤄진다.
+<strong>5.5 Message priority</strong>: CAN 데이터 프레임 우선순위는 ISO 11898-1을 따른다. CAN identifier 필드의 값이 우선순위를 결정한다: 값이 낮을수록(29 bit 모두 0이 최고) 우선순위가 높고, 클수록(모두 1이 최저) 낮다. 할당은 5.9의 지침을 따라 응용 계층에서 이뤄진다.
 
-<strong>5.6 Bus access</strong> — 버스가 비어 있으면 어떤 컨트롤러든 송신을 시작할 수 있다. 둘 이상이 동시에 시작하면 CAN identifier를 이용한 contention-based arbitration으로 충돌을 해소한다. 정보도 시간도 잃지 않으며, 최고 우선순위 프레임의 발신 컨트롤러가 버스를 획득한다.
+<strong>5.6 Bus access</strong>: 버스가 비어 있으면 어떤 컨트롤러든 송신을 시작할 수 있다. 둘 이상이 동시에 시작하면 CAN identifier를 이용한 contention-based arbitration으로 충돌을 해소한다. 정보도 시간도 잃지 않으며, 최고 우선순위 프레임의 발신 컨트롤러가 버스를 획득한다.
 
-<strong>5.7 Contention-based arbitration</strong> — 중재 중 각 발신 컨트롤러는 자신이 보낸 비트와 버스에서 관측된 비트를 비교한다. 같으면 계속 송신한다. recessive를 보냈는데 dominant가 관측되면 중재에서 패배해 즉시 물러난다. dominant를 보냈는데 recessive가 관측되면 bit error로 검출한다.
+<strong>5.7 Contention-based arbitration</strong>: 중재 중 각 발신 컨트롤러는 자신이 보낸 비트와 버스에서 관측된 비트를 비교한다. 같으면 계속 송신한다. recessive를 보냈는데 dominant가 관측되면 중재에서 패배해 즉시 물러난다. dominant를 보냈는데 recessive가 관측되면 bit error로 검출한다.
 
-<strong>5.8 Error detection</strong> — 오류 검출 수단: 송신 비트와 버스 관측 비트의 비교, CRC, 스터프 폭 5의 가변 비트 스터핑, 프레임 포맷 검사. 상세는 ISO 11898-1 참조.
+<strong>5.8 Error detection</strong>: 오류 검출 수단: 송신 비트와 버스 관측 비트의 비교, CRC, 스터프 폭 5의 가변 비트 스터핑, 프레임 포맷 검사. 상세는 ISO 11898-1 참조.
 
 ## 5.9 Assignment process for SA and PGN
 
@@ -435,7 +441,7 @@ ISO 11783에는 세 가지 기본 통신 방법이 있고, 이를 적절히 쓰�
 | PDU2 (PS = GE) | 단일/복수 출처에서 단일/복수 목적지로 가되 목적지 지정이 필요 없는 경우 |
 | proprietary PGN 2종 | 표준화가 불필요하거나 proprietary 정보를 통신해야 하는 경우 |
 
-proprietary 통신은 PDU2 형식(비목적지 지정, PS는 사용자 정의)과 PDU1 형식(목적지 지정 — 예: 진단 도구가 같은 네트워크의 여러 컨트롤러 중 특정 컨트롤러와 통신) 두 방식을 제공한다. 단일 제조사 컨트롤러 간 통신처럼 네트워크의 다른 컨트롤러에 일반적으로 유용하지 않은 정보에는 proprietary PG를 쓴다.
+proprietary 통신은 PDU2 형식(비목적지 지정, PS는 사용자 정의)과 PDU1 형식(목적지 지정, 예: 진단 도구가 같은 네트워크의 여러 컨트롤러 중 특정 컨트롤러와 통신) 두 방식을 제공한다. 단일 제조사 컨트롤러 간 통신처럼 네트워크의 다른 컨트롤러에 일반적으로 유용하지 않은 정보에는 proprietary PG를 쓴다.
 
 할당 판단 순서: proprietary 정보이거나 일반적 관심사가 아니면 proprietary 방식 → 일반적 관심사이고 특정 CF로의 지향이 불필요하면 PDU2 → 일반적 관심사이면서 특정 CF로 보내야 하면 PDU1.
 
@@ -465,7 +471,7 @@ transport protocol 기능은 데이터 링크 계층의 일부로 기술되며 �
 - 한 multi-packet 메시지의 모든 데이터 패킷은 같은 CAN identifier를 가진다는 점을 수신 측이 인지해야 한다.
 - 재조립: 패킷들을 sequence number 순으로 단일 바이트 열로 조립해 해당 대형 메시지를 담당하는 응용 개체에 전달한다.
 
-### 5.10.3 Transport Protocol — Connection management
+### 5.10.3 Transport Protocol: Connection management
 
 #### 가상 연결
 
@@ -479,7 +485,7 @@ multi-packet 메시지를 브로드캐스트하려면 먼저 <strong>BAM(Broadca
 
 - 연결은 originating CF가 DA로 <strong>RTS</strong>를 보내며 시작된다. RTS에는 전체 메시지 크기(byte), 총 패킷 수, CTS 하나당 보낼 수 있는 최대 패킷 수, 전송할 메시지의 PGN이 담긴다.
 - RTS를 받은 CF는 연결을 수락하거나 거절할 수 있다. 수락하려면 <strong>CTS</strong>를 보낸다. CTS에는 받을 수 있는 패킷 수와 기대하는 첫 패킷의 sequence number가 담긴다. 수신 CF는 수락한 패킷 수를 처리할 충분한 자원을 확보해야 한다. 새로 열린 연결에서 첫 기대 sequence number는 1이다.
-- 거절하려면 <strong>Connection Abort</strong>로 응답한다. 사유는 무엇이든 될 수 있다(자원·메모리 부족 등). RTS를 검토하고 연결하지 않기로 했다면 Connection Abort를 보내는 것이 좋다 — originating CF가 타임아웃을 기다리지 않고 새 연결로 넘어갈 수 있다.
+- 거절하려면 <strong>Connection Abort</strong>로 응답한다. 사유는 무엇이든 될 수 있다(자원·메모리 부족 등). RTS를 검토하고 연결하지 않기로 했다면 Connection Abort를 보내는 것이 좋다. originating CF가 타임아웃을 기다리지 않고 새 연결로 넘어갈 수 있다.
 - 연결 성립 시점: originating CF(RTS 측)는 대응 CTS를 수신했을 때, receiving CF(CTS 측)는 RTS에 대한 CTS를 성공적으로 송신했을 때.
 
 #### Data transfer와 흐름 제어
@@ -491,7 +497,7 @@ multi-packet 메시지를 브로드캐스트하려면 먼저 <strong>BAM(Broadca
 
 오류가 없을 때의 종료는 두 경우다.
 
-- <strong>전역 목적지(BAM)</strong>: 데이터 수신 외에 별도의 종료 절차가 없다. 연결 종료 시점 — originating CF가 마지막 패킷을 보냈을 때, receiving CF는 마지막 패킷을 받았거나 T1 타임아웃이 발생했을 때.
+- <strong>전역 목적지(BAM)</strong>: 데이터 수신 외에 별도의 종료 절차가 없다. 연결 종료 시점: originating CF는 마지막 패킷을 보냈을 때, receiving CF는 마지막 패킷을 받았거나 T1 타임아웃이 발생했을 때.
 - <strong>특정 목적지(RTS/CTS)</strong>: 마지막 패킷을 받은 receiving CF가 <strong>End of Message ACK(TP.CM_EndOfMsgACK)</strong>를 originating CF에 보낸다. 이것이 연결 종료 신호이며, 다른 CF가 연결을 재사용할 수 있도록 이 종료가 필요하다.
 
 Connection Abort 규칙:
@@ -526,7 +532,7 @@ RTS/CTS 연결의 종료 시점 정리:
 
 | 항목 | 값 |
 |---|---|
-| Parameter group name | TRANSPORT PROTOCOL — CONNECTION MANAGEMENT (TP.CM) |
+| Parameter group name | TRANSPORT PROTOCOL: CONNECTION MANAGEMENT (TP.CM) |
 | 용도 | 9바이트 이상 데이터를 가진 PG의 전송 |
 | Data length | 8 byte |
 | Data page / PF / PS | 0 / 236 / DA |
@@ -559,7 +565,7 @@ RTS/CTS 연결의 종료 시점 정리:
 
 #### TP.CM_RTS
 
-네트워크의 다른 CF가 자신과 가상 연결을 열고 싶다는 것을 알리는 메시지다. SA는 originating CF, DA는 수신 대상 CF다. Byte 5로 originating CF는 CTS 하나에서 지정할 수 있는 패킷 수를 제한할 수 있다 — receiving CF가 이 제한을 지키면, originating CF는 수신 측이 놓친 패킷을 항상 재전송할 수 있음이 보장된다. <strong>같은 SA에서 같은 PGN에 대해 여러 RTS가 오면 가장 최근 RTS를 따르고 이전 RTS는 폐기한다(이 경우 abort 메시지는 보내지 않는다)</strong>. RTS는 originating CF만 송신한다.
+네트워크의 다른 CF가 자신과 가상 연결을 열고 싶다는 것을 알리는 메시지다. SA는 originating CF, DA는 수신 대상 CF다. Byte 5로 originating CF는 CTS 하나에서 지정할 수 있는 패킷 수를 제한할 수 있다. receiving CF가 이 제한을 지키면, originating CF는 수신 측이 놓친 패킷을 항상 재전송할 수 있음이 보장된다. <strong>같은 SA에서 같은 PGN에 대해 여러 RTS가 오면 가장 최근 RTS를 따르고 이전 RTS는 폐기한다(이 경우 abort 메시지는 보내지 않는다)</strong>. RTS는 originating CF만 송신한다.
 
 #### TP.CM_CTS
 
@@ -576,7 +582,7 @@ RTS에 대한 응답으로, 일정량의 대형 메시지 데이터를 받을 �
 
 #### TP.Conn_Abort
 
-가상 연결에 참여한 어느 쪽이든 전송 완료 전에 연결을 닫거나 연결 성립 자체를 막기 위해 쓴다. RTS를 받은 CF는 자원이 충분한지 판단해야 하며(힙 메모리 확보 실패, 처리 여력 부족 등), 연결이 성립되지 않았어도 Connection Abort를 보낼 수 있다 — originating CF가 타임아웃을 기다리지 않고 다른 연결을 시도할 수 있게 하기 위함이다.
+가상 연결에 참여한 어느 쪽이든 전송 완료 전에 연결을 닫거나 연결 성립 자체를 막기 위해 쓴다. RTS를 받은 CF는 자원이 충분한지 판단해야 하며(힙 메모리 확보 실패, 처리 여력 부족 등), 연결이 성립되지 않았어도 Connection Abort를 보낼 수 있다. originating CF가 타임아웃을 기다리지 않고 다른 연결을 시도할 수 있게 하기 위함이다.
 
 <strong>originating CF(RTS 측)는 Connection Abort 수신 즉시 송신을 중단해야 한다. 즉시가 불가능하면 중단 절차는 32개 데이터 패킷·50 ms를 넘지 않아야 한다.</strong> Connection Abort 송수신 후에는 관련해 수신된 모든 데이터 패킷을 무시한다. Conn_Abort는 양쪽 모두 송신할 수 있다.
 
@@ -608,11 +614,11 @@ TP.DT는 parameter group에 연계된 데이터를 실어 나르는 메시지로
 
 | 항목 | 값 |
 |---|---|
-| Parameter group name | TRANSPORT PROTOCOL — DATA TRANSFER (TP.DT) |
+| Parameter group name | TRANSPORT PROTOCOL: DATA TRANSFER (TP.DT) |
 | 용도 | 8바이트 초과 데이터를 가진 PG의 데이터 전송 |
 | Data length | 8 byte |
 | Data page / PF | 0 / 235 |
-| PS | DA — BAM 데이터 전송은 global(255), RTS/CTS 데이터 전송은 global 불허 |
+| PS | DA. BAM 데이터 전송은 global(255), RTS/CTS 데이터 전송은 global 불허 |
 | Default priority | 7 (운반하는 PGN과 무관하게 적용) |
 | PGN | 60 160 (00EB00₁₆) |
 | Byte 1 | Sequence number (1~255) |
@@ -660,7 +666,7 @@ ETP.CM은 TP.CM과 다른 PGN을 사용한다.
 
 | 항목 | 값 |
 |---|---|
-| Parameter group name | EXTENDED TRANSPORT PROTOCOL — CONNECTION MANAGEMENT (ETP.CM) |
+| Parameter group name | EXTENDED TRANSPORT PROTOCOL: CONNECTION MANAGEMENT (ETP.CM) |
 | 용도 | 1 786바이트 이상 데이터를 가진 PG의 전송 |
 | Data length | 8 byte |
 | Data page / PF / PS | 0 / 200 / DA |
@@ -690,12 +696,12 @@ ETP Connection Abort 사유(Table 9)는 1~8이 TP와 동일하고, 9부터 ETP �
 
 | 값 | 의미 |
 |---|---|
-| 1~8 | TP와 동일 (Table 8 참조) |
+| 1~8 | TP와 동일(위 TP.Conn_Abort의 사유 코드 표, 원문 Table 8) |
 | 9 | 예기치 않은 EDPO 패킷 |
 | 10 | EDPO의 PGN이 잘못됨 |
 | 11 | EDPO 패킷 수가 CTS보다 큼 |
 | 12 | 잘못된 EDPO offset |
-| 13 | 폐기됨(deprecated) — 250 사용 |
+| 13 | 폐기됨(deprecated). 250 사용 |
 | 14 | ECTS의 PGN이 잘못됨 |
 | 15 | ECTS가 요구한 패킷이 메시지 크기 초과 |
 | 16~249 | 예약 |
@@ -706,7 +712,7 @@ ETP Connection Abort 사유(Table 9)는 1~8이 TP와 동일하고, 9부터 ETP �
 
 | 항목 | 값 |
 |---|---|
-| Parameter group name | EXTENDED TRANSPORT PROTOCOL — DATA TRANSFER (ETP.DT) |
+| Parameter group name | EXTENDED TRANSPORT PROTOCOL: DATA TRANSFER (ETP.DT) |
 | 용도 | 1 785바이트 초과 데이터를 가진 PG의 데이터 전송 |
 | Data length | 8 byte |
 | Data page / PF / PS | 0 / 199 / DA |
@@ -737,7 +743,7 @@ PDU 해석의 권장 절차는 Annex A에, 메시지 타입·PDU 포맷 사용 �
 - 응답이 요구되는 모든 컨트롤러는 <strong>0,20 s(Tr) 이내</strong>에 응답해야 한다.
 - 응답을 기다리는 모든 컨트롤러는 포기·재시도 전에 <strong>최소 1,25 s(T3)</strong>를 기다려야 한다. 이 값들은 버스 접근·브리지 경유 전달 지연이 원치 않는 타임아웃을 만들지 않도록 보장한다.
 - 필요 시 특정 응용에는 다른 시간 값을 쓸 수 있다(예: 고속 제어 메시지는 20 ms 응답 기대). 더 빠른 응답을 위해 버퍼된 메시지의 재정렬이 필요할 수 있다. 최소 응답 시간 제한은 없다.
-- destination-specific multi-packet의 패킷 간 시간은 0~200 ms(back-to-back 허용 — 같은 identifier를 가질 수 있음). CTS 메커니즘으로 패킷 간 간격을 강제할 수 있다(흐름 제어).
+- destination-specific multi-packet의 패킷 간 시간은 0~200 ms(back-to-back 허용, 같은 identifier를 가질 수 있음). CTS 메커니즘으로 패킷 간 간격을 강제할 수 있다(흐름 제어).
 - <strong>multi-packet 브로드캐스트의 패킷 간 시간은 10~200 ms</strong>. 최소 10 ms는 수신 CF가 CAN 하드웨어에서 메시지를 꺼낼 시간을 보장한다. 수신 CF는 T1 = 750 ms 타임아웃을 사용한다(최대 송신 간격 200 ms보다 큼).
 
 T3 = 1,25 s의 산정 예: 브리지 하나의 최대 순방향 지연 50 ms × 브리지 10개(트랙터 1 + 트레일러 5 + 돌리 4) = 편도 500 ms의 네트워크 지연, 재전송 요구(CTS에 의한 재요청) 한도 2회(총 3회 요청, 한도 도달 시 abort reason 5), 타임아웃 마진 50 ms.
@@ -748,7 +754,7 @@ T3 = 1,25 s의 산정 예: 브리지 하나의 최대 순방향 지연 50 ms × 
 - 주기적으로 브로드캐스트되는 PGN은 대부분 전역 목적지로 보내는 것이 바람직하다.
 - <strong>일반적인 임플리먼트 운용 중 CTS당 최대 패킷 수는 16 권장.</strong>
 
-## Annex A (참고) — 전형적인 PDU 수신 루틴
+## Annex A (참고): 전형적인 PDU 수신 루틴
 
 CAN IC에서 메시지를 수신하면 어디에 저장할지 결정하기 위한 검사를 수행한다. 3개 priority bit는 버스 중재에만 쓰이므로 수신 측에서는 사용하지 않는다. 하나의 컨트롤러가 여러 기능을 수행하면 여러 주소를 가질 수 있다. 권장 분기 로직:
 
@@ -757,36 +763,36 @@ CAN IC에서 메시지를 수신하면 어디에 저장할지 결정하기 위�
 3. PF < 240 (PDU1): DA가 global이든 specific이든, 관심 PGN의 점프 테이블을 사용해 SA가 특별 관심 대상이면 데이터 8바이트를 전용 버퍼에, 아니면 12바이트 메시지(ID + 데이터)를 순환 큐에 저장.
 4. PF ≥ 240 (PDU2): 관심 PGN 점프 테이블 사용, SA가 특별 관심 대상이면 전용 버퍼에, 아니면 12바이트 메시지를 순환 큐에 저장.
 
-## Annex B (참고) — Transport protocol 전송 시퀀스 예
+## Annex B (참고): Transport protocol 전송 시퀀스 예
 
 connection mode 데이터 전송의 예시 시퀀스 모음이다. 대표 시나리오는 다음과 같다.
 
-<strong>B.1 오류 없는 전송</strong> — component identification(PGN 65 259) 23바이트를 4패킷으로 전송하는 예.
+<strong>B.1 오류 없는 전송</strong>: component identification(PGN 65 259) 23바이트를 4패킷으로 전송하는 예.
 
 1. originating CF가 TP.CM_RTS(16, 크기 23, 패킷 4, 최대 255, PGN 65 259) 송신.
-2. receiving CF가 TP.CM_CTS(17, 패킷 2, 시작 1) — 패킷 1부터 2개 수신 준비.
+2. receiving CF가 TP.CM_CTS(17, 패킷 2, 시작 1): 패킷 1부터 2개 수신 준비.
 3. TP.DT 1(데이터 1~7), TP.DT 2(데이터 8~14) 전송.
-4. receiving CF가 CTS(0) — 연결은 유지하되 당장 수신 불가(hold). 최대 500 ms 후 다시 CTS를 보내야 한다.
+4. receiving CF가 CTS(0): 연결은 유지하되 당장 수신 불가(hold). 최대 500 ms 후 다시 CTS를 보내야 한다.
 5. receiving CF가 TP.CM_CTS(패킷 2, 시작 3) → TP.DT 3(데이터 15~21), TP.DT 4(데이터 22~23 + 나머지 FF₁₆) 전송.
-6. receiving CF가 TP.CM_EndOfMsgACK(19, 23, 4, 255, 65 259) 송신 — 연결 종료.
+6. receiving CF가 TP.CM_EndOfMsgACK(19, 23, 4, 255, 65 259) 송신. 연결 종료.
 
 각 구간에는 5.10.3.5의 타이밍(Tr ≤ 200 ms, T1 ≤ 750 ms, T2 = 1 250 ms, T3 = 1 250 ms, T4 ≤ 1 050 ms, Th ≤ 500 ms)이 적용된다.
 
-<strong>B.2 오류를 동반한 전송</strong> — 패킷 2가 체크섬 실패 등으로 오류 판정되면, receiving CF는 CTS(패킷 1개, 시작 2)로 패킷 2 재전송을 요구한다. 재전송 후 CTS(패킷 2, 시작 3)를 보내는데, 이는 패킷 1·2의 정상 수신 확인이기도 하다. 마지막 패킷까지 정상 수신하면 EndOfMsgACK를 보낸다.
+<strong>B.2 오류를 동반한 전송</strong>: 패킷 2가 체크섬 실패 등으로 오류 판정되면, receiving CF는 CTS(패킷 1개, 시작 2)로 패킷 2 재전송을 요구한다. 재전송 후 CTS(패킷 2, 시작 3)를 보내는데, 이는 패킷 1·2의 정상 수신 확인이기도 하다. 마지막 패킷까지 정상 수신하면 EndOfMsgACK를 보낸다.
 
-<strong>B.3 브로드캐스트 전송</strong> — tractor identification(PGN 65 260) 17바이트를 브로드캐스트하는 예. TP.CM_BAM(32, 17, 3, 255, 65 260) 송신 후 TP.DT 1~3을 각각 10~200 ms 간격으로 전송한다. 어떤 수신 CF도 acknowledgement를 하지 않는다. 수신 측은 패킷마다 T1(750 ms) 타임아웃을 적용한다.
+<strong>B.3 브로드캐스트 전송</strong>: tractor identification(PGN 65 260) 17바이트를 브로드캐스트하는 예. TP.CM_BAM(32, 17, 3, 255, 65 260) 송신 후 TP.DT 1~3을 각각 10~200 ms 간격으로 전송한다. 어떤 수신 CF도 acknowledgement를 하지 않는다. 수신 측은 패킷마다 T1(750 ms) 타임아웃을 적용한다.
 
-<strong>B.4 / B.5 Maximum Number of Packets 파라미터</strong> — B.4는 양쪽 모두 RTS Byte 5(CTS당 최대 패킷 수) 파라미터를 지원해 originating CF가 수신 측의 요구량을 제한하는 예다. B.5는 originating CF만 지원하고 receiving CF는 지원하지 않는 상황으로, 이때 originating CF는 수신 측 CTS 한도를 따라야 한다(5개씩 보내고 싶어도 CTS가 7개를 지시하면 7개 전송).
+<strong>B.4 / B.5 Maximum Number of Packets 파라미터</strong>: B.4는 양쪽 모두 RTS Byte 5(CTS당 최대 패킷 수) 파라미터를 지원해 originating CF가 수신 측의 요구량을 제한하는 예다. B.5는 originating CF만 지원하고 receiving CF는 지원하지 않는 상황으로, 이때 originating CF는 수신 측 CTS 한도를 따라야 한다(5개씩 보내고 싶어도 CTS가 7개를 지시하면 7개 전송).
 
 :::warning 재전송 데이터의 일관성
 B.5의 예에서 패킷 7 전송 후 수신 측이 패킷 1에 대한 CTS를 다시 보내면, originating CF가 정보를 재계산해야 할 수 있어 두 번째 전송의 패킷 1이 원래 패킷 1과 다른 데이터를 담을 수 있다. 동적 데이터를 가진 PGN(예: 65 227)은 이런 위험이 있고, 정적 데이터 PGN(예: 65 242)은 문제가 없다.
 :::
 
-<strong>B.6 CTS 그룹의 마지막 패킷 누락</strong> — receiving CF는 세션 abort를 피하기 위해 CTS(재전송 요구)를 보낸다.
+<strong>B.6 CTS 그룹의 마지막 패킷 누락</strong>: receiving CF는 세션 abort를 피하기 위해 CTS(재전송 요구)를 보낸다.
 
-<strong>B.7 타임아웃 시 CTS</strong> — 느린 송신 CF의 경우: 12패킷 CTS 그룹 전송 중 수신 측의 재전송 CTS가 마지막 데이터 패킷 송신 전에 도착하면, 송신 CF는 abort reason 4로 세션을 abort한다(재전송 CTS가 abort를 막지 못하는 사례). 빠른 송신 CF의 경우: 재전송 CTS가 마지막 데이터 패킷 송신 후·T3 타임아웃 전에 도착하면 송신 CF가 CTS를 수용해 세션 abort를 피할 수 있다.
+<strong>B.7 타임아웃 시 CTS</strong>: 느린 송신 CF의 경우: 12패킷 CTS 그룹 전송 중 수신 측의 재전송 CTS가 마지막 데이터 패킷 송신 전에 도착하면, 송신 CF는 abort reason 4로 세션을 abort한다(재전송 CTS가 abort를 막지 못하는 사례). 빠른 송신 CF의 경우: 재전송 CTS가 마지막 데이터 패킷 송신 후·T3 타임아웃 전에 도착하면 송신 CF가 CTS를 수용해 세션 abort를 피할 수 있다.
 
-## Annex C (참고) — 통신 모드 예시
+## Annex C (참고): 통신 모드 예시
 
 엔진 ECU를 예로 든 메시지 타입 사용 시나리오다.
 
@@ -800,11 +806,11 @@ B.5의 예에서 패킷 7 전송 후 수신 측이 패킷 1에 대한 CTS를 다
 command에는 항상 동작 성공 여부를 확인할 수단이 있다. 다른 확인 수단이 있으면 ACK 메시지는 필수가 아니며, 이는 버스 트래픽 최소화에 도움이 된다. 예를 들어 엔진에 대한 torque command는 엔진이 내보내는 torque mode 비트와 torque 값으로 확인할 수 있다.
 :::
 
-## Annex D (참고) — 네트워크 대역폭 활용
+## Annex D (참고): 네트워크 대역폭 활용
 
 ISO 11783 같은 개방형 시스템에서는 CAN 네트워크 대역폭 활용이 매우 중요하다. 설계가 부주의하면 메시징 수요가 네트워크 용량을 초과할 수 있다. 대역폭·지연을 관리하는 수단은 proprietary PG·CBFF 통신 사용 제한, 주기 메시지의 주기를 실용적인 한도에서 최대한 느리게 설정, PG의 기본 priority다. 강력 권장 사항:
 
-- 정상 운용 중 proprietary 메시지 사용 최소화 — Proprietary A + A2 + B의 합이 네트워크 용량의 2 % 이하.
+- 정상 운용 중 proprietary 메시지 사용 최소화: Proprietary A + A2 + B의 합이 네트워크 용량의 2 % 이하.
 - CBFF 메시징은 CEFF와 공존할 수 있지만, CEFF ISO 11783 네트워크 대역폭 보존을 위해 <strong>CBFF 트래픽은 서브넷으로 격리</strong>하는 것이 권장된다.
 - 기본 priority는 아래 분류에 따라 적용한다.
 

@@ -1,11 +1,11 @@
-"""CH19 §12 task total 처리 타임라인 — 시작·재개, 측정, 주기 수집, 일시정지 (light/dark PNG)."""
+"""CH19 §12 task total 처리 타임라인: 시작·재개, 측정, 주기 수집, 일시정지 (light/dark PNG)."""
 from _common import diagram
 
 TC_X, CL_X = 34, 84
 TOP = 57
 STEP = 3.55
 
-# (종류, 내용) — "tc": TC->클라이언트, "cl": 클라이언트->TC, "note_cl"/"note_tc": 생명선 위 메모
+# (종류, 내용): "tc": TC->클라이언트, "cl": 클라이언트->TC, "note_cl"/"note_tc": 생명선 위 메모
 ROWS = [
     ("tc", "TC Status (E)   totals active 0 -> 1"),
     ("note_cl", "task total = 0, 카운트 시작"),

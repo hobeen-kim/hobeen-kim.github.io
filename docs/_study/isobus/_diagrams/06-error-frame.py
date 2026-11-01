@@ -1,4 +1,4 @@
-"""CH6 §2 Error Frame 구조 — Active Error Flag + Error Delimiter (light/dark PNG)."""
+"""CH6 §2 Error Frame 구조: Active Error Flag + Error Delimiter (light/dark PNG)."""
 from _common import diagram
 
 FIELDS = [

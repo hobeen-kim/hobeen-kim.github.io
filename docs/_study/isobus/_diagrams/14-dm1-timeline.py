@@ -1,4 +1,4 @@
-"""CH14 §10 DM1 송신 시점 — 이벤트·1초 주기·간헐 고장 억제 (light/dark PNG)."""
+"""CH14 §10 DM1 송신 시점: 이벤트·1초 주기·간헐 고장 억제 (light/dark PNG)."""
 from _common import diagram
 
 X0, SCALE = 13, 12.4

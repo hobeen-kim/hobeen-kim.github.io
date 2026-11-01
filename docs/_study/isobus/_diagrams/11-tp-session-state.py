@@ -1,4 +1,4 @@
-"""CH11 §8 RTS/CTS 세션 상태 머신 — 송신 측·수신 측 (light/dark PNG)."""
+"""CH11 §8 RTS/CTS 세션 상태 머신: 송신 측·수신 측 (light/dark PNG)."""
 from _common import diagram
 
 

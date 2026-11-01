@@ -51,7 +51,7 @@ def draw(d):
     xd = xc + w_len + GAP
     w_pkt = 44
     cell(xd, y3, w_pkt, "AD 00 00 02 00 FF FF FF", "명령 패킷 1개 = 8바이트 (짧으면 FF 채움)", "green")
-    bracket(xd, xd + w_pkt, y3 - 1.2, "Annex F 명령 형식 그대로, Byte 1 = VT function")
+    bracket(xd, xd + w_pkt, y3 - 1.2, "Working Set 명령과 같은 형식, Byte 1 = VT function")
 
 
 diagram("17-macro-encoding", draw, w=13, h=6.6, xmax=100, ymax=54)

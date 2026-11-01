@@ -9,8 +9,8 @@ BYTES = [
     ("SPN 175", "byte[3]=0xFF", "(MSB)", "brown"),
     ("SPN 176", "byte[4]=0xFF", "(N/A)", "gray"),
     ("SPN 176", "byte[5]=0xFF", "(N/A)", "gray"),
-    ("SPN 1134", "byte[6]=0xFF", "(N/A)", "purple"),
-    ("SPN 1135", "byte[7]=0xFF", "(N/A)", "orange"),
+    ("SPN 52", "byte[6]=0xFF", "(N/A)", "purple"),
+    ("SPN 1134", "byte[7]=0xFF", "(N/A)", "orange"),
 ]
 
 

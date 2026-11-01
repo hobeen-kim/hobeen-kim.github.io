@@ -1,7 +1,7 @@
-"""CH08 §7 데이터 페이지 0·1의 PGN 공간과 할당 방향 — Part 3 Table 2·Table 7 (light/dark PNG)."""
+"""CH08 §7 데이터 페이지 0·1의 PGN 공간과 할당 방향: Part 3 Table 2·Table 7 (light/dark PNG)."""
 from _common import diagram
 
-# (폭, 이름, 색, 왼쪽 PGN, 오른쪽 PGN) — 폭은 보기 좋게 조정한 값(비례 아님)
+# (폭, 이름, 색, 왼쪽 PGN, 오른쪽 PGN): 폭은 보기 좋게 조정한 값(비례 아님)
 SEG = [(40, "PDU1  (PS = DA)\nPF 0~238", "blue"),
        (7, "PF 239", "brown"),
        (40, "PDU2  (PS = GE)\nPF 240~254", "green"),
@@ -15,7 +15,7 @@ def draw(d):
         (31, "DP = 0", ["0", "60928 | 61184", "61440", "65279 | 65280", "65535"],
          ["Proprietary A", "Proprietary B"]),
         (7, "DP = 1", ["65536", "126464 | 126720", "126976", "130815 | 130816", "131071"],
-         ["Proprietary A2", "Prop B 표기 (Table 7)"]),
+         ["Proprietary A2", "표기 엇갈림"]),
     ]
     for y, name, edges, prop in pages:
         d.text(X0, y + 10.5, name, size=10, weight="bold", ha="left")

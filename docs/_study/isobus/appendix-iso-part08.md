@@ -1,14 +1,20 @@
 ---
-title: "표준 정리: Part 8 — Power train messages"
-description: "ISO 11783-8(Power train messages) — J1939-71 파워트레인 메시지의 ISOBUS 적용 규칙을 정리한 표준 요약이다."
+title: "표준 정리: Part 8(Power train messages)"
+description: "ISO 11783-8(Power train messages)에서 J1939-71 파워트레인 메시지의 ISOBUS 적용 규칙을 정리한 표준 요약이다."
 date: 2026-08-21
 tags: [ISOBUS, ISO11783, 표준정리]
+prev: /study/isobus/appendix-iso-part07
+next: /study/isobus/appendix-iso-part09
 ---
 
 # ISO 11783-8: Power train messages 정리
 
 ::: info 이 문서에 대해
 ISO 11783-8 표준 원문을 학습 목적으로 재구성한 <strong>비공식 요약·해설</strong>이다. 규범적 판단이 필요할 때는 반드시 원문 표준을 확인해야 한다.
+:::
+
+::: tip 처음 읽는다면
+이 페이지는 파워트레인 메시지(Part 8: 엔진과 변속기 메시지를 SAE J1939에서 가져다 쓰는 규칙)를 요약한 참고 자료다. 본문이 짧은 파트라 한 번에 훑어볼 수 있다. 처음이라면 [22장 트랙터 ECU: 클래스, 조명, 전원, Safe mode](/study/isobus/22-tractor-ecu)를 먼저 읽는다. 그 장의 Safe mode와 파워트레인 메시지 규칙 절이 이 파트를 다룬다.
 :::
 
 ## 개요
@@ -33,13 +39,13 @@ ISO 11783 시리즈 전체는 농림업용 트랙터와 장착식·반장착식�
 | 2 | Normative references | 필수 참조 문서 |
 | 3 | Terms and definitions | 용어 (ISO 11783-1 준용) |
 | 4 | Technical requirements | 기술 요구사항 (4.1~4.3) |
-| — | Bibliography | 참고 문헌 |
+| - | Bibliography | 참고 문헌 |
 
-## 1절 — 적용 범위 (Scope)
+## 1절: 적용 범위 (Scope)
 
 센서, 액추에이터, 제어 요소, 정보 저장·표시 장치 사이의 데이터 전송 방법과 형식을 표준화한다는 ISO 11783 공통 목적 아래, Part 8은 <strong>트랙터 및 자주식 작업기에 요구되는 메시지</strong>를 기술하는 범위를 갖는다. 견인되는 일반 작업기의 프로세스 데이터가 아니라, 차량 자체의 구동계 정보가 대상이다.
 
-## 2절 — 필수 참조 문서
+## 2절: 필수 참조 문서
 
 세 문서가 normative reference로 지정되어 있으며, 이 중 J1939/71이 실질적인 본체 역할을 한다.
 
@@ -49,17 +55,17 @@ ISO 11783 시리즈 전체는 농림업용 트랙터와 장착식·반장착식�
 | ISO 11783-7 | Implement messages application layer. 파라미터 정의 충돌 시 <strong>우선권</strong>을 가짐 |
 | SAE J1939/71 | Application Layer. 파워트레인 파라미터·파라미터 그룹의 <strong>실제 정의 출처</strong> |
 
-## 3절 — 용어와 정의
+## 3절: 용어와 정의
 
 별도 정의 없이 ISO 11783-1의 용어·정의를 그대로 적용한다.
 
-## 4절 — 기술 요구사항
+## 4절: 기술 요구사항
 
 ### 4.1 General
 
 이 메시지 세트의 목적은 트랙터 또는 자주식 작업기의 <strong>파워트레인 모니터링과 제어</strong>를 지원하는 것이다. 엔진 회전수·차속·변속 상태 같은 구동계 정보를 네트워크 상의 다른 ECU(예: Task Controller, Virtual Terminal, 작업기 ECU)가 받아 쓰거나, 반대로 구동계에 제어 요청을 보내는 시나리오를 포괄한다.
 
-### 4.2 Message parameter definitions — 파라미터 정의 규칙
+### 4.2 Message parameter definitions: 파라미터 정의 규칙
 
 파워트레인 제어에 필요한 <strong>개별 파라미터(J1939 용어로 SPN에 해당하는 수준)</strong>의 정의는 SAE J1939/71을 참조한다. 단, 하나의 예외 규칙이 있다.
 
@@ -67,11 +73,11 @@ ISO 11783 시리즈 전체는 농림업용 트랙터와 장착식·반장착식�
 어떤 파라미터가 SAE J1939/71에도 정의되어 있고 ISO 11783-7에도 정의되어 있다면, <strong>ISO 11783-7의 파라미터 정의를 따라야 한다(shall)</strong>. 즉 농업 도메인에서 재정의된 것이 있으면 그것이 트럭·버스 정의를 이긴다.
 :::
 
-### 4.3 Message parameter group definitions — 파라미터 그룹 정의 규칙
+### 4.3 Message parameter group definitions: 파라미터 그룹 정의 규칙
 
 <strong>파라미터 그룹(PGN 단위의 메시지)</strong>에 대해서도 4.2와 동일한 구조의 규칙을 둔다. 정의 출처는 SAE J1939/71이고, ISO 11783-7에 같은 파라미터 그룹이 정의되어 있으면 ISO 11783-7의 정의가 우선한다.
 
-## 해설 — 이 파트를 어떻게 읽어야 하나
+## 해설: 이 파트를 어떻게 읽어야 하나
 
 ISO 11783-8은 자체 콘텐츠가 거의 없는 대신, 다음과 같은 <strong>계층 관계를 확정하는 문서</strong>로 이해하면 된다.
 
@@ -91,12 +97,12 @@ ISO 11783-8은 자체 콘텐츠가 거의 없는 대신, 다음과 같은 <stron
 
 - ISO 11783-1:2017 6.6.2: 트랙터 네트워크는 Part 8·Part 7 메시지와 독점 메시지를 쓸 수 있다. 6.6.3: 파워트레인 메시지는 implement 네트워크의 CF도 쓸 수 있다.
 - ISO 11783-9:2012 4.4.2.2: Class 1 TECU가 제공하는 engine speed는 Part 8 소관이고, 송신 주기는 100 ms여야 한다.
-- 트랙터가 implement 버스에 보내는 Wheel-based speed and distance(PGN 65096)는 ISO 11783-7:2015 B.3에 정의된 메시지이므로 Part 7 정의대로 구현한다.
+- 트랙터가 implement 버스에 보내는 Wheel-based speed and distance(PGN 65096)는 ISO 11783-7:2015 B.3에 정의된 메시지이므로 Part 7 정의대로 구현한다([ISO 11783-7 정리](/study/isobus/appendix-iso-part07)의 B.3 참고).
 
 :::details Bibliography (참고 문헌)
-- CAN Specification 2.0 Part B (Robert Bosch GmbH, 1991) — ISO 11783의 기반 프로토콜
-- SAE J1939/81 — Network Management. Part 8이 조화를 이루는 네트워크 관리 문서
-- ISO 7498 — OSI 기본 참조 모델
-- ISO 11519-1 — 저속 직렬 데이터 통신
-- ISO 11898 — 고속 CAN
+- CAN Specification 2.0 Part B (Robert Bosch GmbH, 1991): ISO 11783의 기반 프로토콜
+- SAE J1939/81: Network Management. Part 8이 조화를 이루는 네트워크 관리 문서
+- ISO 7498: OSI 기본 참조 모델
+- ISO 11519-1: 저속 직렬 데이터 통신
+- ISO 11898: 고속 CAN
 :::

@@ -1,4 +1,4 @@
-"""CH1 §5 CAN 프레임 구조 — SOF/ID/DLC/데이터/CRC/ACK/EOF 필드와 각 역할 (light/dark PNG)."""
+"""CH1 §5 CAN 프레임 구조: SOF/ID/DLC/데이터/CRC/ACK/EOF 필드와 각 역할 (light/dark PNG)."""
 from _common import diagram
 
 FIELDS = [

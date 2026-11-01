@@ -26,7 +26,7 @@ CAN 스택에서 메시지를 받는 일은 <strong>언제나 콜백 형태로</
 
 ::: info 관련 스터디
 PGN 과 목적지 주소(DA)가 프레임 어디에 들어가는지는 이론 스터디에 정리돼 있다.
-[ISOBUS CH9. J1939 메시지 구조](/study/isobus/09-j1939-message) · [ISOBUS CH11. J1939 전송 프로토콜](/study/isobus/11-j1939-transport)
+[ISOBUS CH9. J1939 메시지 구조](/study/isobus/09-j1939-message) · [ISOBUS CH15~17. J1939 전송 프로토콜](/study/isobus/15-tp-bam-cmdt)
 :::
 
 ## 브로드캐스트 메시지 수신

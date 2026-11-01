@@ -34,9 +34,9 @@ TC와 작업기 사이의 통신은 <strong>상태를 가진(stateful) 프로토
 
 ::: info 관련 스터디
 TC의 개념적 배경과 프로세스 데이터 메시지의 바이트 수준 구조는 ISOBUS 스터디에서 다룬다.
-- [ISOBUS CH18. TC 기초](/study/isobus/18-tc-basics)
-- [CH19. TC 프로세스 데이터](/study/isobus/19-tc-process-data)
-- [CH20. TC DDOP](/study/isobus/20-tc-ddop)
+- [ISOBUS CH41. TC 기초](/study/isobus/41-tc-basics)
+- [CH45~47. TC 프로세스 데이터](/study/isobus/45-tc-process-data-basics)
+- [CH48~50. TC DDOP](/study/isobus/48-ddop-basics)
 :::
 
 ## Device Descriptor Object Pool (DDOP)

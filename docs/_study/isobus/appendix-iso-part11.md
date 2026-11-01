@@ -1,14 +1,20 @@
 ---
-title: "표준 정리: Part 11 — Data dictionary"
-description: "ISO 11783-11(Mobile data element dictionary) — DDI 체계와 온라인 사전 운영 방식을 정리한 표준 요약이다."
+title: "표준 정리: Part 11(Data dictionary)"
+description: "ISO 11783-11(Mobile data element dictionary)에서 DDI 체계와 온라인 사전 운영 방식을 정리한 표준 요약이다."
 date: 2026-08-21
 tags: [ISOBUS, ISO11783, 표준정리]
+prev: /study/isobus/appendix-iso-part10
+next: /study/isobus/appendix-iso-part12
 ---
 
 # ISO 11783-11: Mobile data element dictionary 정리
 
 ::: info 이 문서에 대해
 ISO 11783-11 표준 원문을 학습 목적으로 재구성한 <strong>비공식 요약·해설</strong>이다. 규범적 판단이 필요할 때는 반드시 원문 표준을 확인해야 한다.
+:::
+
+::: tip 처음 읽는다면
+이 페이지는 데이터 사전(Part 11: TC가 주고받는 값의 종류 번호인 DDI를 정하는 체계)을 요약한 참고 자료다. 본문이 짧은 파트라 한 번에 훑어볼 수 있다. 처음이라면 [45장 TC 프로세스 데이터 기초](/study/isobus/45-tc-process-data-basics)를 먼저 읽고, 개별 DDI는 [DDI 주요 목록](/study/isobus/appendix-ddi)에서 찾는다.
 :::
 
 ## 개요
@@ -33,13 +39,13 @@ ISO 11783 시리즈 안에서 Part 11은 Part 10(Task Controller and management 
 | 2 | Normative references | 필수 참조 문서 (온라인 사전 포함) |
 | 3 | Terms, definitions, symbols and abbreviated terms | 용어 (ISO 11783-1 준용) |
 | 4 | Technical requirements | 기술 요구사항 (4.1~4.2) |
-| — | Bibliography | 참고 문헌 |
+| - | Bibliography | 참고 문헌 |
 
-## 1절 — 적용 범위 (Scope)
+## 1절: 적용 범위 (Scope)
 
 ISO 11783 공통의 목적(트랙터·작업기 간 데이터 전송의 방법·형식 표준화) 아래에서, Part 11의 범위는 <strong>ISO 11783-10에 정의된 Process Data message에 사용되는 데이터 요소의 식별자를 규정</strong>하는 것이다. 즉 통신 절차가 아니라 "데이터의 이름표"가 대상이다.
 
-## 2절 — 필수 참조 문서
+## 2절: 필수 참조 문서
 
 | 문서 | 역할 |
 |---|---|
@@ -49,13 +55,13 @@ ISO 11783 공통의 목적(트랙터·작업기 간 데이터 전송의 방법·
 
 온라인 데이터베이스가 필수 참조 문서 목록에 오른 것이 이 파트의 핵심 장치다. 사전의 최신 내용이 곧 규범의 일부가 된다.
 
-## 3절 — 용어와 정의
+## 3절: 용어와 정의
 
 별도 정의 없이 ISO 11783-1의 용어·정의·기호·약어를 그대로 적용한다.
 
-## 4절 — 기술 요구사항
+## 4절: 기술 요구사항
 
-### 4.1 General — 온라인 사전 준수 의무와 유지관리 주체
+### 4.1 General: 온라인 사전 준수 의무와 유지관리 주체
 
 ISO 11783-10에 따라 Process Data message로 전송되는 가변 데이터는 <strong>ISOBUS Data Dictionary(isobus.net)에 정의된 대로 따라야 한다(shall)</strong>. 임의로 만든 식별자나 사전과 다른 해석을 쓸 수 없다.
 
@@ -63,7 +69,7 @@ ISO 11783-10에 따라 Process Data message로 전송되는 가변 데이터는 
 이 온라인 데이터베이스의 유지관리 책임은 <strong>VDMA(독일기계공업협회, German Engineering Federation)</strong>에 있다. VDMA는 ISO 기술관리이사회(ISO/TMB)가 지명한 공식 <strong>maintenance agency(MA)</strong>다. 즉 새 DDI의 등록·심사·발행은 ISO 개정 절차가 아니라 VDMA가 운영하는 사전 관리 절차를 거친다. 제조사가 새로운 프로세스 데이터가 필요하면 이 체계를 통해 DDI 신설을 신청하게 된다.
 :::
 
-### 4.2 Process data element definitions — 사전 엔트리의 필수 속성
+### 4.2 Process data element definitions: 사전 엔트리의 필수 속성
 
 프로세스 데이터 요소 하나를 사전에 정의할 때는 다음 다섯 가지 속성을 갖추어야 한다.
 
@@ -77,7 +83,7 @@ ISO 11783-10에 따라 Process Data message로 전송되는 가변 데이터는 
 
 이 다섯 속성이 갖춰져야 서로 다른 제조사의 Task Controller와 작업기 ECU가 같은 숫자를 같은 의미·같은 스케일로 해석할 수 있다.
 
-## 해설 — DDI 체계가 실무에서 작동하는 방식
+## 해설: DDI 체계가 실무에서 작동하는 방식
 
 Part 11 본문은 짧지만, 이 파트가 고정해 놓은 틀 위에서 ISOBUS 프로세스 데이터 생태계 전체가 돌아간다.
 
@@ -96,15 +102,15 @@ Part 11 본문에는 DDI 번호 체계나 예약 범위가 없다. 대신 Part 1
 
 | 값 | 이름 | 정의한 곳 |
 |---|---|---|
-| DDI DFFE<sub>16</sub>(57342) | ParameterGroupNumberValue — PGN 값 로깅용 | Part 10 6.3, D.17 |
-| DDI DFFF<sub>16</sub>(57343) | RequestDefaultProcessData — default data logging | Part 10 6.8.4 |
-| DDI 0093<sub>16</sub>(147) | Log Count — 로그 묶음 표시 | Part 10 6.8.4 |
+| DDI DFFE<sub>16</sub>(57342) | ParameterGroupNumberValue: PGN 값 로깅용 | Part 10 6.3, D.17 |
+| DDI DFFF<sub>16</sub>(57343) | RequestDefaultProcessData: default data logging | Part 10 6.8.4 |
+| DDI 0093<sub>16</sub>(147) | Log Count: 로그 묶음 표시 | Part 10 6.8.4 |
 | DDI FFFF<sub>16</sub> / element FFF<sub>16</sub> | not available | Part 10 B.7·B.8 |
 
-Part 10 B.1.1은 "독점(proprietary) DDI 값 범위"를 언급하지만, 그 범위의 숫자는 Part 10·11 본문 어디에도 없다. 온라인 사전에서 확인해야 한다(확인 필요). 메시지·DDE 활용 예는 [TC 프로세스 데이터 챕터](/study/isobus/19-tc-process-data) §17에 있다.
+Part 10 B.1.1은 "독점(proprietary) DDI 값 범위"를 언급하지만, 그 범위의 숫자는 Part 10·11 본문 어디에도 없다. 온라인 사전에서 확인해야 한다(확인 필요). 메시지·DDE 활용 예는 [47장 Totals, 로깅, Peer Control](/study/isobus/47-tc-totals-logging-peer)에 있다.
 
 :::details Bibliography (참고 문헌)
-- ISO 11898-1 — CAN Part 1: Data link layer and physical signalling. ISO 11783의 기반 프로토콜
-- SAE J1939 — 트럭·버스용 직렬 제어·통신 네트워크 권고안. ISO 11783 여러 파트의 모태
-- ISO 7498 (all parts) — OSI 기본 참조 모델
+- ISO 11898-1: CAN Part 1: Data link layer and physical signalling. ISO 11783의 기반 프로토콜
+- SAE J1939: 트럭·버스용 직렬 제어·통신 네트워크 권고안. ISO 11783 여러 파트의 모태
+- ISO 7498 (all parts): OSI 기본 참조 모델
 :::

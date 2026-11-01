@@ -1,4 +1,4 @@
-"""CH21 §3.2 SCC 상태 머신 — ISO 11783-14 Figure 5 재구성 (light/dark PNG)."""
+"""CH21 §3.2 SCC 상태 머신: ISO 11783-14 Figure 5 재구성 (light/dark PNG)."""
 from _common import diagram
 
 

@@ -1,14 +1,20 @@
 ---
-title: "표준 정리: Part 1 — General standard"
-description: "ISO 11783-1(General standard) — 시리즈 전체 구조, 네트워크 개요, 공통 용어를 정리한 표준 요약이다."
+title: "표준 정리: Part 1(General standard)"
+description: "ISO 11783-1(General standard)에서 시리즈 전체 구조, 네트워크 개요, 공통 용어를 정리한 표준 요약이다."
 date: 2026-08-21
 tags: [ISOBUS, ISO11783, 표준정리]
+prev: /study/isobus/appendix-references
+next: /study/isobus/appendix-iso-part03
 ---
 
 # ISO 11783-1: General standard for mobile data communication 정리
 
 ::: info 이 문서에 대해
 ISO 11783-1 표준 원문을 학습 목적으로 재구성한 <strong>비공식 요약·해설</strong>이다. 규범적 판단이 필요할 때는 반드시 원문 표준을 확인해야 한다.
+:::
+
+::: tip 처음 읽는다면
+이 페이지는 ISO 11783 시리즈의 총론(Part 1: 용어 정의, 네트워크 전체 구조, 파트 구성)을 원문의 절 구조대로 요약한 참고 자료다. 용어의 원래 정의나 네트워크 요구사항을 원문 순서로 확인하고 싶을 때 펼쳐 본다. 처음이라면 [18장 ISOBUS 개요](/study/isobus/18-isobus-overview)와 [19장 ISO 11783 Part 1: 네트워크 요구사항과 공통 서비스](/study/isobus/19-isobus-part1-requirements)를 먼저 읽는다.
 :::
 
 ## 개요
@@ -62,14 +68,14 @@ Part 1의 scope는 "시리즈 전체가 무엇을 표준화하는지"와 "이 �
 
 | 용어 | 약어 | 정의 요지 |
 |---|---|---|
-| address | — | 메시지의 출발지 또는 목적지를 정의하는 8-bit 필드 |
+| address | - | 메시지의 출발지 또는 목적지를 정의하는 8-bit 필드 |
 | source address | SA | 29-bit CAN 식별자 안에서 메시지 발신자를 유일하게 식별하는 8-bit 필드. 발신 control function의 주소가 들어간다 |
 | destination address | DA | CAN 식별자 안에서 수신 대상 주소를 나타내는 PDU 특정 필드 |
-| NAME | — | ECU의 각 control function을 나타내는 8-byte 엔티티. CF의 기능 설명과 함께, 주소 충돌 시 중재(arbitration)에 쓰이는 수치값을 제공한다 |
-| preferred address | — | 표준이 지정해 둔, 네트워크 최초 접속 시 기본으로 사용할 SA. 목록은 ISO 11783 데이터베이스에 있다 |
-| initial address | — | 자기 구성(self-configuring) ECU가 최초 전원 인가 시 결정하여 이후 전원 인가 때도 사용하는 SA |
-| self-configurable address | — | ECU 최초 전원 인가 시 내부 계산으로 결정하고, CF가 네트워크에서 클레임하는 SA |
-| non-configurable address | — | 어떤 수단으로도 바꿀 수 없는 SA |
+| NAME | - | ECU의 각 control function을 나타내는 8-byte 엔티티. CF의 기능 설명과 함께, 주소 충돌 시 중재(arbitration)에 쓰이는 수치값을 제공한다 |
+| preferred address | - | 표준이 지정해 둔, 네트워크 최초 접속 시 기본으로 사용할 SA. 목록은 ISO 11783 데이터베이스에 있다 |
+| initial address | - | 자기 구성(self-configuring) ECU가 최초 전원 인가 시 결정하여 이후 전원 인가 때도 사용하는 SA |
+| self-configurable address | - | ECU 최초 전원 인가 시 내부 계산으로 결정하고, CF가 네트워크에서 클레임하는 SA |
+| non-configurable address | - | 어떤 수단으로도 바꿀 수 없는 SA |
 
 ### CAN 식별자·메시지 구조 관련
 
@@ -78,17 +84,17 @@ Part 1의 scope는 "시리즈 전체가 무엇을 표준화하는지"와 "이 �
 | protocol data unit | PDU | CAN 데이터 프레임 안에서 전송 정보를 정의하는 ISO 11783 규정 데이터 필드 |
 | PDU format | PF | 29-bit CAN 식별자 내 8-bit 필드. PDU의 형식을 식별하며 PGN 결정에 쓰인다 |
 | PDU specific field | PS | 29-bit CAN 식별자 내 8-bit 필드. DA(목적지 주소) 또는 GE(group extension) 중 하나가 된다 |
-| PDU1 format | — | 특정 목적지로 보내는 메시지용 PDU format. PS 필드에 DA(특정 또는 global)가 들어간다 |
-| PDU2 format | — | group extension 기법으로 정보를 보내는 PDU format. PS 필드에 GE가 들어간다 |
+| PDU1 format | - | 특정 목적지로 보내는 메시지용 PDU format. PS 필드에 DA(특정 또는 global)가 들어간다 |
+| PDU2 format | - | group extension 기법으로 정보를 보내는 PDU format. PS 필드에 GE가 들어간다 |
 | group extension | GE | PGN 결정에 필요한 정보의 일부가 되는 PDU 특정 필드 |
 | data page | DP | CAN arbitration 필드 내 1-bit. EDP와 조합하여 4개 메시지 정의 페이지 중 하나를 선택한다 |
 | extended data page | EDP | DP와 조합되는 1-bit 필드. 모든 ISO 11783 메시지는 송신 시 EDP를 0으로 설정한다 |
 | parameter group | PG | 단일/멀티 패킷 메시지 안의 데이터 식별 단위. SA에 의존하지 않으므로 어떤 발신자든 어떤 PG라도 보낼 수 있다. 데이터·명령·요청·ACK·NACK을 포함한다 |
 | parameter group number | PGN | DP·EDP·PF·GE 필드를 3-byte(24-bit)로 표현하여 특정 PG를 식별하는 번호 |
 | suspect parameter number | SPN | CF와 연관된 특정 요소·부품·파라미터를 식별하는 19-bit 번호. PG 내 개별 파라미터마다 부여되며, PG에 없는 진단 관련 항목에도 부여된다 |
-| message | — | 동일 PGN의 정보를 전달하는 1개 이상의 CAN 데이터 프레임 |
-| packet | — | 멀티 프레임 메시지의 단일 CAN 데이터 프레임 |
-| multi-packet message | — | 한 PGN의 데이터 전송에 CAN 프레임 여러 개가 필요할 때 쓰는 메시지. 각 프레임의 CAN 식별자는 같고 데이터만 다르다 |
+| message | - | 동일 PGN의 정보를 전달하는 1개 이상의 CAN 데이터 프레임 |
+| packet | - | 멀티 프레임 메시지의 단일 CAN 데이터 프레임 |
+| multi-packet message | - | 한 PGN의 데이터 전송에 CAN 프레임 여러 개가 필요할 때 쓰는 메시지. 각 프레임의 CAN 식별자는 같고 데이터만 다르다 |
 | extended transport protocol | ETP | 1786~117440512바이트 데이터를 가진 PG 전송용 프로토콜 |
 | Negative acknowledgement | NACK | 메시지를 이해하지 못했거나 요청 동작을 수행할 수 없음을 알리는 응답 |
 
@@ -98,28 +104,28 @@ Part 1의 scope는 "시리즈 전체가 무엇을 표준화하는지"와 "이 �
 |---|---|---|
 | electronic control unit | ECU | 물리적으로 독립된 하나의 전자 장치. 하나의 ECU가 여러 control function을 담을 수 있다 |
 | control function | CF | 장치 내에서 특정 기능을 수행하는 기능 단위. 네트워크에서 유일한 주소 하나를 가진다 |
-| node | — | ECU의 네트워크 물리 접속점 |
-| device | — | 트랙터·트레일러·작업기 같은 기계 시스템 또는 독립 센서 시스템 |
-| machine | — | 기계 동력을 사용·적용하며 명확한 기능과 작업을 수행하는 device |
-| tractor | — | 연결 시스템의 1차 동력원인 machine. 자주식 장비는 동력원을 내장한 것으로 본다 |
-| implement | — | 특정 작업을 수행하며 보통 트랙터에 부착되는 device 또는 machine |
-| equipment | — | 특정 포장(field) 작업을 수행하는 device 또는 machine (트랙터이거나 트랙터에 부착된 작업기) |
+| node | - | ECU의 네트워크 물리 접속점 |
+| device | - | 트랙터·트레일러·작업기 같은 기계 시스템 또는 독립 센서 시스템 |
+| machine | - | 기계 동력을 사용·적용하며 명확한 기능과 작업을 수행하는 device |
+| tractor | - | 연결 시스템의 1차 동력원인 machine. 자주식 장비는 동력원을 내장한 것으로 본다 |
+| implement | - | 특정 작업을 수행하며 보통 트랙터에 부착되는 device 또는 machine |
+| equipment | - | 특정 포장(field) 작업을 수행하는 device 또는 machine (트랙터이거나 트랙터에 부착된 작업기) |
 | mobile implement control system | MICS | ISO 11783 네트워크로 결합되어 이를 사용하는 device들의 집합 |
-| working set | — | 하나의 애플리케이션을 분산 프로세스로 제공하는, 1개 이상 ECU 내 여러 CF의 집합. 구성원은 working-set master가 식별한다 |
-| working-set master | — | working set의 통신 조정자. master의 SA가 working set 전체를 대표하는 식별자·통신 창구가 된다 |
+| working set | - | 하나의 애플리케이션을 분산 프로세스로 제공하는, 1개 이상 ECU 내 여러 CF의 집합. 구성원은 working-set master가 식별한다 |
+| working-set master | - | working set의 통신 조정자. master의 SA가 working set 전체를 대표하는 식별자·통신 창구가 된다 |
 | industry group | IG | 특정 산업이 사용하는 device 및 기능의 할당 구분 |
 
 ### 기능(functionality)·서버 관련
 
 | 용어 | 약어 | 정의 요지 |
 |---|---|---|
-| functionality | — | 시장에서 최종 사용자에게 제공되는, 특정 기능(군)을 수행하는 MICS 구성 요소의 능력. 예: universal terminal(server), task controller basic(client), file server |
-| functionality characteristic | — | ISO 11783 개정에 따른 CF functionality 능력 구분. 예: VT Ver 2 vs Ver 3 |
-| functionality generation | — | CF의 functionality characteristic 수준(세대) 표시 |
-| minimum control function | — | ISO 11783-3, -5, -12에 특정된 최소 기능 |
+| functionality | - | 시장에서 최종 사용자에게 제공되는, 특정 기능(군)을 수행하는 MICS 구성 요소의 능력. 예: universal terminal(server), task controller basic(client), file server |
+| functionality characteristic | - | ISO 11783 개정에 따른 CF functionality 능력 구분. 예: VT Ver 2 vs Ver 3 |
+| functionality generation | - | CF의 functionality characteristic 수준(세대) 표시 |
+| minimum control function | - | ISO 11783-3, -5, -12에 특정된 최소 기능 |
 | virtual terminal | VT | 그래픽 디스플레이와 입력 장치를 갖추고, 접속된 작업기·working set에 대해 운전자와의 정보 표시·입력을 제공하는 ECU |
 | universal terminal | UT | ISO 11783-6 정의 능력 중 보조 조작기(auxiliary control)를 제외한 functionality |
-| auxiliary input unit | — | 공용 보조 조작기를 제공하는 자율 CF. 물리적으로 ECU 안이나 VT 위에 위치할 수도 있다 |
+| auxiliary input unit | - | 공용 보조 조작기를 제공하는 자율 CF. 물리적으로 ECU 안이나 VT 위에 위치할 수도 있다 |
 | auxiliary old / auxiliary new | AUX-O / AUX-N | ISO 11783-6의 Type 1 / Type 2 보조 조작기 functionality |
 | task controller | TC | MICS에서 process data의 송수신·기록을 담당하는 CF |
 | task controller basic | TC-BAS | 지리 참조가 필요 없는 ISO 11783-10 능력 |
@@ -127,10 +133,10 @@ Part 1의 scope는 "시리즈 전체가 무엇을 표준화하는지"와 "이 �
 | task controller section control | TC-SC | ISO 11783-10의 구간 제어(section control) 사양 |
 | data logger | DL | TC의 process data 프로토콜을 사용해 데이터 로깅을 수행하는 CF. 텔레메트리 시스템의 일부이거나, device description·process data 외에 브로드캐스트되는 다른 PG까지 수집하는 별도 CF일 수 있다. ISO 11783-10에 정의 |
 | file server | FS | 파일 저장소를 제공하고 파일 취급·접근 명령 집합을 사용하는 mobile implement bus 상의 CF |
-| client | — | 서버 또는 master의 서비스를 이용하는 mobile implement bus 상의 CF |
+| client | - | 서버 또는 master의 서비스를 이용하는 mobile implement bus 상의 CF |
 | farm management information system | FMIS | 장부·급여·자원·필지 관리, GIS, 의사결정 지원, 작업(task) 관리 소프트웨어를 포함하는 농장 사무용 컴퓨터 시스템 |
-| process data | — | CF들이 주고받는 측정 데이터 및/또는 설정값(set point) 명령 |
-| sequence control system | — | sequence control master와 1개 이상의 client가 ISO 11783-14의 sequence control 기능을 수행하는 시스템 |
+| process data | - | CF들이 주고받는 측정 데이터 및/또는 설정값(set point) 명령 |
+| sequence control system | - | sequence control master와 1개 이상의 client가 ISO 11783-14의 sequence control 기능을 수행하는 시스템 |
 
 ### 데이터 사전·문자 인코딩 관련
 
@@ -139,12 +145,12 @@ Part 1의 scope는 "시리즈 전체가 무엇을 표준화하는지"와 "이 �
 | data dictionary | DD | 데이터 변수와 그 식별자의 목록. ISO 11783-11에 정의 |
 | data dictionary element | DDE | data dictionary에 정의된 파라미터. Process Data Message(PDM)를 통한 제어·모니터링에 쓰인다 |
 | data dictionary identifier | DDI | DDE를 유일하게 식별하는 16-bit 번호. process data message에서 값·명령의 대상 DDE를 지정한다. 목록은 isobus.net |
-| char | — | 크기 1바이트의 단일 문자(주로 ISO/IEC 8859 계열) |
-| character | — | 알파벳 같은 단일 텍스트 자소·기호. 크기는 인코딩에 따라 가변 |
-| WideChar | — | little endian 2바이트로 인코딩되는 단일 문자 (예: 41h 00h = 'A') |
-| WideString | — | WideChar 0개 이상으로 구성되고 항상 byte order mark FEFFh가 앞에 붙는 문자열 |
-| code plane | — | 65536개 문자 코드의 그룹. Unicode/ISO/IEC 10646은 0~16의 17개 code plane으로 구성 |
-| surrogate pair | — | 16-bit high pair + 16-bit low pair로 구성되는 32-bit 문자 코드(UTF-16, code plane 1~16 문자용) |
+| char | - | 크기 1바이트의 단일 문자(주로 ISO/IEC 8859 계열) |
+| character | - | 알파벳 같은 단일 텍스트 자소·기호. 크기는 인코딩에 따라 가변 |
+| WideChar | - | little endian 2바이트로 인코딩되는 단일 문자 (예: 41h 00h = 'A') |
+| WideString | - | WideChar 0개 이상으로 구성되고 항상 byte order mark FEFFh가 앞에 붙는 문자열 |
+| code plane | - | 65536개 문자 코드의 그룹. Unicode/ISO/IEC 10646은 0~16의 17개 code plane으로 구성 |
+| surrogate pair | - | 16-bit high pair + 16-bit low pair로 구성되는 32-bit 문자 코드(UTF-16, code plane 1~16 문자용) |
 
 ### VT 오브젝트·기타
 

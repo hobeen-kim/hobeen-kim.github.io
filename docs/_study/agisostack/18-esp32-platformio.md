@@ -227,7 +227,7 @@ extern "C" void app_main()
 이게 스택이 <strong>주소 클레임을 수행하고 메시지를 받을 준비를 마치기 위한 절대 최소한</strong>이다.
 
 ::: info 관련 스터디
-NAME의 각 필드가 무슨 뜻인지, function code와 industry group을 어떻게 골라야 하는지는 [CH3. Control Function과 NAME](/study/agisostack/03-control-function-name)에서 다룬다. 주소 클레임 절차 자체는 [ISOBUS CH10. J1939 주소 관리](/study/isobus/10-j1939-address)를 참고하면 된다.
+NAME의 각 필드가 무슨 뜻인지, function code와 industry group을 어떻게 골라야 하는지는 [CH3. Control Function과 NAME](/study/agisostack/03-control-function-name)에서 다룬다. 주소 클레임 절차 자체는 [ISOBUS CH12~14. J1939 주소 관리](/study/isobus/12-j1939-address-name)를 참고하면 된다.
 :::
 
 ### ESP32의 OS·PThread 옵션 조정
@@ -302,7 +302,7 @@ ESP32와 PlatformIO 조합에서 파일을 임베드하는 자세한 방법은 P
 :::
 
 ::: info 관련 스터디
-오브젝트 풀이 무엇이고 어떻게 만드는지는 [ISOBUS CH16. VT 오브젝트 풀](/study/isobus/16-vt-object-pool)에서, VT 클라이언트를 코드로 다루는 법은 [CH13. Virtual Terminal 클라이언트](/study/agisostack/13-virtual-terminal)에서 다룬다.
+오브젝트 풀이 무엇이고 어떻게 만드는지는 [ISOBUS CH32~35. VT 오브젝트 풀](/study/isobus/32-vt-object-pool-basics)에서, VT 클라이언트를 코드로 다루는 법은 [CH13. Virtual Terminal 클라이언트](/study/agisostack/13-virtual-terminal)에서 다룬다.
 :::
 
 ### 배선

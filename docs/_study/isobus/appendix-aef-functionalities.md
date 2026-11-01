@@ -1,11 +1,17 @@
 ---
 title: "AEF 기능 카테고리"
-description: "UT, AUX-N, TC-BAS/TC-GEO/TC-SC, TIM, ISB 등 AEF가 정의한 ISOBUS 기능 단위를 한자리에 정리한 참조 자료입니다."
+description: "UT, AUX-N, TC-BAS/TC-GEO/TC-SC, TIM, ISB 등 AEF가 정의한 ISOBUS 기능 단위를 한자리에 정리한 참조 자료다."
 date: 2026-04-13
 tags: [ISOBUS, AEF, 부록]
+prev: /study/isobus/appendix-ddi
+next: /study/isobus/appendix-troubleshooting
 ---
 
 # AEF 기능 카테고리
+
+::: tip 처음 읽는다면
+이 부록은 AEF(ISOBUS 인증을 맡는 농기계 업계 단체)가 나눈 기능 단위(UT, AUX-N, TC-BAS 같은 약어)를 정리한 표다. 장비 사양서나 인증 목록에서 이런 약어를 만났을 때, 또는 무엇부터 구현할지 정할 때 펼쳐 본다. 먼저 [18장 ISOBUS 개요](/study/isobus/18-isobus-overview)에서 AEF와 인증의 큰 그림을 읽고 오면 쉽다.
+:::
 
 ## 1. ISO 파트와 AEF 기능은 다른 축이다
 
@@ -35,7 +41,7 @@ ISO 11783은 <strong>프로토콜을 어떻게 구현하는가</strong>를 파�
 AEF 기능 목록은 계속 갱신된다. 실제 인증을 준비한다면 위 표가 아니라 AEF가 배포하는 현행 기능 목록과 테스트 매트릭스를 기준으로 삼아야 한다.
 :::
 
-## 3. TC 3형제의 관계 — GEO는 BAS 위에, SC는 독립
+## 3. TC 3형제의 관계: GEO는 BAS 위에, SC는 독립
 
 세 기능이 모두 TC-BAS 위에 쌓인 계층은 아니다. <strong>TC-GEO만 TC-BAS를 전제</strong>로 하고, <strong>TC-SC는 둘과 독립</strong>이다.
 
@@ -45,9 +51,11 @@ TC-BAS  (작업 총계 기록)
 TC-SC   (위치 기반 섹션 자동 개폐)              ← F.2.3: TC-BAS·TC-GEO와 독립
 ```
 
-Part 10 Annex F.2.2는 TC-GEO를 지원하면 TC-BAS도 반드시 지원해야 한다고 정한다. 반면 F.2.3은 TC-SC가 TC-BAS나 TC-GEO를 함께 지원할 것을 요구하지 않는다. TC-SC만 제공하는 구현은 데이터 전송 파일 세트를 처리하거나 FMIS와 연결할 필요도 없다. 따라서 "TC-GEO 지원"은 TC-BAS 지원을 뜻하지만, "TC-SC 지원"만으로는 TC-BAS 지원을 알 수 없다. 기능별 최소 요건은 [CH18. TC 기초](/study/isobus/18-tc-basics)에 자세히 정리돼 있다.
+ISO 11783-10(TC를 정하는 표준 문서)은 TC-GEO를 지원하면 TC-BAS도 반드시 지원해야 한다고 정한다. 반면 TC-SC에는 TC-BAS나 TC-GEO를 함께 지원하라는 요구가 없다. TC-SC만 제공하는 구현은 데이터 전송 파일 세트를 처리하거나 FMIS와 연결할 필요도 없다. 따라서 "TC-GEO 지원"은 TC-BAS 지원을 뜻하지만, "TC-SC 지원"만으로는 TC-BAS 지원을 알 수 없다. 기능별 최소 요건은 [41장 Task Controller(TC) 기초](/study/isobus/41-tc-basics)와 [44장 다중 TC, Data Logger, TC 기능성](/study/isobus/44-tc-multi-dl-functionality)에 자세히 정리돼 있다.
 
 LOG(Data Logger)는 이 계층 바깥에 있다. TC 기능의 부분집합으로 같은 연결 메커니즘을 쓰며, 클라이언트는 TC 1개와 DL 1개에 동시에 연결할 수 있다.
+
+<small>근거: ISO 11783-10 F.2.2, F.2.3</small>
 
 ## 4. UT와 AUX-N은 목적이 다르다
 
@@ -89,7 +97,7 @@ LOG(Data Logger)는 이 계층 바깥에 있다. TC 기능의 부분집합으로
 
 메시지에는 기능 식별자와 함께 generation, functionality option이 실린다. 기능 식별자 값 자체는 표준 문서가 아니라 ISOBUS 온라인 데이터베이스(ISOBUS.net)에서 관리된다.
 
-보고 범위에 규칙이 있다(Part 12 6.5).
+보고 범위에 규칙이 있다.
 
 - 구현돼 있으나 <strong>비활성</strong>인 기능 → 보고 대상이 아니다
 - ECU에 있으나 <strong>시스템 구성상 현재 사용 불가</strong>한 기능 → 보고한다
@@ -98,10 +106,12 @@ LOG(Data Logger)는 이 계층 바깥에 있다. TC 기능의 부분집합으로
 예를 들어 작업기 ECU가 TC-GEO와 TC-SC를 가졌는데 TC-SC 서버가 없는 트랙터에 연결되면, TC-SC는 "존재하지만 시스템에서 사용 불가" 상태이므로 <strong>여전히 보고한다</strong>.
 
 ::: warning 런타임 협상에는 각 프로토콜의 메시지를 쓴다
-Part 12 6.5의 마지막 문장은 "진단 목적 전용이며 CF가 런타임 동작을 구성하는 데 쓰면 안 된다"고 정한다. 그런데 원문이 이 금지의 대상으로 적은 것은 functionalities 메시지가 아니라 <strong>diagnostic protocol 메시지</strong>다. functionalities 메시지에는 같은 금지 문구가 없다.
+ISO 11783-12(진단 서비스를 정하는 표준 문서)에서 이 보고 규칙을 담은 절의 마지막 문장은 "진단 목적 전용이며 CF가 런타임 동작을 구성하는 데 쓰면 안 된다"고 정한다. 그런데 원문이 이 금지의 대상으로 적은 것은 functionalities 메시지가 아니라 <strong>diagnostic protocol 메시지</strong>다. functionalities 메시지에는 같은 금지 문구가 없다.
 
-그래도 6.5는 functionalities 메시지를 진단 사용자 인터페이스가 요청하는 정보로 정의한다. 또 TC는 상대 능력에 맞출 때 Version 메시지를 쓰라고 한다(Part 10 F.2.3). 따라서 상대가 무슨 기능을 가졌는지 보고 동작을 바꾸려면 각 프로토콜이 정한 고유의 버전·능력 협상을 쓰는 편이 맞다(예: TC의 Version 메시지, VT의 기술 데이터 메시지). 이 결론은 원문 문장이 아니라 해석이다.
+그래도 같은 절은 functionalities 메시지를 진단 사용자 인터페이스가 요청하는 정보로 정의한다. 또 ISO 11783-10은 TC가 상대 능력에 맞출 때 Version 메시지를 쓰라고 한다. 따라서 상대가 무슨 기능을 가졌는지 보고 동작을 바꾸려면 각 프로토콜이 정한 고유의 버전·능력 협상을 쓰는 편이 맞다(예: TC의 Version 메시지, VT의 기술 데이터 메시지). 이 결론은 원문 문장이 아니라 해석이다.
 :::
+
+<small>근거: ISO 11783-12 6.5, ISO 11783-10 F.2.3</small>
 
 ## 7. Conformance Test와 Plugfest는 다르다
 
@@ -123,19 +133,21 @@ Plugfest는 "표준 문서만 보고 구현했는데 남의 장비와 실제로 
 | 순위 | 기능 | 이유 |
 |------|------|------|
 | 1 | **UT** | 가장 많이 붙여보게 되고, 이것이 안 되면 다른 검증을 시작할 수 없다 |
-| 2 | **TC-BAS** | 두 번째로 수요가 많고 TC-GEO의 전제 조건이다(F.2.2) |
-| 3 | TC-SC → TC-GEO | TC-GEO는 TC-BAS가 선 다음에 붙인다. TC-SC는 표준상 독립 기능이라(F.2.3) TC-BAS와 별개로 구현해도 된다 |
+| 2 | **TC-BAS** | 두 번째로 수요가 많고 TC-GEO의 전제 조건이다 |
+| 3 | TC-SC → TC-GEO | TC-GEO는 TC-BAS가 선 다음에 붙인다. TC-SC는 표준상 독립 기능이라 TC-BAS와 별개로 구현해도 된다 |
 | 4 | AUX-N | 조작 편의 기능이라 뒤로 미뤄도 된다 |
 | 후순위 | TIM | 트랙터를 제어하므로 안전 요구와 인증 부담이 다른 차원이다 |
+
+<small>근거: ISO 11783-10 F.2.2, F.2.3</small>
 
 ## 9. 관련 문서
 
 | 주제 | 문서 |
 |------|------|
-| TC 기능성 구분과 최소 요건 | [CH18. TC 기초](/study/isobus/18-tc-basics) |
-| AEF와 적합성 인증 개요 | [CH12. ISOBUS 개요](/study/isobus/12-isobus-overview) |
+| TC 기능성 구분과 최소 요건 | [41장 TC 기초](/study/isobus/41-tc-basics), [44장 다중 TC·DL·기능성](/study/isobus/44-tc-multi-dl-functionality) |
+| AEF와 적합성 인증 개요 | [18장 ISOBUS 개요](/study/isobus/18-isobus-overview) |
 | 인증 프로세스와 생태계 | [스마트농업 CH14. 생태계와 표준화](/study/smart-agriculture/14-ecosystem) |
 | 기능 선언 메시지 원문 정리 | [Part 12. Diagnostics services](/study/isobus/appendix-iso-part12) |
 | TIM으로의 이관 예고 | [Part 7. Implement messages](/study/isobus/appendix-iso-part07) |
 | AUX-N API와 VT 서버 구현 | [AgIsoStack CH13. Virtual Terminal](/study/agisostack/13-virtual-terminal) |
-| 용어 정의 | [용어집](/study/isobus/appendix-glossary) |
+| 용어 정의 | [용어 사전](/study/isobus/appendix-glossary) |

@@ -1,36 +1,49 @@
 ---
 title: "CAN 에러 처리"
-description: "CAN 버스가 오류를 감지하고, 카운터를 관리하며, Bus Off 상태에서 복구하는 메커니즘을 이해한다"
+description: "CAN 노드가 오류를 찾아 버스 전체에 알리고, 오류 횟수를 세어 스스로 물러났다가 다시 돌아오는 방법을 익힌다."
 date: 2026-04-13
-tags:
-  - isobus
-  - can
-  - error-handling
+tags: [isobus, can, error-handling]
+prev: /study/isobus/05-can-arbitration
+next: /study/isobus/07-can-fd
 ---
-
-<Header/>
-
-[[toc]]
 
 # CAN 에러 처리
 
 ::: info 학습 목표
-- CAN의 5가지 에러 검출 메커니즘을 각각 설명할 수 있다
-- 에러 프레임의 구조와 역할을 이해한다
-- TEC, REC 카운터의 증감 규칙을 적용할 수 있다
-- Error Active → Error Passive → Bus Off 상태 천이 조건을 설명할 수 있다
-- Bus Off에서 자동 복구 메커니즘을 이해한다
-- CAN 수준 ACK와 응용 계층 Acknowledgement(PGN 59392)가 각각 무엇을 보장하는지 구분하고, 목적지 무응답을 어느 계층에서 감지해야 하는지 판단할 수 있다
-- 중재 구간에서 Bit Error가 되는 경우와 중재 패배가 되는 경우를 구분할 수 있다
+- CAN이 오류를 찾아내는 5가지 검사를 각각 한 문장으로 설명할 수 있다.
+- 에러 프레임이 무엇이고, 오류를 버스 전체가 어떻게 알게 되는지 설명할 수 있다.
+- TEC·REC 카운터 값을 보고 노드의 상태(Error Active, Error Passive, Bus Off)를 판정할 수 있다.
+- Bus Off에서 다시 돌아오는 조건과, 자동 복구와 수동 복구의 차이를 설명할 수 있다.
+- CAN ACK가 보장하는 것과 보장하지 않는 것을 구분하고, 목적지가 응답하지 않는 상황은 응용 계층에서 알아내야 함을 설명할 수 있다.
 :::
+
+::: tip 시작하기 전에
+- 먼저 읽을 장: [3장 CAN 물리 계층](/study/isobus/03-can-physical), [4장 CAN 데이터 프레임](/study/isobus/04-can-data-frame), [5장 CAN 중재와 우선순위](/study/isobus/05-can-arbitration)
+- 앞 장에서 본 말: 비트 스터핑(같은 값 5개 뒤에 반대 비트를 끼워 넣는 규칙), CRC(데이터가 바뀌지 않았는지 확인하는 검사 값), ACK 슬롯(프레임 끝에서 받은 노드가 0을 써 넣는 칸). 모두 4장에서 봤다.
+- 이 장에서 처음 나오는 말
+  - 에러 프레임(Error Frame): 오류를 찾은 노드가 버스 전체에 "방금 프레임은 무효"라고 알리는 신호
+  - TEC·REC: 보내기 오류와 받기 오류를 세는 두 카운터
+  - Error Active·Error Passive·Bus Off: 카운터 값에 따라 정해지는 노드의 세 가지 상태
+  - 오버런(Overrun): 소프트웨어가 늦게 꺼내는 바람에 받아 둔 프레임이 다음 프레임에 덮어써지는 일
+:::
+
+교실 방송에 잡음이 끼면 누군가 "방금 거 안 들렸어요!" 하고 외치고, 방송하던 사람은 같은 내용을 다시 읽는다. CAN도 비슷하다. 오류를 찾은 노드는 버스 전체가 들리게 신호를 보내 방금 프레임을 무효로 만들고, 보낸 노드는 같은 프레임을 다시 보낸다. 그런데 계속 잡음을 만드는 장치가 있다면 어떻게 할까? CAN은 노드마다 오류 횟수를 세어, 문제가 많은 노드가 스스로 목소리를 낮추고 결국 버스에서 물러나게 한다. 이 장은 이 세 단계(찾기, 알리기, 물러나기)를 차례로 본다.
 
 ## 1. 에러 검출 메커니즘 5가지
 
-CAN은 하드웨어 레벨에서 5가지 독립적인 방법으로 오류를 감지한다. 이 중 하나라도 오류를 감지하면 즉시 에러 프레임을 전송한다.
+이 절에서는 CAN 컨트롤러가 오류를 찾아내는 다섯 가지 검사를 하나씩 본다. 다섯 검사는 서로 독립이라, 하나가 놓친 오류를 다른 검사가 잡을 수 있다.
+
+CAN은 하드웨어 레벨에서 5가지 독립적인 방법으로 오류를 감지한다. 이 중 하나라도 오류를 감지하면 즉시 에러 프레임을 전송한다. 먼저 쉬운 말로 한 줄씩 보면 다음과 같다.
+
+- Bit Error: 말하는 사람이 자기 목소리가 제대로 나가는지 들어 보니 다르게 들린다.
+- Stuff Error: "같은 글자 다섯 번 뒤에는 반드시 다른 글자"라는 쓰기 규칙이 깨졌다.
+- CRC Error: 상자에 붙은 검산 숫자와, 받은 내용물로 다시 계산한 숫자가 다르다.
+- Form Error: 반드시 비어 있어야 할 칸에 무언가 적혀 있다.
+- ACK Error: 보냈는데 아무도 "받았다"고 답하지 않는다.
 
 ### 1-1. Bit Error (비트 에러)
 
-**원리**: 노드가 비트를 전송하는 동시에 버스를 읽어서, 자신이 보낸 값과 버스의 값이 다르면 오류로 판단한다.
+<strong>원리</strong>: 노드가 비트를 전송하는 동시에 버스를 읽어서, 자신이 보낸 값과 버스의 값이 다르면 오류로 판단한다. 아래는 1을 보냈는데 0이 읽힌 경우다.
 
 ```
 전송한 값: 1 (Recessive)
@@ -38,11 +51,11 @@ CAN은 하드웨어 레벨에서 5가지 독립적인 방법으로 오류를 감
 → Bit Error 발생
 ```
 
-**예외**: 중재(Arbitration) 구간과 ACK 슬롯에서는 Recessive를 보내고 Dominant를 읽어도 Bit Error로 보지 않는다. 중재 중 패배하는 것은 정상 동작이기 때문이다. 반대로 Dominant를 보냈는데 Recessive를 읽으면 중재 구간에서도 Bit Error다(ISO 11783-3:2018 5.7, §7 참고).
+<strong>예외</strong>: 중재(Arbitration) 구간과 ACK 슬롯에서는 Recessive를 보내고 Dominant를 읽어도 Bit Error로 보지 않는다. 중재 중 패배하는 것은 정상 동작이기 때문이다([5장](/study/isobus/05-can-arbitration)에서 본 그대로다). ACK 슬롯에서도 송신 노드가 Recessive를 보내고 수신 노드가 Dominant로 덮어쓰는 것이 정상이다(1-5 참고). 반대로 Dominant를 보냈는데 Recessive를 읽으면 중재 구간에서도 Bit Error다(7절 참고).
 
 ### 1-2. Stuff Error (스터프 에러)
 
-**원리**: 비트 스터핑 규칙에 따르면, 같은 값의 비트 5개 후에는 반드시 반대 비트가 온다. 이 규칙이 위반되면 Stuff Error가 발생한다.
+<strong>원리</strong>: [4장](/study/isobus/04-can-data-frame)의 비트 스터핑 규칙에 따르면, 같은 값의 비트 5개 후에는 반드시 반대 비트가 온다. 이 규칙이 위반되면 Stuff Error가 발생한다. 아래는 1이 여섯 번 이어져 규칙이 깨진 경우다.
 
 ```
 수신된 비트열: 1 1 1 1 1 1 ...
@@ -51,7 +64,7 @@ CAN은 하드웨어 레벨에서 5가지 독립적인 방법으로 오류를 감
 
 ### 1-3. CRC Error (CRC 에러)
 
-**원리**: 송신 노드가 계산한 CRC 값을 프레임에 포함해 전송한다. 수신 노드는 받은 데이터로 직접 CRC를 계산해 프레임의 CRC 필드와 비교한다. 값이 다르면 CRC Error다.
+<strong>원리</strong>: 송신 노드가 계산한 CRC 값을 프레임에 포함해 전송한다. 수신 노드는 받은 데이터로 직접 CRC를 계산해 프레임의 CRC 필드와 비교한다. 값이 다르면 CRC Error다. 아래 값은 설명용 예시다.
 
 ```
 송신 노드 계산 CRC: 0x1A3F
@@ -59,9 +72,11 @@ CAN은 하드웨어 레벨에서 5가지 독립적인 방법으로 오류를 감
 → CRC Error 발생
 ```
 
+0x1A3F는 10진수 6719, 0x1A3E는 6718이다. 이진수로 보면 마지막 비트 하나만 다르다. 전송 중에 비트 하나만 바뀌어도 CRC 값이 달라져 오류가 드러난다.
+
 ### 1-4. Form Error (폼 에러)
 
-**원리**: CAN 프레임의 특정 필드(CRC Delimiter, ACK Delimiter, EOF)는 반드시 Recessive(1)여야 한다. 이 위치에서 Dominant(0)를 수신하면 Form Error다.
+<strong>원리</strong>: CAN 프레임의 특정 필드(CRC Delimiter, ACK Delimiter, EOF)는 반드시 Recessive(1)여야 한다. 이 위치에서 Dominant(0)를 수신하면 Form Error다. 아래는 프레임 끝 EOF(End of Frame) 7비트 가운데 하나가 0으로 읽힌 경우다.
 
 ```
 EOF 필드 (반드시 7개 Recessive):
@@ -71,7 +86,7 @@ EOF 필드 (반드시 7개 Recessive):
 
 ### 1-5. ACK Error (ACK 에러)
 
-**원리**: 송신 노드는 ACK Slot을 Recessive로 전송하고, 수신에 성공한 모든 노드가 이 위치를 Dominant로 덮어쓴다(ACK). 아무도 ACK를 보내지 않으면(버스가 Recessive 유지), 송신 노드는 ACK Error를 인식한다.
+<strong>원리</strong>: 송신 노드는 ACK Slot을 Recessive로 전송하고, 수신에 성공한 모든 노드가 이 위치를 Dominant로 덮어쓴다(ACK). 아무도 ACK를 보내지 않으면(버스가 Recessive 유지), 송신 노드는 ACK Error를 인식한다. 아래는 ACK 슬롯이 끝까지 1로 남은 경우다.
 
 ```
 ACK Slot 전송: 1 (Recessive)
@@ -79,7 +94,7 @@ ACK Slot 전송: 1 (Recessive)
 → ACK Error 발생
 ```
 
-**5가지 에러 비교 요약**
+<strong>5가지 에러 비교 요약</strong>
 
 | 에러 종류 | 검출 주체 | 검출 지점 | 주요 원인 |
 |---|---|---|---|
@@ -89,52 +104,54 @@ ACK Slot 전송: 1 (Recessive)
 | Form Error | 수신 노드 | 구조적 필드 위치 | 프레임 구조 손상 |
 | ACK Error | 송신 노드 | ACK Slot | 수신 노드 없음, 버스 단선 |
 
-이 5가지 중 하나라도 오류를 감지하면, 다음 단계는 이를 버스 전체에 알리는 것이다. 이때 사용되는 것이 에러 프레임이다.
+표에서 보듯 Bit Error와 ACK Error는 보내는 노드가, 나머지 셋은 받는 노드가 찾는다. 이 5가지 중 하나라도 오류를 감지하면, 다음 단계는 이를 버스 전체에 알리는 것이다. 이때 사용되는 것이 에러 프레임이다.
+
+<small>근거: ISO 11783-3 5.7</small>
 
 ## 2. 에러 프레임
 
-오류를 감지한 노드는 즉시 <strong>에러 프레임(Error Frame)</strong>을 전송해 버스 전체에 오류 발생을 알린다.
+이 절에서는 오류를 찾은 노드가 그 사실을 버스 전체에 알리는 방법을 본다. 회의 중 누군가 "잠깐!" 하고 크게 외쳐 방금 한 말을 모두 무효로 만드는 것과 비슷하다.
+
+오류를 감지한 노드는 즉시 <strong>에러 프레임(Error Frame)</strong>을 전송해 버스 전체에 오류 발생을 알린다. 에러 프레임은 두 부분으로 이뤄진다.
 
 ![Error Frame 구조: Active Error Flag 6bit Dominant, Error Delimiter 8bit Recessive](/images/study-isobus/06-error-frame-light.png)
 ![Error Frame 구조: Active Error Flag 6bit Dominant, Error Delimiter 8bit Recessive](/images/study-isobus/06-error-frame-dark.png)
 
-**Active Error Flag (6 Dominant bits)**
+<strong>Active Error Flag (6 Dominant bits)</strong>
 
 - 6개의 연속 Dominant(0) 비트
 - 이 자체가 Bit Stuffing 규칙 위반이므로, 다른 노드들도 Stuff Error를 감지해 자신의 에러 플래그를 전송함
 - 결과적으로 버스에 6~12개의 연속 Dominant 비트가 나타나 버스 전체가 오류를 인지
 
-**Error Delimiter (8 Recessive bits)**
+정상 프레임에서는 같은 값이 6개 이어질 수 없다(비트 스터핑 때문이다). 그래서 Dominant 6개는 "이건 정상 프레임이 아니다"라는 신호가 된다. 처음 외친 노드의 플래그 위에 다른 노드들의 플래그가 겹쳐서, 버스에는 Dominant가 최소 6개, 최대 12개 이어진다.
+
+<strong>Error Delimiter (8 Recessive bits)</strong>
 
 - 8개의 연속 Recessive(1) 비트
 - 에러 프레임의 끝을 알리며, 이후 정상 메시지 전송이 재개될 수 있음
 
-**에러 프레임 이후 흐름**
+<strong>에러 프레임 이후 흐름</strong>
 
-```mermaid
-sequenceDiagram
-    participant TX as 송신 노드
-    participant Bus as CAN 버스
-    participant RX as 수신 노드
+아래 그림은 송신 중 비트 오류가 난 뒤의 순서를 위에서 아래로 그린 것이다. Interframe Space는 프레임과 프레임 사이에 두는 쉬는 구간이다.
 
-    TX->>Bus: 데이터 프레임 전송 중...
-    Note over Bus: 비트 오류 발생
-    TX->>Bus: Active Error Flag (6× Dominant)
-    RX->>Bus: 자신의 Error Flag 추가 전송
-    Note over Bus: Superimposed Error Flags
-    Bus-->>TX: Error Delimiter 감지
-    Bus-->>RX: Error Delimiter 감지
-    Note over TX: Interframe Space 후
-    TX->>Bus: 오류 프레임 재전송 시도
-```
+![송신 노드가 데이터 프레임을 보내던 중 비트 오류가 나면 Active Error Flag(Dominant 6개)를 보내고, 수신 노드도 자신의 Error Flag를 더해 겹친 에러 플래그(Dominant 6~12비트)가 된다. 두 노드가 Error Delimiter를 감지하고, 송신 노드는 Interframe Space 뒤에 오류 난 프레임을 다시 보낸다](/images/study-isobus/06-error-flag-sequence-light.png)
+![송신 노드가 데이터 프레임을 보내던 중 비트 오류가 나면 Active Error Flag(Dominant 6개)를 보내고, 수신 노드도 자신의 Error Flag를 더해 겹친 에러 플래그(Dominant 6~12비트)가 된다. 두 노드가 Error Delimiter를 감지하고, 송신 노드는 Interframe Space 뒤에 오류 난 프레임을 다시 보낸다](/images/study-isobus/06-error-flag-sequence-dark.png)
+
+1. 송신 노드가 데이터 프레임을 보내는 중에 비트 오류가 난다.
+2. 송신 노드가 Active Error Flag(Dominant 6개)를 보낸다.
+3. 수신 노드도 규칙 위반을 알아채고 자신의 Error Flag를 더한다. 겹친 플래그(Superimposed Error Flags)가 된다.
+4. 모든 노드가 Error Delimiter(Recessive 8개)를 확인한다.
+5. Interframe Space가 지나면 송신 노드가 오류 난 프레임을 다시 보낸다.
 
 에러 프레임이 전송될 때마다 CAN 컨트롤러는 내부적으로 오류 횟수를 기록한다. 이 카운터 값에 따라 노드의 동작이 달라진다.
 
 ## 3. 에러 카운터
 
-CAN 컨트롤러는 <strong>TEC(Transmit Error Counter)</strong>와 **REC(Receive Error Counter)** 두 개의 카운터를 유지한다. 이 카운터로 노드의 에러 상태를 추적한다.
+이 절에서는 노드가 오류를 몇 번 겪었는지 세는 두 카운터와 그 증감 규칙을 본다. 벌점 제도와 비슷하다. 잘못하면 벌점이 크게 쌓이고(+8), 잘하면 조금씩 깎인다(-1). 벌점이 0 아래로 내려가지는 않는다.
 
-**TEC (Transmit Error Counter) 증감 규칙**
+CAN 컨트롤러는 <strong>TEC(Transmit Error Counter)</strong>와 <strong>REC(Receive Error Counter)</strong> 두 개의 카운터를 유지한다. 이 카운터로 노드의 에러 상태를 추적한다. TEC는 보내다가 겪은 오류를, REC는 받다가 겪은 오류를 센다.
+
+<strong>TEC (Transmit Error Counter) 증감 규칙</strong>
 
 | 상황 | TEC 변화 |
 |---|---|
@@ -142,78 +159,81 @@ CAN 컨트롤러는 <strong>TEC(Transmit Error Counter)</strong>와 **REC(Receiv
 | 메시지 성공적으로 전송 | -1 |
 | Bus Off 진입 시 | TEC > 255 확정 |
 
-**REC (Receive Error Counter) 증감 규칙**
+마지막 줄은 TEC가 255를 넘는 순간이 곧 Bus Off 진입이라는 뜻이다(4절).
+
+<strong>REC (Receive Error Counter) 증감 규칙</strong>
 
 | 상황 | REC 변화 |
 |---|---|
 | 수신 오류 감지 (첫 번째) | +1 |
 | 수신 오류 감지 (에러 플래그 후) | +8 |
 | 메시지 성공적으로 수신 | -1 |
-| REC가 127 초과 상태에서 성공 수신 | 119로 재설정 |
+| REC가 127 초과 상태에서 성공 수신 | 119~127 사이 값으로 재설정(구현마다 다름) |
+
+받는 쪽은 오류를 처음 발견하면 REC를 1만 올린다. 자기가 에러 플래그를 보낸 직후 첫 비트로 Dominant를 보면 8을 올린다. 마지막 줄은 REC가 아주 높아진 노드도 한 번 제대로 받으면 단번에 119~127 사이 값으로 내려와, 다음 절의 Error Passive 경계(128) 아래로 돌아간다는 뜻이다. 그 범위 안의 정확한 값은 CAN 규격이 정하지 않고 컨트롤러 구현마다 다르다.
 
 ::: info 에러 카운터의 비대칭성
 에러 카운터의 비대칭성에 주목하자. 오류 시 +8, 성공 시 -1로 설계된 이유는, <strong>오류 빈도가 낮아야 정상</strong>이라는 가정 때문이다. 간헐적 오류는 카운터가 자연히 회복되지만, 지속적 오류는 빠르게 누적된다.
 :::
 
+예를 들어 성공 8번에 오류 1번 꼴이면 TEC는 제자리다. 오류가 이보다 잦으면 TEC는 계속 오른다.
+
 그렇다면 카운터가 특정 임계값에 도달하면 어떤 일이 벌어질까? CAN은 카운터 값에 따라 노드의 동작 상태를 세 단계로 구분한다.
+
+<small>근거: Bosch CAN Specification 2.0 Part B, fault confinement 규칙 8(REC 재설정 범위)</small>
 
 ## 4. 에러 상태 천이
 
+이 절에서는 카운터 값에 따라 노드가 놓이는 세 가지 상태와, 상태가 바뀌는 조건을 본다. 운동 경기의 경고 누적과 비슷하다. 경고가 쌓이면 행동이 제한되고(Error Passive), 더 쌓이면 퇴장(Bus Off)이다. 다만 경기와 달리 경고 수가 다시 줄면 원래 상태로 돌아올 수 있다.
+
 TEC와 REC 값에 따라 노드는 3가지 상태 중 하나에 있게 된다.
 
-```mermaid
-stateDiagram-v2
-    [*] --> ErrorActive: 초기 상태
+![에러 상태 천이: 전원을 켜면 Error Active(TEC < 128 그리고 REC < 128)에서 시작한다. TEC 또는 REC가 128 이상이면 Error Passive로, 둘 다 128 미만으로 내려오면 다시 Error Active로 간다. Error Passive에서 TEC가 255를 넘으면 Bus Off가 되고, Bus Off는 11개 연속 recessive 비트를 128번 감지하면 Error Active로 자동 복구된다](/images/study-isobus/06-error-states-light.png)
+![에러 상태 천이: 전원을 켜면 Error Active(TEC < 128 그리고 REC < 128)에서 시작한다. TEC 또는 REC가 128 이상이면 Error Passive로, 둘 다 128 미만으로 내려오면 다시 Error Active로 간다. Error Passive에서 TEC가 255를 넘으면 Bus Off가 되고, Bus Off는 11개 연속 recessive 비트를 128번 감지하면 Error Active로 자동 복구된다](/images/study-isobus/06-error-states-dark.png)
 
-    ErrorActive: Error Active<br>(정상 동작 상태)<br>TEC < 128 AND REC < 128
+그림의 화살표는 상태가 바뀌는 조건이다. "TEC ≥ 128 또는 REC ≥ 128"은 둘 중 하나만 128 이상이어도 된다는 뜻이고, "TEC < 128 그리고 REC < 128"은 둘 다 128 미만이어야 한다는 뜻이다.
 
-    ErrorPassive: Error Passive<br>(제한 동작 상태)<br>TEC >= 128 OR REC >= 128
-
-    BusOff: Bus Off<br>(버스 분리 상태)<br>TEC > 255
-
-    ErrorActive --> ErrorPassive: TEC >= 128 또는 REC >= 128
-    ErrorPassive --> ErrorActive: TEC < 128 AND REC < 128
-    ErrorPassive --> BusOff: TEC > 255
-    BusOff --> ErrorActive: 128 × 11-recessive-bit 시퀀스 감지<br>(자동 복구)
-```
-
-**Error Active (에러 활성)**
+<strong>Error Active (에러 활성)</strong>
 
 - 초기 상태이자 정상 동작 상태
 - TEC < 128, REC < 128
-- 오류 감지 시 **Active Error Flag** (6 Dominant bits) 전송
+- 오류 감지 시 <strong>Active Error Flag</strong> (6 Dominant bits) 전송
 - 버스에 적극적으로 오류를 알릴 수 있음
 
-**Error Passive (에러 패시브)**
+<strong>Error Passive (에러 패시브)</strong>
 
 - TEC >= 128 또는 REC >= 128 시 진입
-- 오류 감지 시 **Passive Error Flag** (6 Recessive bits) 전송
+- 오류 감지 시 <strong>Passive Error Flag</strong> (6 Recessive bits) 전송
   - Recessive이므로 다른 노드의 신호를 덮어쓰지 못함
   - 버스에 오류를 강제로 알릴 수 없음
 - Interframe Space에서 추가 대기 시간(Suspend Transmission, 8 bits) 발생
 
-**Bus Off (버스 오프)**
+Suspend Transmission(송신 유예)은 Error Passive 상태의 노드가 프레임을 보낸 뒤 다음 프레임을 보내기 전에 8비트만큼 더 쉬는 것이다. 문제가 의심되는 노드가 버스를 덜 차지하게 하는 장치다.
+
+<strong>Bus Off (버스 오프)</strong>
 
 - TEC > 255 시 진입
 - 노드가 <strong>버스에서 완전히 분리</strong>됨
 - 어떠한 전송도, 수신도 불가능
 - 하드웨어 리셋이나 자동 복구 절차를 통해서만 복귀 가능
 
-**에러 상태별 동작 비교**
+<strong>에러 상태별 동작 비교</strong>
 
 | 상태 | 에러 플래그 종류 | 전송 가능 | 수신 가능 | 추가 대기 |
 |---|---|---|---|---|
 | Error Active | Active (6 Dominant) | 가능 | 가능 | 없음 |
 | Error Passive | Passive (6 Recessive) | 가능 | 가능 | 있음 (8bit) |
-| Bus Off | 없음 | **불가** | **불가** | — |
+| Bus Off | 없음 | <strong>불가</strong> | <strong>불가</strong> | - |
+
+정리하면, 카운터가 128에 닿으면 노드는 목소리를 낮추고(Error Passive), TEC가 255를 넘으면 버스에서 물러난다(Bus Off).
 
 ## 5. Bus Off 복구
 
-Bus Off 상태에 진입한 노드는 두 가지 방법으로 복구할 수 있다.
+이 절에서는 Bus Off로 물러난 노드가 다시 버스에 돌아오는 방법을 본다. Bus Off 상태에 진입한 노드는 두 가지 방법으로 복구할 수 있다.
 
-**자동 복구 (Auto Recovery)**
+<strong>자동 복구 (Auto Recovery)</strong>
 
-CAN 컨트롤러는 버스에서 <strong>128번의 11-recessive-bit 시퀀스</strong>를 감지하면 자동으로 Error Active 상태로 복귀한다.
+CAN 컨트롤러는 버스에서 <strong>128번의 11-recessive-bit 시퀀스</strong>를 감지하면 자동으로 Error Active 상태로 복귀한다. 아래는 그 조건을 그림처럼 적은 것이다.
 
 ```
 복구 조건:
@@ -225,11 +245,11 @@ CAN 컨트롤러는 버스에서 <strong>128번의 11-recessive-bit 시퀀스</s
 128회 완료 시 → TEC = 0, REC = 0, Error Active 복귀
 ```
 
-11개 연속 Recessive는 인터프레임 스페이스(Interframe Space)와 유휴 버스 상태에 해당한다. 버스가 정상 동작 중이면 이 시퀀스가 자연히 발생한다.
+11개 연속 Recessive는 인터프레임 스페이스(Interframe Space)와 유휴 버스 상태에 해당한다. 버스가 정상 동작 중이면 이 시퀀스가 자연히 발생한다. 즉 "버스가 한동안 조용하고 멀쩡한 것을 충분히 지켜본 뒤에" 돌아오는 방식이다.
 
-**수동 복구 (Manual Recovery)**
+<strong>수동 복구 (Manual Recovery)</strong>
 
-일부 CAN 컨트롤러는 소프트웨어에서 Bus Off 자동 복구를 비활성화할 수 있다. 이 경우 애플리케이션 코드가 명시적으로 복구를 트리거해야 한다.
+일부 CAN 컨트롤러는 소프트웨어에서 Bus Off 자동 복구를 비활성화할 수 있다. 이 경우 애플리케이션 코드가 명시적으로 복구를 트리거해야 한다. 아래 코드는 그 모습을 보여 주는 예시다. 함수 이름은 설명용이고, 실제 이름은 컨트롤러 드라이버마다 다르다.
 
 ```c
 /* Example: manually trigger Bus Off recovery */
@@ -237,36 +257,36 @@ can_controller_reset(CAN1);          /* Reset the CAN controller */
 can_set_mode(CAN1, CAN_MODE_NORMAL); /* Re-enter normal mode */
 ```
 
-**복구 전략 선택 기준**
+첫 줄은 CAN 컨트롤러를 초기화하고, 둘째 줄은 정상 모드로 다시 들어가 버스에 참여하게 한다.
 
-```mermaid
-flowchart TD
-    A[Bus Off 발생] --> B{시스템 안전 요구사항}
-    B -->|일반 시스템| C[자동 복구 활성화]
-    B -->|안전 필수 시스템| D[수동 복구 선택]
+<strong>복구 전략 선택 기준</strong>
 
-    C --> E[128 × 11-recessive 감지 후<br>자동으로 Error Active 복귀]
-    D --> F[애플리케이션이<br>오류 원인 분석]
-    F --> G{원인 해결됨?}
-    G -->|Yes| H[소프트웨어에서<br>수동 복구 명령]
-    G -->|No| I[유지보수 요청<br>또는 안전 모드 유지]
-```
+어떤 복구 방식을 쓸지는 그 장치가 얼마나 안전에 민감한지로 정한다. 아래 그림은 그 판단 순서다.
+
+![Bus Off 복구 전략 선택: Bus Off가 나면 시스템 안전 요구사항을 본다. 일반 시스템은 자동 복구를 켜서 11개 연속 recessive를 128번 감지한 뒤 자동으로 Error Active로 돌아간다. 안전 필수 시스템은 수동 복구를 선택해 애플리케이션이 오류 원인을 분석하고, 원인이 해결되면 소프트웨어에서 수동 복구 명령을 내리며, 해결되지 않으면 유지보수를 요청하거나 안전 모드를 유지한다](/images/study-isobus/06-busoff-recovery-choice-light.png)
+![Bus Off 복구 전략 선택: Bus Off가 나면 시스템 안전 요구사항을 본다. 일반 시스템은 자동 복구를 켜서 11개 연속 recessive를 128번 감지한 뒤 자동으로 Error Active로 돌아간다. 안전 필수 시스템은 수동 복구를 선택해 애플리케이션이 오류 원인을 분석하고, 원인이 해결되면 소프트웨어에서 수동 복구 명령을 내리며, 해결되지 않으면 유지보수를 요청하거나 안전 모드를 유지한다](/images/study-isobus/06-busoff-recovery-choice-dark.png)
 
 ::: warning 농기계(ISOBUS) 환경에서의 고려사항
 전기 노이즈가 많은 트랙터 환경에서는 간헐적 오류로 인한 Bus Off가 발생할 수 있다. 자동 복구가 적절할 수 있지만, 조향/브레이크 관련 ECU는 수동 복구로 설계해 불확실한 상태에서의 자동 복귀를 방지하는 것이 안전하다.
 :::
 
-앞 절들이 카운터 증감 규칙(§3)과 상태 임계값(§4), 복구 조건(§5)을 각각 따로 다뤘다면, 이번에는 이 세 가지를 <strong>한 노드의 시간 흐름</strong>에 그대로 적용해 Error Active에서 Bus Off까지, 그리고 다시 복귀하기까지를 끝까지 따라가 본다.
+정리하면, 보통은 버스가 조용한 것을 충분히 확인한 뒤 자동으로 돌아오고, 안전에 민감한 장치는 원인을 확인한 뒤 소프트웨어가 직접 돌려보낸다.
+
+앞 절들이 카운터 증감 규칙(3절)과 상태 임계값(4절), 복구 조건(5절)을 각각 따로 다뤘다면, 이번에는 이 세 가지를 <strong>한 노드의 시간 흐름</strong>에 그대로 적용해 Error Active에서 Bus Off까지, 그리고 다시 복귀하기까지를 끝까지 따라가 본다.
 
 ## 6. 에러 카운터 따라가기
 
 ### 시나리오: 노이즈가 심한 버스에서 진단 도구가 반복 전송에 실패한다
 
-전기 노이즈가 심한 트랙터 환경에서, 진단 도구(SA=0xF9) 하나의 TEC·REC가 시간에 따라 어떻게 움직이는지 이벤트 단위로 추적한다. 증감 폭은 모두 §3에서 정리한 규칙(<strong>전송 오류 +8, 전송 성공 −1</strong> / <strong>수신 오류 첫 감지 +1, 에러 플래그 이후 감지 +8, 수신 성공 −1</strong>) 그대로이고, 상태 판정은 §4의 임계값(<strong>TEC < 128 AND REC < 128 → Error Active</strong>, <strong>TEC >= 128 OR REC >= 128 → Error Passive</strong>, <strong>TEC > 255 → Bus Off</strong>)을 그대로 적용한다.
+이 절에서는 노드 하나의 카운터가 사건마다 어떻게 바뀌고, 그에 따라 상태가 어떻게 바뀌는지 한 줄씩 따라간다.
+
+전기 노이즈가 심한 트랙터 환경에서, 진단 도구(SA=0xF9) 하나의 TEC·REC가 시간에 따라 어떻게 움직이는지 이벤트 단위로 추적한다. SA(Source Address)는 장치의 주소이고, 0xF9(10진수 249)는 기계 밖에서 꽂는 진단 도구에 쓰는 주소다. 증감 폭은 모두 3절에서 정리한 규칙(<strong>전송 오류 +8, 전송 성공 −1</strong> / <strong>수신 오류 첫 감지 +1, 에러 플래그 이후 감지 +8, 수신 성공 −1</strong>) 그대로이고, 상태 판정은 4절의 임계값(<strong>TEC < 128 AND REC < 128 → Error Active</strong>, <strong>TEC >= 128 OR REC >= 128 → Error Passive</strong>, <strong>TEC > 255 → Bus Off</strong>)을 그대로 적용한다.
+
+표는 위에서 아래로 시간 순서다. ΔTEC와 ΔREC는 그 사건으로 카운터가 얼마나 바뀌었는지, TEC와 REC는 바뀐 뒤의 값이다.
 
 | 이벤트 | ΔTEC | ΔREC | TEC | REC | 상태 |
 |---|---|---|---|---|---|
-| 초기 상태 | — | — | 0 | 0 | Error Active |
+| 초기 상태 | - | - | 0 | 0 | Error Active |
 | 송신 실패 (Bit Error) | +8 | 0 | 8 | 0 | Error Active |
 | 송신 실패 (Stuff Error) | +8 | 0 | 16 | 0 | Error Active |
 | 송신 실패 (CRC Error) | +8 | 0 | 24 | 0 | Error Active |
@@ -278,20 +298,40 @@ flowchart TD
 | 송신 실패 × 15회 반복 (135 + 15×8) | +120 | 0 | 255 | 9 | Error Passive (TEC=255, 아직 <strong>초과는 아님</strong>) |
 | 송신 실패 | +8 | 0 | 263 | 9 | **Bus Off** (TEC > 255) |
 
+아래 그림은 같은 표를 그래프로 그린 것이다. 가로축 번호는 표의 줄 순서(초기 상태가 0)이고, 배경색은 그 높이에서의 상태다.
+
+![에러 카운터 따라가기 그래프: TEC는 0, 8, 16, 24로 오르다가 13번 연속 실패로 128이 되어 Error Passive 구간에 들어가고, 성공 한 번으로 127로 내려와 Error Active로 돌아간 뒤 135, 255를 거쳐 263이 되며 Bus Off 구간에 들어간다. REC는 0에서 1, 9까지만 오른다](/images/study-isobus/06-tec-timeline-light.png)
+![에러 카운터 따라가기 그래프: TEC는 0, 8, 16, 24로 오르다가 13번 연속 실패로 128이 되어 Error Passive 구간에 들어가고, 성공 한 번으로 127로 내려와 Error Active로 돌아간 뒤 135, 255를 거쳐 263이 되며 Bus Off 구간에 들어간다. REC는 0에서 1, 9까지만 오른다](/images/study-isobus/06-tec-timeline-dark.png)
+
+### 단계별로 읽기
+
+1. 초기 상태(0번 줄): 카운터가 둘 다 0에서 출발한다. 여기서 보는 것은 출발점이 Error Active라는 점이다.
+2. 송신 실패 세 번(1~3번 줄): 실패 원인이 Bit, Stuff, CRC로 서로 달라도 송신 실패마다 TEC가 똑같이 8씩 오른다. 여기서 보는 것은 "무슨 오류였나"가 아니라 "보내다 실패했나"가 TEC를 움직인다는 점이다.
+3. 수신 실패 한 번(4번 줄): 이번에는 받는 중에 오류를 처음 발견했으므로 TEC는 그대로이고 REC만 1 오른다. 여기서 보는 것은 두 카운터가 따로 움직인다는 점이다.
+4. 송신 실패 13번(5번 줄): TEC가 24에서 128이 되며 Error Passive로 바뀐다. 여기서 보는 것은 경계가 "128 이상"이라 128에 닿는 순간 상태가 바뀐다는 점이다.
+5. 송신 성공 한 번(6번 줄): TEC가 127로 내려가 Error Active로 돌아간다. 여기서 보는 것은 상태가 한 방향으로만 가지 않고, 카운터 값으로 그때그때 다시 판정된다는 점이다.
+6. 송신 실패, 그리고 에러 플래그 뒤의 수신 실패(7~8번 줄): TEC는 135로 올라 다시 Error Passive가 되고, REC는 이번에는 8이 올라 9가 된다. 여기서 보는 것은 같은 수신 실패라도 첫 감지(+1)인지 에러 플래그 뒤(+8)인지에 따라 증가 폭이 다르다는 점이다.
+7. 송신 실패 15번(9번 줄): TEC가 255가 되지만 아직 Bus Off가 아니다. 여기서 보는 것은 Bus Off 조건이 "255 초과"라는 점이다.
+8. 마지막 송신 실패(10번 줄): TEC가 263이 되어 255를 넘고, 드디어 Bus Off다.
+
 몇 가지 짚어볼 지점이 있다.
 
 - <strong>TEC=128에서 정확히 Error Passive로 전환</strong>된다. 임계값은 "128 이상"이므로 127에서는 아직 Active, 128부터 Passive다.
 - 그 직후 송신에 한 번 성공하자 TEC가 127로 내려가며 <strong>다시 Error Active로 돌아간다.</strong> 상태 전환은 한 방향으로만 진행되는 것이 아니라, 카운터 값에 따라 그때그때 재판정된다.
-- 이후 노이즈가 이어지면서 TEC가 다시 오르고, <strong>TEC=255에서는 아직 Bus Off가 아니다.</strong> §4의 조건은 "TEC > 255"이지 "TEC >= 255"가 아니기 때문이다. 마지막 한 번의 송신 실패로 263이 되어야 비로소 Bus Off에 진입한다.
-- REC는 첫 실패에서 +1(첫 번째 감지), 이후 실패에서 +8(에러 플래그 이후 감지)이 적용되어 9까지만 올랐다. §3에 있는 "REC가 127 초과 상태에서 성공 수신 시 119로 재설정" 규칙은 이 시나리오에서는 REC가 그 구간에 도달하지 않아 발동하지 않았다.
+- 이후 노이즈가 이어지면서 TEC가 다시 오르고, <strong>TEC=255에서는 아직 Bus Off가 아니다.</strong> 4절의 조건은 "TEC > 255"이지 "TEC >= 255"가 아니기 때문이다. 마지막 한 번의 송신 실패로 263이 되어야 비로소 Bus Off에 진입한다.
+- REC는 첫 실패에서 +1(첫 번째 감지), 이후 실패에서 +8(에러 플래그 이후 감지)이 적용되어 9까지만 올랐다. 3절에 있는 "REC가 127 초과 상태에서 성공 수신 시 119~127 사이 값으로 재설정" 규칙은 이 시나리오에서는 REC가 그 구간에 도달하지 않아 발동하지 않았다.
 
 ::: info 이 시나리오가 보여주는 것
-전송 오류(+8)와 성공(−1)의 비대칭성(§3에서 이미 짚은 내용)이 실제 숫자로 어떻게 나타나는지가 이 표의 핵심이다. 성공 한 번(−1)이 실패 13번(+104)을 전혀 상쇄하지 못한다. 간헐적 성공만으로는 지속적 노이즈를 이길 수 없고, 결국 TEC는 계속 우상향해 Bus Off에 도달한다.
+전송 오류(+8)와 성공(−1)의 비대칭성(3절에서 이미 짚은 내용)이 실제 숫자로 어떻게 나타나는지가 이 표의 핵심이다. 성공 한 번(−1)이 실패 13번(+104)을 전혀 상쇄하지 못한다. 간헐적 성공만으로는 지속적 노이즈를 이길 수 없고, 결국 TEC는 계속 우상향해 Bus Off에 도달한다.
 :::
 
 ### Bus Off 이후: 자동 복구까지
 
-Bus Off에 진입한 진단 도구는 §5의 규칙대로 더 이상 어떤 프레임도 송신·수신하지 못한다. 이후 버스가 정상 상태를 회복해 <strong>11개 연속 Recessive 비트 시퀀스를 128번</strong> 감지하면, TEC와 REC가 모두 0으로 초기화되며 Error Active로 복귀한다. 이 조건은 노드 자신의 판단이 아니라 <strong>버스에서 관측되는 유휴 패턴의 반복 횟수</strong>로만 결정되므로, 노이즈 원인이 없어지지 않은 채로 128번을 채우면 복귀 직후 다시 오류가 누적되어 같은 경로를 반복할 수 있다.
+이 단계에서는 Bus Off가 된 진단 도구가 어떻게 돌아오는지 본다.
+
+Bus Off에 진입한 진단 도구는 5절의 규칙대로 더 이상 어떤 프레임도 송신·수신하지 못한다. 이후 버스가 정상 상태를 회복해 <strong>11개 연속 Recessive 비트 시퀀스를 128번</strong> 감지하면, TEC와 REC가 모두 0으로 초기화되며 Error Active로 복귀한다. 이 조건은 노드 자신의 판단이 아니라 <strong>버스에서 관측되는 유휴 패턴의 반복 횟수</strong>로만 결정되므로, 노이즈 원인이 없어지지 않은 채로 128번을 채우면 복귀 직후 다시 오류가 누적되어 같은 경로를 반복할 수 있다.
+
+아래 코드는 표의 사건을 차례로 적용하면서 매번 TEC·REC와 상태를 출력한다. `state()` 함수가 4절의 판정 규칙이고, `events` 목록이 표의 줄이다.
 
 :::details 파이썬으로 검산해 보기
 ```python
@@ -303,7 +343,7 @@ def state(tec, rec):
     return "Error Active"
 
 
-# (이벤트 이름, ΔTEC, ΔREC) — §3 규칙 그대로 적용
+# (이벤트 이름, ΔTEC, ΔREC): §3 규칙 그대로 적용
 events = [
     ("송신 실패 (Bit Error)",            +8, 0),
     ("송신 실패 (Stuff Error)",          +8, 0),
@@ -328,53 +368,112 @@ tec, rec = 0, 0   # 128 x 11-recessive-bit 시퀀스 감지 완료
 print("복구 후:", state(tec, rec))   # Error Active
 ```
 
+실행하면 다음이 출력된다(한글 폭 때문에 줄 맞춤은 조금 어긋나 보일 수 있다).
+
+```
+송신 실패 (Bit Error)            TEC=   8 REC=  0 -> Error Active
+송신 실패 (Stuff Error)          TEC=  16 REC=  0 -> Error Active
+송신 실패 (CRC Error)            TEC=  24 REC=  0 -> Error Active
+수신 실패 (첫 번째 감지)              TEC=  24 REC=  1 -> Error Active
+송신 실패 × 13회 반복               TEC= 128 REC=  1 -> Error Passive
+송신 성공 (재전송 성공)               TEC= 127 REC=  1 -> Error Active
+송신 실패                        TEC= 135 REC=  1 -> Error Passive
+수신 실패 (에러 플래그 이후 감지)         TEC= 135 REC=  9 -> Error Passive
+송신 실패 × 15회 반복               TEC= 255 REC=  9 -> Error Passive
+송신 실패                        TEC= 263 REC=  9 -> Bus Off
+복구 후: Error Active
+```
+
 마지막 줄 실행 결과가 `TEC=263 REC=9 -> Bus Off`로 나와 위 표와 일치하며, 복구 후에는 `Error Active`로 돌아온다.
 :::
 
-::: tip 핵심 정리
-
-- CAN은 **Bit, Stuff, CRC, Form, ACK** 5가지 독립 메커니즘으로 오류를 검출하며, 하나라도 감지되면 에러 프레임을 전송한다.
+::: tip 여기까지 정리 (1~6절)
+- CAN은 <strong>Bit, Stuff, CRC, Form, ACK</strong> 5가지 독립 메커니즘으로 오류를 검출하며, 하나라도 감지되면 에러 프레임을 전송한다.
 - <strong>에러 프레임</strong>은 6개의 Dominant(Active) 또는 6개의 Recessive(Passive) 비트로 구성된 에러 플래그와 8개의 Recessive Delimiter로 이뤄진다.
-- <strong>TEC</strong>는 전송 오류 시 +8, 성공 시 -1. <strong>REC</strong>는 수신 오류 시 +8, 성공 시 -1로 변한다.
-- 에러 상태는 **Error Active → Error Passive → Bus Off** 순으로 악화되며, 각 임계값은 128, 255이다.
+- <strong>TEC</strong>는 전송 오류 시 +8, 성공 시 -1. <strong>REC</strong>는 수신 오류를 처음 감지하면 +1, 에러 플래그 뒤에 감지하면 +8, 성공 시 -1로 변한다.
+- 에러 상태는 <strong>Error Active → Error Passive → Bus Off</strong> 순으로 악화된다. TEC나 REC가 128 이상이면 Error Passive, TEC가 255를 넘으면 Bus Off다.
 - <strong>Bus Off 자동 복구</strong>는 버스에서 128번의 11-recessive-bit 시퀀스를 감지한 뒤 Error Active로 복귀한다.
-
 :::
 
-## 7. ISO 11783가 에러 처리에 덧붙이는 것
+## 7. ISOBUS 표준이 에러 처리에 덧붙이는 것
 
-에러 검출과 카운터, Bus Off는 모두 CAN 컨트롤러가 ISO 11898-1대로 처리한다. ISO 11783-3:2018(이하 Part 3)은 여기에 새 메커니즘을 더하지 않는다. 대신 세 가지를 분명히 해 둔다. 어떤 검출 수단을 전제로 하는지, CAN 수준의 확인 응답이 어디까지 보장하는지, 에러 프레임에 잡히지 않는 메시지 유실을 누가 막아야 하는지다.
+이 절에서는 ISOBUS 표준이 CAN의 에러 처리 위에 무엇을 분명히 해 두는지 본다. 결론부터 말하면, 새 장치를 더하지는 않고 "CAN이 보장하지 않는 것"을 짚어 준다.
 
-### Part 3 5.8이 나열하는 검출 수단
+에러 검출과 카운터, Bus Off는 모두 CAN 컨트롤러가 ISO 11898-1(CAN 자체를 정하는 국제 표준)대로 처리한다. ISO 11783-3:2018(ISOBUS 표준 가운데 CAN 프레임과 메시지 주고받기를 정하는 문서, 이하 Part 3)은 여기에 새 메커니즘을 더하지 않는다. 대신 세 가지를 분명히 해 둔다. 어떤 검출 수단을 전제로 하는지, CAN 수준의 확인 응답이 어디까지 보장하는지, 에러 프레임에 잡히지 않는 메시지 유실을 누가 막아야 하는지다. 앞의 두 가지는 이 절에서, 마지막은 8절에서 본다.
 
-Part 3 5.8은 에러 검출 수단을 네 가지로 적고, 자세한 내용은 ISO 11898-1에 맡긴다.
+표준 문장에서 shall은 반드시 지켜야 하는 규칙, should는 지키기를 권하는 규칙이다. 원문의 강도를 보여 주려고 괄호 안에 그대로 적는다.
 
-| Part 3 5.8의 표현 | §1의 대응 |
+### 표준이 전제로 하는 검출 수단
+
+Part 3은 에러 검출 수단을 네 가지로 적고, 자세한 내용은 ISO 11898-1에 맡긴다.
+
+| Part 3의 표현 | 1절의 대응 |
 |---|---|
 | 송신 컨트롤러가 보낸 비트 레벨과 버스에서 읽은 비트 레벨을 비교 | Bit Error |
 | CRC | CRC Error |
 | 스터프 폭 5의 가변 비트 스터핑 | Stuff Error |
 | 프레임 형식 검사(frame format check) | Form Error |
 
-§1의 ACK Error는 5.8 목록에 따로 없다. 대신 Part 3은 ACK 슬롯을 "확인 응답의 첫 번째 형식"으로 5.4.5에서 다룬다(아래 소절).
+"스터프 폭 5"는 같은 비트 5개마다 반대 비트를 끼운다는 뜻으로, 1-2에서 본 규칙과 같다. 1절의 ACK Error는 이 목록에 따로 없다. 대신 Part 3은 ACK 슬롯을 "확인 응답의 첫 번째 형식"으로 다룬다(아래 소절).
 
-### 중재 구간의 Bit Error — 5.7
+### 중재 구간의 Bit Error
 
-§1-1의 예외에는 방향이 있다. Part 3 5.7은 중재 중 두 경우를 나눈다.
+1-1의 예외에는 방향이 있다. Part 3은 중재 중 두 경우를 나눈다.
 
 | 보낸 값 | 읽은 값 | 판정 |
 |---|---|---|
 | recessive (1) | dominant (0) | 중재 패배. 비트를 하나도 더 보내지 않고 물러나야 한다(shall) |
 | dominant (0) | recessive (1) | Bit Error |
 
-[CAN 물리 계층](/study/isobus/03-can-physical) 챕터의 Wired-AND로 풀어 보면 이유가 보인다. dominant는 다른 노드가 recessive로 덮어쓸 수 없다. 그러니 dominant를 보냈는데 recessive가 읽힌다면 경쟁이 아니라 송신 경로나 버스의 고장이고, 그래서 중재 구간이라도 에러로 처리한다.
+[3장 CAN 물리 계층](/study/isobus/03-can-physical)의 Wired-AND로 풀어 보면 이유가 보인다. dominant는 다른 노드가 recessive로 덮어쓸 수 없다. 그러니 dominant를 보냈는데 recessive가 읽힌다면 경쟁이 아니라 송신 경로나 버스의 고장이고, 그래서 중재 구간이라도 에러로 처리한다.
 
-### 확인 응답의 두 형식 — CAN ACK는 "목적지가 받았다"가 아니다
+### 확인 응답의 두 형식: CAN ACK는 "목적지가 받았다"가 아니다
 
-Part 3 5.4.5는 확인 응답(acknowledgement)을 두 형식으로 나눈다.
+Part 3은 확인 응답(acknowledgement)을 두 형식으로 나눈다. 하나는 CAN 하드웨어가 프레임마다 자동으로 하는 확인(ACK 슬롯)이고, 다른 하나는 소프트웨어(응용 계층)가 메시지로 보내는 응답이다.
+
+아래 그림의 CF(Control Function)는 ISOBUS에서 주소를 하나 가진 제어 기능 단위다. 지금은 "버스에 붙은 장치"로 읽어도 된다. 그림의 Tr과 T3는 표 아래에서 설명하는 응답 시간 규칙이다.
 
 ![송신 CF가 목적지를 지정한 데이터 프레임을 보내면 CAN 계층에서는 아무 노드나 ACK 슬롯을 dominant로 채우고 에러 프레임이 없으면 켜진 노드 모두 정상 수신이며, 응용 계층에서는 목적지 CF가 Tr 200 ms 안에 PGN 59392로 ACK·NACK를 보내고 송신 CF는 T3 1.25 s 동안 기다리는 구조](/images/study-isobus/06-ack-two-forms-light.png)
 ![송신 CF가 목적지를 지정한 데이터 프레임을 보내면 CAN 계층에서는 아무 노드나 ACK 슬롯을 dominant로 채우고 에러 프레임이 없으면 켜진 노드 모두 정상 수신이며, 응용 계층에서는 목적지 CF가 Tr 200 ms 안에 PGN 59392로 ACK·NACK를 보내고 송신 CF는 T3 1.25 s 동안 기다리는 구조](/images/study-isobus/06-ack-two-forms-dark.png)
+
+| 형식 | 의미 | 더 볼 곳 |
+|---|---|---|
+| CAN 프로토콜의 프레임 내 확인 응답(ACK 슬롯) | <strong>적어도 한 컨트롤러</strong>가 메시지를 받았다 | 이 장 1-5 |
+| CAN 에러 프레임이 없음 | 전원이 켜져 연결된 나머지 모든 컨트롤러가 메시지를 정상 수신했다 | 이 장 2절 |
+| 응용 계층의 응답(일반 브로드캐스트, ACK, NACK) | 특정 명령·요청에 대한 응답. 어떤 PG에 어떤 응답이 필요한지는 응용 계층이 정한다 | [10장](/study/isobus/10-j1939-request-ack), PGN 59392 |
+
+표의 PG(Parameter Group)는 메시지 종류를 뜻하고, PGN 59392(16진수 0xE800)는 Acknowledgement 메시지의 번호다. NACK은 "처리할 수 없다"는 부정 응답이다.
+
+구현에서 중요한 것은 첫 줄의 "적어도 한 컨트롤러"다. 목적지(DA, Destination Address: 받는 쪽 주소)를 지정한 명령을 보냈는데 목적지 장치가 꺼져 있어도, 버스에 다른 노드가 하나라도 켜져 있으면 그 노드가 ACK 슬롯을 채운다. 송신 측 컨트롤러는 ACK Error를 보지 못하고 프레임을 성공으로 처리한다. "목적지가 받았는가"는 CAN 계층으로는 알 수 없다.
+
+목적지의 응답이 필요한 메시지는 응용 계층에서 확인해야 한다. Part 3은 응답해야 하는 컨트롤러는 0.2 s(Tr) 안에 응답하고, 응답을 기다리는 컨트롤러는 포기하거나 다시 보내기 전에 최소 1.25 s(T3)를 기다리라고 정한다. Acknowledgement 메시지의 바이트 구조와 응답 규칙은 [10장 요청과 응답](/study/isobus/10-j1939-request-ack)에서, Tr·T3와 재시도 규칙은 [11장](/study/isobus/11-j1939-request2-timing)에서 다룬다.
+
+반대로 1-5의 ACK Error가 났다는 것은 ACK 슬롯을 채운 노드가 하나도 없다는 뜻이다. 버스에 송신 노드 혼자 있거나, 다른 노드가 전부 버스에서 떨어져 있거나, 배선이 끊긴 경우다.
+
+정리하면, 중재 중에도 "0을 보냈는데 1이 읽힘"은 고장이고, CAN ACK는 "누군가 받았다"까지만 알려 준다. 목적지가 실제로 받았는지는 응용 계층의 응답으로 확인한다.
+
+<small>근거: ISO 11783-3 5.4.5, 5.7, 5.8, 5.13.3</small>
+
+## 8. 에러 프레임에 잡히지 않는 유실: 수신 오버런 (심화)
+
+::: info 처음 읽는다면
+이 절은 직접 구현할 때 필요한 세부다. 처음에는 건너뛰고 다음 절로 가도 된다.
+:::
+
+이 절에서는 버스에서는 아무 문제가 없었는데도 메시지를 잃는 경우를 본다. 원인은 버스가 아니라 받는 장치의 소프트웨어다.
+
+CRC와 ACK를 통과해 컨트롤러가 받아들인 프레임도 소프트웨어가 늦게 꺼내면 사라질 수 있다. 수신 버퍼에서 새 프레임이 이전 프레임을 덮어쓰는 오버런(overrun)은 버스에 에러 프레임을 만들지 않고, 송신 측도 알 수 없다. 우편함에 편지가 계속 오는데 꺼내 가지 않으면, 새 편지가 앞 편지를 밀어내는 것과 같다.
+
+Part 3은 이를 컨트롤러의 의무로 정한다. 데이터 링크가 100% 사용률일 때도 메시지를 잃지 않을 만큼 빠르게 처리해야 하고(shall), 사용률이 낮아도 프레임이 연달아(back-to-back) 오면 그 때문에 메시지를 잃어서는 안 된다. 여기서 "빠르게 처리"는 응답을 즉시 만들라는 뜻이 아니라, 새 메시지가 이전 메시지를 덮어쓰지 않게 하라는 뜻이다.
+
+이 요구는 TP 수신에서 특히 중요하다. TP(Transport Protocol)는 8바이트보다 긴 데이터를 여러 프레임으로 나눠 보내는 방법이고, TP.DT는 그 데이터 조각을 싣는 프레임이다. 특정 목적지로 가는 multi-packet 데이터(여러 프레임으로 나뉜 데이터)는 패킷 간 최소 간격이 없어 연달아 올 수 있다. 소프트웨어가 TP.DT를 하나 놓치면 에러 프레임은 없는데 시퀀스 번호가 빈다. 그 결과는 재전송 요청이나 Abort(연결 중단)로 나타난다. 이 처리는 [15장 TP 기초](/study/isobus/15-tp-bam-cmdt)와 [16장 TP 연결 규칙과 타이머](/study/isobus/16-tp-connection-rules)에서 본다.
+
+정리하면, 에러 프레임이 0이어도 메시지를 잃을 수 있다. 받는 쪽 소프트웨어가 버스가 가득 찼을 때와 프레임이 연달아 올 때도 버퍼를 제때 비워야 한다.
+
+::: details 원문을 가진 독자를 위한 메모
+- 7절 "표준이 전제로 하는 검출 수단" 표는 ISO 11783-3:2018 5.8(Error detection)이다. 5.8의 목록에는 ACK가 없고, ACK 슬롯은 5.4.5(Acknowledgement)에서 확인 응답의 첫 번째 형식으로 다룬다.
+- 중재 구간 Bit Error 표는 5.7(Contention-based arbitration)이다.
+- 확인 응답의 두 형식 표는 세 줄 모두 5.4.5이고, Acknowledgement PG(PGN 59392) 정의도 5.4.5에 있다. Tr 0.2 s와 T3 1.25 s는 5.13.3이다. 근거 조항을 붙인 원래 표는 다음과 같다.
 
 | 형식 | 의미 | 근거 |
 |---|---|---|
@@ -382,38 +481,37 @@ Part 3 5.4.5는 확인 응답(acknowledgement)을 두 형식으로 나눈다.
 | CAN 에러 프레임이 없음 | 전원이 켜져 연결된 나머지 모든 컨트롤러가 메시지를 정상 수신했다 | Part 3 5.4.5 |
 | 응용 계층의 응답(일반 브로드캐스트, ACK, NACK) | 특정 명령·요청에 대한 응답. 어떤 PG에 어떤 응답이 필요한지는 응용 계층이 정한다 | Part 3 5.4.5, PGN 59392 |
 
-구현에서 중요한 것은 첫 줄의 "적어도 한 컨트롤러"다. 목적지(DA)를 지정한 명령을 보냈는데 목적지 장치가 꺼져 있어도, 버스에 다른 노드가 하나라도 켜져 있으면 그 노드가 ACK 슬롯을 채운다. 송신 측 컨트롤러는 ACK Error를 보지 못하고 프레임을 성공으로 처리한다. "목적지가 받았는가"는 CAN 계층으로는 알 수 없다.
+- 8절의 오버런 규칙은 5.12(PDU processing requirements), 특정 목적지 multi-packet의 패킷 간격 0~200 ms는 5.13.3이다.
+:::
 
-목적지의 응답이 필요한 메시지는 응용 계층에서 확인해야 한다. Part 3은 응답해야 하는 컨트롤러는 0.2 s(Tr) 안에 응답하고, 응답을 기다리는 컨트롤러는 포기하거나 다시 보내기 전에 최소 1.25 s(T3)를 기다리라고 정한다(Part 3 5.13.3). Acknowledgement 메시지의 바이트 구조와 응답 규칙은 [J1939 메시지 구조](/study/isobus/09-j1939-message) 챕터에서 다룬다.
+<small>근거: ISO 11783-3 5.12, 5.13.3</small>
 
-반대로 §1-5의 ACK Error가 났다는 것은 ACK 슬롯을 채운 노드가 하나도 없다는 뜻이다. 버스에 송신 노드 혼자 있거나, 다른 노드가 전부 버스에서 떨어져 있거나, 배선이 끊긴 경우다.
-
-### 에러 프레임에 잡히지 않는 유실 — 5.12
-
-CRC와 ACK를 통과해 컨트롤러가 받아들인 프레임도 소프트웨어가 늦게 꺼내면 사라질 수 있다. 수신 버퍼에서 새 프레임이 이전 프레임을 덮어쓰는 오버런(overrun)은 버스에 에러 프레임을 만들지 않고, 송신 측도 알 수 없다.
-
-Part 3 5.12는 이를 컨트롤러의 의무로 정한다. 데이터 링크가 100% 사용률일 때도 메시지를 잃지 않을 만큼 빠르게 처리해야 하고(shall), 사용률이 낮아도 프레임이 연달아(back-to-back) 오면 그 때문에 메시지를 잃어서는 안 된다. 여기서 "빠르게 처리"는 응답을 즉시 만들라는 뜻이 아니라, 새 메시지가 이전 메시지를 덮어쓰지 않게 하라는 뜻이다.
-
-이 요구는 TP 수신에서 특히 중요하다. 특정 목적지로 가는 multi-packet 데이터는 패킷 간 최소 간격이 없어 연달아 올 수 있다(Part 3 5.13.3). 소프트웨어가 TP.DT를 하나 놓치면 에러 프레임은 없는데 시퀀스 번호가 빈다. 그 결과는 재전송 요청이나 Abort로 나타난다. 이 처리는 [J1939 Transport Protocol](/study/isobus/11-j1939-transport) 챕터에서 본다.
-
-::: tip 정리
-- Part 3 5.8은 비트 비교·CRC·스터프 폭 5·프레임 형식 검사를 전제로 하고, 세부는 ISO 11898-1에 맡긴다.
+::: tip 핵심 정리
+- CAN은 Bit, Stuff, CRC, Form, ACK 다섯 가지 검사로 오류를 찾고, 하나라도 걸리면 에러 프레임으로 버스 전체에 알린다. 보낸 노드는 그 프레임을 다시 보낸다.
+- 노드는 TEC(보내기 오류)와 REC(받기 오류)를 센다. 오류는 크게(+8), 성공은 작게(-1) 반영된다.
+- TEC나 REC가 128 이상이면 Error Passive, TEC가 255를 넘으면 Bus Off다. Bus Off 노드는 11개 연속 recessive 비트를 128번 본 뒤 Error Active로 돌아온다.
 - 중재 중 recessive를 보내고 dominant를 읽으면 패배, dominant를 보내고 recessive를 읽으면 Bit Error다.
 - CAN ACK 슬롯은 "적어도 한 노드가 받음"만 보장한다. 목적지의 응답은 응용 계층(Tr 0.2 s, T3 1.25 s)에서 확인한다.
-- 수신 오버런은 에러 프레임을 남기지 않는다. 100% 버스 부하와 연달아 오는 프레임에서도 잃지 않도록 처리하는 것은 컨트롤러의 의무다.
+- (심화) 수신 오버런은 에러 프레임을 남기지 않는다. 100% 버스 부하와 연달아 오는 프레임에서도 잃지 않도록 처리하는 것은 컨트롤러의 의무다.
 :::
 
 ::: details 확인 문제
-1. (설명형) 중재 구간에서 Bit Error가 되는 경우와 중재 패배가 되는 경우를 보낸 값·읽은 값으로 구분하라.
-2. (시나리오형) TC가 VT에 명령을 보냈는데 VT의 전원이 꺼져 있었다. 버스에는 TECU 등 다른 노드가 켜져 있다. TC의 CAN 컨트롤러는 ACK Error나 자동 재전송을 겪는가? TC 소프트웨어는 실패를 무엇으로 알아채야 하는가?
-3. (진단형) 수신 ECU 로그에 TP.DT 시퀀스 번호가 비어 있는데, 그 시간대 버스의 에러 프레임 카운트는 0이다. 어떤 원인을 먼저 의심해야 하는가?
+1. (개념) 수신 노드가 직접 계산한 CRC가 프레임에 실린 CRC와 다르다. 어떤 에러이고, 그다음 버스에는 무엇이 나타나는가?
+2. (계산) 어떤 노드의 TEC가 120, REC가 0이다. 송신 실패가 한 번 일어나면 상태는 무엇인가? 이어서 송신에 한 번 성공하면 상태는 무엇인가?
+3. (개념) Error Active 노드와 Error Passive 노드가 오류를 알리는 방식은 어떻게 다른가?
+4. (설명형) 중재 구간에서 Bit Error가 되는 경우와 중재 패배가 되는 경우를 보낸 값·읽은 값으로 구분하라.
+5. (시나리오형) TC(Task Controller, 작업 기록과 작업기 제어를 맡는 장치)가 VT(Virtual Terminal, 운전석의 공용 화면 장치)에 명령을 보냈는데 VT의 전원이 꺼져 있었다. 버스에는 TECU(트랙터 ECU) 등 다른 노드가 켜져 있다. TC의 CAN 컨트롤러는 ACK Error나 자동 재전송을 겪는가? TC 소프트웨어는 실패를 무엇으로 알아채야 하는가?
+6. (진단형, 심화) 수신 ECU 로그에 TP.DT 시퀀스 번호가 비어 있는데, 그 시간대 버스의 에러 프레임 카운트는 0이다. 어떤 원인을 먼저 의심해야 하는가?
 
 **답 가이드**
-1. recessive를 보내고 dominant를 읽으면 중재 패배이고 즉시 물러난다. dominant를 보내고 recessive를 읽으면 중재 구간이라도 Bit Error다(Part 3 5.7).
-2. 켜져 있는 다른 노드가 ACK 슬롯을 채우므로 ACK Error도 자동 재전송도 없다. CAN ACK는 "적어도 한 컨트롤러가 받음"만 뜻한다(Part 3 5.4.5). TC는 응용 계층의 응답(VT의 응답 메시지나 Acknowledgement)을 T3 1.25 s 이상 기다렸다가 오지 않으면 실패로 판단해야 한다(Part 3 5.13.3).
-3. 에러 프레임이 없으므로 버스 오류보다 수신 측 소프트웨어의 오버런을 먼저 의심한다. 특정 목적지 TP.DT는 연달아 올 수 있으므로 수신 큐 크기와 인터럽트 처리 시간을 점검한다(Part 3 5.12, 5.13.3).
+1. CRC Error이고 수신 노드가 찾는다. 수신 노드가 에러 프레임(Dominant 6개의 에러 플래그와 Recessive 8개의 Delimiter)을 보내 그 프레임을 무효로 만들고, 송신 노드는 같은 프레임을 다시 보낸다.
+2. 송신 실패로 TEC가 128이 되어 Error Passive다. 이어서 성공하면 TEC가 127이 되어 다시 Error Active다. 상태는 카운터 값으로 그때그때 다시 판정된다.
+3. Error Active 노드는 Dominant 6개의 Active Error Flag를 보내 버스 전체에 오류를 강제로 알린다. Error Passive 노드는 Recessive 6개의 Passive Error Flag를 보내므로 다른 노드의 신호를 덮어쓰지 못한다. 또 Error Passive 노드는 송신 사이에 8비트를 더 쉰다.
+4. recessive를 보내고 dominant를 읽으면 중재 패배이고 즉시 물러난다. dominant를 보내고 recessive를 읽으면 중재 구간이라도 Bit Error다(7절의 중재 구간 규칙).
+5. 켜져 있는 다른 노드가 ACK 슬롯을 채우므로 ACK Error도 자동 재전송도 없다. CAN ACK는 "적어도 한 컨트롤러가 받음"만 뜻한다(7절의 확인 응답 두 형식). TC는 응용 계층의 응답(VT의 응답 메시지나 Acknowledgement)을 T3 1.25 s 이상 기다렸다가 오지 않으면 실패로 판단해야 한다.
+6. 에러 프레임이 없으므로 버스 오류보다 수신 측 소프트웨어의 오버런을 먼저 의심한다. 특정 목적지 TP.DT는 연달아 올 수 있으므로 수신 큐 크기와 인터럽트 처리 시간을 점검한다(8절).
 :::
 
 ## 다음 챕터
 
-- 다음 : [CAN FD](/study/isobus/07-can-fd)
+- 다음: [7장 CAN FD](/study/isobus/07-can-fd)

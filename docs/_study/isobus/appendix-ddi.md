@@ -1,11 +1,17 @@
 ---
 title: "DDI 주요 목록"
-description: "ISOBUS Task Controller에서 사용하는 주요 DDI(Data Dictionary Identifier)를 정리한 참조 자료입니다."
+description: "ISOBUS Task Controller에서 쓰는 주요 DDI(Data Dictionary Identifier)를 용도별로 정리한 참조 자료다."
 date: 2026-04-13
 tags: [ISOBUS, 부록]
+prev: /study/isobus/appendix-pgn-spn
+next: /study/isobus/appendix-aef-functionalities
 ---
 
 # DDI 주요 목록
+
+::: tip 처음 읽는다면
+이 부록은 TC(Task Controller, 작업을 기록하고 제어하는 장치)가 주고받는 값의 종류 번호인 DDI를 찾아보는 목록이다. 처음부터 읽는 글이 아니라, 본문이나 DDOP에서 모르는 DDI 번호를 만났을 때 펼쳐 본다. DDI가 처음이라면 [45장 TC 프로세스 데이터 기초](/study/isobus/45-tc-process-data-basics)를 먼저 읽는다.
+:::
 
 DDI(Data Dictionary Identifier)는 ISO 11783-11이 규정하는 2바이트(16비트) 식별자로, Task Controller가 작업기의 측정값이나 설정값의 종류를 식별하는 데 사용한다. 개별 DDI 항목은 표준 문서 본문에 실려 있지 않고, ISO가 지명한 유지관리 기관(VDMA)이 관리하는 isobus.net의 ISOBUS Data Dictionary(온라인 사전 자체가 normative reference)에 정의된다. DDOP(Device Descriptor Object Pool) 안의 DPD(Device Process Data)·DPT(Device Property) 오브젝트에서 참조된다.
 
@@ -18,14 +24,14 @@ DDI(Data Dictionary Identifier)는 ISO 11783-11이 규정하는 2바이트(16비
 | 1 | Setpoint Volume Per Area Application Rate as [mm³/m²] | mm³/m² (분해능 0.01, 1 L/ha = 100 mm³/m² = 원시값 10 000) | 면적당 설정 살포량 (액체) |
 | 2 | Actual Volume Per Area Application Rate as [mm³/m²] | mm³/m² | 면적당 실제 살포량 (액체) |
 | 3 | Default Volume Per Area Application Rate as [mm³/m²] | mm³/m² | 면적당 기본 살포량 |
-| 6 | Setpoint Mass Per Area | mg/m² | 면적당 설정 살포량 (고체/분말). ISO 11783-10 Annex D 예시에서 15000 mg/m² = 150 kg/ha로 확인됨 |
+| 6 | Setpoint Mass Per Area | mg/m² | 면적당 설정 살포량 (고체/분말). ISO 11783-10의 ISOXML 예시(ProcessDataVariable 요소)에서 15000 mg/m² = 150 kg/ha로 확인됨 |
 | 7 | Actual Mass Per Area | mg/m² | 면적당 실제 살포량 (고체/분말) |
 | 8 | Default Mass Per Area | mg/m² | 면적당 기본 살포량 (고체) |
 | 11 | Setpoint Count Per Area | count/m² | 면적당 설정 입자/씨앗 수 (파종기) |
 | 12 | Actual Count Per Area | count/m² | 면적당 실제 입자/씨앗 수 |
 
 ::: tip 확인 근거
-DDI 6은 ISO 11783-10 Annex D 예시 문장에서 값과 함께 직접 확인했다. 개별 DDI의 이름·단위·분해능은 Part 10/11 본문에 없고 [isobus.net Data Dictionary](https://www.isobus.net/isobus/dDEntity)가 관리한다. DDI 1·2·3의 이름과 단위(mm³/m²), DDI 1의 분해능 0.01은 그 사전에서 확인했다(2026-10 기준). 대유량(분뇨 살포 등)용으로 ml/m² 단위를 쓰는 별도 DDI(588 Setpoint, 589 Actual, 591 Maximum, 592 Default)가 따로 있으니 DDI 1과 혼동하지 않는다.
+DDI 6은 ISO 11783-10의 ISOXML 예시 문장에서 값과 함께 직접 확인했다. 개별 DDI의 이름·단위·분해능은 Part 10/11 본문에 없고 [isobus.net Data Dictionary](https://www.isobus.net/isobus/dDEntity)가 관리한다. DDI 1·2·3의 이름과 단위(mm³/m²), DDI 1의 분해능 0.01은 그 사전에서 확인했다(2026-10 기준). 대유량(분뇨 살포 등)용으로 ml/m² 단위를 쓰는 별도 DDI(588 Setpoint, 589 Actual, 591 Maximum, 592 Default)가 따로 있으니 DDI 1과 혼동하지 않는다.
 :::
 
 ### 단위 시간당 적용량 (Application Rate per Time)
@@ -38,7 +44,7 @@ DDI 6은 ISO 11783-10 Annex D 예시 문장에서 값과 함께 직접 확인했
 | 42 | Actual Mass Per Time Application Rate | mg/s | 시간당 실제 살포량 (고체) |
 
 ::: tip 혼동하기 쉬운 번호
-이 표는 예전에 시간당 유량을 16·17, 시간당 질량을 21·22로 적었으나 isobus.net Data Dictionary로 확인한 결과 틀린 번호였다. 16·17은 Setpoint·Actual <strong>Spacing</strong> Application Rate(간격, mm)이고, 21·22는 Volume Per Volume Application Rate(mm³/m³)다. ISO 11783-10 Table F.2가 16·17을 Seeders/Planters의 권장 rate DDI로 드는 것도 파종 간격이기 때문이다. [TC 프로세스 데이터 챕터](/study/isobus/19-tc-process-data)의 36·37(mm³/s)이 맞다.
+이 표는 예전에 시간당 유량을 16·17, 시간당 질량을 21·22로 적었으나 isobus.net Data Dictionary로 확인한 결과 틀린 번호였다. 16·17은 Setpoint·Actual <strong>Spacing</strong> Application Rate(간격, mm)이고, 21·22는 Volume Per Volume Application Rate(mm³/m³)다. ISO 11783-10이 파종기(Seeders/Planters)의 권장 rate DDI로 16·17을 드는 것도 파종 간격이기 때문이다. [45장 TC 프로세스 데이터 기초](/study/isobus/45-tc-process-data-basics)의 36·37(mm³/s)이 맞다.
 :::
 
 ### 작업 폭 (Working Width)
@@ -49,7 +55,7 @@ DDI 6은 ISO 11783-10 Annex D 예시 문장에서 값과 함께 직접 확인했
 | 70 | Maximum Working Width | mm | 최대 작업 폭. 붐 geometry의 필수 속성(offset X·Y와 함께 최소 구성) |
 | 68 | Default Working Width | mm | 기본 작업 폭 |
 
-Section이 복수 종류의 작업 폭을 제공하면 Section Controller는 <strong>Actual(67) → Maximum(70) → Default(68)</strong> 순으로 우선 사용해야 한다(ISO 11783-10 Annex F.3.5.2). "Setpoint Working Width"라는 명칭의 별도 DDI는 표준 본문에서 확인되지 않아 목록에서 제외했다.
+Section이 복수 종류의 작업 폭을 제공하면 Section Controller는 <strong>Actual(67) → Maximum(70) → Default(68)</strong> 순으로 우선 사용해야 한다. "Setpoint Working Width"라는 명칭의 별도 DDI는 표준 본문에서 확인되지 않아 목록에서 제외했다.
 
 ### 면적 (Area)
 
@@ -74,8 +80,8 @@ Effective/In-Effective(유효/비유효) 면적 계열 DDI는 isobus.net Data Di
 
 | DDI | 이름 | 단위 | 설명 |
 |-----|------|------|------|
-| 119 | Total Time | s | 현재 태스크의 총 작업 시간. TC-BAS 클라이언트 필수(ISO 11783-10 F.2.1). 단위는 Part 10 6.8.4 예 1의 DVP 배율(2.777778E-04 → hr)로 역산한 값 |
-| 120 | Ineffective Total Time | 확인 필요 | 비유효 작업 시간 (Annex F 트랙터 예시) |
+| 119 | Total Time | s | 현재 태스크의 총 작업 시간. TC-BAS 클라이언트 필수(F.2.1). 단위는 ISO 11783-10의 기본 로깅 예시 DDOP에서 이 DDI에 붙은 표시 배율(2.777778E-04를 곱해 hr로 표시)로 거꾸로 계산한 값([47장](/study/isobus/47-tc-totals-logging-peer) 참고) |
+| 120 | Ineffective Total Time | 확인 필요 | 비유효 작업 시간 (ISO 11783-10의 트랙터 DDOP 예시) |
 | 274 | Lifetime Effective Total Time | 확인 필요 | 누적 유효 작업 시간. LOG 클라이언트 필수(F.2.4) |
 | 275 | Lifetime Ineffective Total Time | 확인 필요 | 누적 비유효 작업 시간 (LOG 트랙터 예시) |
 
@@ -101,9 +107,9 @@ Effective/In-Effective(유효/비유효) 면적 계열 DDI는 isobus.net Data Di
 | 157 | Connector Type | - | 커넥터 유형 코드 (property로 정의되는 것이 일반적) |
 | 276 | Lifetime Total Fuel Consumption | - | 누적 총 연료 소비량 (LOG 기능용) |
 
-Connector·Navigation 타입 device element는 별도의 "Connector Offset" DDI 없이 위 Offset X/Y(134/135)를 그대로 사용한다(ISO 11783-10 Annex F.3.4.2).
+Connector·Navigation 타입 device element는 별도의 "Connector Offset" DDI 없이 위 Offset X/Y(134/135)를 그대로 사용한다.
 
-### 제어·지연·로깅 (ISO 11783-10 본문·Annex F에서 확인)
+### 제어·지연·로깅
 
 | DDI | 이름 | 단위 | 설명 |
 |-----|------|------|------|
@@ -116,7 +122,7 @@ Connector·Navigation 타입 device element는 별도의 "Connector Offset" DDI 
 | 205 | SC Turn On Time | 확인 필요 | 섹션 켜기 지연. 붐에 settable + on change. TC-SC가 on 명령을 앞당긴다(F.3.5.5) |
 | 206 | SC Turn Off Time | 확인 필요 | 섹션 끄기 지연. 205와 같은 규칙(F.3.5.5) |
 
-이름은 Part 10 Annex F 그림과 본문에서 확인했다. 값 코드(ENABLED/ON 등)와 단위가 비어 있는 항목은 온라인 사전에서 확인해야 한다.
+이름은 ISO 11783-10 본문과 TC 기능성을 정의하는 부속서의 그림에서 확인했다. 값 코드(ENABLED/ON 등)와 단위가 비어 있는 항목은 온라인 사전에서 확인해야 한다.
 
 ### 제품 수량 (Product Quantity)
 
@@ -134,9 +140,11 @@ Connector·Navigation 타입 device element는 별도의 "Connector Offset" DDI 
 | DFFF₁₆ | 57343 | Request Default Process Data | device element 0에서만 요청 가능. 클라이언트가 스스로 정한 데이터·주기·트리거로 로깅하게 하는 트리거 |
 | FFFF₁₆ | 65535 | Not available | 오류 응답 등에서 특정 element/DDI와 무관함을 나타내는 sentinel 값 |
 
+<small>근거: ISO 11783-10 D.41, F.3.4.2, F.3.5.2, Table F.2, 6.8.4</small>
+
 ## DDI 값 표현 방식
 
-DDI 값은 모두 <strong>부호 있는 32비트 정수(int32, −2³¹~2³¹−1)</strong>로 전송된다(ISO 11783-10 Annex A ProcessDataValue 정의). 실제 단위 값으로 변환하려면 DDI별 해상도(Resolution)를 적용해야 한다.
+DDI 값은 모두 <strong>부호 있는 32비트 정수(int32, −2³¹~2³¹−1)</strong>로 전송된다. 실제 단위 값으로 변환하려면 DDI별 해상도(Resolution)를 적용해야 한다.
 
 예시:
 - DDI 1 (Setpoint Volume Per Area): 1 bit = 0.01 mm³/m² (1 L/ha = 원시값 10 000)
@@ -145,8 +153,10 @@ DDI 값은 모두 <strong>부호 있는 32비트 정수(int32, −2³¹~2³¹−
 
 위 해상도 수치는 예시이며, 각 DDI의 공식 해상도·값 범위는 isobus.net의 ISOBUS Data Dictionary에서 확인해야 한다.
 
+<small>근거: ISO 11783-10 D.41(ProcessDataValue 범위), B.3</small>
+
 ::: info DDI 1 분해능의 근거
-DDI 1의 단위 mm³/m²와 분해능 0.01은 isobus.net Data Dictionary 항목에서 확인했다(CAN 범위 0~2 147 483 647, 표시 범위 0.00~21 474 836.47). [TC 프로세스 데이터 챕터](/study/isobus/19-tc-process-data) §1·§6의 계산(1 L/ha = 원시값 10 000)과 일치한다.
+DDI 1의 단위 mm³/m²와 분해능 0.01은 isobus.net Data Dictionary 항목에서 확인했다(CAN 범위 0~2 147 483 647, 표시 범위 0.00~21 474 836.47). [45장 TC 프로세스 데이터 기초](/study/isobus/45-tc-process-data-basics)의 계산(1 L/ha = 원시값 10 000)과 일치한다.
 :::
 
 ## 참고

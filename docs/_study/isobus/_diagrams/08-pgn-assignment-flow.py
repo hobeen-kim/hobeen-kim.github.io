@@ -1,4 +1,4 @@
-"""CH08 §8 새 메시지의 PDU 형식·PF 구간 고르기 — Part 3 5.9 (light/dark PNG)."""
+"""CH08 §8 새 메시지의 PDU 형식·PF 구간 고르기: Part 3 5.9 (light/dark PNG)."""
 from _common import diagram
 
 

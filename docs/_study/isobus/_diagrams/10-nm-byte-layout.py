@@ -1,7 +1,7 @@
 """CH10 §8 NAME(PGN 60928)과 NAME management(PGN 37632) 데이터 바이트 비교 (light/dark PNG)."""
 from _common import diagram
 
-# 왼쪽이 Byte 8(최상위), 오른쪽이 Byte 1 — Part 5 Figure 1·3과 같은 방향
+# 왼쪽이 Byte 8(최상위), 오른쪽이 Byte 1: Part 5 Figure 1·3과 같은 방향
 NAME_ROW = [
     ("Byte 8", "AAC 1\nIG 3\nDCI 4", "blue"),
     ("Byte 7", "DC 7\nR 1 (=0)", "blue"),

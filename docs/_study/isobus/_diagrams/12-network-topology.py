@@ -1,4 +1,4 @@
-"""CH12 §8 전형적 ISO 11783 토폴로지와 CF 주소 — Part 1 Figure 3 재구성 (light/dark PNG)."""
+"""CH12 §8 전형적 ISO 11783 토폴로지와 CF 주소: Part 1 Figure 3 재구성 (light/dark PNG)."""
 from _common import diagram
 
 

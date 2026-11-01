@@ -67,7 +67,7 @@ static constexpr std::uint32_t MAX_PROTOCOL_DATA_LENGTH = 117440505;
 :::
 
 ::: info 관련 스터디
-프로토콜 자체의 동작 원리(RTS/CTS, BAM, 타임아웃, abort 사유)는 [ISOBUS CH11. J1939 Transport Protocol](/study/isobus/11-j1939-transport)에서 다뤘다. 이 스터디 안에서는 [CH4. 전송 개념 잡기](/study/agisostack/04-transport-concepts)에서 개요를 정리했다.
+프로토콜 자체의 동작 원리(RTS/CTS, BAM, 타임아웃, abort 사유)는 [ISOBUS CH15~17. J1939 Transport Protocol](/study/isobus/15-tp-bam-cmdt)에서 다뤘다. 이 스터디 안에서는 [CH4. 전송 개념 잡기](/study/agisostack/04-transport-concepts)에서 개요를 정리했다.
 :::
 
 ## 3. 8바이트 초과 수신하기

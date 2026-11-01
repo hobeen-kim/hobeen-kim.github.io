@@ -1,4 +1,4 @@
-"""CH3 §1 CAN_H/CAN_L 전압 레벨 — Dominant/Recessive (light/dark PNG)."""
+"""CH3 §1 CAN_H/CAN_L 전압 레벨: Dominant/Recessive (light/dark PNG)."""
 from _common import diagram
 
 

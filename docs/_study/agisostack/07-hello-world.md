@@ -26,7 +26,7 @@ ISOBUS 모듈은 크게 세 덩어리로 나뉜다. <strong>Hardware API</strong
 
 ::: info 관련 스터디
 NAME·주소 클레임·PGN 같은 밑바탕 개념이 흐릿하다면 이론 스터디를 먼저 보는 편이 좋다.
-[ISOBUS CH9. J1939 메시지 구조](/study/isobus/09-j1939-message) · [ISOBUS CH10. J1939 주소 체계](/study/isobus/10-j1939-address) · [AgIsoStack CH3. Control Function 과 NAME](/study/agisostack/03-control-function-name)
+[ISOBUS CH9. J1939 메시지 구조](/study/isobus/09-j1939-message) · [ISOBUS CH12~14. J1939 주소 체계](/study/isobus/12-j1939-address-name) · [AgIsoStack CH3. Control Function 과 NAME](/study/agisostack/03-control-function-name)
 :::
 
 ## 첫 단계

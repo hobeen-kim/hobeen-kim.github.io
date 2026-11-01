@@ -1,11 +1,17 @@
 ---
 title: "흔한 실수와 트러블슈팅"
-description: "ISOBUS/CAN 개발 및 통합 과정에서 자주 겪는 문제, 원인, 해결 방법을 정리한 참조 자료입니다."
+description: "ISOBUS와 CAN 장비를 개발하고 통합하면서 자주 겪는 문제의 증상, 원인, 해결 방법을 정리한 참조 자료다."
 date: 2026-04-13
 tags: [ISOBUS, 부록]
+prev: /study/isobus/appendix-aef-functionalities
+next: /study/isobus/appendix-references
 ---
 
 # 흔한 실수와 트러블슈팅
+
+::: tip 처음 읽는다면
+이 부록은 ISOBUS 장비를 연결하다 자주 겪는 문제를 증상, 원인, 해결 순서로 모은 점검표다. 처음부터 읽기보다, 문제가 생겼을 때 증상으로 해당 항목을 찾아 펼쳐 본다. 각 문제의 배경은 본문에 있다. 종단 저항과 배선은 [3장 CAN 물리 계층: 전선 위의 0과 1](/study/isobus/03-can-physical), Bus Off는 [6장 CAN 에러 처리](/study/isobus/06-can-error), 주소 충돌은 [13장 주소 클레임: 주소를 정하는 절차](/study/isobus/13-j1939-address-claim), TP 타임아웃은 [16장 TP 연결 규칙과 타이머](/study/isobus/16-tp-connection-rules)에서 다룬다.
+:::
 
 ## 1. 종단 저항 미설치
 
@@ -37,9 +43,11 @@ tags: [ISOBUS, 부록]
 |------|------|
 | **증상** | VT에 UI가 표시되지 않음, "Object Pool Upload Failed" 또는 타임아웃 발생 |
 | **원인 1** | VT의 가용 메모리가 부족하다. 오브젝트 풀 크기가 VT 사양을 초과한다. |
-| **원인 2** | TP 전송 타임아웃: destination-specific TP.DT는 송신 측이 패킷 간 간격을 최대 200ms 이내로 유지해야 하며(CTS로 흐름 제어), 수신 측은 다음 패킷을 최대 T1(750ms) 동안만 기다린다. 이를 넘기면 연결이 중단된다(ISO 11783-3 §5.10). |
+| **원인 2** | TP 전송 타임아웃: destination-specific TP.DT는 송신 측이 패킷 간 간격을 최대 200ms 이내로 유지해야 하며(CTS로 흐름 제어), 수신 측은 다음 패킷을 최대 T1(750ms) 동안만 기다린다. 이를 넘기면 연결이 중단된다. |
 | **원인 3** | 오브젝트 풀 내부 참조 오류(존재하지 않는 오브젝트 ID 참조). |
 | **해결** | VT의 지원 메모리를 확인하고 오브젝트 풀을 최적화한다. 전송 속도를 높이고, ISO 11783-6 준수 여부를 검증 도구로 확인한다. |
+
+<small>근거: ISO 11783-3 5.10</small>
 
 ## 5. TP 타임아웃
 
@@ -70,7 +78,7 @@ tags: [ISOBUS, 부록]
 | 항목 | 내용 |
 |------|------|
 | **증상** | VT에서 작업기 UI가 나타나지 않음, Working Set Master가 VT를 찾지 못함 |
-| **원인** | NAME의 Function 필드 설정 오류. Virtual Terminal 기능 코드(0x26)가 올바르게 설정되지 않아 VT를 인식하지 못한다. 또는 Working Set Maintenance 메시지 전송 누락. |
+| **원인** | NAME의 Function 필드 설정 오류. VT를 찾을 때 비교하는 NAME의 Function 값이 VT를 나타내는 기능 코드로 설정되지 않아 VT를 인식하지 못한다(0x26은 VT가 흔히 쓰는 주소이지 기능 코드가 아니다). 또는 Working Set Maintenance 메시지 전송 누락. |
 | **해결** | Working Set Master의 NAME Function 필드를 올바르게 설정한다. 주소 획득 후 <strong>매 1초마다</strong> Working Set Maintenance 메시지(ECU to VT PGN 59136/0xE700 위에 실림)를 전송하는지 확인한다. VT는 이 메시지가 3초간 오지 않으면 Master의 비정상 종료로 판정한다. |
 
 ## 9. TC가 DDOP를 거부
@@ -113,4 +121,6 @@ tags: [ISOBUS, 부록]
 - **에러 카운터 모니터링**: CAN 컨트롤러의 TEC/REC 값을 주기적으로 읽어 에러 누적 추세를 파악한다.
 - **전압 측정**: 정상 버스는 CAN_H 약 3.5V, CAN_L 약 1.5V (Dominant), 각각 2.5V (Recessive)여야 한다.
 - **로그 수준 분리**: 에러 프레임, 주소 협상, TP 세션을 별도 채널로 로깅하면 원인 파악이 빠르다.
-- **TC 연결 상태 확인**: TC Status 메시지(Process Data PGN 51968/0xCB00 위에 실림)는 2초 주기로 송신된다. 클라이언트가 이를 6초간 받지 못하면 TC의 비정상 종료로 간주하고 Client Task 송신을 중단해야 한다(ISO 11783-10 Annex B).
+- **TC 연결 상태 확인**: TC Status 메시지(Process Data PGN 51968/0xCB00 위에 실림)는 2초 주기로 송신된다. 클라이언트가 이를 6초간 받지 못하면 TC의 비정상 종료로 간주하고 Client Task 송신을 중단해야 한다.
+
+<small>근거: ISO 11783-10 Annex B</small>
